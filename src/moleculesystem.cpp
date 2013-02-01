@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/stat.h>
+#include <hdf5.h>
 
 using namespace std;
 
@@ -13,7 +14,9 @@ MoleculeSystem::MoleculeSystem() :
     nSimulationSteps(100),
     boltzmannConstant(2.5),
     potentialConstant(0.1),
-    nDimensions(3)
+    nDimensions(3),
+    outFileName("out/myfile.xyz.*"),
+    outFileFormat(XyzFormat)
 {
     integrator = new Integrator(this);
 }
@@ -22,18 +25,28 @@ void MoleculeSystem::load(string fileName) {
     cout << fileName << endl;
 }
 
-bool MoleculeSystem::save(string fileName) {
-    string threeLetterExtension = fileName.substr(fileName.length() - 4, 4);
-    string fourLetterExtension = fileName.substr(fileName.length() - 5, 5);
-    if(threeLetterExtension == ".xyz") {
-        return saveXyz(fileName);
+bool MoleculeSystem::save(int step) {
+//    string threeLetterExtension = outFileName.substr(outFileName.length() - 4, 4);
+    //string fourLetterExtension = outFileName.substr(outFileName.length() - 5, 5);
+    if(outFileName.find(".xyz") != string::npos) {
+        return saveXyz(step);
     }
     return false;
 }
 
-bool MoleculeSystem::saveXyz(string fileName) {
+bool MoleculeSystem::saveXyz(int step) {
+    stringstream outStepName;
+    outStepName << setw(4) << setfill('0') << step;
+    string outFileNameLocal = outFileName;
+    size_t starPos = outFileName.find("*");
     ofstream outFile;
-    outFile.open(fileName);
+    if(starPos != string::npos) {
+        outFileNameLocal.replace(starPos, 1, outStepName.str());
+        outFile.open(outFileNameLocal);
+    } else {
+        outFile.open(outFileNameLocal, ios_base::app);
+    }
+    cout << "Saving xyz data to " << outFileNameLocal  << endl;
 
     outFile << m_molecules.size() << endl;
     outFile << "Some nice comment" << endl;
@@ -45,7 +58,50 @@ bool MoleculeSystem::saveXyz(string fileName) {
                     << endl;
         }
     }
+    outFile.close();
     return true;
+}
+
+bool MoleculeSystem::saveHDF5(string filename) {
+//    hid_t       file, filetype, memtype, strtype, space, dset;
+//                                            /* Handles */
+//    herr_t      status;
+//    hsize_t     dims[1] = {DIM0};
+//    Molecule    wdata[DIM0],                /* Write buffer */
+//                *rdata;                     /* Read buffer */
+//    int         ndims,
+//                i;
+
+//    /*
+//     * Create a new file using the default properties.
+//     */
+//    file = H5Fcreate (FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+//    /*
+//     * Create variable-length string datatype.
+//     */
+//    strtype = H5Tcopy (H5T_C_S1);
+//    status = H5Tset_size (strtype, H5T_VARIABLE);
+
+//    /*
+//     * Create the compound datatype for memory.
+//     */
+//    memtype = H5Tcreate (H5T_COMPOUND, sizeof (Molecule));
+//    status = H5Tinsert (memtype, "Mass", HOFFSET (Molecule, mass), H5T_NATIVE_DOUBLE);
+
+//    space = H5Screate_simple (1, dims, NULL);
+
+//    dset = H5Dcreate (file, DATASET, filetype, space, H5P_DEFAULT, H5P_DEFAULT,
+//                H5P_DEFAULT);
+//    status = H5Dwrite (dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+//    /*
+//     * Close and release resources.
+//     */
+//    status = H5Dclose (dset);
+//    status = H5Sclose (space);
+//    status = H5Tclose (filetype);
+//    status = H5Fclose (file);
+    return false;
 }
 
 void MoleculeSystem::addMolecules(vector<Molecule *> molecule)
@@ -60,7 +116,6 @@ const vector<Molecule *> &MoleculeSystem::molecules() const
 
 void MoleculeSystem::updateForces()
 {
-
     for(Molecule* molecule : m_molecules) {
         molecule->clearForces();
     }
@@ -133,9 +188,7 @@ void MoleculeSystem::simulate()
             }
         }
         // Save the data
-        stringstream outName;
-        outName << "out/mytest" << setw(6) << setfill('0') << iStep << ".xyz";
-        save(outName.str());
+        save(iStep);
     }
 }
 

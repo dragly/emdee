@@ -1,3 +1,5 @@
+include(../molecular-dynamics.pri)
+
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
@@ -29,10 +31,3 @@ myscript.target = myscript
 myscript.commands = python $$PWD/../myscript.py $$PWD/../
 QMAKE_EXTRA_TARGETS += myscript
 PRE_TARGETDEPS += myscript
-
-COMMON_CXXFLAGS = -std=c++0x
-QMAKE_CXXFLAGS += $$COMMON_CXXFLAGS
-QMAKE_CXXFLAGS_RELEASE += $$COMMON_CXXFLAGS
-
-QMAKE_CXXFLAGS_RELEASE += -O3
-QMAKE_CXXFLAGS_RELEASE -= -O2

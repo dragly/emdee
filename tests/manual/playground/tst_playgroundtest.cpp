@@ -1,5 +1,6 @@
 #include <QString>
 #include <QtTest>
+#include "moleculesystem.h"
 
 #include <iostream>
 
