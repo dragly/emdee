@@ -2,6 +2,7 @@
 #include "atom.h"
 #include "molecule.h"
 #include "integrator.h"
+#include "moleculesystemcell.h"
 
 #include <fstream>
 #include <iomanip>
@@ -15,10 +16,13 @@ MoleculeSystem::MoleculeSystem() :
     boltzmannConstant(2.5),
     potentialConstant(0.1),
     nDimensions(3),
-    outFileName("out/myfile.xyz.*"),
-    outFileFormat(XyzFormat)
+    outFileName("out/myfile*.xyz"),
+    outFileFormat(XyzFormat),
+    pow3nDimensions(pow(3, nDimensions))
 {
     integrator = new Integrator(this);
+    cellShiftVectors = zeros(pow3nDimensions, nDimensions);
+    m_boundaries = zeros(2,nDimensions);
 }
 
 void MoleculeSystem::load(string fileName) {
@@ -26,7 +30,7 @@ void MoleculeSystem::load(string fileName) {
 }
 
 bool MoleculeSystem::save(int step) {
-//    string threeLetterExtension = outFileName.substr(outFileName.length() - 4, 4);
+    //    string threeLetterExtension = outFileName.substr(outFileName.length() - 4, 4);
     //string fourLetterExtension = outFileName.substr(outFileName.length() - 5, 5);
     if(outFileName.find(".xyz") != string::npos) {
         return saveXyz(step);
@@ -63,44 +67,45 @@ bool MoleculeSystem::saveXyz(int step) {
 }
 
 bool MoleculeSystem::saveHDF5(string filename) {
-//    hid_t       file, filetype, memtype, strtype, space, dset;
-//                                            /* Handles */
-//    herr_t      status;
-//    hsize_t     dims[1] = {DIM0};
-//    Molecule    wdata[DIM0],                /* Write buffer */
-//                *rdata;                     /* Read buffer */
-//    int         ndims,
-//                i;
+    (void)filename;
+    //    hid_t       file, filetype, memtype, strtype, space, dset;
+    //                                            /* Handles */
+    //    herr_t      status;
+    //    hsize_t     dims[1] = {DIM0};
+    //    Molecule    wdata[DIM0],                /* Write buffer */
+    //                *rdata;                     /* Read buffer */
+    //    int         ndims,
+    //                i;
 
-//    /*
-//     * Create a new file using the default properties.
-//     */
-//    file = H5Fcreate (FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    //    /*
+    //     * Create a new file using the default properties.
+    //     */
+    //    file = H5Fcreate (FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-//    /*
-//     * Create variable-length string datatype.
-//     */
-//    strtype = H5Tcopy (H5T_C_S1);
-//    status = H5Tset_size (strtype, H5T_VARIABLE);
+    //    /*
+    //     * Create variable-length string datatype.
+    //     */
+    //    strtype = H5Tcopy (H5T_C_S1);
+    //    status = H5Tset_size (strtype, H5T_VARIABLE);
 
-//    /*
-//     * Create the compound datatype for memory.
-//     */
-//    memtype = H5Tcreate (H5T_COMPOUND, sizeof (Molecule));
-//    status = H5Tinsert (memtype, "Mass", HOFFSET (Molecule, mass), H5T_NATIVE_DOUBLE);
+    //    /*
+    //     * Create the compound datatype for memory.
+    //     */
+    //    memtype = H5Tcreate (H5T_COMPOUND, sizeof (Molecule));
+    //    status = H5Tinsert (memtype, "Mass", HOFFSET (Molecule, mass), H5T_NATIVE_DOUBLE);
 
-//    space = H5Screate_simple (1, dims, NULL);
+    //    space = H5Screate_simple (1, dims, NULL);
 
-//    dset = H5Dcreate (file, DATASET, filetype, space, H5P_DEFAULT, H5P_DEFAULT,
-//                H5P_DEFAULT);
-//    status = H5Dwrite (dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
-//    /*
-//     * Close and release resources.
-//     */
-//    status = H5Dclose (dset);
-//    status = H5Sclose (space);
-//    status = H5Tclose (filetype);
-//    status = H5Fclose (file);
+    //    dset = H5Dcreate (file, DATASET, filetype, space, H5P_DEFAULT, H5P_DEFAULT,
+    //                H5P_DEFAULT);
+    //    status = H5Dwrite (dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    //    /*
+    //     * Close and release resources.
+    //     */
+    //    status = H5Dclose (dset);
+    //    status = H5Sclose (space);
+    //    status = H5Tclose (filetype);
+    //    status = H5Fclose (file);
     return false;
 }
 
@@ -119,39 +124,47 @@ void MoleculeSystem::updateForces()
     for(Molecule* molecule : m_molecules) {
         molecule->clearForces();
     }
-    double kB = boltzmannConstant;
+    //    double kB = boltzmannConstant;
     double eps = potentialConstant;
     double sigma = 4.5;
     Atom* atom1;
     Atom* atom2;
-    vec3 rVec;
+    vec rVec;
+    vec otherPosition;
+    vec shortestVec;
+    vec cellShiftVector;
+    vec cellShiftVectorInUse;
+    double shortestVecSquaredLength;
     double r;
     double sigmar;
     double factor;
-    vec3 force;
-    for(int iOffset = 0; iOffset < 3; iOffset++) {
-        for(int jOffset = 0; jOffset < 3; jOffset++) {
-            for(int kOffset = 0; kOffset < 3; kOffset++) {
-                vec3 offset;
-                vec3 xxOffset;
-                xxOffset << iOffset << jOffset << kOffset;
-                for(int iDim = 0; iDim < nDimensions; iDim++) {
-                    offset(iDim) = (- 1 + xxOffset(iDim)) * (m_boundaries(1,iDim) - m_boundaries(0,iDim)) - m_boundaries(0,iDim);
-                }
-                for(uint i = 0; i < m_atoms.size(); i++) {
-                    for(uint j = i + 1; j < m_atoms.size(); j++) {
-                        atom1 = m_atoms.at(i);
-                        atom2 = m_atoms.at(j);
-                        rVec = atom2->absolutePosition() + offset - atom1->absolutePosition();
-                        r = norm(rVec, 2);
-                        sigmar = sigma/r;
-                        factor = ((24 * eps) / (r*r)) * (2 * pow((sigmar), 12) - pow((sigmar), 6));
-                        force = factor * rVec;
-                        atom1->addForce(-force);
-                        atom2->addForce(force);
-                    }
+    vec force;
+    cout << "Updating forces..." << endl;
+    for(uint i = 0; i < m_atoms.size(); i++) {
+        for(uint j = i + 1; j < m_atoms.size(); j++) {
+            atom1 = m_atoms.at(i);
+            atom2 = m_atoms.at(j);
+            shortestVecSquaredLength = INFINITY;
+            for(uint iShiftVec = 0; iShiftVec < cellShiftVectors.n_rows; iShiftVec++) {
+                cellShiftVector = trans(cellShiftVectors.row(iShiftVec));
+                otherPosition = atom2->absolutePosition() + cellShiftVector;
+                rVec = otherPosition - atom1->absolutePosition();
+                double rVecSquaredLength = dot(rVec, rVec);
+                if(rVecSquaredLength < shortestVecSquaredLength) {
+                    shortestVecSquaredLength = rVecSquaredLength;
+                    shortestVec = rVec;
+                    cellShiftVectorInUse = cellShiftVector;
                 }
             }
+            // Check distances to the nearby cells
+            r = norm(shortestVec, 2);
+            sigmar = sigma/r;
+            // TODO Verify force term
+            factor = - ((24 * eps) / (r*r)) * (2 * pow((sigmar), 12) - pow((sigmar), 6));
+
+            force = factor * shortestVec;
+            atom1->addForce(force);
+            atom2->addForce(-force);
         }
     }
 }
@@ -174,10 +187,11 @@ void MoleculeSystem::simulate()
     for(int iStep = 0; iStep < nSimulationSteps; iStep++) {
         cout << "Simulation step " << iStep << endl;
         integrator->stepForward();
+        //        cout << "Integrator done" << endl;
         // Boundary conditions
         for(Molecule* molecule : m_molecules) {
-            vec3 position = molecule->position();
-            for(int iDim = 0; iDim < 3; iDim++) {
+            vec position = molecule->position();
+            for(int iDim = 0; iDim < nDimensions; iDim++) {
                 if(molecule->position()(iDim) > m_boundaries(1,iDim)) {
                     position(iDim) -= (m_boundaries(1,iDim) - m_boundaries(0,iDim));
                     molecule->setPosition(position);
@@ -205,7 +219,66 @@ void MoleculeSystem::setBoundaries(double xMin, double xMax, double yMin, double
     setBoundaries(boundaries);
 }
 
-void MoleculeSystem::setBoundaries(mat::fixed<2,3> boundaries)
+void MoleculeSystem::setBoundaries(mat boundaries)
 {
     m_boundaries = boundaries;
+    irowvec counters = zeros<irowvec>(nDimensions);
+    for(int i = 0; i < pow3nDimensions; i++) {
+        irowvec direction = counters - ones<irowvec>(nDimensions);
+        rowvec lengths = m_boundaries.row(1) - m_boundaries.row(0);
+        rowvec directionVec = conv_to<rowvec>::from(direction);
+        cellShiftVectors.row(i) = lengths % directionVec;
+        counters(0) += 1;
+        for(uint idim = 1; idim < counters.size(); idim++) {
+            if(counters(idim - 1) > 2) {
+                counters(idim - 1) = 0;
+                counters(idim) += 1;
+            }
+        }
+    }
+    //    cout << cellShiftVectors << endl;
+}
+
+void MoleculeSystem::setupCells(double minCutLength) {
+    int totalNCells = 1;
+    m_nCells = zeros<ivec>(nDimensions);
+    m_cellLengths = zeros(nDimensions);
+    for(int iDim = 0; iDim < nDimensions; iDim++) {
+        double totalLength = m_boundaries(1,iDim) - m_boundaries(0,iDim);
+        m_nCells(iDim) = totalLength / minCutLength;
+        m_cellLengths(iDim) = totalLength / m_nCells(iDim);
+        totalNCells *= m_nCells(iDim);
+    }
+
+    ivec counters = zeros<ivec>(nDimensions);
+    for(int i = 0; i < totalNCells; i++) {
+        MoleculeSystemCell* cell = new MoleculeSystemCell();
+
+        mat cellBoundaries = m_boundaries;
+
+        rowvec shiftVector = trans(m_cellLengths % counters);
+
+        cellBoundaries.row(0) = shiftVector;
+        cellBoundaries.row(1) = shiftVector + trans(m_cellLengths);
+
+        cell->setBoundaries(cellBoundaries);
+
+        cout << cell << endl;
+
+        m_cells.push_back(cell);
+
+        counters(0) += 1;
+        for(uint iDim = 1; iDim < counters.size(); iDim++) {
+            if(counters(iDim - 1) > m_nCells(iDim - 1) - 1) {
+                counters(iDim - 1) = 0;
+                counters(iDim) += 1;
+            }
+        }
+    }
+
+    for(Atom* atom : m_atoms) {
+        for(Cell* cell : m_cells) {
+        if(atom->position()) {
+        }
+    }
 }

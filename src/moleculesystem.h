@@ -5,6 +5,7 @@
 class Atom;
 class Molecule;
 class Integrator;
+class MoleculeSystemCell;
 
 // System includes
 #include <iostream>
@@ -34,9 +35,10 @@ public:
 
     void setBoundaries(double min, double max);
     void setBoundaries(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax);
-    void setBoundaries(mat::fixed<2, 3> boundaries);
+    void setBoundaries(mat boundaries);
 
     bool saveHDF5(string filename);
+    void setupCells(double minCutLength);
 private:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
@@ -46,12 +48,21 @@ private:
     double boltzmannConstant;
     double potentialConstant;
 
-    mat::fixed<2,3> m_boundaries;
+    mat m_boundaries;
 
     int nDimensions;
 
     string outFileName;
     FileFormat outFileFormat;
+
+    mat cellShiftVectors;
+
+    int pow3nDimensions;
+
+    ivec m_nCells;
+    vec m_cellLengths;
+
+    vector<MoleculeSystemCell*> m_cells;
 };
 
 #endif // MOLECULESYSTEM_H

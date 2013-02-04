@@ -15,23 +15,23 @@ public:
     Atom(Molecule* parent);
     Atom(Molecule* parent, AtomType atomType);
 
-    void setPosition(const vec3 &position);
-    vec3 position();
-    void setVelocity(const vec3 &velocity);
-    const vec3 &velocity() const;
-    void addForce(const vec3 &force);
-    const vec3 &force() const;
+    void setPosition(const vec &position);
+    vec position();
+    void setVelocity(const vec &velocity);
+    const vec &velocity() const;
+    void addForce(const vec &force);
+    const vec &force() const;
     AtomType type();
 
-    vec3 absolutePosition();
-    vec3 absoluteVelocity();
+    vec absolutePosition();
+    vec absoluteVelocity();
 
     double mass();
     void clearForces();
 private:
-    vec3 m_position;
-    vec3 m_velocity;
-    vec3 m_force;
+    vec m_position;
+    vec m_velocity;
+    vec m_force;
     AtomType m_type;
 
     Molecule* m_parent;

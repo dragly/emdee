@@ -1,6 +1,8 @@
 ROOT_DIR = $$PWD
 SRC_DIR = $$PWD/src
 
+# Libraries
+LIBS += -larmadillo -llapack -lblas
 
 COMMON_CXXFLAGS = -std=c++0x
 QMAKE_CXXFLAGS += $$COMMON_CXXFLAGS

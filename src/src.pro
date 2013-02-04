@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     generator.cpp \
     atomtype.cpp \
     molecule.cpp \
-    integrator.cpp
+    integrator.cpp \
+    moleculesystemcell.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -21,10 +22,8 @@ HEADERS += \
     generator.h \
     atomtype.h \
     molecule.h \
-    integrator.h
-
-# Libraries
-LIBS += -larmadillo -llapack -lblas
+    integrator.h \
+    moleculesystemcell.h
 
 # Building
 myscript.target = myscript

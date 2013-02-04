@@ -25,7 +25,8 @@ SOURCES += tst_playgroundtest.cpp \
     ../../../src/integrator.cpp \
     ../../../src/generator.cpp \
     ../../../src/atomtype.cpp \
-    ../../../src/atom.cpp
+    ../../../src/atom.cpp \
+    ../../../src/moleculesystemcell.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
@@ -35,4 +36,5 @@ HEADERS += \
     ../../../src/integrator.h \
     ../../../src/generator.h \
     ../../../src/atomtype.h \
-    ../../../src/atom.h
+    ../../../src/atom.h \
+    ../../../src/moleculesystemcell.h

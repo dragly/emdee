@@ -9,34 +9,34 @@ Molecule::Molecule() :
 {
 }
 
-const vec3 &Molecule::position() const
+const vec &Molecule::position() const
 {
     return m_position;
 }
 
 
-const vec3 &Molecule::velocity() const
+const vec &Molecule::velocity() const
 {
     return m_velocity;
 }
 
-const vec3 &Molecule::force() const
+const vec &Molecule::force() const
 {
     return m_force;
 }
 
-void Molecule::setPosition(const vec3 &position)
+void Molecule::setPosition(const vec &position)
 {
     m_position = position;
 }
 
 
-void Molecule::setVelocity(const vec3 &velocity)
+void Molecule::setVelocity(const vec &velocity)
 {
     m_velocity = velocity;
 }
 
-void Molecule::addForce(const vec3 &force)
+void Molecule::addForce(const vec &force)
 {
     m_force += force;
 }

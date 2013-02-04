@@ -1,6 +1,7 @@
 #include <QString>
 #include <QtTest>
 #include "moleculesystem.h"
+#include "generator.h"
 
 #include <iostream>
 
@@ -12,11 +13,12 @@ class PlaygroundTest : public QObject
     
 public:
     PlaygroundTest();
-    
+
 private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void testCase1();
+    void setupCells();
 };
 
 PlaygroundTest::PlaygroundTest()
@@ -33,11 +35,23 @@ void PlaygroundTest::cleanupTestCase()
 
 void PlaygroundTest::testCase1()
 {
-    string test = "blah test banana.xkd";
+    MoleculeSystem* system = new MoleculeSystem();
+    mat test = zeros(2,3);
+    test(1,0) = 10;
+    test(1,1) = 10;
+    test(1,2) = 10;
+    system->setBoundaries(test);
+}
 
-    cout << test.substr(test.length() - 4, 4) << endl;
-
-    QVERIFY2(true, "Failure");
+void PlaygroundTest::setupCells() {
+    int nCells = 5;
+    double b = 5.620;
+    vector<Molecule*> molecules = Generator::generateFcc(nCells, b, AtomType::argon());
+    Generator::boltzmannDistributeVelocities(molecules);
+    MoleculeSystem system;
+    system.addMolecules(molecules);
+    system.setBoundaries(0, b*nCells);
+    system.setupCells(4);
 }
 
 QTEST_APPLESS_MAIN(PlaygroundTest)
