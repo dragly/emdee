@@ -129,24 +129,25 @@ void MoleculeSystem::updateForces()
     double sigma = 4.5;
     Atom* atom1;
     Atom* atom2;
-    vec rVec;
-    vec otherPosition;
-    vec shortestVec;
-    vec cellShiftVector;
-    vec cellShiftVectorInUse;
+    rowvec rVec;
+    rowvec otherPosition;
+    rowvec shortestVec;
+    rowvec cellShiftVector;
+    rowvec cellShiftVectorInUse;
     double shortestVecSquaredLength;
     double r;
     double sigmar;
     double factor;
-    vec force;
+    rowvec force;
     cout << "Updating forces..." << endl;
     for(uint i = 0; i < m_atoms.size(); i++) {
         for(uint j = i + 1; j < m_atoms.size(); j++) {
             atom1 = m_atoms.at(i);
             atom2 = m_atoms.at(j);
+            // Minimum image convention
             shortestVecSquaredLength = INFINITY;
             for(uint iShiftVec = 0; iShiftVec < cellShiftVectors.n_rows; iShiftVec++) {
-                cellShiftVector = trans(cellShiftVectors.row(iShiftVec));
+                cellShiftVector = cellShiftVectors.row(iShiftVec);
                 otherPosition = atom2->absolutePosition() + cellShiftVector;
                 rVec = otherPosition - atom1->absolutePosition();
                 double rVecSquaredLength = dot(rVec, rVec);
@@ -190,7 +191,7 @@ void MoleculeSystem::simulate()
         //        cout << "Integrator done" << endl;
         // Boundary conditions
         for(Molecule* molecule : m_molecules) {
-            vec position = molecule->position();
+            rowvec position = molecule->position();
             for(int iDim = 0; iDim < nDimensions; iDim++) {
                 if(molecule->position()(iDim) > m_boundaries(1,iDim)) {
                     position(iDim) -= (m_boundaries(1,iDim) - m_boundaries(0,iDim));
@@ -229,10 +230,10 @@ void MoleculeSystem::setBoundaries(mat boundaries)
         rowvec directionVec = conv_to<rowvec>::from(direction);
         cellShiftVectors.row(i) = lengths % directionVec;
         counters(0) += 1;
-        for(uint idim = 1; idim < counters.size(); idim++) {
-            if(counters(idim - 1) > 2) {
-                counters(idim - 1) = 0;
-                counters(idim) += 1;
+        for(uint iDim = 1; iDim < counters.size(); iDim++) {
+            if(counters(iDim - 1) > 2) {
+                counters(iDim - 1) = 0;
+                counters(iDim) += 1;
             }
         }
     }
@@ -241,8 +242,8 @@ void MoleculeSystem::setBoundaries(mat boundaries)
 
 void MoleculeSystem::setupCells(double minCutLength) {
     int totalNCells = 1;
-    m_nCells = zeros<ivec>(nDimensions);
-    m_cellLengths = zeros(nDimensions);
+    m_nCells = zeros<irowvec>(nDimensions);
+    m_cellLengths = zeros<rowvec>(nDimensions);
     for(int iDim = 0; iDim < nDimensions; iDim++) {
         double totalLength = m_boundaries(1,iDim) - m_boundaries(0,iDim);
         m_nCells(iDim) = totalLength / minCutLength;
@@ -250,35 +251,84 @@ void MoleculeSystem::setupCells(double minCutLength) {
         totalNCells *= m_nCells(iDim);
     }
 
-    ivec counters = zeros<ivec>(nDimensions);
+    irowvec indices = zeros<irowvec>(nDimensions);
     for(int i = 0; i < totalNCells; i++) {
         MoleculeSystemCell* cell = new MoleculeSystemCell();
 
         mat cellBoundaries = m_boundaries;
 
-        rowvec shiftVector = trans(m_cellLengths % counters);
+        rowvec shiftVector = m_cellLengths % indices;
 
         cellBoundaries.row(0) = shiftVector;
-        cellBoundaries.row(1) = shiftVector + trans(m_cellLengths);
+        cellBoundaries.row(1) = shiftVector + m_cellLengths;
 
         cell->setBoundaries(cellBoundaries);
+
+        cell->setIndices(indices);
 
         cout << cell << endl;
 
         m_cells.push_back(cell);
 
-        counters(0) += 1;
-        for(uint iDim = 1; iDim < counters.size(); iDim++) {
-            if(counters(iDim - 1) > m_nCells(iDim - 1) - 1) {
-                counters(iDim - 1) = 0;
-                counters(iDim) += 1;
+        indices(0) += 1;
+        for(uint iDim = 1; iDim < indices.size(); iDim++) {
+            if(indices(iDim - 1) > m_nCells(iDim - 1) - 1) {
+                indices(iDim - 1) = 0;
+                indices(iDim) += 1;
             }
         }
     }
 
-    for(Atom* atom : m_atoms) {
-        for(Cell* cell : m_cells) {
-        if(atom->position()) {
+    // Add contents (molecules) to the cells
+    for(Molecule* molecule : m_molecules) {
+        for(MoleculeSystemCell* cell : m_cells) {
+            urowvec moreThan = (molecule->position() > cell->boundaries().row(0));
+            urowvec lessThan = (molecule->position() < cell->boundaries().row(1));
+            bool isInside = true;
+            for(int iDim = 0; iDim < nDimensions; iDim++) {
+                if(!moreThan(iDim) || !lessThan(iDim)) {
+                    isInside = false;
+                    break;
+                }
+            }
+            if(isInside) {
+                cell->addMolecule(molecule);
+            }
+        }
+    }
+
+    // Find the neighbor cells
+    for(MoleculeSystemCell *cell1 : m_cells) {
+        irowvec counters = zeros<irowvec>(nDimensions);
+        for(int i = 0; i < pow3nDimensions; i++) {
+            irowvec direction = counters - ones<irowvec>(nDimensions);
+            irowvec shiftVec = (cell1->indices() + direction);
+            // Boundaries
+            for(uint j = 0; j < shiftVec.n_cols; j++) {
+                if(shiftVec(j) >= m_nCells(j)) {
+                    shiftVec(j) -= m_nCells(j);
+                } else if(shiftVec(j) < 0) {
+                    shiftVec(j) += m_nCells(j);
+                }
+            }
+            int cellIndex = 0;
+            for(int j = 0; j < nDimensions; j++) {
+                int multiplicator = 1;
+                for(int k = j + 1; k < nDimensions; k++) {
+                    multiplicator *= m_nCells(nDimensions - k - 1);
+                }
+                cellIndex += multiplicator * shiftVec(nDimensions - j - 1);
+            }
+//            cout << cellIndex << endl;
+            MoleculeSystemCell* cell2 = m_cells.at(cellIndex);
+            cell1->addNeighbor(cell2);
+            counters(0) += 1;
+            for(uint iDim = 1; iDim < indices.size(); iDim++) {
+                if(counters(iDim - 1) >= nDimensions) {
+                    counters(iDim - 1) = 0;
+                    counters(iDim) += 1;
+                }
+            }
         }
     }
 }

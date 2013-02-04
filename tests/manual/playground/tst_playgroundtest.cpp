@@ -1,11 +1,14 @@
 #include <QString>
 #include <QtTest>
+#include <cmath>
+#include <armadillo>
 #include "moleculesystem.h"
 #include "generator.h"
 
 #include <iostream>
 
 using namespace std;
+using namespace arma;
 
 class PlaygroundTest : public QObject
 {
@@ -13,16 +16,20 @@ class PlaygroundTest : public QObject
     
 public:
     PlaygroundTest();
+    int n;
 
 private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
     void testCase1();
     void setupCells();
+//    void benchmarkMod();
+//    void benchmarkIf();
 };
 
 PlaygroundTest::PlaygroundTest()
 {
+    n = 1e7;
 }
 
 void PlaygroundTest::initTestCase()
@@ -53,6 +60,34 @@ void PlaygroundTest::setupCells() {
     system.setBoundaries(0, b*nCells);
     system.setupCells(4);
 }
+
+//void PlaygroundTest::benchmarkMod() {
+//    QBENCHMARK {
+//        for(int i = 0; i < n; i++) {
+//            vec a = 10 * randn<vec>(3);
+//            for(int dim = 0; dim < 3; dim++) {
+//                a(dim) = fmod(a(dim) + 4, 4);
+//            }
+//        }
+//    }
+//}
+
+//void  PlaygroundTest::benchmarkIf() {
+
+
+//    QBENCHMARK {
+//        for(int i = 0; i < n; i++) {
+//            vec a = 10 * randn<vec>(3);
+//            for(int dim = 0; dim < 3; dim++) {
+//                if(a(dim) > 4) {
+//                    a(dim) -= 4;
+//                } else if(a(dim) < 0) {
+//                    a(dim) += 4;
+//                }
+//            }
+//        }
+//    }
+//}
 
 QTEST_APPLESS_MAIN(PlaygroundTest)
 

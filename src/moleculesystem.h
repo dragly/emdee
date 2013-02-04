@@ -59,8 +59,8 @@ private:
 
     int pow3nDimensions;
 
-    ivec m_nCells;
-    vec m_cellLengths;
+    irowvec m_nCells;
+    rowvec m_cellLengths;
 
     vector<MoleculeSystemCell*> m_cells;
 };

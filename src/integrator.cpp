@@ -16,8 +16,8 @@ void Integrator::initialize() {
 void Integrator::stepForward() {
     for(uint i = 0; i < m_moleculeSystem->molecules().size(); i++) {
         Molecule *molecule = m_moleculeSystem->molecules().at(i);
-        vec velocity = molecule->velocity();
-        vec position = molecule->position();
+        rowvec velocity = molecule->velocity();
+        rowvec position = molecule->position();
         velocity += molecule->force() / (2*molecule->mass()) * dt;
         molecule->setVelocity(velocity);
         position += velocity * dt;
@@ -28,7 +28,7 @@ void Integrator::stepForward() {
 
     for(uint i = 0; i < m_moleculeSystem->molecules().size(); i++) {
         Molecule *molecule = m_moleculeSystem->molecules().at(i);
-        vec velocity = molecule->velocity();
+        rowvec velocity = molecule->velocity();
         velocity += molecule->force() / (2*molecule->mass()) * dt;
         molecule->setVelocity(velocity);
     }

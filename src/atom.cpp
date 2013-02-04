@@ -6,33 +6,33 @@
 using namespace arma;
 
 Atom::Atom(Molecule *parent) :
-    m_position(zeros(3)),
-    m_velocity(zeros(3)),
-    m_force(zeros(3)),
+    m_position(zeros<rowvec>(3)),
+    m_velocity(zeros<rowvec>(3)),
+    m_force(zeros<rowvec>(3)),
     m_parent(parent)
 {
 }
 
 Atom::Atom(Molecule *parent, AtomType atomType) :
-    m_position(zeros(3)),
-    m_velocity(zeros(3)),
-    m_force(zeros(3)),
+    m_position(zeros<rowvec>(3)),
+    m_velocity(zeros<rowvec>(3)),
+    m_force(zeros<rowvec>(3)),
     m_type(atomType),
     m_parent(parent)
 {
 }
 
-void Atom::setPosition(const vec &position)
+void Atom::setPosition(const rowvec &position)
 {
     m_position = position;
 }
 
-vec Atom::position()
+rowvec Atom::position()
 {
     return m_position;
 }
 
-vec Atom::absolutePosition()
+rowvec Atom::absolutePosition()
 {
     if(m_parent == NULL) {
         return m_position;
@@ -40,32 +40,32 @@ vec Atom::absolutePosition()
     return m_position + m_parent->position();
 }
 
-void Atom::setVelocity(const vec &velocity) {
+void Atom::setVelocity(const rowvec &velocity) {
     m_velocity = velocity;
 }
 
-const vec &Atom::velocity() const
+const rowvec &Atom::velocity() const
 {
     return m_velocity;
 }
 
 void Atom::clearForces()
 {
-    m_force = zeros<vec>(3);
+    m_force = zeros<rowvec>(3);
 }
 
-void Atom::addForce(const vec &force)
+void Atom::addForce(const rowvec &force)
 {
     m_force += force;
     m_parent->addForce(force);
 }
 
-const vec &Atom::force() const
+const rowvec &Atom::force() const
 {
     return m_force;
 }
 
-vec Atom::absoluteVelocity() {
+rowvec Atom::absoluteVelocity() {
     if(m_parent == NULL) {
         return m_velocity;
     }

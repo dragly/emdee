@@ -20,13 +20,13 @@ class Molecule
 public:
     Molecule();
 
-    const vec &position() const;
-    const vec &velocity() const;
-    const vec &force() const;
+    const rowvec &position() const;
+    const rowvec &velocity() const;
+    const rowvec &force() const;
 
-    void setPosition(const vec &position);
-    void setVelocity(const vec &velocity);
-    void addForce(const vec &force);
+    void setPosition(const rowvec &position);
+    void setVelocity(const rowvec &velocity);
+    void addForce(const rowvec &force);
 
     void clearForces();
 
@@ -36,9 +36,9 @@ public:
 
     const vector<Atom *> atoms();
 private:
-    vec m_position;
-    vec m_velocity;
-    vec m_force;
+    rowvec m_position;
+    rowvec m_velocity;
+    rowvec m_force;
 
     double m_mass;
 

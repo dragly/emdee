@@ -13,7 +13,7 @@ Generator::Generator()
 
 vector<Molecule*> Generator::generateFcc(int nCells, double b, AtomType atomType) {
     vector<Molecule*> moleculeList;
-    vec offset = zeros(3);
+    rowvec offset = zeros<rowvec>(3);
     for(int i = 0; i < nCells; i++) {
         for(int j = 0; j < nCells; j++) {
             for(int k = 0; k < nCells; k++) {
@@ -21,7 +21,7 @@ vector<Molecule*> Generator::generateFcc(int nCells, double b, AtomType atomType
                     Molecule* molecule = new Molecule();
                     Atom* atom = new Atom(molecule, atomType);
                     molecule->addAtom(atom);
-                    vec face = zeros(3);
+                    rowvec face = zeros<rowvec>(3);
                     switch(atomi) {
                     case 0:
                         break;
@@ -35,7 +35,7 @@ vector<Molecule*> Generator::generateFcc(int nCells, double b, AtomType atomType
                         face << 0 << b / 2 << b / 2;
                         break;
                     }
-                    vec position = zeros(3);
+                    rowvec position = zeros<rowvec>(3);
                     position = offset + face;
                     molecule->setPosition(position);
                     moleculeList.push_back(molecule);
@@ -53,7 +53,7 @@ vector<Molecule*> Generator::generateFcc(int nCells, double b, AtomType atomType
 
 void Generator::boltzmannDistributeVelocities(vector<Molecule*> molecules) {
     for(Molecule* molecule : molecules) {
-        vec velocity = randn(3);
+        rowvec velocity = randn<rowvec>(3);
         molecule->setVelocity(velocity);
     }
 }

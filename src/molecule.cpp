@@ -2,48 +2,48 @@
 #include "atom.h"
 
 Molecule::Molecule() :
-    m_position(zeros(3)),
-    m_velocity(zeros(3)),
-    m_force(zeros(3)),
+    m_position(zeros<rowvec>(3)),
+    m_velocity(zeros<rowvec>(3)),
+    m_force(zeros<rowvec>(3)),
     m_mass(1)
 {
 }
 
-const vec &Molecule::position() const
+const rowvec &Molecule::position() const
 {
     return m_position;
 }
 
 
-const vec &Molecule::velocity() const
+const rowvec &Molecule::velocity() const
 {
     return m_velocity;
 }
 
-const vec &Molecule::force() const
+const rowvec &Molecule::force() const
 {
     return m_force;
 }
 
-void Molecule::setPosition(const vec &position)
+void Molecule::setPosition(const rowvec &position)
 {
     m_position = position;
 }
 
 
-void Molecule::setVelocity(const vec &velocity)
+void Molecule::setVelocity(const rowvec &velocity)
 {
     m_velocity = velocity;
 }
 
-void Molecule::addForce(const vec &force)
+void Molecule::addForce(const rowvec &force)
 {
     m_force += force;
 }
 
 void Molecule::clearForces()
 {
-    m_force = zeros<vec>(3);
+    m_force = zeros<rowvec>(3);
     for(Atom* atom : m_atoms) {
         atom->clearForces();
     }
