@@ -22,25 +22,32 @@ Atom::Atom(Molecule *parent, AtomType atomType) :
 {
 }
 
+void Atom::refreshAbsolutePositionAndVelocity() {
+    m_absolutePosition = m_position + m_parent->position();
+    m_absoluteVelocity = m_velocity + m_parent->velocity();
+}
+
 void Atom::setPosition(const rowvec &position)
 {
+    refreshAbsolutePositionAndVelocity();
     m_position = position;
 }
 
-rowvec Atom::position()
+const rowvec& Atom::position() const
 {
     return m_position;
 }
 
-rowvec Atom::absolutePosition()
+const rowvec& Atom::absolutePosition() const
 {
-    if(m_parent == NULL) {
-        return m_position;
-    }
-    return m_position + m_parent->position();
+//    if(m_parent == NULL) {
+//        return m_position;
+//    }
+    return m_absolutePosition;
 }
 
 void Atom::setVelocity(const rowvec &velocity) {
+    refreshAbsolutePositionAndVelocity();
     m_velocity = velocity;
 }
 
@@ -65,11 +72,12 @@ const rowvec &Atom::force() const
     return m_force;
 }
 
-rowvec Atom::absoluteVelocity() {
-    if(m_parent == NULL) {
-        return m_velocity;
-    }
-    return m_velocity + m_parent->velocity();
+const rowvec& Atom::absoluteVelocity() const
+{
+//    if(m_parent == NULL) {
+//        return m_velocity;
+//    }
+    return m_absoluteVelocity;
 }
 
 double Atom::mass()

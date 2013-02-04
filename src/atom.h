@@ -16,22 +16,25 @@ public:
     Atom(Molecule* parent, AtomType atomType);
 
     void setPosition(const rowvec &position);
-    rowvec position();
+    const rowvec& position() const;
     void setVelocity(const rowvec &velocity);
     const rowvec &velocity() const;
     void addForce(const rowvec &force);
     const rowvec &force() const;
     AtomType type();
 
-    rowvec absolutePosition();
-    rowvec absoluteVelocity();
+    const rowvec& absolutePosition() const;
+    const rowvec& absoluteVelocity() const;
 
     double mass();
     void clearForces();
+    void refreshAbsolutePositionAndVelocity();
 private:
     rowvec m_position;
     rowvec m_velocity;
     rowvec m_force;
+    rowvec m_absolutePosition;
+    rowvec m_absoluteVelocity;
     AtomType m_type;
 
     Molecule* m_parent;

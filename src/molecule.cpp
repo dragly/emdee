@@ -28,12 +28,18 @@ const rowvec &Molecule::force() const
 void Molecule::setPosition(const rowvec &position)
 {
     m_position = position;
+    for(Atom* atom : m_atoms) {
+        atom->refreshAbsolutePositionAndVelocity();
+    }
 }
 
 
 void Molecule::setVelocity(const rowvec &velocity)
 {
     m_velocity = velocity;
+    for(Atom* atom : m_atoms) {
+        atom->refreshAbsolutePositionAndVelocity();
+    }
 }
 
 void Molecule::addForce(const rowvec &force)

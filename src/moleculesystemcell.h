@@ -33,6 +33,7 @@ public:
 
     void updateForces();
     void clearMolecules();
+    void calculateForceBetweenAtoms(Atom *atom1, Atom *atom2, const rowvec &neighborOffset, rowvec &rVec, rowvec &force, double& sigma, double& eps);
 private:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;

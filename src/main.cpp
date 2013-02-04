@@ -7,7 +7,7 @@ using namespace std;
 
 int main()
 {
-    int nCells = 1;
+    int nCells = 3;
     double b = 5.620;
     vector<Molecule*> molecules = Generator::generateFcc(nCells, b, AtomType::argon());
     Generator::boltzmannDistributeVelocities(molecules);
