@@ -3,6 +3,7 @@
 
 class Molecule;
 class Atom;
+class MoleculeSystem;
 
 #include <armadillo>
 #include <vector>
@@ -14,25 +15,28 @@ using namespace std;
 class MoleculeSystemCell
 {
 public:
-    MoleculeSystemCell();
+    MoleculeSystemCell(MoleculeSystem *parent);
 
     friend ostream& operator<<(ostream& os, const MoleculeSystemCell& dt);
     friend ostream& operator<<(ostream& os, MoleculeSystemCell* dt);
 
     void setBoundaries(mat boundaries);
 
-    void addNeighbor(MoleculeSystemCell *cell);
+    void addNeighbor(MoleculeSystemCell *cell, const rowvec& offset);
 
     const mat &boundaries() const;
     void addMolecule(Molecule *molecule);
+    const vector<Atom*>& atoms();
 
     void setIndices(const irowvec& indices);
     const irowvec& indices() const;
 
     void updateForces();
+    void clearMolecules();
 private:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
+    vector<rowvec> m_neighborOffsets;
 
     mat m_boundaries;
     int m_nDimensions;
@@ -43,6 +47,8 @@ private:
     vector<Atom*> m_atoms;
 
     irowvec m_indices;
+
+    MoleculeSystem* moleculeSystem;
 };
 
 #endif // MOLECULESYSTEMCELL_H

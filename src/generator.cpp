@@ -48,6 +48,7 @@ vector<Molecule*> Generator::generateFcc(int nCells, double b, AtomType atomType
         offset(0) += b;
         offset(1) = 0;
     }
+    cout << "Generated " << moleculeList.size() << " molecules in FCC structure!" << endl;
     return moleculeList;
 }
 

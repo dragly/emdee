@@ -28,7 +28,7 @@ public:
     void load(string fileName);
     bool save(int step);
     bool saveXyz(int step);
-    void addMolecules(vector<Molecule *> molecule);
+    void addMolecules(const vector<Molecule *> &molecule);
     const vector<Molecule*> &molecules() const;
     void updateForces();
     void simulate();
@@ -39,6 +39,12 @@ public:
 
     bool saveHDF5(string filename);
     void setupCells(double minCutLength);
+
+    double potentialConstant();
+
+    const mat& cellShiftVectors();
+
+    void refreshCellContents();
 private:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
@@ -46,7 +52,7 @@ private:
     Integrator *integrator;
 
     double boltzmannConstant;
-    double potentialConstant;
+    double m_potentialConstant;
 
     mat m_boundaries;
 
@@ -55,7 +61,7 @@ private:
     string outFileName;
     FileFormat outFileFormat;
 
-    mat cellShiftVectors;
+    mat m_cellShiftVectors;
 
     int pow3nDimensions;
 
