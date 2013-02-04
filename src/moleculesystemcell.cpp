@@ -107,8 +107,6 @@ void MoleculeSystemCell::updateForces()
     //    cout << m_molecules.size() << endl;
     //    cout << "m_neighborCells.size()" << endl;
     //    cout << m_neighborCells.size() << endl;
-
-    // Loop over neighbor cells
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
         MoleculeSystemCell* neighbor = m_neighborCells.at(iNeighbor);
         rowvec& neighborOffset = m_neighborOffsets.at(iNeighbor);
