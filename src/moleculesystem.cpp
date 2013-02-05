@@ -355,7 +355,7 @@ void MoleculeSystem::setupCells(double minCutLength) {
             //            cout << cellIndex << endl;
             //            cout << offsetVec << endl;
             MoleculeSystemCell* cell2 = m_cells.at(cellIndex);
-            if(cell2 != cell1) {
+            if(cell2 != cell1 || m_cells.size() == 1) {
                 cell1->addNeighbor(cell2, offsetVec);
                 nNeighbors++;
             }

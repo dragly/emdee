@@ -87,7 +87,7 @@ void MoleculeSystemCell::updateForces()
         molecule->clearForces();
     }
     //    double kB = boltzmannConstant;
-    double eps = 0.01;
+    double eps = 1;
     double sigma = moleculeSystem->potentialConstant();
     Atom* atom1;
     Atom* atom2;
@@ -108,6 +108,7 @@ void MoleculeSystemCell::updateForces()
     //    cout << "m_neighborCells.size()" << endl;
     //    cout << m_neighborCells.size() << endl;
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
+//        cout << iNeighbor << endl;
         MoleculeSystemCell* neighbor = m_neighborCells.at(iNeighbor);
         rowvec& neighborOffset = m_neighborOffsets.at(iNeighbor);
         bool foundNeighbor = false;
@@ -117,7 +118,7 @@ void MoleculeSystemCell::updateForces()
             if(alreadyNeighbor == neighbor) {
                 bool allMatch = true;
                 for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-                    if(neighborOffset(iDim) != alreadyNeighborOffset(iDim)) {
+                    if(fabs(neighborOffset(iDim) - alreadyNeighborOffset(iDim)) > 1e-6) {
                         allMatch = false;
                     }
                 }
@@ -127,7 +128,7 @@ void MoleculeSystemCell::updateForces()
             }
         }
         if(foundNeighbor) {
-            continue;
+//            continue;
         }
         for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
             atom1 = m_atoms.at(iAtom);
@@ -146,7 +147,7 @@ void MoleculeSystemCell::updateForces()
                 force = factor * rVec;
 
                 atom1->addForce(force);
-                atom2->addForce(-force);
+//                atom2->addForce(-force);
             }
         }
         neighbor->addAlreadyCalculatedNeighbor(this, -neighborOffset);
