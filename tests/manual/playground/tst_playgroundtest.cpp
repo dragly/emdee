@@ -6,9 +6,11 @@
 #include "generator.h"
 
 #include <iostream>
+#include <libconfig.h++>
 
 using namespace std;
 using namespace arma;
+using namespace libconfig;
 
 class PlaygroundTest : public QObject
 {
@@ -54,7 +56,7 @@ void PlaygroundTest::setupCells() {
     int nCells = 5;
     double b = 5.620;
     Generator generator;
-    vector<Molecule*> molecules = generator.generateFcc(nCells, b, AtomType::argon());
+    vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
     generator.boltzmannDistributeVelocities(molecules);
     MoleculeSystem system;
     system.addMolecules(molecules);

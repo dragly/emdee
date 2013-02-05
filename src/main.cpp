@@ -2,26 +2,39 @@
 #include "generator.h"
 
 #include <iostream>
+#include <libconfig.h++>
 
 using namespace std;
+using namespace libconfig;
 
-int main()
+int main(/*int argc, char** argv*/)
 {
-    double sigma = 3.405;
-    int nCells = 6;
-    double b = 5.620;
+    Config config;
+    config.readFile("testconfig.cfg");
+
+    double unitLength = config.lookup("units.length");
+
+    int nSimulationSteps = config.lookup("simulation.nSimulationSteps");
     Generator generator;
-    generator.setUnitLength(sigma);
-    vector<Molecule*> molecules = generator.generateFcc(nCells, b, AtomType::argon());
+    generator.loadConfiguration(&config);
+
+    // Generator specific config
+    int nCells = config.lookup("generator.nCells");
+    double b = config.lookup("generator.b");
+    double bUnit = b / unitLength;
+    double potentialConstant = config.lookup("system.potentialConstant");
+    double potentialConstantUnit = potentialConstant / unitLength;
+    vector<Molecule*> molecules = generator.generateFcc(bUnit, nCells, AtomType::argon());
     generator.boltzmannDistributeVelocities(molecules);
     MoleculeSystem system;
-    system.setUnitLength(sigma);
-    system.setPotentialConstant(sigma);
+    system.loadConfiguration(&config);
     system.addMolecules(molecules);
-    system.setBoundaries(0, b*nCells);
-    system.setupCells(sigma*3);
-
-    system.simulate(10000);
+    cout << "addded" << endl;
+    system.setBoundaries(generator.lastBoundaries());
+    cout << "setbounds" << endl;
+    system.setupCells();
+    cout << "Setup cells" << endl;
+    system.simulate(nSimulationSteps);
 
     return 0;
 }

@@ -11,9 +11,11 @@ class MoleculeSystemCell;
 #include <iostream>
 #include <vector>
 #include <armadillo>
+#include <libconfig.h++>
 
 using namespace std;
 using namespace arma;
+using namespace libconfig;
 
 class MoleculeSystem
 {
@@ -24,6 +26,8 @@ public:
         XyzFormat,
         HDF5Format
     };
+
+    void loadConfiguration(Config* config);
 
     void load(string fileName);
     bool save(int step);
@@ -38,6 +42,7 @@ public:
     void setBoundaries(mat boundaries);
 
     bool saveHDF5(string filename);
+    void setupCells();
     void setupCells(double minCutLength);
 
     double potentialConstant();
@@ -54,12 +59,12 @@ private:
 //    int nSimulationSteps;
     Integrator *integrator;
 
-    double boltzmannConstant;
+    double m_boltzmannConstant;
     double m_potentialConstant;
 
     mat m_boundaries;
 
-    int nDimensions;
+    int m_nDimensions;
 
     string outFileName;
     FileFormat outFileFormat;
@@ -74,6 +79,8 @@ private:
     vector<MoleculeSystemCell*> m_cells;
 
     double m_unitLength;
+
+    Config *m_config;
 };
 
 #endif // MOLECULESYSTEM_H
