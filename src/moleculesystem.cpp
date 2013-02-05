@@ -7,7 +7,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/stat.h>
-#include <hdf5.h>
+//#include <hdf5.h>
 
 using namespace std;
 
@@ -124,6 +124,10 @@ bool MoleculeSystem::saveHDF5(string filename) {
 void MoleculeSystem::setupCells()
 {
     setupCells(m_potentialConstant * 3);
+    if(m_cells.size() < 27) {
+        cerr << "The number of cells can never be less than 27!" << endl;
+        throw new std::logic_error("The number of cells can never be less than 27!");
+    }
 }
 
 void MoleculeSystem::addMolecules(const vector<Molecule *>& molecule)

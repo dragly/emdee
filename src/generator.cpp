@@ -64,7 +64,7 @@ vector<Molecule*> Generator::generateFcc(double b, int nCells, AtomType atomType
 
 void Generator::boltzmannDistributeVelocities(vector<Molecule*> molecules) {
     for(Molecule* molecule : molecules) {
-        rowvec velocity = 0.01 * randn<rowvec>(3); // / m_unitLength;
+        rowvec velocity = 0.1 * randn<rowvec>(3); // / m_unitLength;
         molecule->setVelocity(velocity);
     }
     cout << "Boltzmann distributed velocities for " << molecules.size() << " molecules!" << endl;

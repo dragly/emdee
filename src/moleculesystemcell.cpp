@@ -116,20 +116,21 @@ void MoleculeSystemCell::updateForces()
             MoleculeSystemCell* alreadyNeighbor = m_neighborWithAlreadyCalculatedForces.at(iAlreadyNeighbor);
             rowvec& alreadyNeighborOffset = m_neighborWithAlreadyCalculatedForcesOffsets.at(iAlreadyNeighbor);
             if(alreadyNeighbor == neighbor) {
-                bool allMatch = true;
-                for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-                    if(fabs(neighborOffset(iDim) - alreadyNeighborOffset(iDim)) > 1e-6) {
-                        allMatch = false;
-                    }
-                }
-                if(allMatch) {
-                    foundNeighbor = true;
-                }
+//                bool allMatch = true;
+//                for(int iDim = 0; iDim < m_nDimensions; iDim++) {
+//                    if(fabs(neighborOffset(iDim) - alreadyNeighborOffset(iDim)) > 1e-4) {
+//                        allMatch = false;
+//                    }
+//                }
+//                if(allMatch) {
+//                    foundNeighbor = true;
+//                }
+//                continue;
             }
         }
-        if(foundNeighbor) {
+//        if(foundNeighbor) {
 //            continue;
-        }
+//        }
         for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
             atom1 = m_atoms.at(iAtom);
             for(uint jAtom = 0; jAtom < neighbor->atoms().size(); jAtom++) {

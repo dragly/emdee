@@ -30,3 +30,5 @@ myscript.target = myscript
 myscript.commands = python $$PWD/../myscript.py $$PWD/../
 QMAKE_EXTRA_TARGETS += myscript
 PRE_TARGETDEPS += myscript
+
+OTHER_FILES += ../testconfig.cfg
