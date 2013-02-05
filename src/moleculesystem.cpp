@@ -196,6 +196,9 @@ void MoleculeSystem::updateForces()
 
     refreshCellContents();
     for(MoleculeSystemCell* cell : m_cells) {
+        cell->clearAlreadyCalculatedNeighbors();
+    }
+    for(MoleculeSystemCell* cell : m_cells) {
         cell->updateForces();
     }
 }

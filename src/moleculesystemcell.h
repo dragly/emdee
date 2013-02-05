@@ -34,10 +34,14 @@ public:
     void updateForces();
     void clearMolecules();
     void calculateForceBetweenAtoms(Atom *atom1, Atom *atom2, const rowvec &neighborOffset, rowvec &rVec, rowvec &force, double& sigma, double& eps);
+    void addAlreadyCalculatedNeighbor(MoleculeSystemCell* neighbor, const rowvec &offset);
+    void clearAlreadyCalculatedNeighbors();
 private:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
+    vector<MoleculeSystemCell*> m_neighborWithAlreadyCalculatedForces;
     vector<rowvec> m_neighborOffsets;
+    vector<rowvec> m_neighborWithAlreadyCalculatedForcesOffsets;
 
     mat m_boundaries;
     int m_nDimensions;

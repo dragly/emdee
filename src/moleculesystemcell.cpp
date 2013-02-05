@@ -110,6 +110,25 @@ void MoleculeSystemCell::updateForces()
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
         MoleculeSystemCell* neighbor = m_neighborCells.at(iNeighbor);
         rowvec& neighborOffset = m_neighborOffsets.at(iNeighbor);
+        bool foundNeighbor = false;
+        for(int iAlreadyNeighbor = 0; iAlreadyNeighbor < m_neighborWithAlreadyCalculatedForces.size(); iAlreadyNeighbor++) {
+            MoleculeSystemCell* alreadyNeighbor = m_neighborWithAlreadyCalculatedForces.at(iAlreadyNeighbor);
+            rowvec& alreadyNeighborOffset = m_neighborWithAlreadyCalculatedForcesOffsets.at(iAlreadyNeighbor);
+            if(alreadyNeighbor == neighbor) {
+                bool allMatch = true;
+                for(int iDim = 0; iDim < m_nDimensions; iDim++) {
+                    if(neighborOffset(iDim) != alreadyNeighborOffset(iDim)) {
+                        allMatch = false;
+                    }
+                }
+                if(allMatch) {
+                    foundNeighbor = true;
+                }
+            }
+        }
+        if(foundNeighbor) {
+            continue;
+        }
         for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
             atom1 = m_atoms.at(iAtom);
             for(uint jAtom = 0; jAtom < neighbor->atoms().size(); jAtom++) {
@@ -127,8 +146,10 @@ void MoleculeSystemCell::updateForces()
                 force = factor * rVec;
 
                 atom1->addForce(force);
+                atom2->addForce(-force);
             }
         }
+        neighbor->addAlreadyCalculatedNeighbor(this, -neighborOffset);
     }
 
     // Loop over own atoms
@@ -157,4 +178,16 @@ void MoleculeSystemCell::clearMolecules()
 {
     m_molecules.clear();
     m_atoms.clear();
+}
+
+
+void MoleculeSystemCell::addAlreadyCalculatedNeighbor(MoleculeSystemCell *neighbor, const rowvec& offset)
+{
+    m_neighborWithAlreadyCalculatedForces.push_back(neighbor);
+    m_neighborWithAlreadyCalculatedForcesOffsets.push_back(offset);
+}
+
+void MoleculeSystemCell::clearAlreadyCalculatedNeighbors()
+{
+    m_neighborWithAlreadyCalculatedForces.clear();
 }
