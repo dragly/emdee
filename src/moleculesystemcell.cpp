@@ -87,8 +87,8 @@ void MoleculeSystemCell::updateForces()
         molecule->clearForces();
     }
     //    double kB = boltzmannConstant;
-    double eps = moleculeSystem->potentialConstant();
-    double sigma = 4.5;
+    double eps = 0.01;
+    double sigma = moleculeSystem->potentialConstant();
     Atom* atom1;
     Atom* atom2;
     rowvec rVec;
@@ -117,7 +117,7 @@ void MoleculeSystemCell::updateForces()
 //                    if(atom1 == atom2/* && neighbor == this && neighborOffset.max() == 0*/) {
 //                        continue;
 //                    }
-                rVec = atom2->absolutePosition() + neighborOffset - atom1->absolutePosition();
+                rVec = atom2->position() + neighborOffset - atom1->position();
                 // Check distances to the nearby cells
                 rSquared = dot(rVec, rVec);
                 sigmaSquaredOverRSquared = sigma*sigma/rSquared;
@@ -125,6 +125,7 @@ void MoleculeSystemCell::updateForces()
                 factor = - ((24 * eps) / (rSquared)) * (2 * pow((sigmaSquaredOverRSquared), 6) - pow((sigmaSquaredOverRSquared), 3));
 
                 force = factor * rVec;
+
                 atom1->addForce(force);
             }
         }
@@ -136,7 +137,7 @@ void MoleculeSystemCell::updateForces()
         // Loop over all neighbors (including ourselves)
         for(uint jAtom = iAtom + 1; jAtom < m_atoms.size(); jAtom++) {
             atom2 = m_atoms.at(jAtom);
-            rVec = atom2->absolutePosition() - atom1->absolutePosition();
+            rVec = atom2->position() - atom1->position();
             // Check distances to the nearby cells
             rSquared = dot(rVec, rVec);
             sigmaSquaredOverRSquared = sigma*sigma/rSquared;
@@ -144,9 +145,11 @@ void MoleculeSystemCell::updateForces()
             factor = - ((24 * eps) / (rSquared)) * (2 * pow((sigmaSquaredOverRSquared), 6) - pow((sigmaSquaredOverRSquared), 3));
 
             force = factor * rVec;
-            atom1->addForce(force);
             atom2->addForce(-force);
+            atom1->addForce(force);
         }
+//        force = -0.05 * pow(atom1->absoluteVelocity(), 3);
+//        atom1->addForce(force);
     }
 }
 

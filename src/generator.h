@@ -16,8 +16,13 @@ class Generator
 {
 public:
     Generator();
-    static vector<Molecule*> generateFcc(int nCells, double b, AtomType atomType);
-    static void boltzmannDistributeVelocities(vector<Molecule *> molecules);
+    vector<Molecule*> generateFcc(int nCells, double b, AtomType atomType);
+    void boltzmannDistributeVelocities(vector<Molecule *> molecules);
+
+    void setUnitLength(double unitLength);
+
+private:
+    double m_unitLength;
 };
 
 #endif // GENERATOR_H

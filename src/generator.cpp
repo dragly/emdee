@@ -14,6 +14,7 @@ Generator::Generator()
 vector<Molecule*> Generator::generateFcc(int nCells, double b, AtomType atomType) {
     vector<Molecule*> moleculeList;
     rowvec offset = zeros<rowvec>(3);
+    double bUnit = b / m_unitLength;
     for(int i = 0; i < nCells; i++) {
         for(int j = 0; j < nCells; j++) {
             for(int k = 0; k < nCells; k++) {
@@ -26,13 +27,13 @@ vector<Molecule*> Generator::generateFcc(int nCells, double b, AtomType atomType
                     case 0:
                         break;
                     case 1:
-                        face << b / 2 << b / 2 <<  0;
+                        face << bUnit / 2 << bUnit / 2 <<  0;
                         break;
                     case 2:
-                        face << b / 2 << 0 << b / 2;
+                        face << bUnit / 2 << 0 << bUnit / 2;
                         break;
                     case 3:
-                        face << 0 << b / 2 << b / 2;
+                        face << 0 << bUnit / 2 << bUnit / 2;
                         break;
                     }
                     rowvec position = zeros<rowvec>(3);
@@ -40,12 +41,12 @@ vector<Molecule*> Generator::generateFcc(int nCells, double b, AtomType atomType
                     molecule->setPosition(position);
                     moleculeList.push_back(molecule);
                 }
-                offset(2) += b;
+                offset(2) += bUnit;
             }
-            offset(1) += b;
+            offset(1) += bUnit;
             offset(2) = 0;
         }
-        offset(0) += b;
+        offset(0) += bUnit;
         offset(1) = 0;
     }
     cout << "Generated " << moleculeList.size() << " molecules in FCC structure!" << endl;
@@ -54,7 +55,12 @@ vector<Molecule*> Generator::generateFcc(int nCells, double b, AtomType atomType
 
 void Generator::boltzmannDistributeVelocities(vector<Molecule*> molecules) {
     for(Molecule* molecule : molecules) {
-        rowvec velocity = randn<rowvec>(3);
+        rowvec velocity = 0.1 * randn<rowvec>(3) / m_unitLength;
         molecule->setVelocity(velocity);
     }
+}
+
+void Generator::setUnitLength(double unitLength)
+{
+    m_unitLength = unitLength;
 }

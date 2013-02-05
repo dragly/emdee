@@ -12,13 +12,14 @@
 using namespace std;
 
 MoleculeSystem::MoleculeSystem() :
-    nSimulationSteps(100),
+//    nSimulationSteps(100),
     boltzmannConstant(2.5),
     m_potentialConstant(0.1),
     nDimensions(3),
     outFileName("out/myfile*.xyz"),
     outFileFormat(XyzFormat),
-    pow3nDimensions(pow(3, nDimensions))
+    pow3nDimensions(pow(3, nDimensions)),
+    m_unitLength(1)
 {
     integrator = new Integrator(this);
     m_cellShiftVectors = zeros(pow3nDimensions, nDimensions);
@@ -40,7 +41,7 @@ bool MoleculeSystem::save(int step) {
 
 bool MoleculeSystem::saveXyz(int step) {
     stringstream outStepName;
-    outStepName << setw(4) << setfill('0') << step;
+    outStepName << setw(6) << setfill('0') << step;
     string outFileNameLocal = outFileName;
     size_t starPos = outFileName.find("*");
     ofstream outFile;
@@ -57,8 +58,9 @@ bool MoleculeSystem::saveXyz(int step) {
     for(Molecule* molecule : m_molecules) {
         for(Atom* atom : molecule->atoms()) {
             outFile << atom->type().abbreviation
-                    << " " << atom->absolutePosition()(0) << " " << atom->absolutePosition()(1) << " " << atom->absolutePosition()(2)
-                    << " " << atom->absoluteVelocity()(0) << " " << atom->absoluteVelocity()(1) << " " << atom->absoluteVelocity()(2)
+                    << " " << atom->position()(0) << " " << atom->position()(1) << " " << atom->position()(2)
+                    << " " << atom->velocity()(0) << " " << atom->velocity()(1) << " " << atom->velocity()(2)
+                    << " " << atom->force()(0) << " " << atom->force()(1) << " " << atom->force()(2)
                     << endl;
         }
     }
@@ -176,12 +178,14 @@ void MoleculeSystem::updateForces()
     //    }
     //    cout << "nCalculations" << endl;
     //    cout << nCalculations << endl;
+
+    refreshCellContents();
     for(MoleculeSystemCell* cell : m_cells) {
         cell->updateForces();
     }
 }
 
-void MoleculeSystem::simulate()
+void MoleculeSystem::simulate(int nSimulationSteps)
 {
     // Make output directory
     mkdir("out", S_IRWXU|S_IRGRP|S_IXGRP);
@@ -194,12 +198,12 @@ void MoleculeSystem::simulate()
         }
     }
 
+    save(0);
     // Set up integrator
     integrator->initialize();
-    for(int iStep = 0; iStep < nSimulationSteps; iStep++) {
+    for(int iStep = 1; iStep < nSimulationSteps; iStep++) {
         cout << "Simulation step " << iStep << endl;
         integrator->stepForward();
-        refreshCellContents();
         //        cout << "Integrator done" << endl;
         // Boundary conditions
         for(Molecule* molecule : m_molecules) {
@@ -234,7 +238,7 @@ void MoleculeSystem::setBoundaries(double xMin, double xMax, double yMin, double
 
 void MoleculeSystem::setBoundaries(mat boundaries)
 {
-    m_boundaries = boundaries;
+    m_boundaries = boundaries / m_unitLength;
     irowvec counters = zeros<irowvec>(nDimensions);
     for(int i = 0; i < pow3nDimensions; i++) {
         irowvec direction = counters - ones<irowvec>(nDimensions);
@@ -254,6 +258,7 @@ void MoleculeSystem::setBoundaries(mat boundaries)
 }
 
 void MoleculeSystem::setupCells(double minCutLength) {
+    double minCutLengthUnit = minCutLength / m_unitLength;
     for(uint i = 0; m_cells.size(); i++) {
         MoleculeSystemCell* cellToDelete = m_cells.at(i);
         delete cellToDelete;
@@ -265,7 +270,7 @@ void MoleculeSystem::setupCells(double minCutLength) {
     m_cellLengths = zeros<rowvec>(nDimensions);
     for(int iDim = 0; iDim < nDimensions; iDim++) {
         double totalLength = m_boundaries(1,iDim) - m_boundaries(0,iDim);
-        m_nCells(iDim) = totalLength / minCutLength;
+        m_nCells(iDim) = totalLength / minCutLengthUnit;
         m_cellLengths(iDim) = totalLength / m_nCells(iDim);
         nCellsTotal *= m_nCells(iDim);
     }
@@ -371,6 +376,19 @@ void MoleculeSystem::refreshCellContents() {
         }
     }
     //    cout << "The last added cell has " << nNeighbors << " neighbors" << endl;
+}
+
+void MoleculeSystem::setUnitLength(double unitLength)
+{
+    // rescale everything that has been previously set based on previous unit length
+    m_potentialConstant = m_potentialConstant * m_unitLength / unitLength;
+    // Finally set the new unitlength
+    m_unitLength = unitLength;
+}
+
+void MoleculeSystem::setPotentialConstant(double potentialConstant)
+{
+    m_potentialConstant = potentialConstant / m_unitLength;
 }
 
 double MoleculeSystem::potentialConstant()

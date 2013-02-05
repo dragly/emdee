@@ -53,8 +53,9 @@ void PlaygroundTest::testCase1()
 void PlaygroundTest::setupCells() {
     int nCells = 5;
     double b = 5.620;
-    vector<Molecule*> molecules = Generator::generateFcc(nCells, b, AtomType::argon());
-    Generator::boltzmannDistributeVelocities(molecules);
+    Generator generator;
+    vector<Molecule*> molecules = generator.generateFcc(nCells, b, AtomType::argon());
+    generator.boltzmannDistributeVelocities(molecules);
     MoleculeSystem system;
     system.addMolecules(molecules);
     system.setBoundaries(0, b*nCells);

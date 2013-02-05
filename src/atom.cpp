@@ -6,16 +6,16 @@
 using namespace arma;
 
 Atom::Atom(Molecule *parent) :
-    m_position(zeros<rowvec>(3)),
-    m_velocity(zeros<rowvec>(3)),
+    m_relativePosition(zeros<rowvec>(3)),
+    m_relativeVelocity(zeros<rowvec>(3)),
     m_force(zeros<rowvec>(3)),
     m_parent(parent)
 {
 }
 
 Atom::Atom(Molecule *parent, AtomType atomType) :
-    m_position(zeros<rowvec>(3)),
-    m_velocity(zeros<rowvec>(3)),
+    m_relativePosition(zeros<rowvec>(3)),
+    m_relativeVelocity(zeros<rowvec>(3)),
     m_force(zeros<rowvec>(3)),
     m_type(atomType),
     m_parent(parent)
@@ -23,37 +23,37 @@ Atom::Atom(Molecule *parent, AtomType atomType) :
 }
 
 void Atom::refreshAbsolutePositionAndVelocity() {
-    m_absolutePosition = m_position + m_parent->position();
-    m_absoluteVelocity = m_velocity + m_parent->velocity();
+    m_position = m_relativePosition + m_parent->position();
+    m_velocity = m_relativeVelocity + m_parent->velocity();
 }
 
-void Atom::setPosition(const rowvec &position)
+void Atom::setRelativePosition(const rowvec &position)
 {
     refreshAbsolutePositionAndVelocity();
-    m_position = position;
+    m_relativePosition = position;
+}
+
+const rowvec& Atom::relativePosition() const
+{
+    return m_relativePosition;
 }
 
 const rowvec& Atom::position() const
 {
-    return m_position;
-}
-
-const rowvec& Atom::absolutePosition() const
-{
 //    if(m_parent == NULL) {
 //        return m_position;
 //    }
-    return m_absolutePosition;
+    return m_position;
 }
 
-void Atom::setVelocity(const rowvec &velocity) {
+void Atom::setRelativeVelocity(const rowvec &velocity) {
     refreshAbsolutePositionAndVelocity();
-    m_velocity = velocity;
+    m_relativeVelocity = velocity;
 }
 
-const rowvec &Atom::velocity() const
+const rowvec &Atom::relativeVelocity() const
 {
-    return m_velocity;
+    return m_relativeVelocity;
 }
 
 void Atom::clearForces()
@@ -72,12 +72,12 @@ const rowvec &Atom::force() const
     return m_force;
 }
 
-const rowvec& Atom::absoluteVelocity() const
+const rowvec& Atom::velocity() const
 {
 //    if(m_parent == NULL) {
 //        return m_velocity;
 //    }
-    return m_absoluteVelocity;
+    return m_velocity;
 }
 
 double Atom::mass()

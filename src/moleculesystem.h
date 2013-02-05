@@ -31,7 +31,7 @@ public:
     void addMolecules(const vector<Molecule *> &molecule);
     const vector<Molecule*> &molecules() const;
     void updateForces();
-    void simulate();
+    void simulate(int nSimulationSteps);
 
     void setBoundaries(double min, double max);
     void setBoundaries(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax);
@@ -45,10 +45,13 @@ public:
     const mat& cellShiftVectors();
 
     void refreshCellContents();
+
+    void setUnitLength(double unitLength);
+    void setPotentialConstant(double potentialConstant);
 private:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
-    int nSimulationSteps;
+//    int nSimulationSteps;
     Integrator *integrator;
 
     double boltzmannConstant;
@@ -69,6 +72,8 @@ private:
     rowvec m_cellLengths;
 
     vector<MoleculeSystemCell*> m_cells;
+
+    double m_unitLength;
 };
 
 #endif // MOLECULESYSTEM_H
