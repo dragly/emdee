@@ -8,7 +8,8 @@ MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     m_nDimensions(3),
     pow3nDimensions(pow(3, m_nDimensions)),
     m_indices(zeros<irowvec>(m_nDimensions)),
-    moleculeSystem(parent)
+    moleculeSystem(parent),
+    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false)
 {
     cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
 }
@@ -110,29 +111,32 @@ void MoleculeSystemCell::updateForces()
         MoleculeSystemCell* neighbor = m_neighborCells.at(iNeighbor);
 //        cout << "neighbor: " << neighbor->indices() << endl;
         rowvec& neighborOffset = m_neighborOffsets.at(iNeighbor);
-        bool foundNeighbor = false;
-        for(int iAlreadyNeighbor = 0; iAlreadyNeighbor < m_alreadyCalculatedNeighbors.size(); iAlreadyNeighbor++) {
-            MoleculeSystemCell* alreadyNeighbor = m_alreadyCalculatedNeighbors.at(iAlreadyNeighbor);
-//            cout << "alreadyNeighbor: " << alreadyNeighbor->indices() << endl;
-            rowvec& alreadyNeighborOffset = m_neighborWithAlreadyCalculatedForcesOffsets.at(iAlreadyNeighbor);
-            if(alreadyNeighbor == neighbor) {
-//                bool allMatch = true;
-//                for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-//                    if(fabs(neighborOffset(iDim) - alreadyNeighborOffset(iDim)) > 1e-4) {
-//                        allMatch = false;
-//                    }
-//                }
-//                if(allMatch) {
-//                    foundNeighbor = true;
-//                }
+//        bool foundNeighbor = false;
+//        for(int iAlreadyNeighbor = 0; iAlreadyNeighbor < m_alreadyCalculatedNeighbors.size(); iAlreadyNeighbor++) {
+//            MoleculeSystemCell* alreadyNeighbor = m_alreadyCalculatedNeighbors.at(iAlreadyNeighbor);
+////            cout << "alreadyNeighbor: " << alreadyNeighbor->indices() << endl;
+//            rowvec& alreadyNeighborOffset = m_neighborWithAlreadyCalculatedForcesOffsets.at(iAlreadyNeighbor);
+//            if(alreadyNeighbor == neighbor) {
+////                bool allMatch = true;
+////                for(int iDim = 0; iDim < m_nDimensions; iDim++) {
+////                    if(fabs(neighborOffset(iDim) - alreadyNeighborOffset(iDim)) > 1e-4) {
+////                        allMatch = false;
+////                    }
+////                }
+////                if(allMatch) {
+////                    foundNeighbor = true;
+////                }
 
-                foundNeighbor = true;
-//                cout << "break" << endl;
-                break;
-            }
-        }
-        if(foundNeighbor) {
-//            cout << "continue" << endl;
+//                foundNeighbor = true;
+////                cout << "break" << endl;
+//                break;
+//            }
+//        }
+//        if(foundNeighbor) {
+////            cout << "continue" << endl;
+//            continue;
+//        }
+        if(neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()) {
             continue;
         }
         for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
@@ -154,8 +158,9 @@ void MoleculeSystemCell::updateForces()
                 atom1->addForce(force);
             }
         }
-        neighbor->addAlreadyCalculatedNeighbor(this, -neighborOffset);
-        nCalculatedNeighbors++;
+//        neighbor->addAlreadyCalculatedNeighbor(this, -neighborOffset);
+//        nCalculatedNeighbors++;
+        m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = true;
     }
 //    cout << "nCalculatedNeighbors: " << nCalculatedNeighbors << endl;
 
@@ -188,13 +193,19 @@ void MoleculeSystemCell::clearMolecules()
 }
 
 
-void MoleculeSystemCell::addAlreadyCalculatedNeighbor(MoleculeSystemCell *neighbor, const rowvec& offset)
-{
-    m_alreadyCalculatedNeighbors.push_back(neighbor);
-    m_neighborWithAlreadyCalculatedForcesOffsets.push_back(offset);
-}
+//void MoleculeSystemCell::addAlreadyCalculatedNeighbor(MoleculeSystemCell *neighbor, const rowvec& offset)
+//{
+//    m_alreadyCalculatedNeighbors.push_back(neighbor);
+//    m_neighborWithAlreadyCalculatedForcesOffsets.push_back(offset);
+//}
 
 void MoleculeSystemCell::clearAlreadyCalculatedNeighbors()
 {
-    m_alreadyCalculatedNeighbors.clear();
+//    m_alreadyCalculatedNeighbors.clear();
+    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = false;
+}
+
+bool MoleculeSystemCell::hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
+{
+    return m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
 }

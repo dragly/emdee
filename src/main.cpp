@@ -19,8 +19,8 @@ int main(/*int argc, char** argv*/)
     generator.loadConfiguration(&config);
 
     // Generator specific config
-    int nCells = config.lookup("generator.nCells");
-    double b = config.lookup("generator.b");
+    int nCells = config.lookup("generator.fcc.nCells");
+    double b = config.lookup("generator.fcc.b");
     double bUnit = b / unitLength;
     double potentialConstant = config.lookup("system.potentialConstant");
     double potentialConstantUnit = potentialConstant / unitLength;
