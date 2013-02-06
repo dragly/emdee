@@ -5,7 +5,7 @@ Molecule::Molecule() :
     m_position(zeros<rowvec>(3)),
     m_velocity(zeros<rowvec>(3)),
     m_force(zeros<rowvec>(3)),
-    m_mass(1)
+    m_mass(0.0)
 {
 }
 
@@ -63,6 +63,7 @@ double Molecule::mass()
 void Molecule::addAtom(Atom *atom)
 {
     m_atoms.push_back(atom);
+    m_mass += atom->mass();
 }
 
 const vector<Atom *> Molecule::atoms() {

@@ -27,6 +27,7 @@ public:
     const mat &boundaries() const;
     void addMolecule(Molecule *molecule);
     const vector<Atom*>& atoms();
+    const vector<Molecule*>& molecules();
 
     void setIndices(const irowvec& indices);
     const irowvec& indices() const;
@@ -37,6 +38,8 @@ public:
 //    void addAlreadyCalculatedNeighbor(MoleculeSystemCell* neighbor, const rowvec &offset);
     void clearAlreadyCalculatedNeighbors();
     bool hasAlreadyCalculatedForcesBetweenSelfAndNeighbors();
+    void setID(int id);
+    int id();
 private:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
@@ -56,6 +59,8 @@ private:
     irowvec m_indices;
 
     MoleculeSystem* moleculeSystem;
+
+    int m_id;
 };
 
 #endif // MOLECULESYSTEMCELL_H

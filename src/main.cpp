@@ -21,11 +21,12 @@ int main(/*int argc, char** argv*/)
     // Generator specific config
     int nCells = config.lookup("generator.fcc.nCells");
     double b = config.lookup("generator.fcc.b");
+    double temperature = config.lookup("system.initialTemperature");
     double bUnit = b / unitLength;
     double potentialConstant = config.lookup("system.potentialConstant");
     double potentialConstantUnit = potentialConstant / unitLength;
     vector<Molecule*> molecules = generator.generateFcc(bUnit, nCells, AtomType::argon());
-    generator.boltzmannDistributeVelocities(molecules);
+    generator.boltzmannDistributeVelocities(temperature, molecules);
     MoleculeSystem system;
     system.loadConfiguration(&config);
     system.addMolecules(molecules);

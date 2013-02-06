@@ -9,7 +9,8 @@ MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     pow3nDimensions(pow(3, m_nDimensions)),
     m_indices(zeros<irowvec>(m_nDimensions)),
     moleculeSystem(parent),
-    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false)
+    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false),
+    m_id(0)
 {
     cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
 }
@@ -69,6 +70,11 @@ void MoleculeSystemCell::addMolecule(Molecule *molecule) {
 const vector<Atom *> &MoleculeSystemCell::atoms()
 {
     return m_atoms;
+}
+
+const vector<Molecule *> &MoleculeSystemCell::molecules()
+{
+    return m_molecules;
 }
 
 void MoleculeSystemCell::setIndices(const irowvec& indices)
@@ -208,4 +214,14 @@ void MoleculeSystemCell::clearAlreadyCalculatedNeighbors()
 bool MoleculeSystemCell::hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
 {
     return m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
+}
+
+void MoleculeSystemCell::setID(int id)
+{
+    m_id = id;
+}
+
+int MoleculeSystemCell::id()
+{
+    return m_id;
 }

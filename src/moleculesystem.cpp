@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/stat.h>
+#include <algorithm>
 //#include <hdf5.h>
 
 using namespace std;
@@ -62,16 +63,19 @@ bool MoleculeSystem::saveXyz(int step) {
 
     outFile << m_molecules.size() << endl;
     outFile << "Some nice comment" << endl;
-    for(Molecule* molecule : m_molecules) {
-        for(Atom* atom : molecule->atoms()) {
-            rowvec position = atom->position() * m_unitLength;
-            rowvec velocity = atom->velocity() * m_unitLength;
-            rowvec force = atom->force() * m_unitLength;
-            outFile << atom->type().abbreviation
-                    << " " << position(0) << " " << position(1) << " " << position(2)
-                    << " " << velocity(0) << " " << velocity(1) << " " << velocity(2)
-                    << " " << force(0) << " " << force(1) << " " << force(2)
-                    << endl;
+    for(MoleculeSystemCell* cell : m_cells) {
+        for(Molecule* molecule : cell->molecules()) {
+            for(Atom* atom : molecule->atoms()) {
+                rowvec position = atom->position() * m_unitLength;
+                rowvec velocity = atom->velocity() * m_unitLength;
+                rowvec force = atom->force() * m_unitLength;
+                outFile << atom->type().abbreviation
+                        << " " << position(0) << " " << position(1) << " " << position(2)
+                        << " " << velocity(0) << " " << velocity(1) << " " << velocity(2)
+                        << " " << force(0) << " " << force(1) << " " << force(2)
+                        << " " << cell->id()
+                        << endl;
+            }
         }
     }
     outFile.close();
@@ -224,8 +228,8 @@ void MoleculeSystem::simulate(int nSimulationSteps)
             m_atoms.push_back(atom);
         }
     }
-
     save(0);
+
     // Set up integrator
     integrator->initialize();
     for(int iStep = 1; iStep < nSimulationSteps; iStep++) {
@@ -306,8 +310,16 @@ void MoleculeSystem::setupCells(double minCutLength) {
     cout << "With geometry " << m_nCells << endl;
 
     irowvec indices = zeros<irowvec>(m_nDimensions);
+
+    vector<int> randomIDs;
+    for(int i = 0; i < nCellsTotal; i++) {
+        randomIDs.push_back(i);
+    }
+    random_shuffle(randomIDs.begin(), randomIDs.end());
+
     for(int i = 0; i < nCellsTotal; i++) {
         MoleculeSystemCell* cell = new MoleculeSystemCell(this);
+        cell->setID(randomIDs.at(i));
 
         mat cellBoundaries = m_boundaries;
 

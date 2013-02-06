@@ -34,7 +34,7 @@ AtomType::AtomType(AtomType::AtomTypeEnum atomTypeEnum)
         name = "Argon";
         abbreviation = "Ar";
         number = 18;
-        mass = -1;
+        mass = 1;
         break;
     default:
         name = "Unknown";

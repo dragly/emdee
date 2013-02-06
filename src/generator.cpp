@@ -15,6 +15,7 @@ Generator::Generator() :
 void Generator::loadConfiguration(Config *config)
 {
     m_unitLength = config->lookup("units.length");
+    m_boltzmannConstant = config->lookup("units.boltzmannConstant");
 }
 
 vector<Molecule*> Generator::generateFcc(double b, int nCells, AtomType atomType) {
@@ -62,9 +63,11 @@ vector<Molecule*> Generator::generateFcc(double b, int nCells, AtomType atomType
     return moleculeList;
 }
 
-void Generator::boltzmannDistributeVelocities(vector<Molecule*> molecules) {
+void Generator::boltzmannDistributeVelocities(double temperature, vector<Molecule*> molecules) {
+
     for(Molecule* molecule : molecules) {
-        rowvec velocity = 0.1 * randn<rowvec>(3); // / m_unitLength;
+        rowvec velocity = randn<rowvec>(3);
+        velocity *= sqrt(m_boltzmannConstant * temperature / molecule->mass());
         molecule->setVelocity(velocity);
     }
     cout << "Boltzmann distributed velocities for " << molecules.size() << " molecules!" << endl;
@@ -78,4 +81,8 @@ void Generator::setUnitLength(double unitLength)
 const mat &Generator::lastBoundaries() const
 {
     return m_lastBoundaries;
+}
+
+void Generator::setBoltzmannConstant(double boltzmannConstant) {
+    m_boltzmannConstant = boltzmannConstant;
 }
