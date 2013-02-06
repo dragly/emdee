@@ -61,6 +61,7 @@ private:
     MoleculeSystem* moleculeSystem;
 
     int m_id;
+    rowvec force;
 };
 
 #endif // MOLECULESYSTEMCELL_H

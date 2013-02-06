@@ -6,6 +6,7 @@ class Atom;
 class Molecule;
 class Integrator;
 class MoleculeSystemCell;
+class InteratomicForce;
 
 // System includes
 #include <iostream>
@@ -53,6 +54,7 @@ public:
 
     void setUnitLength(double unitLength);
     void setPotentialConstant(double potentialConstant);
+    InteratomicForce* interatomicForce();
 private:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
@@ -81,6 +83,8 @@ private:
     double m_unitLength;
 
     Config *m_config;
+
+    InteratomicForce *m_interatomicForce;
 };
 
 #endif // MOLECULESYSTEM_H

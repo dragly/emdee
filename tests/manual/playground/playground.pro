@@ -26,7 +26,8 @@ SOURCES += tst_playgroundtest.cpp \
     ../../../src/generator.cpp \
     ../../../src/atomtype.cpp \
     ../../../src/atom.cpp \
-    ../../../src/moleculesystemcell.cpp
+    ../../../src/moleculesystemcell.cpp \
+    ../../../src/interatomicforce.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
@@ -37,4 +38,5 @@ HEADERS += \
     ../../../src/generator.h \
     ../../../src/atomtype.h \
     ../../../src/atom.h \
-    ../../../src/moleculesystemcell.h
+    ../../../src/moleculesystemcell.h \
+    ../../../src/interatomicforce.h

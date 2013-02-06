@@ -3,6 +3,7 @@
 #include "molecule.h"
 #include "integrator.h"
 #include "moleculesystemcell.h"
+#include "interatomicforce.h"
 
 #include <fstream>
 #include <iomanip>
@@ -24,6 +25,7 @@ MoleculeSystem::MoleculeSystem() :
     integrator = new Integrator(this);
     m_cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
     m_boundaries = zeros(2,m_nDimensions);
+    m_interatomicForce = new InteratomicForce(this);
 }
 
 void MoleculeSystem::loadConfiguration(Config *config)
@@ -429,6 +431,11 @@ void MoleculeSystem::setUnitLength(double unitLength)
 void MoleculeSystem::setPotentialConstant(double potentialConstant)
 {
     m_potentialConstant = potentialConstant; // / m_unitLength;
+}
+
+InteratomicForce *MoleculeSystem::interatomicForce()
+{
+    return m_interatomicForce;
 }
 
 double MoleculeSystem::potentialConstant()

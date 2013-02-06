@@ -3,6 +3,7 @@
 
 #include "moleculesystemcell.h"
 #include "moleculesystem.h"
+#include "interatomicforce.h"
 
 MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     m_nDimensions(3),
@@ -91,11 +92,9 @@ const irowvec &MoleculeSystemCell::indices() const
 void MoleculeSystemCell::updateForces()
 {
     //    double kB = boltzmannConstant;
-    double eps = 1;
     double sigma = moleculeSystem->potentialConstant();
     Atom* atom1;
     Atom* atom2;
-    rowvec rVec;
     //    rowvec otherPosition;
     //    rowvec shortestVec;
     //    rowvec cellShiftVector;
@@ -104,7 +103,6 @@ void MoleculeSystemCell::updateForces()
     double rSquared;
     double sigmaSquaredOverRSquared;
     double factor;
-    rowvec force;
     //    cout << "Updating forces..." << endl;
     //    int nCalculations = 0;
     //    cout << "m_molecules.size()" << endl;
@@ -149,17 +147,7 @@ void MoleculeSystemCell::updateForces()
             atom1 = m_atoms.at(iAtom);
             for(uint jAtom = 0; jAtom < neighbor->atoms().size(); jAtom++) {
                 atom2 = neighbor->atoms().at(jAtom);
-//                    if(atom1 == atom2/* && neighbor == this && neighborOffset.max() == 0*/) {
-//                        continue;
-//                    }
-                rVec = atom2->position() + neighborOffset - atom1->position();
-                // Check distances to the nearby cells
-                rSquared = dot(rVec, rVec);
-                sigmaSquaredOverRSquared = sigma*sigma/rSquared;
-                // TODO Verify force term
-                factor = - ((24 * eps) / (rSquared)) * (2 * pow((sigmaSquaredOverRSquared), 6) - pow((sigmaSquaredOverRSquared), 3));
-
-                force = factor * rVec;
+                force = moleculeSystem->interatomicForce()->force(atom1, atom2, neighborOffset);
                 atom2->addForce(-force);
                 atom1->addForce(force);
             }
@@ -176,14 +164,7 @@ void MoleculeSystemCell::updateForces()
         // Loop over all neighbors (including ourselves)
         for(uint jAtom = iAtom + 1; jAtom < m_atoms.size(); jAtom++) {
             atom2 = m_atoms.at(jAtom);
-            rVec = atom2->position() - atom1->position();
-            // Check distances to the nearby cells
-            rSquared = dot(rVec, rVec);
-            sigmaSquaredOverRSquared = sigma*sigma/rSquared;
-            // TODO Verify force term
-            factor = - ((24 * eps) / (rSquared)) * (2 * pow((sigmaSquaredOverRSquared), 6) - pow((sigmaSquaredOverRSquared), 3));
-
-            force = factor * rVec;
+            force = moleculeSystem->interatomicForce()->force(atom1, atom2);
             atom2->addForce(-force);
             atom1->addForce(force);
         }
