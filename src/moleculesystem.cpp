@@ -148,61 +148,61 @@ const vector<Molecule *> &MoleculeSystem::molecules() const
 
 void MoleculeSystem::updateForces()
 {
-    //    for(Molecule* molecule : m_molecules) {
-    //        molecule->clearForces();
-    //    }
-    //    //    double kB = boltzmannConstant;
-    //    double eps = m_potentialConstant;
-    //    double sigma = 4.5;
-    //    Atom* atom1;
-    //    Atom* atom2;
-    //    rowvec rVec;
-    //    rowvec otherPosition;
-    //    rowvec shortestVec;
-    //    rowvec cellShiftVector;
-    //    rowvec cellShiftVectorInUse;
-    //    double shortestVecSquaredLength;
-    //    double r;
-    //    double sigmar;
-    //    double factor;
-    //    rowvec force;
-    //    cout << "Updating forces..." << endl;
-    //    int nCalculations = 0;
-    //    for(uint i = 0; i < m_atoms.size(); i++) {
-    //        for(uint j = 0; j < m_atoms.size(); j++) {
-    //            atom1 = m_atoms.at(i);
-    //            atom2 = m_atoms.at(j);
-    //            if(atom1 == atom2) {
-    //                continue;
-    //            }
-    ////            rVec = atom2->absolutePosition() - atom1->absolutePosition();
-    //            // Minimum image convention
-    ////            shortestVecSquaredLength = INFINITY;
-    //            for(uint iShiftVec = 0; iShiftVec < m_cellShiftVectors.n_rows; iShiftVec++) {
-    //                cellShiftVector = m_cellShiftVectors.row(iShiftVec);
-    //                otherPosition = atom2->absolutePosition() + cellShiftVector;
-    //                rVec = otherPosition - atom1->absolutePosition();
-    ////                double rVecSquaredLength = dot(rVec, rVec);
-    ////                if(rVecSquaredLength < shortestVecSquaredLength) {
-    ////                    shortestVecSquaredLength = rVecSquaredLength;
-    ////                    shortestVec = rVec;
-    ////                    cellShiftVectorInUse = cellShiftVector;
-    ////                }
-    //                // Check distances to the nearby cells
-    //                r = norm(rVec, 2);
-    //                sigmar = sigma/r;
-    //                // TODO Verify force term
-    //                factor = - ((24 * eps) / (r*r)) * (2 * pow((sigmar), 12) - pow((sigmar), 6));
+//        for(Molecule* molecule : m_molecules) {
+//            molecule->clearForces();
+//        }
+//        //    double kB = boltzmannConstant;
+//        double eps = m_potentialConstant;
+//        double sigma = 4.5;
+//        Atom* atom1;
+//        Atom* atom2;
+//        rowvec rVec;
+//        rowvec otherPosition;
+//        rowvec shortestVec;
+//        rowvec cellShiftVector;
+//        rowvec cellShiftVectorInUse;
+//        double shortestVecSquaredLength;
+//        double r;
+//        double sigmar;
+//        double factor;
+//        rowvec force;
+//        cout << "Updating forces..." << endl;
+//        int nCalculations = 0;
+//        for(uint i = 0; i < m_atoms.size(); i++) {
+//            for(uint j = 0; j < m_atoms.size(); j++) {
+//                atom1 = m_atoms.at(i);
+//                atom2 = m_atoms.at(j);
+//                if(atom1 == atom2) {
+//                    continue;
+//                }
+//    //            rVec = atom2->absolutePosition() - atom1->absolutePosition();
+//                // Minimum image convention
+//                shortestVecSquaredLength = INFINITY;
+//                for(uint iShiftVec = 0; iShiftVec < m_cellShiftVectors.n_rows; iShiftVec++) {
+//                    cellShiftVector = m_cellShiftVectors.row(iShiftVec);
+//                    otherPosition = atom2->absolutePosition() + cellShiftVector;
+//                    rVec = otherPosition - atom1->absolutePosition();
+//                    double rVecSquaredLength = dot(rVec, rVec);
+//                    if(rVecSquaredLength < shortestVecSquaredLength) {
+//                        shortestVecSquaredLength = rVecSquaredLength;
+//                        shortestVec = rVec;
+//                        cellShiftVectorInUse = cellShiftVector;
+//                    }
+//                }
+//                // Check distances to the nearby cells
+//                r = norm(shortestVec, 2);
+//                sigmar = sigma/r;
+//                // TODO Verify force term
+//                factor = - ((24 * eps) / (r*r)) * (2 * pow((sigmar), 12) - pow((sigmar), 6));
 
-    //                force = factor * rVec;
-    //                atom1->addForce(force);
-    ////                atom2->addForce(-force);
-    //                nCalculations++;
-    //            }
-    //        }
-    //    }
-    //    cout << "nCalculations" << endl;
-    //    cout << nCalculations << endl;
+//                force = factor * rVec;
+//                atom1->addForce(force);
+////                atom2->addForce(-force);
+//                nCalculations++;
+//            }
+//        }
+//        cout << "nCalculations" << endl;
+//        cout << nCalculations << endl;
 
     for(Molecule* molecule : m_molecules) {
         molecule->clearForces();
