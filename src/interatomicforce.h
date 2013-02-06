@@ -18,19 +18,20 @@ using namespace libconfig;
 class InteratomicForce
 {
 public:
-    InteratomicForce(MoleculeSystem *parent);
+    InteratomicForce();
 
-    void loadConfiguration(Config* config);
+//    void loadConfiguration(Config* config);
 
     const rowvec force(Atom *atom1, Atom *atom2);
     const rowvec force(Atom* atom1, Atom* atom2, const rowvec &atom2Offset);
+
+    void setPotentialConstant(double potentialConstant);
+
 private:
     rowvec tmpForce;
     rowvec zeroVector;
 
     double m_potentialConstant;
-
-    MoleculeSystem* moleculeSystem;
     rowvec rVec;
 };
 

@@ -4,6 +4,7 @@
 #
 #-------------------------------------------------
 
+include(../../../molecular-dynamics.pri)
 QT       += testlib
 
 QT       -= gui
@@ -14,6 +15,17 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
+INCLUDEPATH += ../../../src
 
-SOURCES += tst_forcestest.cpp
+SOURCES += tst_forcestest.cpp \
+    ../../../src/interatomicforce.cpp \
+    ../../../src/atomtype.cpp \
+    ../../../src/atom.cpp \
+    ../../../src/molecule.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
+
+HEADERS += \
+    ../../../src/interatomicforce.h \
+    ../../../src/atomtype.h \
+    ../../../src/atom.h \
+    ../../../src/molecule.h

@@ -1,5 +1,6 @@
 #include "moleculesystem.h"
 #include "generator.h"
+#include "interatomicforce.h"
 
 #include <iostream>
 #include <libconfig.h++>
@@ -27,7 +28,11 @@ int main(/*int argc, char** argv*/)
     double potentialConstantUnit = potentialConstant / unitLength;
     vector<Molecule*> molecules = generator.generateFcc(bUnit, nCells, AtomType::argon());
     generator.boltzmannDistributeVelocities(temperature, molecules);
-    MoleculeSystem system;
+    // Set up force
+    InteratomicForce* force = new InteratomicForce();
+    force->setPotentialConstant(potentialConstantUnit);
+    // Set up molecule system
+    MoleculeSystem system(force);
     system.loadConfiguration(&config);
     system.addMolecules(molecules);
     cout << "addded" << endl;

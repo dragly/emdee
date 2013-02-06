@@ -44,24 +44,24 @@ void PlaygroundTest::cleanupTestCase()
 
 void PlaygroundTest::testCase1()
 {
-    MoleculeSystem* system = new MoleculeSystem();
-    mat test = zeros(2,3);
-    test(1,0) = 10;
-    test(1,1) = 10;
-    test(1,2) = 10;
-    system->setBoundaries(test);
+//    MoleculeSystem* system = new MoleculeSystem();
+//    mat test = zeros(2,3);
+//    test(1,0) = 10;
+//    test(1,1) = 10;
+//    test(1,2) = 10;
+//    system->setBoundaries(test);
 }
 
 void PlaygroundTest::setupCells() {
-    int nCells = 5;
-    double b = 5.620;
-    Generator generator;
-    vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
-    generator.boltzmannDistributeVelocities(100, molecules);
-    MoleculeSystem system;
-    system.addMolecules(molecules);
-    system.setBoundaries(0, b*nCells);
-    system.setupCells(4);
+//    int nCells = 5;
+//    double b = 5.620;
+//    Generator generator;
+//    vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
+//    generator.boltzmannDistributeVelocities(100, molecules);
+//    MoleculeSystem system;
+//    system.addMolecules(molecules);
+//    system.setBoundaries(0, b*nCells);
+//    system.setupCells(4);
 }
 
 //void PlaygroundTest::benchmarkMod() {
