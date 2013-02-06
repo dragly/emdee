@@ -14,7 +14,8 @@ SOURCES += main.cpp \
     atomtype.cpp \
     molecule.cpp \
     integrator.cpp \
-    moleculesystemcell.cpp
+    moleculesystemcell.cpp \
+    interatomicforce.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -23,7 +24,8 @@ HEADERS += \
     atomtype.h \
     molecule.h \
     integrator.h \
-    moleculesystemcell.h
+    moleculesystemcell.h \
+    interatomicforce.h
 
 # Building
 myscript.target = myscript
