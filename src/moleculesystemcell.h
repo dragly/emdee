@@ -39,7 +39,7 @@ public:
 private:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
-    vector<MoleculeSystemCell*> m_neighborWithAlreadyCalculatedForces;
+    vector<MoleculeSystemCell*> m_alreadyCalculatedNeighbors;
     vector<rowvec> m_neighborOffsets;
     vector<rowvec> m_neighborWithAlreadyCalculatedForcesOffsets;
 

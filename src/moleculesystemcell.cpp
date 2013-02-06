@@ -83,9 +83,6 @@ const irowvec &MoleculeSystemCell::indices() const
 
 void MoleculeSystemCell::updateForces()
 {
-    for(Molecule* molecule : m_molecules) {
-        molecule->clearForces();
-    }
     //    double kB = boltzmannConstant;
     double eps = 1;
     double sigma = moleculeSystem->potentialConstant();
@@ -107,14 +104,16 @@ void MoleculeSystemCell::updateForces()
     //    cout << m_molecules.size() << endl;
     //    cout << "m_neighborCells.size()" << endl;
     //    cout << m_neighborCells.size() << endl;
+//    cout << "I am " << indices() << endl;
+    int nCalculatedNeighbors = 0;
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
-//        cout << "iNeighbor: " << iNeighbor << endl;
         MoleculeSystemCell* neighbor = m_neighborCells.at(iNeighbor);
+//        cout << "neighbor: " << neighbor->indices() << endl;
         rowvec& neighborOffset = m_neighborOffsets.at(iNeighbor);
         bool foundNeighbor = false;
-        for(int iAlreadyNeighbor = 0; iAlreadyNeighbor < m_neighborWithAlreadyCalculatedForces.size(); iAlreadyNeighbor++) {
-//            cout << "iAlreadyNeighbor: " << iAlreadyNeighbor << endl;
-            MoleculeSystemCell* alreadyNeighbor = m_neighborWithAlreadyCalculatedForces.at(iAlreadyNeighbor);
+        for(int iAlreadyNeighbor = 0; iAlreadyNeighbor < m_alreadyCalculatedNeighbors.size(); iAlreadyNeighbor++) {
+            MoleculeSystemCell* alreadyNeighbor = m_alreadyCalculatedNeighbors.at(iAlreadyNeighbor);
+//            cout << "alreadyNeighbor: " << alreadyNeighbor->indices() << endl;
             rowvec& alreadyNeighborOffset = m_neighborWithAlreadyCalculatedForcesOffsets.at(iAlreadyNeighbor);
             if(alreadyNeighbor == neighbor) {
 //                bool allMatch = true;
@@ -127,12 +126,13 @@ void MoleculeSystemCell::updateForces()
 //                    foundNeighbor = true;
 //                }
 
-//                cout << "continue" << endl;
                 foundNeighbor = true;
+//                cout << "break" << endl;
                 break;
             }
         }
         if(foundNeighbor) {
+//            cout << "continue" << endl;
             continue;
         }
         for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
@@ -150,13 +150,14 @@ void MoleculeSystemCell::updateForces()
                 factor = - ((24 * eps) / (rSquared)) * (2 * pow((sigmaSquaredOverRSquared), 6) - pow((sigmaSquaredOverRSquared), 3));
 
                 force = factor * rVec;
-
+                atom2->addForce(-force);
                 atom1->addForce(force);
-                atom2->addForce(-1 * force);
             }
         }
         neighbor->addAlreadyCalculatedNeighbor(this, -neighborOffset);
+        nCalculatedNeighbors++;
     }
+//    cout << "nCalculatedNeighbors: " << nCalculatedNeighbors << endl;
 
     // Loop over own atoms
     for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
@@ -189,11 +190,11 @@ void MoleculeSystemCell::clearMolecules()
 
 void MoleculeSystemCell::addAlreadyCalculatedNeighbor(MoleculeSystemCell *neighbor, const rowvec& offset)
 {
-    m_neighborWithAlreadyCalculatedForces.push_back(neighbor);
+    m_alreadyCalculatedNeighbors.push_back(neighbor);
     m_neighborWithAlreadyCalculatedForcesOffsets.push_back(offset);
 }
 
 void MoleculeSystemCell::clearAlreadyCalculatedNeighbors()
 {
-    m_neighborWithAlreadyCalculatedForces.clear();
+    m_alreadyCalculatedNeighbors.clear();
 }

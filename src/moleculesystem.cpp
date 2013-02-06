@@ -198,6 +198,11 @@ void MoleculeSystem::updateForces()
     //    cout << "nCalculations" << endl;
     //    cout << nCalculations << endl;
 
+    for(Molecule* molecule : m_molecules) {
+        molecule->clearForces();
+    }
+
+
     refreshCellContents();
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearAlreadyCalculatedNeighbors();
