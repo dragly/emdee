@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-include(../../../molecular-dynamics.pri)
+include(../../tests.pri)
+
 QT       += testlib
 
 QT       -= gui

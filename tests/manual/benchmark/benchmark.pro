@@ -1,42 +1,40 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2013-01-27T11:53:14
+# Project created by QtCreator 2013-02-07T09:31:13
 #
 #-------------------------------------------------
 
 include(../../tests.pri)
 
-
 QT       += testlib
 
 QT       -= gui
 
-TARGET = tst_playgroundtest
+TARGET = tst_benchmarktest
 CONFIG   += console
 CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-INCLUDEPATH += $$SRC_DIR
+DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-SOURCES += tst_playgroundtest.cpp \
+
+SOURCES += tst_benchmarktest.cpp \
+    ../../../src/moleculesystemcell.cpp \
     ../../../src/moleculesystem.cpp \
     ../../../src/molecule.cpp \
+    ../../../src/interatomicforce.cpp \
     ../../../src/integrator.cpp \
     ../../../src/generator.cpp \
     ../../../src/atomtype.cpp \
-    ../../../src/atom.cpp \
-    ../../../src/moleculesystemcell.cpp \
-    ../../../src/interatomicforce.cpp
-
-DEFINES += SRCDIR=\\\"$$PWD/\\\"
+    ../../../src/atom.cpp
 
 HEADERS += \
+    ../../../src/moleculesystemcell.h \
     ../../../src/moleculesystem.h \
     ../../../src/molecule.h \
+    ../../../src/interatomicforce.h \
     ../../../src/integrator.h \
     ../../../src/generator.h \
     ../../../src/atomtype.h \
-    ../../../src/atom.h \
-    ../../../src/moleculesystemcell.h \
-    ../../../src/interatomicforce.h
+    ../../../src/atom.h
