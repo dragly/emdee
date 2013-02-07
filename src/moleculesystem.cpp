@@ -71,12 +71,12 @@ bool MoleculeSystem::saveXyz(int step) {
                 rowvec position = atom->position() * m_unitLength;
                 rowvec velocity = atom->velocity() * m_unitLength;
                 rowvec force = atom->force() * m_unitLength;
-                outFile << endl
-                        << atom->type().abbreviation
+                outFile << atom->type().abbreviation
                         << " " << position(0) << " " << position(1) << " " << position(2)
                         << " " << velocity(0) << " " << velocity(1) << " " << velocity(2)
                         << " " << force(0) << " " << force(1) << " " << force(2)
-                        << " " << cell->id();
+                        << " " << cell->id()
+                        << endl;
             }
         }
     }

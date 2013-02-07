@@ -15,7 +15,7 @@ int main(/*int argc, char** argv*/)
     config.readFile("testconfig.cfg");
 
     double unitLength = config.lookup("units.length");
-    double unitTime = config.lookup("units.time");
+//    double unitTime = config.lookup("units.time");
     double unitTemperature = config.lookup("units.temperature");
 
     int nSimulationSteps = config.lookup("simulation.nSimulationSteps");

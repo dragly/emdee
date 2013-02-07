@@ -46,6 +46,8 @@ private:
 //    vector<MoleculeSystemCell*> m_alreadyCalculatedNeighbors;
     vector<rowvec> m_neighborOffsets;
 //    vector<rowvec> m_neighborWithAlreadyCalculatedForcesOffsets;
+
+    MoleculeSystem* moleculeSystem;
     bool m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
 
     mat m_boundaries;
@@ -57,8 +59,6 @@ private:
     vector<Atom*> m_atoms;
 
     irowvec m_indices;
-
-    MoleculeSystem* moleculeSystem;
 
     int m_id;
     rowvec force;

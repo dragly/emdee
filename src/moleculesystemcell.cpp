@@ -92,7 +92,7 @@ const irowvec &MoleculeSystemCell::indices() const
 void MoleculeSystemCell::updateForces()
 {
     //    double kB = boltzmannConstant;
-    double sigma = moleculeSystem->potentialConstant();
+//    double sigma = moleculeSystem->potentialConstant();
     Atom* atom1;
     Atom* atom2;
     //    rowvec otherPosition;
@@ -100,9 +100,9 @@ void MoleculeSystemCell::updateForces()
     //    rowvec cellShiftVector;
     //    rowvec cellShiftVectorInUse;
     //    double shortestVecSquaredLength;
-    double rSquared;
-    double sigmaSquaredOverRSquared;
-    double factor;
+//    double rSquared;
+//    double sigmaSquaredOverRSquared;
+//    double factor;
     //    cout << "Updating forces..." << endl;
     //    int nCalculations = 0;
     //    cout << "m_molecules.size()" << endl;
@@ -110,7 +110,7 @@ void MoleculeSystemCell::updateForces()
     //    cout << "m_neighborCells.size()" << endl;
     //    cout << m_neighborCells.size() << endl;
 //    cout << "I am " << indices() << endl;
-    int nCalculatedNeighbors = 0;
+//    int nCalculatedNeighbors = 0;
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
         MoleculeSystemCell* neighbor = m_neighborCells.at(iNeighbor);
 //        cout << "neighbor: " << neighbor->indices() << endl;
