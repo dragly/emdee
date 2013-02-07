@@ -21,6 +21,7 @@ using namespace libconfig;
 class MoleculeSystem
 {
 public:
+    MoleculeSystem();
     MoleculeSystem(InteratomicForce *interatomicForce);
 
     enum FileFormat {

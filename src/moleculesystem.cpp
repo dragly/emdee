@@ -13,6 +13,21 @@
 
 using namespace std;
 
+MoleculeSystem::MoleculeSystem() :
+    m_boltzmannConstant(1.0),
+    m_potentialConstant(1.0),
+    m_nDimensions(3),
+    outFileName("out/myfile*.xyz"),
+    outFileFormat(XyzFormat),
+    pow3nDimensions(pow(3, m_nDimensions)),
+    m_unitLength(1)
+{
+    m_interatomicForce = new InteratomicForce();
+    integrator = new Integrator(this);
+    m_cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
+    m_boundaries = zeros(2,m_nDimensions);
+}
+
 MoleculeSystem::MoleculeSystem(InteratomicForce* interatomicForce) :
     m_boltzmannConstant(2.5),
     m_potentialConstant(0.1),
