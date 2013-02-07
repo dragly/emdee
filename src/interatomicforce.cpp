@@ -23,8 +23,10 @@ const rowvec InteratomicForce::force(Atom *atom1, Atom *atom2, const rowvec& ato
     // Check distances to the nearby cells
     rSquared = dot(rVec, rVec);
     sigmaSquaredOverRSquared = sigma*sigma/rSquared;
+    double sigmaOverR6 = sigmaSquaredOverRSquared * sigmaSquaredOverRSquared * sigmaSquaredOverRSquared;
+    double sigmaOverR12 = sigmaOverR6 * sigmaOverR6;
     // TODO Verify force term
-    double factor = - ((24 * eps) / (rSquared)) * (2 * pow((sigmaSquaredOverRSquared), 6) - pow((sigmaSquaredOverRSquared), 3));
+    double factor = - ((24 * eps) / (rSquared)) * (2 * sigmaOverR12 - sigmaOverR6);
 
     tmpForce = factor * rVec;
     return tmpForce;
