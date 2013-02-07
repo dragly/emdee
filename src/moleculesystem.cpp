@@ -64,19 +64,19 @@ bool MoleculeSystem::saveXyz(int step) {
 //    cout << "Saving xyz data to " << outFileNameLocal  << endl;
 
     outFile << m_molecules.size() << endl;
-    outFile << "Some nice comment" << endl;
+    outFile << "Some nice comment";
     for(MoleculeSystemCell* cell : m_cells) {
         for(Molecule* molecule : cell->molecules()) {
             for(Atom* atom : molecule->atoms()) {
                 rowvec position = atom->position() * m_unitLength;
                 rowvec velocity = atom->velocity() * m_unitLength;
                 rowvec force = atom->force() * m_unitLength;
-                outFile << atom->type().abbreviation
+                outFile << endl
+                        << atom->type().abbreviation
                         << " " << position(0) << " " << position(1) << " " << position(2)
                         << " " << velocity(0) << " " << velocity(1) << " " << velocity(2)
                         << " " << force(0) << " " << force(1) << " " << force(2)
-                        << " " << cell->id()
-                        << endl;
+                        << " " << cell->id();
             }
         }
     }
