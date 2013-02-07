@@ -23,22 +23,7 @@ MoleculeSystem::MoleculeSystem() :
     m_unitLength(1)
 {
     m_interatomicForce = new InteratomicForce();
-    integrator = new Integrator(this);
-    m_cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
-    m_boundaries = zeros(2,m_nDimensions);
-}
-
-MoleculeSystem::MoleculeSystem(InteratomicForce* interatomicForce) :
-    m_boltzmannConstant(2.5),
-    m_potentialConstant(0.1),
-    m_nDimensions(3),
-    outFileName("out/myfile*.xyz"),
-    outFileFormat(XyzFormat),
-    pow3nDimensions(pow(3, m_nDimensions)),
-    m_unitLength(1),
-    m_interatomicForce(interatomicForce)
-{
-    integrator = new Integrator(this);
+    m_integrator = new Integrator(this);
     m_cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
     m_boundaries = zeros(2,m_nDimensions);
 }
@@ -76,7 +61,7 @@ bool MoleculeSystem::saveXyz(int step) {
     } else {
         outFile.open(outFileNameLocal, ios_base::app);
     }
-    cout << "Saving xyz data to " << outFileNameLocal  << endl;
+//    cout << "Saving xyz data to " << outFileNameLocal  << endl;
 
     outFile << m_molecules.size() << endl;
     outFile << "Some nice comment" << endl;
@@ -248,10 +233,11 @@ void MoleculeSystem::simulate(int nSimulationSteps)
     save(0);
 
     // Set up integrator
-    integrator->initialize();
+    m_integrator->initialize();
+    cout << "Starting simulation " << endl;
     for(int iStep = 1; iStep < nSimulationSteps; iStep++) {
-        cout << "Simulation step " << iStep << endl;
-        integrator->stepForward();
+        cout << iStep << ".." << endl;
+        m_integrator->stepForward();
         //        cout << "Integrator done" << endl;
         // Boundary conditions
         for(Molecule* molecule : m_molecules) {
@@ -446,6 +432,16 @@ void MoleculeSystem::setUnitLength(double unitLength)
 void MoleculeSystem::setPotentialConstant(double potentialConstant)
 {
     m_potentialConstant = potentialConstant; // / m_unitLength;
+}
+
+void MoleculeSystem::setIntegrator(Integrator *integrator)
+{
+    m_integrator = integrator;
+}
+
+void MoleculeSystem::setInteratomicForce(InteratomicForce *force)
+{
+    m_interatomicForce = force;
 }
 
 InteratomicForce *MoleculeSystem::interatomicForce()

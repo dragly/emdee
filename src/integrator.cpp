@@ -5,7 +5,7 @@
 
 Integrator::Integrator(MoleculeSystem *moleculeSystem) :
     m_moleculeSystem(moleculeSystem),
-    dt(0.001)
+    m_timeStep(0.01)
 {
 }
 
@@ -13,7 +13,13 @@ void Integrator::initialize() {
     m_moleculeSystem->updateForces();
 }
 
+void Integrator::setTimeStep(double timeStep)
+{
+    m_timeStep = timeStep;
+}
+
 void Integrator::stepForward() {
+    double dt = m_timeStep;
     for(uint i = 0; i < m_moleculeSystem->molecules().size(); i++) {
         Molecule *molecule = m_moleculeSystem->molecules().at(i);
         rowvec velocity = molecule->velocity();

@@ -21,7 +21,6 @@ void Generator::loadConfiguration(Config *config)
 vector<Molecule*> Generator::generateFcc(double b, int nCells, AtomType atomType) {
     vector<Molecule*> moleculeList;
     rowvec offset = zeros<rowvec>(3);
-    double bUnit = b; // / m_unitLength;
     for(int i = 0; i < nCells; i++) {
         for(int j = 0; j < nCells; j++) {
             for(int k = 0; k < nCells; k++) {
@@ -34,13 +33,13 @@ vector<Molecule*> Generator::generateFcc(double b, int nCells, AtomType atomType
                     case 0:
                         break;
                     case 1:
-                        face << bUnit / 2 << bUnit / 2 <<  0;
+                        face << b / 2 << b / 2 <<  0;
                         break;
                     case 2:
-                        face << bUnit / 2 << 0 << bUnit / 2;
+                        face << b / 2 << 0 << b / 2;
                         break;
                     case 3:
-                        face << 0 << bUnit / 2 << bUnit / 2;
+                        face << 0 << b / 2 << b / 2;
                         break;
                     }
                     rowvec position = zeros<rowvec>(3);
@@ -48,16 +47,16 @@ vector<Molecule*> Generator::generateFcc(double b, int nCells, AtomType atomType
                     molecule->setPosition(position);
                     moleculeList.push_back(molecule);
                 }
-                offset(2) += bUnit;
+                offset(2) += b;
             }
-            offset(1) += bUnit;
+            offset(1) += b;
             offset(2) = 0;
         }
-        offset(0) += bUnit;
+        offset(0) += b;
         offset(1) = 0;
     }
     m_lastBoundaries << 0 << 0 << 0 << endr
-                        << nCells * bUnit << nCells * bUnit << nCells * bUnit;
+                        << nCells * b << nCells * b << nCells * b;
 
     cout << "Generated " << moleculeList.size() << " molecules in FCC structure!" << endl;
     return moleculeList;

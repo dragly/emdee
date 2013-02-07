@@ -14,10 +14,11 @@ public:
 
     void stepForward();
     void initialize();
+    void setTimeStep(double timeStep);
 private:
     MoleculeSystem *m_moleculeSystem;
 
-    double dt;
+    double m_timeStep;
 };
 
 #endif // INTEGRATOR_H

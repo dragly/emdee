@@ -1,6 +1,7 @@
 #include "moleculesystem.h"
 #include "generator.h"
 #include "interatomicforce.h"
+#include "integrator.h"
 
 #include <iostream>
 #include <libconfig.h++>
@@ -14,8 +15,11 @@ int main(/*int argc, char** argv*/)
     config.readFile("testconfig.cfg");
 
     double unitLength = config.lookup("units.length");
+    double unitTime = config.lookup("units.time");
+    double unitTemperature = config.lookup("units.temperature");
 
     int nSimulationSteps = config.lookup("simulation.nSimulationSteps");
+    double timeStep = config.lookup("integrator.timeStep");
     Generator generator;
     generator.loadConfiguration(&config);
 
@@ -23,17 +27,22 @@ int main(/*int argc, char** argv*/)
     int nCells = config.lookup("generator.fcc.nCells");
     double b = config.lookup("generator.fcc.b");
     double temperature = config.lookup("system.initialTemperature");
-    double bUnit = b / unitLength;
+    temperature /= unitTemperature;
+    b /= unitLength;
     double potentialConstant = config.lookup("system.potentialConstant");
-    double potentialConstantUnit = potentialConstant / unitLength;
-    vector<Molecule*> molecules = generator.generateFcc(bUnit, nCells, AtomType::argon());
+    potentialConstant /= unitLength;
+    vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
     generator.boltzmannDistributeVelocities(temperature, molecules);
     // Set up force
     InteratomicForce* force = new InteratomicForce();
-    force->setPotentialConstant(potentialConstantUnit);
+    force->setPotentialConstant(potentialConstant);
     // Set up molecule system
-    MoleculeSystem system(force);
-    system.loadConfiguration(&config);
+    MoleculeSystem system;
+    system.setInteratomicForce(force);
+    Integrator* integrator = new Integrator(&system);
+    integrator->setTimeStep(timeStep);
+    system.setIntegrator(integrator);
+    system.loadConfiguration(&config); // TODO remove this
     system.addMolecules(molecules);
     cout << "addded" << endl;
     system.setBoundaries(generator.lastBoundaries());

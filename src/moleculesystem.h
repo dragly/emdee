@@ -22,7 +22,6 @@ class MoleculeSystem
 {
 public:
     MoleculeSystem();
-    MoleculeSystem(InteratomicForce *interatomicForce);
 
     enum FileFormat {
         XyzFormat,
@@ -55,12 +54,14 @@ public:
 
     void setUnitLength(double unitLength);
     void setPotentialConstant(double potentialConstant);
+    void setIntegrator(Integrator *integrator);
+    void setInteratomicForce(InteratomicForce* force);
     InteratomicForce* interatomicForce();
 private:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
 //    int nSimulationSteps;
-    Integrator *integrator;
+    Integrator *m_integrator;
 
     double m_boltzmannConstant;
     double m_potentialConstant;
