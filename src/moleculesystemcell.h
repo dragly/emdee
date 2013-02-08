@@ -40,25 +40,25 @@ public:
     bool hasAlreadyCalculatedForcesBetweenSelfAndNeighbors();
     void setID(int id);
     int id();
-private:
+protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
 //    vector<MoleculeSystemCell*> m_alreadyCalculatedNeighbors;
     vector<rowvec> m_neighborOffsets;
 //    vector<rowvec> m_neighborWithAlreadyCalculatedForcesOffsets;
 
+    int m_nDimensions;
+    int pow3nDimensions;
+    irowvec m_indices;
     MoleculeSystem* moleculeSystem;
     bool m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
 
     mat m_boundaries;
-    int m_nDimensions;
-    int pow3nDimensions;
     mat cellShiftVectors;
 
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
 
-    irowvec m_indices;
 
     int m_id;
     rowvec force;

@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2013-02-07T09:31:13
+# Project created by QtCreator 2013-02-07T13:26:13
 #
 #-------------------------------------------------
 
@@ -10,16 +10,14 @@ QT       += testlib
 
 QT       -= gui
 
-TARGET = tst_benchmarktest
+TARGET = tst_systemtest
 CONFIG   += console
 CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-
-SOURCES += tst_benchmarktest.cpp \
+SOURCES += tst_systemtest.cpp \
     ../../../src/moleculesystemcell.cpp \
     ../../../src/moleculesystem.cpp \
     ../../../src/molecule.cpp \
@@ -30,6 +28,8 @@ SOURCES += tst_benchmarktest.cpp \
     ../../../src/integrator/velocityverletintegrator.cpp \
     ../../../src/integrator/integrator.cpp \
     ../../../src/integrator/eulercromerintegrator.cpp
+
+DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
     ../../../src/moleculesystemcell.h \

@@ -35,6 +35,7 @@ public:
     bool saveXyz(int step);
     void addMolecules(const vector<Molecule *> &molecule);
     const vector<Molecule*> &molecules() const;
+    const vector<MoleculeSystemCell*> &cells() const;
     void updateForces();
     void simulate(int nSimulationSteps);
 
@@ -43,7 +44,7 @@ public:
     void setBoundaries(mat boundaries);
 
     bool saveHDF5(string filename);
-    void setupCells();
+//    void setupCells();
     void setupCells(double minCutLength);
 
     double potentialConstant();
@@ -57,7 +58,12 @@ public:
     void setIntegrator(Integrator *integrator);
     void setInteratomicForce(InteratomicForce* force);
     InteratomicForce* interatomicForce();
-private:
+    bool isSaveEnabled() const;
+    void setSaveEnabled(bool enabled);
+    bool isOutputEnabled() const;
+    void setOutputEnabled(bool enabled);
+    bool saveBinary(int step);
+protected:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
 //    int nSimulationSteps;
@@ -87,6 +93,11 @@ private:
     Config *m_config;
 
     InteratomicForce *m_interatomicForce;
+
+    bool m_isSaveEnabled;
+    bool m_isOutputEnabled;
+
+    bool m_areCellsSetUp;
 };
 
 #endif // MOLECULESYSTEM_H

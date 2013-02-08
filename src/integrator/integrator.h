@@ -12,10 +12,10 @@ class Integrator
 public:
     Integrator(MoleculeSystem *moleculeSystem);
 
-    void stepForward();
-    void initialize();
+    virtual void stepForward() = 0;
+    virtual void initialize() = 0;
     void setTimeStep(double timeStep);
-private:
+protected:
     MoleculeSystem *m_moleculeSystem;
 
     double m_timeStep;

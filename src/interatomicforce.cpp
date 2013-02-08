@@ -1,6 +1,6 @@
-#include "interatomicforce.h"
-#include "moleculesystem.h"
-#include "atom.h"
+#include <src/interatomicforce.h>
+#include <src/moleculesystem.h>
+#include <src/atom.h>
 
 InteratomicForce::InteratomicForce() :
     tmpForce(zeros<rowvec>(3)),

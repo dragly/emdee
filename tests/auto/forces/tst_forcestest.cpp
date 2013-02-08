@@ -1,6 +1,6 @@
-#include "interatomicforce.h"
-#include "atom.h"
-#include "molecule.h"
+#include <src/interatomicforce.h>
+#include <src/atom.h>
+#include <src/molecule.h>
 
 #include <QString>
 #include <QtTest>

@@ -4,7 +4,7 @@
 class Molecule;
 class Atom;
 
-#include "atomtype.h"
+#include <src/atomtype.h>
 
 #include <vector>
 #include <armadillo>
@@ -29,7 +29,7 @@ public:
     void setNCells(int nCells);
     void setB(double b);
     void setBoltzmannConstant(double boltzmannConstant);
-private:
+protected:
     double m_unitLength;
     double m_boltzmannConstant;
 

@@ -1,4 +1,4 @@
-#include "atomtype.h"
+#include <src/atomtype.h>
 
 #include <iostream>
 

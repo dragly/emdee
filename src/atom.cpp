@@ -1,5 +1,5 @@
-#include "atom.h"
-#include "molecule.h"
+#include <src/atom.h>
+#include <src/molecule.h>
 
 #include <armadillo>
 

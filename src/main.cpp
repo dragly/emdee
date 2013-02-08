@@ -1,7 +1,9 @@
-#include "moleculesystem.h"
-#include "generator.h"
-#include "interatomicforce.h"
-#include "integrator.h"
+#include <src/moleculesystem.h>
+#include <src/generator.h>
+#include <src/interatomicforce.h>
+#include <src/integrator/integrator.h>
+#include <src/integrator/velocityverletintegrator.h>
+#include <src/integrator/eulercromerintegrator.h>
 
 #include <iostream>
 #include <libconfig.h++>
@@ -39,7 +41,7 @@ int main(/*int argc, char** argv*/)
     // Set up molecule system
     MoleculeSystem system;
     system.setInteratomicForce(force);
-    Integrator* integrator = new Integrator(&system);
+    Integrator* integrator = new VelocityVerletIntegrator(&system);
     integrator->setTimeStep(timeStep);
     system.setIntegrator(integrator);
     system.loadConfiguration(&config); // TODO remove this
@@ -47,10 +49,11 @@ int main(/*int argc, char** argv*/)
     cout << "addded" << endl;
     system.setBoundaries(generator.lastBoundaries());
     cout << "setbounds" << endl;
-    system.setupCells();
+    system.setupCells(potentialConstant * 3);
     cout << "Setup cells" << endl;
     system.simulate(nSimulationSteps);
-
+    ofstream test;
+    test.open("test");
     return 0;
 }
 

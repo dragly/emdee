@@ -35,7 +35,7 @@ public:
     void addAtom(Atom* atom);
 
     const vector<Atom *> atoms();
-private:
+protected:
     rowvec m_position;
     rowvec m_velocity;
     rowvec m_force;

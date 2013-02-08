@@ -1,14 +1,15 @@
-#include "generator.h"
+#include <src/generator.h>
 
-#include "atom.h"
-#include "molecule.h"
+#include <src/atom.h>
+#include <src/molecule.h>
 /*!
  * \brief Generator::Generator has multiple functions to generate different setups of atoms.
  * Something is longer than shorter is simple. This is bla bla bla boom.
  */
 
 Generator::Generator() :
-    m_unitLength(1)
+    m_unitLength(1),
+    m_boltzmannConstant(1)
 {
 }
 

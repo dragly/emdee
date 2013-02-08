@@ -1,3 +1,3 @@
 include(../molecular-dynamics.pri)
 
-INCLUDEPATH += $$SRC_DIR
+INCLUDEPATH += $$ROOT_DIR

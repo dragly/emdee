@@ -27,7 +27,7 @@ public:
 
     void setPotentialConstant(double potentialConstant);
 
-private:
+protected:
     rowvec tmpForce;
     rowvec zeroVector;
 

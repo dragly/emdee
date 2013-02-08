@@ -1,9 +1,9 @@
-#include "molecule.h"
-#include "atom.h"
+#include <src/molecule.h>
+#include <src/atom.h>
 
-#include "moleculesystemcell.h"
-#include "moleculesystem.h"
-#include "interatomicforce.h"
+#include <src/moleculesystemcell.h>
+#include <src/moleculesystem.h>
+#include <src/interatomicforce.h>
 
 MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     m_nDimensions(3),

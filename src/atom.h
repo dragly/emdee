@@ -2,7 +2,7 @@
 #define ATOM_H
 
 class Molecule;
-#include "atomtype.h"
+#include <src/atomtype.h>
 
 #include <armadillo>
 
@@ -29,7 +29,7 @@ public:
     double mass();
     void clearForces();
     void refreshAbsolutePositionAndVelocity();
-private:
+protected:
     rowvec m_relativePosition;
     rowvec m_relativeVelocity;
     rowvec m_force;

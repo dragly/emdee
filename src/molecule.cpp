@@ -1,5 +1,5 @@
-#include "molecule.h"
-#include "atom.h"
+#include <src/molecule.h>
+#include <src/atom.h>
 
 Molecule::Molecule() :
     m_position(zeros<rowvec>(3)),

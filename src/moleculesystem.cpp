@@ -1,14 +1,17 @@
-#include "moleculesystem.h"
-#include "atom.h"
-#include "molecule.h"
-#include "integrator.h"
-#include "moleculesystemcell.h"
-#include "interatomicforce.h"
+#include <src/moleculesystem.h>
+#include <src/atom.h>
+#include <src/molecule.h>
+#include <src/integrator/integrator.h>
+#include <src/moleculesystemcell.h>
+#include <src/interatomicforce.h>
+#include <src/integrator/velocityverletintegrator.h>
 
+// System headers
 #include <fstream>
 #include <iomanip>
 #include <sys/stat.h>
 #include <algorithm>
+#include <boost/lexical_cast.hpp>
 //#include <hdf5.h>
 
 using namespace std;
@@ -17,13 +20,16 @@ MoleculeSystem::MoleculeSystem() :
     m_boltzmannConstant(1.0),
     m_potentialConstant(1.0),
     m_nDimensions(3),
-    outFileName("out/myfile*.xyz"),
+    outFileName("/tmp/data*.bin"),
     outFileFormat(XyzFormat),
     pow3nDimensions(pow(3, m_nDimensions)),
-    m_unitLength(1)
+    m_unitLength(1),
+    m_isSaveEnabled(true),
+    m_isOutputEnabled(true),
+    m_areCellsSetUp(false)
 {
     m_interatomicForce = new InteratomicForce();
-    m_integrator = new Integrator(this);
+    m_integrator = new VelocityVerletIntegrator(this);
     m_cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
     m_boundaries = zeros(2,m_nDimensions);
 }
@@ -34,17 +40,27 @@ void MoleculeSystem::loadConfiguration(Config *config)
     double potentialConstant = config->lookup("system.potentialConstant");
     potentialConstant /= m_unitLength;
     setPotentialConstant(potentialConstant);
+    config->lookupValue("simulation.saveFileName", outFileName);
+    m_isSaveEnabled = config->lookup("simulation.saveEnabled");
 }
 
 void MoleculeSystem::load(string fileName) {
-    cout << fileName << endl;
+    if(isOutputEnabled()) {
+        cout << fileName << endl;
+    }
 }
 
 bool MoleculeSystem::save(int step) {
-    //    string threeLetterExtension = outFileName.substr(outFileName.length() - 4, 4);
-    //string fourLetterExtension = outFileName.substr(outFileName.length() - 5, 5);
+    if(!m_isSaveEnabled) {
+        return true;
+    }
+    // Refreshing to make sure we don't save any wrong cell IDs
+    refreshCellContents();
+
     if(outFileName.find(".xyz") != string::npos) {
         return saveXyz(step);
+    } else if(outFileName.find(".bin") != string::npos) {
+        return saveBinary(step);
     }
     return false;
 }
@@ -64,19 +80,78 @@ bool MoleculeSystem::saveXyz(int step) {
 //    cout << "Saving xyz data to " << outFileNameLocal  << endl;
 
     outFile << m_molecules.size() << endl;
-    outFile << "Some nice comment";
+    outFile << "Some nice comment" << endl;
+
+    char line[1000];
     for(MoleculeSystemCell* cell : m_cells) {
         for(Molecule* molecule : cell->molecules()) {
             for(Atom* atom : molecule->atoms()) {
                 rowvec position = atom->position() * m_unitLength;
                 rowvec velocity = atom->velocity() * m_unitLength;
                 rowvec force = atom->force() * m_unitLength;
+                sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
+                        position(0), position(1), position(2),
+                        velocity(0), velocity(1), velocity(2),
+                        force(0), force(1), force(2),
+                        cell->id());
+//                toPrint << atom->type().abbreviation
+//                        << " " << position(0) << " " << position(1) << " " << position(2)
+//                        << " " << velocity(0) << " " << velocity(1) << " " << velocity(2)
+//                        << " " << force(0) << " " << force(1) << " " << force(2)
+//                        << " " << cell->id()
+//                        << "\n";
                 outFile << atom->type().abbreviation
-                        << " " << position(0) << " " << position(1) << " " << position(2)
-                        << " " << velocity(0) << " " << velocity(1) << " " << velocity(2)
-                        << " " << force(0) << " " << force(1) << " " << force(2)
-                        << " " << cell->id()
-                        << endl;
+                        << line;
+            }
+        }
+    }
+    outFile.close();
+    return true;
+}
+
+bool MoleculeSystem::saveBinary(int step) {
+    stringstream outStepName;
+    outStepName << setw(6) << setfill('0') << step;
+    string outFileNameLocal = outFileName;
+    size_t starPos = outFileName.find("*");
+    ofstream outFile;
+    if(starPos != string::npos) {
+        outFileNameLocal.replace(starPos, 1, outStepName.str());
+        outFile.open(outFileNameLocal, ios::out | ios::binary);
+    } else {
+        outFile.open(outFileNameLocal, ios::app | ios::out | ios::binary);
+    }
+//    cout << "Saving binary data to " << outFileNameLocal  << endl;
+
+//    outFile << m_molecules.size() << endl;
+//    outFile << "Some nice comment" << endl;
+
+//    char line[1000];
+    for(MoleculeSystemCell* cell : m_cells) {
+        for(Molecule* molecule : cell->molecules()) {
+            for(Atom* atom : molecule->atoms()) {
+                rowvec position = atom->position() * m_unitLength;
+                rowvec velocity = atom->velocity() * m_unitLength;
+                rowvec force = atom->force() * m_unitLength;
+//                sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
+//                        position(0), position(1), position(2),
+//                        velocity(0), velocity(1), velocity(2),
+//                        force(0), force(1), force(2),
+//                        cell->id());
+                int id = cell->id();
+                char atomType[3];
+                sprintf(atomType, "Ar");
+                outFile.write(atomType, sizeof(atomType));
+                outFile.write((char*)&position(0), sizeof(double));
+                outFile.write((char*)&position(1), sizeof(double));
+                outFile.write((char*)&position(2), sizeof(double));
+                outFile.write((char*)&velocity(0), sizeof(double));
+                outFile.write((char*)&velocity(1), sizeof(double));
+                outFile.write((char*)&velocity(2), sizeof(double));
+                outFile.write((char*)&force(0), sizeof(double));
+                outFile.write((char*)&force(1), sizeof(double));
+                outFile.write((char*)&force(2), sizeof(double));
+                outFile.write((char*)&id, sizeof(int));
             }
         }
     }
@@ -127,14 +202,14 @@ bool MoleculeSystem::saveHDF5(string filename) {
     return false;
 }
 
-void MoleculeSystem::setupCells()
-{
-    setupCells(m_potentialConstant * 3);
-    if(m_cells.size() < 27) {
-        cerr << "The number of cells can never be less than 27!" << endl;
-        throw new std::logic_error("The number of cells can never be less than 27!");
-    }
-}
+//void MoleculeSystem::setupCells()
+//{
+//    setupCells(m_potentialConstant * 3);
+//    if(m_cells.size() < 27) {
+//        cerr << "The number of cells can never be less than 27!" << endl;
+//        throw new std::logic_error("The number of cells can never be less than 27!");
+//    }
+//}
 
 void MoleculeSystem::addMolecules(const vector<Molecule *>& molecule)
 {
@@ -144,6 +219,11 @@ void MoleculeSystem::addMolecules(const vector<Molecule *>& molecule)
 const vector<Molecule *> &MoleculeSystem::molecules() const
 {
     return m_molecules;
+}
+
+const vector<MoleculeSystemCell *> &MoleculeSystem::cells() const
+{
+    return m_cells;
 }
 
 void MoleculeSystem::updateForces()
@@ -204,12 +284,10 @@ void MoleculeSystem::updateForces()
 //        cout << "nCalculations" << endl;
 //        cout << nCalculations << endl;
 
+    refreshCellContents();
     for(Molecule* molecule : m_molecules) {
         molecule->clearForces();
     }
-
-
-    refreshCellContents();
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearAlreadyCalculatedNeighbors();
     }
@@ -220,6 +298,10 @@ void MoleculeSystem::updateForces()
 
 void MoleculeSystem::simulate(int nSimulationSteps)
 {
+    if(!m_areCellsSetUp) {
+        cerr << "Cells must be set up before simulating!" << endl;
+        throw(new exception());
+    }
     // Make output directory
     mkdir("out", S_IRWXU|S_IRGRP|S_IXGRP);
 
@@ -234,16 +316,26 @@ void MoleculeSystem::simulate(int nSimulationSteps)
 
     // Set up integrator
     m_integrator->initialize();
-    cout << "Starting simulation " << endl;
+    if(isOutputEnabled()) {
+        cout << "Starting simulation " << endl;
+    }
     for(int iStep = 1; iStep < nSimulationSteps; iStep++) {
-        cout << iStep << ".." << endl;
+        if(isOutputEnabled()) {
+            cout << iStep << ".." << endl;
+        }
         m_integrator->stepForward();
         //        cout << "Integrator done" << endl;
+
         // Boundary conditions
         for(Molecule* molecule : m_molecules) {
             rowvec position = molecule->position();
             for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-                if(molecule->position()(iDim) > m_boundaries(1,iDim)) {
+                double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
+                if(fabs(molecule->position()(iDim)) > (m_boundaries(1,iDim) + sideLength)
+                        || fabs(molecule->position()(iDim)) < (m_boundaries(0,iDim) - sideLength)) {
+                    cerr << "Wow! A molecule ended up  outside 2 x boundaries! The time step must be too big. No reason to continue..." << endl;
+                    throw(new exception());
+                } else if(molecule->position()(iDim) > m_boundaries(1,iDim)) {
                     position(iDim) -= (m_boundaries(1,iDim) - m_boundaries(0,iDim));
                     molecule->setPosition(position);
                 } else if(molecule->position()(iDim) < m_boundaries(0,iDim)) {
@@ -252,7 +344,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
                 }
             }
         }
-        // Save the data
+//        updateForces();
         save(iStep);
     }
 }
@@ -272,7 +364,9 @@ void MoleculeSystem::setBoundaries(double xMin, double xMax, double yMin, double
 
 void MoleculeSystem::setBoundaries(mat boundaries)
 {
-    cout << "Setting boundaries" << endl;
+    if(isOutputEnabled()) {
+        cout << "Setting boundaries" << endl;
+    }
     m_boundaries = boundaries;
     irowvec counters = zeros<irowvec>(m_nDimensions);
     for(int i = 0; i < pow3nDimensions; i++) {
@@ -309,8 +403,10 @@ void MoleculeSystem::setupCells(double minCutLength) {
         m_cellLengths(iDim) = totalLength / m_nCells(iDim);
         nCellsTotal *= m_nCells(iDim);
     }
-    cout << "Dividing space into a total of " << nCellsTotal << " cells" << endl;
-    cout << "With geometry " << m_nCells << endl;
+    if(isOutputEnabled()) {
+        cout << "Dividing space into a total of " << nCellsTotal << " cells" << endl;
+        cout << "With geometry " << m_nCells << endl;
+    }
 
     irowvec indices = zeros<irowvec>(m_nDimensions);
 
@@ -393,7 +489,13 @@ void MoleculeSystem::setupCells(double minCutLength) {
         }
     }
 
+    if(m_cells.size() < 27) {
+        cerr << "The number of cells can never be less than 27!" << endl;
+        throw new std::logic_error("The number of cells can never be less than 27!");
+    }
+
     refreshCellContents();
+    m_areCellsSetUp = true;
 }
 
 void MoleculeSystem::refreshCellContents() {
@@ -447,6 +549,26 @@ void MoleculeSystem::setInteratomicForce(InteratomicForce *force)
 InteratomicForce *MoleculeSystem::interatomicForce()
 {
     return m_interatomicForce;
+}
+
+bool MoleculeSystem::isSaveEnabled() const
+{
+    return m_isSaveEnabled;
+}
+
+void MoleculeSystem::setSaveEnabled(bool enabled)
+{
+    m_isSaveEnabled = enabled;
+}
+
+bool MoleculeSystem::isOutputEnabled() const
+{
+    return m_isOutputEnabled;
+}
+
+void MoleculeSystem::setOutputEnabled(bool enabled)
+{
+    m_isOutputEnabled = enabled;
 }
 
 double MoleculeSystem::potentialConstant()

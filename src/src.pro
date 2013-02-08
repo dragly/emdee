@@ -5,6 +5,8 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
+INCLUDEPATH += ../
+
 TARGET = molecular-dynamics
 
 SOURCES += main.cpp \
@@ -13,9 +15,11 @@ SOURCES += main.cpp \
     generator.cpp \
     atomtype.cpp \
     molecule.cpp \
-    integrator.cpp \
     moleculesystemcell.cpp \
-    interatomicforce.cpp
+    interatomicforce.cpp \
+    integrator/velocityverletintegrator.cpp \
+    integrator/integrator.cpp \
+    integrator/eulercromerintegrator.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -23,9 +27,11 @@ HEADERS += \
     generator.h \
     atomtype.h \
     molecule.h \
-    integrator.h \
     moleculesystemcell.h \
-    interatomicforce.h
+    interatomicforce.h \
+    integrator/velocityverletintegrator.h \
+    integrator/integrator.h \
+    integrator/eulercromerintegrator.h
 
 # Building
 myscript.target = myscript
@@ -33,4 +39,5 @@ myscript.commands = python $$PWD/../myscript.py $$PWD/../
 QMAKE_EXTRA_TARGETS += myscript
 PRE_TARGETDEPS += myscript
 
-OTHER_FILES += ../testconfig.cfg
+OTHER_FILES += ../testconfig.cfg \
+    ../molecular-dynamics.pri

@@ -1,24 +1,17 @@
-#include "integrator.h"
-#include "atom.h"
-#include "molecule.h"
-#include "moleculesystem.h"
+#include <src/integrator/velocityverletintegrator.h>
+#include <src/moleculesystem.h>
+#include <src/molecule.h>
 
-Integrator::Integrator(MoleculeSystem *moleculeSystem) :
-    m_moleculeSystem(moleculeSystem),
-    m_timeStep(0.01)
+VelocityVerletIntegrator::VelocityVerletIntegrator(MoleculeSystem *moleculeSystem) :
+    Integrator(moleculeSystem)
 {
 }
 
-void Integrator::initialize() {
+void VelocityVerletIntegrator::initialize() {
     m_moleculeSystem->updateForces();
 }
 
-void Integrator::setTimeStep(double timeStep)
-{
-    m_timeStep = timeStep;
-}
-
-void Integrator::stepForward() {
+void VelocityVerletIntegrator::stepForward() {
     double dt = m_timeStep;
     for(uint i = 0; i < m_moleculeSystem->molecules().size(); i++) {
         Molecule *molecule = m_moleculeSystem->molecules().at(i);
