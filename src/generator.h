@@ -21,6 +21,7 @@ public:
     void loadConfiguration(Config* config);
     vector<Molecule*> generateFcc(double b, int nCells, AtomType atomType);
     void boltzmannDistributeVelocities(double temperature, vector<Molecule *> molecules);
+    void uniformDistributeVelocities(double maxVelocity, vector<Molecule *> molecules);
 
     void setUnitLength(double unitLength);
 
@@ -34,6 +35,8 @@ protected:
     double m_boltzmannConstant;
 
     mat m_lastBoundaries;
+
+    int m_nDimensions;
 };
 
 #endif // GENERATOR_H

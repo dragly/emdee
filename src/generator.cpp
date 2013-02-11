@@ -9,7 +9,8 @@
 
 Generator::Generator() :
     m_unitLength(1),
-    m_boltzmannConstant(1)
+    m_boltzmannConstant(1),
+    m_nDimensions(3)
 {
 }
 
@@ -65,12 +66,41 @@ vector<Molecule*> Generator::generateFcc(double b, int nCells, AtomType atomType
 
 void Generator::boltzmannDistributeVelocities(double temperature, vector<Molecule*> molecules) {
 
+    rowvec totalVelocity = zeros<rowvec>(m_nDimensions);
     for(Molecule* molecule : molecules) {
-        rowvec velocity = randn<rowvec>(3);
+        rowvec velocity = randn<rowvec>(m_nDimensions);
         velocity *= sqrt(m_boltzmannConstant * temperature / molecule->mass());
+        totalVelocity += velocity;
         molecule->setVelocity(velocity);
     }
+    // Remove total linear momentum
+    rowvec velocityToRemove = totalVelocity / molecules.size();
+    totalVelocity.zeros();
+    for(Molecule* molecule : molecules) {
+        rowvec newVelocity = molecule->velocity() - velocityToRemove;
+        molecule->setVelocity(newVelocity);
+    }
     cout << "Boltzmann distributed velocities for " << molecules.size() << " molecules!" << endl;
+}
+
+void Generator::uniformDistributeVelocities(double maxVelocity, vector<Molecule*> molecules) {
+
+    rowvec totalVelocity = zeros<rowvec>(m_nDimensions);
+    for(Molecule* molecule : molecules) {
+        rowvec velocity = randu<rowvec>(m_nDimensions);
+        velocity -= 0.5 * ones<rowvec>(m_nDimensions);
+        velocity *= 2 * maxVelocity;
+        totalVelocity += velocity;
+        molecule->setVelocity(velocity);
+    }
+    // Remove total linear momentum
+    rowvec velocityToRemove = totalVelocity / molecules.size();
+    totalVelocity.zeros();
+    for(Molecule* molecule : molecules) {
+        rowvec newVelocity = molecule->velocity() - velocityToRemove;
+        molecule->setVelocity(newVelocity);
+    }
+    cout << "Uniformly distributed velocities for " << molecules.size() << " molecules!" << endl;
 }
 
 void Generator::setUnitLength(double unitLength)
