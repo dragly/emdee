@@ -52,7 +52,7 @@ void BenchmarkTest::benchmarkDifferentSizes()
     interatomicForce.setPotentialConstant(potentialConstant);
     // Set up molecule system
     MoleculeSystem system;
-//    system.setSaveEnabled(false);
+    system.setSaveEnabled(true);
 //    system.setOutputEnabled(false);
     // Set up integrator
     VelocityVerletIntegrator integrator(&system);

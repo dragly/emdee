@@ -26,6 +26,8 @@ int main(/*int argc, char** argv*/)
     generator.loadConfiguration(&config);
 
     // Generator specific config
+    string velocityDistributionType;
+    config.lookupValue("generator.velocity.distribution", velocityDistributionType);
     int nCells = config.lookup("generator.fcc.nCells");
     double b = config.lookup("generator.fcc.b");
     double temperature = config.lookup("system.initialTemperature");
@@ -33,8 +35,16 @@ int main(/*int argc, char** argv*/)
     b /= unitLength;
     double potentialConstant = config.lookup("system.potentialConstant");
     potentialConstant /= unitLength;
+
+    // Set up grid
     vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
-    generator.boltzmannDistributeVelocities(temperature, molecules);
+
+    // Distribute velocities
+    if(velocityDistributionType == "boltzmann") {
+        generator.boltzmannDistributeVelocities(temperature, molecules);
+    } else if(velocityDistributionType == "uniform") {
+        generator.uniformDistributeVelocities(4, molecules);
+    }
     // Set up force
     InteratomicForce* force = new InteratomicForce();
     force->setPotentialConstant(potentialConstant);

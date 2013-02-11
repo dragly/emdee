@@ -2,4 +2,5 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     forces \
-    system
+    system \
+    generator
