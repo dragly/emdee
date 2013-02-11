@@ -43,7 +43,7 @@ public:
     void setBoundaries(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax);
     void setBoundaries(mat boundaries);
 
-    bool saveHDF5(string filename);
+    bool saveHDF5(int step);
 //    void setupCells();
     void setupCells(double minCutLength);
 
@@ -63,6 +63,7 @@ public:
     bool isOutputEnabled() const;
     void setOutputEnabled(bool enabled);
     bool saveBinary(int step);
+    void setOutFileName(string fileName);
 protected:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
@@ -76,7 +77,7 @@ protected:
 
     int m_nDimensions;
 
-    string outFileName;
+    string m_outFileName;
     FileFormat outFileFormat;
 
     mat m_cellShiftVectors;
