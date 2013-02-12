@@ -10,11 +10,11 @@ InteratomicForce::InteratomicForce() :
 {
 }
 
-void InteratomicForce::calculate(Atom *atom1, Atom *atom2) {
-    return calculate(atom1, atom2, zeroVector);
+void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2) {
+    return calculateAndApplyForce(atom1, atom2, zeroVector);
 }
 
-void InteratomicForce::calculate(Atom *atom1, Atom *atom2, const rowvec& atom2Offset)
+void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const rowvec& atom2Offset)
 {
     double rSquared;
     double sigmaSquaredOverRSquared;
@@ -30,13 +30,18 @@ void InteratomicForce::calculate(Atom *atom1, Atom *atom2, const rowvec& atom2Of
     double factor = - ((24 * eps) / (rSquared)) * (2 * sigmaOverR12 - sigmaOverR6);
     tmpPotential = 4 * eps * (sigmaOverR12 - sigmaOverR6);
 
-    tmpForce *= factor; // * rVec;
+//    tmpForce *= factor; // * rVec;
+
+    atom2->addForce(-tmpForce * factor);
+    atom1->addForce(tmpForce * factor);
+    atom2->addPotential(0.5 * tmpPotential);
+    atom1->addPotential(0.5 * tmpPotential);
 }
 
-const rowvec &InteratomicForce::force()
-{
-    return tmpForce;
-}
+//const rowvec &InteratomicForce::force()
+//{
+//    return tmpForce;
+//}
 
 void InteratomicForce::setPotentialConstant(double potentialConstant)
 {
@@ -49,7 +54,7 @@ void InteratomicForce::setEnergyConstant(double energyConstant)
 }
 
 
-double InteratomicForce::potential()
-{
-    return tmpPotential;
-}
+//double InteratomicForce::potential()
+//{
+//    return tmpPotential;
+//}

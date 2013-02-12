@@ -22,11 +22,11 @@ public:
 
 //    void loadConfiguration(Config* config);
 
-    void calculate(Atom *atom1, Atom *atom2);
-    void calculate(Atom* atom1, Atom* atom2, const rowvec &atom2Offset);
+    void calculateAndApplyForce(Atom *atom1, Atom *atom2);
+    void calculateAndApplyForce(Atom* atom1, Atom* atom2, const rowvec &atom2Offset);
 
-    const rowvec& force();
-    double potential();
+//    const rowvec& force();
+//    double potential();
 
     void setPotentialConstant(double potentialConstant);
     void setEnergyConstant(double energyConstant);

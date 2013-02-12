@@ -104,13 +104,13 @@ void MoleculeSystemCell::updateForces()
             atom1 = m_atoms.at(iAtom);
             for(uint jAtom = 0; jAtom < neighbor->atoms().size(); jAtom++) {
                 atom2 = neighbor->atoms().at(jAtom);
-                moleculeSystem->interatomicForce()->calculate(atom1, atom2, neighborOffset);
-                force = moleculeSystem->interatomicForce()->force();
-                double potential = moleculeSystem->interatomicForce()->potential();
-                atom2->addForce(-force);
-                atom1->addForce(force);
-                atom2->addPotential(0.5 * potential);
-                atom1->addPotential(0.5 * potential);
+                moleculeSystem->interatomicForce()->calculateAndApplyForce(atom1, atom2, neighborOffset);
+//                force = moleculeSystem->interatomicForce()->force();
+//                double potential = moleculeSystem->interatomicForce()->potential();
+//                atom2->addForce(-force);
+//                atom1->addForce(force);
+//                atom2->addPotential(0.5 * potential);
+//                atom1->addPotential(0.5 * potential);
             }
         }
         m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = true;
@@ -122,13 +122,13 @@ void MoleculeSystemCell::updateForces()
         // Loop over all neighbors (including ourselves)
         for(uint jAtom = iAtom + 1; jAtom < m_atoms.size(); jAtom++) {
             atom2 = m_atoms.at(jAtom);
-            moleculeSystem->interatomicForce()->calculate(atom1, atom2);
-            force = moleculeSystem->interatomicForce()->force();
-            double potential = moleculeSystem->interatomicForce()->potential();
-            atom2->addForce(-force);
-            atom1->addForce(force);
-            atom2->addPotential(0.5 * potential);
-            atom1->addPotential(0.5 * potential);
+            moleculeSystem->interatomicForce()->calculateAndApplyForce(atom1, atom2);
+//            force = moleculeSystem->interatomicForce()->force();
+//            double potential = moleculeSystem->interatomicForce()->potential();
+//            atom2->addForce(-force);
+//            atom1->addForce(force);
+//            atom2->addPotential(0.5 * potential);
+//            atom1->addPotential(0.5 * potential);
         }
     }
 }
