@@ -5,7 +5,8 @@
 InteratomicForce::InteratomicForce() :
     tmpForce(zeros<rowvec>(3)),
     zeroVector(zeros<rowvec>(3)),
-    m_potentialConstant(1.2)
+    m_potentialConstant(1.2),
+    m_energyConstant(1.2)
 {
 }
 
@@ -30,7 +31,6 @@ void InteratomicForce::calculate(Atom *atom1, Atom *atom2, const rowvec& atom2Of
     tmpPotential = 4 * eps * (sigmaOverR12 - sigmaOverR6);
 
     tmpForce *= factor; // * rVec;
-//    return tmpForce;
 }
 
 const rowvec &InteratomicForce::force()

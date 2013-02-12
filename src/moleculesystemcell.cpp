@@ -153,8 +153,8 @@ void MoleculeSystemCell::updateForces()
                 double potential = moleculeSystem->interatomicForce()->potential();
                 atom2->addForce(-force);
                 atom1->addForce(force);
-                atom2->addPotential(potential);
-                atom2->addPotential(potential);
+                atom2->addPotential(0.5 * potential);
+                atom1->addPotential(0.5 * potential);
             }
         }
 //        neighbor->addAlreadyCalculatedNeighbor(this, -neighborOffset);
@@ -174,8 +174,8 @@ void MoleculeSystemCell::updateForces()
             double potential = moleculeSystem->interatomicForce()->potential();
             atom2->addForce(-force);
             atom1->addForce(force);
-            atom2->addPotential(potential);
-            atom2->addPotential(potential);
+            atom2->addPotential(0.5 * potential);
+            atom1->addPotential(0.5 * potential);
         }
 //        force = -0.05 * pow(atom1->absoluteVelocity(), 3);
 //        atom1->addForce(force);
