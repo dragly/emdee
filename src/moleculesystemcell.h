@@ -61,7 +61,8 @@ protected:
 
 
     int m_id;
-    rowvec force;
+    rowvec& force;
+    rowvec blankForce;
 };
 
 #endif // MOLECULESYSTEMCELL_H

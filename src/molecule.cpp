@@ -51,7 +51,7 @@ void Molecule::clearForces()
 {
     m_force = zeros<rowvec>(3);
     for(Atom* atom : m_atoms) {
-        atom->clearForces();
+        atom->clearForceAndPotential();
     }
 }
 

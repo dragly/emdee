@@ -17,13 +17,17 @@ int main(/*int argc, char** argv*/)
     config.readFile("testconfig.cfg");
 
     double unitLength = config.lookup("units.length");
-//    double unitTime = config.lookup("units.time");
+    double unitTime = config.lookup("units.time");
+    double unitMass = config.lookup("units.mass");
     double unitTemperature = config.lookup("units.temperature");
+    double boltzmannConstant = config.lookup("units.boltzmannConstant");
+    boltzmannConstant /= (unitLength*unitLength * unitMass / (unitTime*unitTime));
 
     int nSimulationSteps = config.lookup("simulation.nSimulationSteps");
     double timeStep = config.lookup("integrator.timeStep");
+    timeStep /= unitTime;
     Generator generator;
-    generator.loadConfiguration(&config);
+//    generator.loadConfiguration(&config);
 
     // Generator specific config
     string velocityDistributionType;
@@ -33,8 +37,12 @@ int main(/*int argc, char** argv*/)
     double temperature = config.lookup("system.initialTemperature");
     temperature /= unitTemperature;
     b /= unitLength;
+
+    // Force and potentials
     double potentialConstant = config.lookup("system.potentialConstant");
     potentialConstant /= unitLength;
+    double energyConstant = config.lookup("system.energyConstant");
+    energyConstant /= (unitMass * unitLength * unitLength / (unitTime * unitTime));
 
     // Set up grid
     vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
@@ -48,6 +56,7 @@ int main(/*int argc, char** argv*/)
     // Set up force
     InteratomicForce* force = new InteratomicForce();
     force->setPotentialConstant(potentialConstant);
+    force->setEnergyConstant(energyConstant);
     // Set up molecule system
     MoleculeSystem system;
     system.setInteratomicForce(force);

@@ -14,11 +14,11 @@ Generator::Generator() :
 {
 }
 
-void Generator::loadConfiguration(Config *config)
-{
-    m_unitLength = config->lookup("units.length");
-    m_boltzmannConstant = config->lookup("units.boltzmannConstant");
-}
+//void Generator::loadConfiguration(Config *config)
+//{
+//    m_unitLength = config->lookup("units.length");
+//    m_boltzmannConstant = config->lookup("units.boltzmannConstant");
+//}
 
 vector<Molecule*> Generator::generateFcc(double b, int nCells, AtomType atomType) {
     vector<Molecule*> moleculeList;
@@ -61,6 +61,7 @@ vector<Molecule*> Generator::generateFcc(double b, int nCells, AtomType atomType
                         << nCells * b << nCells * b << nCells * b;
 
     cout << "Generated " << moleculeList.size() << " molecules in FCC structure!" << endl;
+    cout << "Boundaries are " << m_lastBoundaries << endl;
     return moleculeList;
 }
 
@@ -103,10 +104,10 @@ void Generator::uniformDistributeVelocities(double maxVelocity, vector<Molecule*
     cout << "Uniformly distributed velocities for " << molecules.size() << " molecules!" << endl;
 }
 
-void Generator::setUnitLength(double unitLength)
-{
-    m_unitLength = unitLength;
-}
+//void Generator::setUnitLength(double unitLength)
+//{
+//    m_unitLength = unitLength;
+//}
 
 const mat &Generator::lastBoundaries() const
 {

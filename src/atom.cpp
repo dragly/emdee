@@ -9,6 +9,7 @@ Atom::Atom(Molecule *parent) :
     m_relativePosition(zeros<rowvec>(3)),
     m_relativeVelocity(zeros<rowvec>(3)),
     m_force(zeros<rowvec>(3)),
+    m_potential(0),
     m_parent(parent)
 {
 }
@@ -25,6 +26,15 @@ Atom::Atom(Molecule *parent, AtomType atomType) :
 void Atom::refreshAbsolutePositionAndVelocity() {
     m_position = m_relativePosition + m_parent->position();
     m_velocity = m_relativeVelocity + m_parent->velocity();
+}
+
+double Atom::potential()
+{
+    return m_potential;
+}
+
+void Atom::addPotential(double potential) {
+    m_potential += potential;
 }
 
 void Atom::setRelativePosition(const rowvec &position)
@@ -56,9 +66,10 @@ const rowvec &Atom::relativeVelocity() const
     return m_relativeVelocity;
 }
 
-void Atom::clearForces()
+void Atom::clearForceAndPotential()
 {
-    m_force = zeros<rowvec>(3);
+    m_force.zeros();
+    m_potential = 0;
 }
 
 void Atom::addForce(const rowvec &force)

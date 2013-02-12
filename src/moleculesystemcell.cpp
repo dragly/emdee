@@ -11,7 +11,8 @@ MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     m_indices(zeros<irowvec>(m_nDimensions)),
     moleculeSystem(parent),
     m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false),
-    m_id(0)
+    m_id(0),
+    force(blankForce)
 {
     cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
 }
@@ -147,9 +148,13 @@ void MoleculeSystemCell::updateForces()
             atom1 = m_atoms.at(iAtom);
             for(uint jAtom = 0; jAtom < neighbor->atoms().size(); jAtom++) {
                 atom2 = neighbor->atoms().at(jAtom);
-                force = moleculeSystem->interatomicForce()->force(atom1, atom2, neighborOffset);
+                moleculeSystem->interatomicForce()->calculate(atom1, atom2, neighborOffset);
+                force = moleculeSystem->interatomicForce()->force();
+                double potential = moleculeSystem->interatomicForce()->potential();
                 atom2->addForce(-force);
                 atom1->addForce(force);
+                atom2->addPotential(potential);
+                atom2->addPotential(potential);
             }
         }
 //        neighbor->addAlreadyCalculatedNeighbor(this, -neighborOffset);
@@ -164,9 +169,13 @@ void MoleculeSystemCell::updateForces()
         // Loop over all neighbors (including ourselves)
         for(uint jAtom = iAtom + 1; jAtom < m_atoms.size(); jAtom++) {
             atom2 = m_atoms.at(jAtom);
-            force = moleculeSystem->interatomicForce()->force(atom1, atom2);
+            moleculeSystem->interatomicForce()->calculate(atom1, atom2);
+            force = moleculeSystem->interatomicForce()->force();
+            double potential = moleculeSystem->interatomicForce()->potential();
             atom2->addForce(-force);
             atom1->addForce(force);
+            atom2->addPotential(potential);
+            atom2->addPotential(potential);
         }
 //        force = -0.05 * pow(atom1->absoluteVelocity(), 3);
 //        atom1->addForce(force);

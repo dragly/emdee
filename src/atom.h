@@ -20,6 +20,7 @@ public:
     void setRelativeVelocity(const rowvec &velocity);
     const rowvec &relativeVelocity() const;
     void addForce(const rowvec &force);
+    void addPotential(double potential);
     const rowvec &force() const;
     AtomType type();
 
@@ -27,8 +28,10 @@ public:
     const rowvec& velocity() const;
 
     double mass();
-    void clearForces();
+    void clearForceAndPotential();
     void refreshAbsolutePositionAndVelocity();
+
+    double potential();
 protected:
     rowvec m_relativePosition;
     rowvec m_relativeVelocity;
@@ -36,6 +39,7 @@ protected:
     rowvec m_position;
     rowvec m_velocity;
     AtomType m_type;
+    double m_potential;
 
     Molecule* m_parent;
 };

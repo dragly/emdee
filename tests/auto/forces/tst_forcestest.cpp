@@ -37,7 +37,7 @@ void ForcesTest::testForceBetweenArgons()
     molecule2->setPosition(position2);
     InteratomicForce force;
     force.setPotentialConstant(3);
-    rowvec calculatedForce = force.force(atom1, atom2);
+    rowvec calculatedForce = force.calculate(atom1, atom2);
     cout << calculatedForce << endl;
 //    QVERIFY(true);
     double val = calculatedForce(0);

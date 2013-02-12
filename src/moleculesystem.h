@@ -13,6 +13,8 @@ class InteratomicForce;
 #include <vector>
 #include <armadillo>
 #include <libconfig.h++>
+#include <H5Cpp.h>
+#include <H5File.h>
 
 using namespace std;
 using namespace arma;
@@ -53,17 +55,24 @@ public:
 
     void refreshCellContents();
 
-    void setUnitLength(double unitLength);
     void setPotentialConstant(double potentialConstant);
     void setIntegrator(Integrator *integrator);
     void setInteratomicForce(InteratomicForce* force);
     InteratomicForce* interatomicForce();
-    bool isSaveEnabled() const;
-    void setSaveEnabled(bool enabled);
+    void updateStatistics();
+
+    // Units
+    void setUnitLength(double unitLength);
+    void setUnitTime(double unitTime);
+    void setUnitEnergy(double unitEnergy);
+
+    // I/O
     bool isOutputEnabled() const;
     void setOutputEnabled(bool enabled);
     bool saveBinary(int step);
     void setOutFileName(string fileName);
+    bool isSaveEnabled() const;
+    void setSaveEnabled(bool enabled);
 protected:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
@@ -89,8 +98,6 @@ protected:
 
     vector<MoleculeSystemCell*> m_cells;
 
-    double m_unitLength;
-
     Config *m_config;
 
     InteratomicForce *m_interatomicForce;
@@ -99,6 +106,13 @@ protected:
     bool m_isOutputEnabled;
 
     bool m_areCellsSetUp;
+    H5::H5File* hdf5File;
+
+    // Units
+    double m_unitLength;
+    double m_unitTime;
+    double m_unitEnergy;
+    double m_unitMass;
 };
 
 #endif // MOLECULESYSTEM_H

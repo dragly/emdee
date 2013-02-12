@@ -43,7 +43,10 @@ MoleculeSystem::MoleculeSystem() :
     m_unitLength(1),
     m_isSaveEnabled(true),
     m_isOutputEnabled(true),
-    m_areCellsSetUp(false)
+    m_areCellsSetUp(false),
+    m_unitEnergy(1),
+    m_unitTime(1),
+    m_unitMass(1)
 {
     m_interatomicForce = new InteratomicForce();
     m_integrator = new VelocityVerletIntegrator(this);
@@ -57,7 +60,9 @@ void MoleculeSystem::loadConfiguration(Config *config)
     double potentialConstant = config->lookup("system.potentialConstant");
     potentialConstant /= m_unitLength;
     setPotentialConstant(potentialConstant);
-    config->lookupValue("simulation.saveFileName", m_outFileName);
+    string outFileName;
+    config->lookupValue("simulation.saveFileName", outFileName);
+    setOutFileName(outFileName);
     m_isSaveEnabled = config->lookup("simulation.saveEnabled");
 }
 
@@ -106,8 +111,8 @@ bool MoleculeSystem::saveXyz(int step) {
         for(Molecule* molecule : cell->molecules()) {
             for(Atom* atom : molecule->atoms()) {
                 rowvec position = atom->position() * m_unitLength;
-                rowvec velocity = atom->velocity() * m_unitLength;
-                rowvec force = atom->force() * m_unitLength;
+                rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
+                rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
                 sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
                         position(0), position(1), position(2),
                         velocity(0), velocity(1), velocity(2),
@@ -150,8 +155,9 @@ bool MoleculeSystem::saveBinary(int step) {
         for(Molecule* molecule : cell->molecules()) {
             for(Atom* atom : molecule->atoms()) {
                 rowvec position = atom->position() * m_unitLength;
-                rowvec velocity = atom->velocity() * m_unitLength;
-                rowvec force = atom->force() * m_unitLength;
+                rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
+                rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
+                double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
                 //                sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
                 //                        position(0), position(1), position(2),
                 //                        velocity(0), velocity(1), velocity(2),
@@ -170,6 +176,7 @@ bool MoleculeSystem::saveBinary(int step) {
                 outFile.write((char*)&force(0), sizeof(double));
                 outFile.write((char*)&force(1), sizeof(double));
                 outFile.write((char*)&force(2), sizeof(double));
+                outFile.write((char*)&potential, sizeof(double));
                 outFile.write((char*)&id, sizeof(int));
             }
         }
@@ -183,7 +190,18 @@ void MoleculeSystem::setOutFileName(string fileName)
     m_outFileName = fileName;
 }
 
+void MoleculeSystem::updateStatistics()
+{
+    // Calculate kinetic energy
+
+    // Calculate potential energy
+
+    // Calculate pressure
+
+}
+
 bool MoleculeSystem::saveHDF5(int step) {
+    cerr << "saveHDF5 is not yet fully implemented. Missing some parameters and rescaling with units." << endl;
     stringstream outStepName;
     outStepName << setw(6) << setfill('0') << step;
     string outFileNameLocal = m_outFileName;
@@ -191,10 +209,10 @@ bool MoleculeSystem::saveHDF5(int step) {
     if(starPos != string::npos) {
         outFileNameLocal.replace(starPos, 1, outStepName.str());
     }
-    cout << "Writing to " << outFileNameLocal << endl;
     /*
       * Initialize the data
       */
+    // TODO Rescale with units!
     int  i = 0;
     s1_t* s1 = new s1_t[m_atoms.size()];
     for(MoleculeSystemCell* cell : m_cells) {
@@ -379,10 +397,10 @@ void MoleculeSystem::simulate(int nSimulationSteps)
             m_atoms.push_back(atom);
         }
     }
-    save(0);
 
     // Set up integrator
     m_integrator->initialize();
+    save(0);
     if(isOutputEnabled()) {
         cout << "Starting simulation " << endl;
     }
@@ -412,6 +430,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
             }
         }
         //        updateForces();
+        updateStatistics();
         save(iStep);
     }
 }
@@ -592,10 +611,16 @@ void MoleculeSystem::refreshCellContents() {
 
 void MoleculeSystem::setUnitLength(double unitLength)
 {
-    // rescale everything that has been previously set based on previous unit length
-    //    m_potentialConstant = m_potentialConstant; // * m_unitLength / unitLength;
-    // Finally set the new unitlength
     m_unitLength = unitLength;
+}
+
+void MoleculeSystem::setUnitTime(double unitTime)
+{
+
+}
+
+void MoleculeSystem::setUnitEnergy(double unitEnergy)
+{
 }
 
 void MoleculeSystem::setPotentialConstant(double potentialConstant)
