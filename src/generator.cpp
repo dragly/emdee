@@ -77,11 +77,14 @@ void Generator::boltzmannDistributeVelocities(double temperature, vector<Molecul
     // Remove total linear momentum
     rowvec velocityToRemove = totalVelocity / molecules.size();
     totalVelocity.zeros();
+    double averageVelocity = 0;
     for(Molecule* molecule : molecules) {
         rowvec newVelocity = molecule->velocity() - velocityToRemove;
         molecule->setVelocity(newVelocity);
+        averageVelocity += norm(newVelocity, 2) / molecules.size();
     }
     cout << "Boltzmann distributed velocities for " << molecules.size() << " molecules!" << endl;
+    cout << "Average velocity is " << averageVelocity << endl;
 }
 
 void Generator::uniformDistributeVelocities(double maxVelocity, vector<Molecule*> molecules) {

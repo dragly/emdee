@@ -41,7 +41,7 @@ void SystemTest::cellSetup()
     MoleculeSystem system;
     system.setSaveEnabled(false);
     Generator generator;
-    generator.setUnitLength(unitLength);
+//    generator.setUnitLength(unitLength);
     InteratomicForce force;
     force.setPotentialConstant(potentialConstant);
     vector<Molecule*> molecules = generator.generateFcc(bUnit, 7, AtomType::argon());
@@ -51,7 +51,7 @@ void SystemTest::cellSetup()
     integrator.setTimeStep(0.005);
     system.setIntegrator(&integrator);
     system.setInteratomicForce(&force);
-    system.setPotentialConstant(potentialConstant);
+//    system.setPotentialConstant(potentialConstant);
     system.setBoundaries(generator.lastBoundaries());
     system.addMolecules(molecules);
     system.setupCells(potentialConstant * 3);

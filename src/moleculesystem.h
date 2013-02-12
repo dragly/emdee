@@ -49,13 +49,13 @@ public:
 //    void setupCells();
     void setupCells(double minCutLength);
 
-    double potentialConstant();
+//    double potentialConstant();
 
     const mat& cellShiftVectors();
 
     void refreshCellContents();
 
-    void setPotentialConstant(double potentialConstant);
+//    void setPotentialConstant(double potentialConstant);
     void setIntegrator(Integrator *integrator);
     void setInteratomicForce(InteratomicForce* force);
     InteratomicForce* interatomicForce();
@@ -64,7 +64,7 @@ public:
     // Units
     void setUnitLength(double unitLength);
     void setUnitTime(double unitTime);
-    void setUnitEnergy(double unitEnergy);
+    void setUnitMass(double unitMass);
 
     // I/O
     bool isOutputEnabled() const;
@@ -73,6 +73,7 @@ public:
     void setOutFileName(string fileName);
     bool isSaveEnabled() const;
     void setSaveEnabled(bool enabled);
+    void obeyBoundaries();
 protected:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;

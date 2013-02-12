@@ -40,12 +40,12 @@ MoleculeSystem::MoleculeSystem() :
     m_outFileName("/tmp/data*.bin"),
     outFileFormat(XyzFormat),
     pow3nDimensions(pow(3, m_nDimensions)),
-    m_unitLength(1),
     m_isSaveEnabled(true),
     m_isOutputEnabled(true),
     m_areCellsSetUp(false),
-    m_unitEnergy(1),
+    m_unitLength(1),
     m_unitTime(1),
+    m_unitEnergy(1),
     m_unitMass(1)
 {
     m_interatomicForce = new InteratomicForce();
@@ -56,10 +56,10 @@ MoleculeSystem::MoleculeSystem() :
 
 void MoleculeSystem::loadConfiguration(Config *config)
 {
-    setUnitLength(config->lookup("units.length"));
-    double potentialConstant = config->lookup("system.potentialConstant");
-    potentialConstant /= m_unitLength;
-    setPotentialConstant(potentialConstant);
+//    setUnitLength(config->lookup("units.length"));
+//    double potentialConstant = config->lookup("system.potentialConstant");
+//    potentialConstant /= m_unitLength;
+//    setPotentialConstant(potentialConstant);
     string outFileName;
     config->lookupValue("simulation.saveFileName", outFileName);
     setOutFileName(outFileName);
@@ -383,6 +383,7 @@ void MoleculeSystem::updateForces()
 
 void MoleculeSystem::simulate(int nSimulationSteps)
 {
+//    cout << "Factor is " << m_unitLength / m_unitTime << endl;
     if(!m_areCellsSetUp) {
         cerr << "Cells must be set up before simulating!" << endl;
         throw(new exception());
@@ -410,28 +411,32 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         }
         m_integrator->stepForward();
         //        cout << "Integrator done" << endl;
-
-        // Boundary conditions
-        for(Molecule* molecule : m_molecules) {
-            rowvec position = molecule->position();
-            for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-                double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
-                if(fabs(molecule->position()(iDim)) > (m_boundaries(1,iDim) + sideLength)
-                        || fabs(molecule->position()(iDim)) < (m_boundaries(0,iDim) - sideLength)) {
-                    cerr << "Wow! A molecule ended up  outside 2 x boundaries! The time step must be too big. No reason to continue..." << endl;
-                    throw(new exception());
-                } else if(molecule->position()(iDim) > m_boundaries(1,iDim)) {
-                    position(iDim) -= (m_boundaries(1,iDim) - m_boundaries(0,iDim));
-                    molecule->setPosition(position);
-                } else if(molecule->position()(iDim) < m_boundaries(0,iDim)) {
-                    position(iDim) += (m_boundaries(1,iDim) - m_boundaries(0,iDim));
-                    molecule->setPosition(position);
-                }
-            }
-        }
+//        updateForces();
+//        refreshCellContents();
         //        updateForces();
         updateStatistics();
         save(iStep);
+    }
+}
+
+void MoleculeSystem::obeyBoundaries() {
+    // Boundary conditions
+    for(Molecule* molecule : m_molecules) {
+        rowvec position = molecule->position();
+        for(int iDim = 0; iDim < m_nDimensions; iDim++) {
+            double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
+            if(fabs(molecule->position()(iDim)) > (m_boundaries(1,iDim) + sideLength)
+                    || fabs(molecule->position()(iDim)) < (m_boundaries(0,iDim) - sideLength)) {
+                cerr << "Wow! A molecule ended up  outside 2 x boundaries! The time step must be too big. No reason to continue..." << endl;
+                throw(new exception());
+            } else if(molecule->position()(iDim) > m_boundaries(1,iDim)) {
+                position(iDim) -= (m_boundaries(1,iDim) - m_boundaries(0,iDim));
+                molecule->setPosition(position);
+            } else if(molecule->position()(iDim) < m_boundaries(0,iDim)) {
+                position(iDim) += (m_boundaries(1,iDim) - m_boundaries(0,iDim));
+                molecule->setPosition(position);
+            }
+        }
     }
 }
 
@@ -616,17 +621,18 @@ void MoleculeSystem::setUnitLength(double unitLength)
 
 void MoleculeSystem::setUnitTime(double unitTime)
 {
-
+    m_unitTime = unitTime;
 }
 
-void MoleculeSystem::setUnitEnergy(double unitEnergy)
+void MoleculeSystem::setUnitMass(double unitMass)
 {
+    m_unitMass = unitMass;
 }
 
-void MoleculeSystem::setPotentialConstant(double potentialConstant)
-{
-    m_potentialConstant = potentialConstant; // / m_unitLength;
-}
+//void MoleculeSystem::setPotentialConstant(double potentialConstant)
+//{
+//    m_potentialConstant = potentialConstant; // / m_unitLength;
+//}
 
 void MoleculeSystem::setIntegrator(Integrator *integrator)
 {
@@ -663,10 +669,10 @@ void MoleculeSystem::setOutputEnabled(bool enabled)
     m_isOutputEnabled = enabled;
 }
 
-double MoleculeSystem::potentialConstant()
-{
-    return m_potentialConstant;
-}
+//double MoleculeSystem::potentialConstant()
+//{
+//    return m_potentialConstant;
+//}
 
 const mat &MoleculeSystem::cellShiftVectors()
 {

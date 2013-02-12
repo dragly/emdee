@@ -27,10 +27,9 @@ void InteratomicForce::calculate(Atom *atom1, Atom *atom2, const rowvec& atom2Of
     double sigmaOverR12 = sigmaOverR6 * sigmaOverR6;
     // TODO Verify force term
     double factor = - ((24 * eps) / (rSquared)) * (2 * sigmaOverR12 - sigmaOverR6);
-    double potential = 4 * eps * (sigmaOverR12 - sigmaOverR6);
+    tmpPotential = 4 * eps * (sigmaOverR12 - sigmaOverR6);
 
     tmpForce *= factor; // * rVec;
-    tmpPotential = potential;
 //    return tmpForce;
 }
 

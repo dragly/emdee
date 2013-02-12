@@ -59,6 +59,9 @@ int main(/*int argc, char** argv*/)
     force->setEnergyConstant(energyConstant);
     // Set up molecule system
     MoleculeSystem system;
+    system.setUnitLength(unitLength);
+    system.setUnitTime(unitTime);
+    system.setUnitMass(unitMass);
     system.setInteratomicForce(force);
     Integrator* integrator = new VelocityVerletIntegrator(&system);
     integrator->setTimeStep(timeStep);
