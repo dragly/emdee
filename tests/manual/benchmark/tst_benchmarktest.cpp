@@ -53,7 +53,7 @@ void BenchmarkTest::benchmarkDifferentSizes()
     // Set up molecule system
     MoleculeSystem system;
     system.setSaveEnabled(false);
-    //system.setOutFileName("test*.bin");
+//    system.setOutFileName("/tmp/mdout/test*.bin");
 //    system.setOutputEnabled(false);
     // Set up integrator
     VelocityVerletIntegrator integrator(&system);
@@ -77,7 +77,7 @@ void BenchmarkTest::benchmarkDifferentSizes_data()
     QTest::addColumn<int>("nCells");
     QTest::addColumn<int>("nSimulationSteps");
 //    QTest::newRow("0") << 7 << 20;
-    QTest::newRow("0") << 8 << 20;
+    QTest::newRow("0") << 8 << 2;
 }
 
 QTEST_APPLESS_MAIN(BenchmarkTest)

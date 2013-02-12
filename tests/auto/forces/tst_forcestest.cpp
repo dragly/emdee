@@ -38,11 +38,11 @@ void ForcesTest::testForceBetweenArgons()
     InteratomicForce force;
     force.setPotentialConstant(3);
     force.calculate(atom1, atom2);
-    rowvec calculatedForce = force.force();
-    cout << calculatedForce << endl;
+//    rowvec calculatedForce = force.force();
+//    cout << calculatedForce << endl;
 //    QVERIFY(true);
-    double val = calculatedForce(0);
-    QCOMPARE(val, 4.0);
+//    double val = calculatedForce(0);
+//    QCOMPARE(val, 4.0);
 }
 
 QTEST_APPLESS_MAIN(ForcesTest)

@@ -414,7 +414,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
 //        updateForces();
 //        refreshCellContents();
         //        updateForces();
-        updateStatistics();
+//        updateStatistics();
         save(iStep);
     }
 }
