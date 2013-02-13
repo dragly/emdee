@@ -1,6 +1,7 @@
 #include <src/interatomicforce.h>
 #include <src/moleculesystem.h>
 #include <src/atom.h>
+#include <src/molecule.h>
 
 InteratomicForce::InteratomicForce() :
     tmpForce(zeros<rowvec>(3)),
@@ -21,12 +22,16 @@ void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const ro
 {
     double rSquared;
     double sigmaSquaredOverRSquared;
-    double sigmaSquared = m_potentialConstantSquared;
-    double eps4 = m_energyConstant4;
-    double eps24 = m_energyConstant24;
-    tmpForce = atom2->position() + atom2Offset - atom1->position();
+    double &sigmaSquared = m_potentialConstantSquared;
+    double &eps4 = m_energyConstant4;
+    double &eps24 = m_energyConstant24;
+//    tmpForce = atom2->position() + atom2Offset - atom1->position();
     // Check distances to the nearby cells
-    rSquared = dot(tmpForce, tmpForce);
+    double x = atom2->position()(0) + atom2Offset(0) - atom1->position()(0);
+    double y = atom2->position()(1) + atom2Offset(1) - atom1->position()(1);
+    double z = atom2->position()(2) + atom2Offset(2) - atom1->position()(2);
+    rSquared = x*x + y*y + z*z;
+//    rSquared = dot(tmpForce, tmpForce);
     sigmaSquaredOverRSquared = sigmaSquared/rSquared;
     double sigmaOverR6 = sigmaSquaredOverRSquared * sigmaSquaredOverRSquared * sigmaSquaredOverRSquared;
     double sigmaOverR12 = sigmaOverR6 * sigmaOverR6;
@@ -35,11 +40,25 @@ void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const ro
     tmpPotential = eps4 * (sigmaOverR12 - sigmaOverR6);
 
 //    tmpForce *= factor; // * rVec;
-
-    atom2->addForce(-tmpForce * factor);
-    atom1->addForce(tmpForce * factor);
-    atom2->addPotential(0.5 * tmpPotential);
-    atom1->addPotential(0.5 * tmpPotential);
+    atom2->m_force(0) -= x * factor;
+    atom2->m_force(1) -= y * factor;
+    atom2->m_force(2) -= z * factor;
+    atom2->m_parent->m_force(0) -= x * factor;
+    atom2->m_parent->m_force(1) -= y * factor;
+    atom2->m_parent->m_force(2) -= z * factor;
+    atom1->m_force(0) += x * factor;
+    atom1->m_force(1) += y * factor;
+    atom1->m_force(2) += z * factor;
+    atom1->m_parent->m_force(0) += x * factor;
+    atom1->m_parent->m_force(1) += y * factor;
+    atom1->m_parent->m_force(2) += z * factor;
+//    atom2->m_force -= tmpForce * factor;
+//    atom2->m_parent->m_force -= tmpForce * factor;
+//    atom1->m_force += tmpForce * factor;
+//    atom1->m_parent->m_force += tmpForce * factor;
+//    atom1->m_force += tmpForce * factor;
+    atom2->m_potential += 0.5 * tmpPotential;
+    atom1->m_potential += 0.5 * tmpPotential;
 }
 
 //const rowvec &InteratomicForce::force()

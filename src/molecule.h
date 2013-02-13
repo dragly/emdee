@@ -3,6 +3,7 @@
 
 // Local includes
 class Atom;
+class InteratomicForce;
 
 // System includes
 #include <armadillo>
@@ -17,6 +18,7 @@ using namespace std;
  */
 class Molecule
 {
+    friend class InteratomicForce;
 public:
     Molecule();
 

@@ -48,13 +48,7 @@ const rowvec& Atom::relativePosition() const
     return m_relativePosition;
 }
 
-const rowvec& Atom::position() const
-{
-//    if(m_parent == NULL) {
-//        return m_position;
-//    }
-    return m_position;
-}
+
 
 void Atom::setRelativeVelocity(const rowvec &velocity) {
     refreshAbsolutePositionAndVelocity();
