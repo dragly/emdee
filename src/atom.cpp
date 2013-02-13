@@ -77,14 +77,6 @@ const rowvec &Atom::force() const
     return m_force;
 }
 
-const rowvec& Atom::velocity() const
-{
-//    if(m_parent == NULL) {
-//        return m_velocity;
-//    }
-    return m_velocity;
-}
-
 double Atom::mass()
 {
     return type().mass;

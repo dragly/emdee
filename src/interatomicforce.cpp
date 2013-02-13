@@ -4,7 +4,7 @@
 #include <src/molecule.h>
 
 InteratomicForce::InteratomicForce() :
-    tmpForce(zeros<rowvec>(3)),
+//    tmpForce(zeros<rowvec>(3)),
     zeroVector(zeros<rowvec>(3)),
     m_potentialConstant(1),
     m_potentialConstantSquared(1),
@@ -27,9 +27,9 @@ void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const ro
     double &eps24 = m_energyConstant24;
 //    tmpForce = atom2->position() + atom2Offset - atom1->position();
     // Check distances to the nearby cells
-    double x = atom2->position()(0) + atom2Offset(0) - atom1->position()(0);
-    double y = atom2->position()(1) + atom2Offset(1) - atom1->position()(1);
-    double z = atom2->position()(2) + atom2Offset(2) - atom1->position()(2);
+    double x = atom2->m_position(0) + atom2Offset(0) - atom1->m_position(0);
+    double y = atom2->m_position(1) + atom2Offset(1) - atom1->m_position(1);
+    double z = atom2->m_position(2) + atom2Offset(2) - atom1->m_position(2);
     rSquared = x*x + y*y + z*z;
 //    rSquared = dot(tmpForce, tmpForce);
     sigmaSquaredOverRSquared = sigmaSquared/rSquared;
@@ -37,9 +37,17 @@ void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const ro
     double sigmaOverR12 = sigmaOverR6 * sigmaOverR6;
     // TODO Verify force term
     double factor = - ((eps24) / (rSquared)) * (2 * sigmaOverR12 - sigmaOverR6);
-    tmpPotential = eps4 * (sigmaOverR12 - sigmaOverR6);
+    double tmpPotential = eps4 * (sigmaOverR12 - sigmaOverR6);
 
-//    tmpForce *= factor; // * rVec;
+    // The following is the same as
+
+    //    atom2->m_force -= tmpForce * factor;
+    //    atom2->m_parent->m_force -= tmpForce * factor;
+    //    atom1->m_force += tmpForce * factor;
+    //    atom1->m_parent->m_force += tmpForce * factor;
+    //    atom1->m_force += tmpForce * factor;
+
+    // Acting directly on elements
     atom2->m_force(0) -= x * factor;
     atom2->m_force(1) -= y * factor;
     atom2->m_force(2) -= z * factor;
@@ -52,11 +60,8 @@ void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const ro
     atom1->m_parent->m_force(0) += x * factor;
     atom1->m_parent->m_force(1) += y * factor;
     atom1->m_parent->m_force(2) += z * factor;
-//    atom2->m_force -= tmpForce * factor;
-//    atom2->m_parent->m_force -= tmpForce * factor;
-//    atom1->m_force += tmpForce * factor;
-//    atom1->m_parent->m_force += tmpForce * factor;
-//    atom1->m_force += tmpForce * factor;
+
+    // Potential
     atom2->m_potential += 0.5 * tmpPotential;
     atom1->m_potential += 0.5 * tmpPotential;
 }

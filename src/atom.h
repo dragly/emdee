@@ -26,17 +26,21 @@ public:
     const rowvec &force() const;
     AtomType type();
 
-    const rowvec& position() const
-    {
-        return m_position;
-    }
-    const rowvec& velocity() const;
-
     double mass();
     void clearForceAndPotential();
     void refreshAbsolutePositionAndVelocity();
 
     double potential();
+
+    // Left in header for optimization
+    const rowvec& velocity() const
+    {
+        return m_velocity;
+    }
+    const rowvec& position() const
+    {
+        return m_position;
+    }
 protected:
     rowvec m_relativePosition;
     rowvec m_relativeVelocity;
