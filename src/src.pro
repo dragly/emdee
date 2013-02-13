@@ -19,7 +19,8 @@ SOURCES += main.cpp \
     interatomicforce.cpp \
     integrator/velocityverletintegrator.cpp \
     integrator/integrator.cpp \
-    integrator/eulercromerintegrator.cpp
+    integrator/eulercromerintegrator.cpp \
+    filemanager.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -31,7 +32,8 @@ HEADERS += \
     interatomicforce.h \
     integrator/velocityverletintegrator.h \
     integrator/integrator.h \
-    integrator/eulercromerintegrator.h
+    integrator/eulercromerintegrator.h \
+    filemanager.h
 
 # Building
 myscript.target = myscript

@@ -4,6 +4,7 @@
 #include <src/integrator/integrator.h>
 #include <src/integrator/velocityverletintegrator.h>
 #include <src/integrator/eulercromerintegrator.h>
+#include <src/filemanager.h>
 
 #include <iostream>
 #include <libconfig.h++>
@@ -22,6 +23,10 @@ int main(/*int argc, char** argv*/)
     double unitTemperature = config.lookup("units.temperature");
     double boltzmannConstant = config.lookup("units.boltzmannConstant");
     boltzmannConstant /= (unitLength*unitLength * unitMass / (unitTime*unitTime));
+
+    // File manager config
+    string outFileName;
+    config.lookupValue("simulation.saveFileName", outFileName);
 
     int nSimulationSteps = config.lookup("simulation.nSimulationSteps");
     double timeStep = config.lookup("integrator.timeStep");
@@ -57,12 +62,20 @@ int main(/*int argc, char** argv*/)
     InteratomicForce* force = new InteratomicForce();
     force->setPotentialConstant(potentialConstant);
     force->setEnergyConstant(energyConstant);
+
     // Set up molecule system
     MoleculeSystem system;
     system.setUnitLength(unitLength);
     system.setUnitTime(unitTime);
     system.setUnitMass(unitMass);
     system.setInteratomicForce(force);
+
+    // Set up file manager
+    FileManager fileManager(&system);
+    fileManager.setOutFileName(outFileName);
+    system.setFileManager(&fileManager);
+
+    // Set up integrator
     Integrator* integrator = new VelocityVerletIntegrator(&system);
     integrator->setTimeStep(timeStep);
     system.setIntegrator(integrator);

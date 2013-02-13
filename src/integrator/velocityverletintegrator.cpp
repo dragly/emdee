@@ -22,7 +22,6 @@ void VelocityVerletIntegrator::stepForward() {
         position += velocity * dt;
         molecule->setPosition(position);
     }
-    m_moleculeSystem->obeyBoundaries();
     m_moleculeSystem->updateForces();
 
     for(uint i = 0; i < m_moleculeSystem->molecules().size(); i++) {

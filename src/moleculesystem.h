@@ -7,6 +7,7 @@ class Molecule;
 class Integrator;
 class MoleculeSystemCell;
 class InteratomicForce;
+class FileManager;
 
 // System includes
 #include <iostream>
@@ -25,18 +26,11 @@ class MoleculeSystem
 public:
     MoleculeSystem();
 
-    enum FileFormat {
-        XyzFormat,
-        HDF5Format
-    };
-
     void loadConfiguration(Config* config);
 
-    void load(string fileName);
-    bool save(int step);
-    bool saveXyz(int step);
     void addMolecules(const vector<Molecule *> &molecule);
     const vector<Molecule*> &molecules() const;
+    const vector<Atom*> &atoms() const;
     const vector<MoleculeSystemCell*> &cells() const;
     void updateForces();
     void simulate(int nSimulationSteps);
@@ -45,7 +39,6 @@ public:
     void setBoundaries(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax);
     void setBoundaries(mat boundaries);
 
-    bool saveHDF5(int step);
 //    void setupCells();
     void setupCells(double minCutLength);
 
@@ -69,11 +62,11 @@ public:
     // I/O
     bool isOutputEnabled() const;
     void setOutputEnabled(bool enabled);
-    bool saveBinary(int step);
     void setOutFileName(string fileName);
     bool isSaveEnabled() const;
     void setSaveEnabled(bool enabled);
     void obeyBoundaries();
+    void setFileManager(FileManager* fileManager);
 protected:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
@@ -87,9 +80,6 @@ protected:
 
     int m_nDimensions;
 
-    string m_outFileName;
-    FileFormat outFileFormat;
-
     mat m_cellShiftVectors;
 
     int pow3nDimensions;
@@ -102,6 +92,7 @@ protected:
     Config *m_config;
 
     InteratomicForce *m_interatomicForce;
+    FileManager *m_fileManager;
 
     bool m_isSaveEnabled;
     bool m_isOutputEnabled;
