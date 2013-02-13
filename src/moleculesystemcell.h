@@ -37,9 +37,13 @@ public:
 //    void calculateForceBetweenAtoms(Atom *atom1, Atom *atom2, const rowvec &neighborOffset, rowvec &rVec, rowvec &force, double& sigma, double& eps);
 //    void addAlreadyCalculatedNeighbor(MoleculeSystemCell* neighbor, const rowvec &offset);
     void clearAlreadyCalculatedNeighbors();
-    bool hasAlreadyCalculatedForcesBetweenSelfAndNeighbors();
     void setID(int id);
     int id();
+
+    bool hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
+    {
+        return m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
+    }
 protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
