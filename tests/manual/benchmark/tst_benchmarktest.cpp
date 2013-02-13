@@ -77,7 +77,7 @@ void BenchmarkTest::benchmarkDifferentSizes_data()
     QTest::addColumn<int>("nCells");
     QTest::addColumn<int>("nSimulationSteps");
 //    QTest::newRow("0") << 7 << 20;
-    QTest::newRow("0") << 8 << 2;
+    QTest::newRow("0") << 8 << 100;
 }
 
 QTEST_APPLESS_MAIN(BenchmarkTest)

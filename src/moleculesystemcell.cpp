@@ -92,25 +92,19 @@ const irowvec &MoleculeSystemCell::indices() const
 
 void MoleculeSystemCell::updateForces()
 {
-    Atom* atom1;
-    Atom* atom2;
+    InteratomicForce* interatomicForce = moleculeSystem->interatomicForce();
+
+    // Loop over neighbors and their atoms
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
-        MoleculeSystemCell* neighbor = m_neighborCells.at(iNeighbor);
-        rowvec& neighborOffset = m_neighborOffsets.at(iNeighbor);
+        MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
+        rowvec& neighborOffset = m_neighborOffsets[iNeighbor];
         if(neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()) {
             continue;
         }
-        for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
-            atom1 = m_atoms.at(iAtom);
-            for(uint jAtom = 0; jAtom < neighbor->atoms().size(); jAtom++) {
-                atom2 = neighbor->atoms().at(jAtom);
-                moleculeSystem->interatomicForce()->calculateAndApplyForce(atom1, atom2, neighborOffset);
-//                force = moleculeSystem->interatomicForce()->force();
-//                double potential = moleculeSystem->interatomicForce()->potential();
-//                atom2->addForce(-force);
-//                atom1->addForce(force);
-//                atom2->addPotential(0.5 * potential);
-//                atom1->addPotential(0.5 * potential);
+        const vector<Atom*>& neighborAtoms = neighbor->atoms();
+        for(Atom* atom1 : m_atoms) {
+            for(Atom* atom2 : neighborAtoms) {
+                interatomicForce->calculateAndApplyForce(atom1, atom2, neighborOffset);
             }
         }
         m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = true;
@@ -118,17 +112,10 @@ void MoleculeSystemCell::updateForces()
 
     // Loop over own atoms
     for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
-        atom1 = m_atoms.at(iAtom);
-        // Loop over all neighbors (including ourselves)
+        Atom* atom1 = m_atoms[iAtom];
         for(uint jAtom = iAtom + 1; jAtom < m_atoms.size(); jAtom++) {
-            atom2 = m_atoms.at(jAtom);
-            moleculeSystem->interatomicForce()->calculateAndApplyForce(atom1, atom2);
-//            force = moleculeSystem->interatomicForce()->force();
-//            double potential = moleculeSystem->interatomicForce()->potential();
-//            atom2->addForce(-force);
-//            atom1->addForce(force);
-//            atom2->addPotential(0.5 * potential);
-//            atom1->addPotential(0.5 * potential);
+            Atom* atom2 = m_atoms[jAtom];
+            interatomicForce->calculateAndApplyForce(atom1, atom2);
         }
     }
 }
@@ -150,11 +137,6 @@ void MoleculeSystemCell::clearAlreadyCalculatedNeighbors()
 {
 //    m_alreadyCalculatedNeighbors.clear();
     m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = false;
-}
-
-bool MoleculeSystemCell::hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
-{
-    return m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
 }
 
 void MoleculeSystemCell::setID(int id)

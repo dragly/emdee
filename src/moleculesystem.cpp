@@ -398,23 +398,37 @@ void MoleculeSystem::refreshCellContents() {
     // Add contents (molecules) to the cells
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearMolecules();
-        for(Molecule* molecule : m_molecules) {
-            urowvec moreThan = (molecule->position() >= cell->boundaries().row(0));
-            urowvec lessThan = (molecule->position() < cell->boundaries().row(1));
-            //            cout << "less is more" << endl;
-            //            cout << moreThan << endl;
-            //            cout << lessThan << endl;
-            bool isInside = true;
-            for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-                if(!moreThan(iDim) || !lessThan(iDim)) {
-                    isInside = false;
-                    break;
-                }
-            }
-            if(isInside) {
-                cell->addMolecule(molecule);
-            }
-        }
+    }
+    for(Molecule* molecule : m_molecules) {
+        int i = molecule->position()(0) / m_cellLengths(0);
+        int j = molecule->position()(1) / m_cellLengths(1);
+        int k = molecule->position()(2) / m_cellLengths(2);
+
+        int cellID = k * m_nCells(1) * m_nCells(2) + j *  m_nCells(2) + i;
+
+//        cout << cellID << endl;
+
+        MoleculeSystemCell* cell = m_cells.at(cellID);
+        cell->addMolecule(molecule);
+
+//        urowvec moreThan = (molecule->position() >= cell->boundaries().row(0));
+//        urowvec lessThan = (molecule->position() < cell->boundaries().row(1));
+//        //            cout << "less is more" << endl;
+//        //            cout << moreThan << endl;
+//        //            cout << lessThan << endl;
+//        bool isInside = true;
+//        for(int iDim = 0; iDim < m_nDimensions; iDim++) {
+//            if(!moreThan(iDim) || !lessThan(iDim)) {
+//                isInside = false;
+//                break;
+//            }
+//        }
+//        if(isInside) {
+//            cell->addMolecule(molecule);
+//        } else {
+//            cout << "wrong!" << endl;
+//            exit(919);
+//        }
     }
     //    cout << "The last added cell has " << nNeighbors << " neighbors" << endl;
 }

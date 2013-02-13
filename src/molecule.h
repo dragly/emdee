@@ -3,6 +3,7 @@
 
 // Local includes
 class Atom;
+class InteratomicForce;
 
 // System includes
 #include <armadillo>
@@ -17,12 +18,9 @@ using namespace std;
  */
 class Molecule
 {
+    friend class InteratomicForce;
 public:
     Molecule();
-
-    const rowvec &position() const;
-    const rowvec &velocity() const;
-    const rowvec &force() const;
 
     void setPosition(const rowvec &position);
     void setVelocity(const rowvec &velocity);
@@ -35,6 +33,23 @@ public:
     void addAtom(Atom* atom);
 
     const vector<Atom *> atoms();
+
+    // Simple getters left in header for optimization
+    const rowvec &position() const
+    {
+        return m_position;
+    }
+
+
+    const rowvec &velocity() const
+    {
+        return m_velocity;
+    }
+
+    const rowvec &force() const
+    {
+        return m_force;
+    }
 protected:
     rowvec m_position;
     rowvec m_velocity;

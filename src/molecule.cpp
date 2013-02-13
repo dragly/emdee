@@ -9,22 +9,6 @@ Molecule::Molecule() :
 {
 }
 
-const rowvec &Molecule::position() const
-{
-    return m_position;
-}
-
-
-const rowvec &Molecule::velocity() const
-{
-    return m_velocity;
-}
-
-const rowvec &Molecule::force() const
-{
-    return m_force;
-}
-
 void Molecule::setPosition(const rowvec &position)
 {
     m_position = position;

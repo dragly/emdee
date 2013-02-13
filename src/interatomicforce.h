@@ -32,12 +32,15 @@ public:
     void setEnergyConstant(double energyConstant);
 
 protected:
-    rowvec tmpForce;
-    double tmpPotential;
+//    rowvec tmpForce;
+//    double tmpPotential;
     rowvec zeroVector;
 
     double m_potentialConstant;
+    double m_potentialConstantSquared;
     double m_energyConstant;
+    double m_energyConstant4;
+    double m_energyConstant24;
 };
 
 #endif // INTERATOMICFORCE_H

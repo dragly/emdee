@@ -2,6 +2,7 @@
 #define ATOM_H
 
 class Molecule;
+class InteratomicForce;
 #include <src/atomtype.h>
 
 #include <armadillo>
@@ -11,6 +12,7 @@ using namespace std;
 
 class Atom
 {
+    friend class InteratomicForce;
 public:
     Atom(Molecule* parent);
     Atom(Molecule* parent, AtomType atomType);
@@ -24,19 +26,26 @@ public:
     const rowvec &force() const;
     AtomType type();
 
-    const rowvec& position() const;
-    const rowvec& velocity() const;
-
     double mass();
     void clearForceAndPotential();
     void refreshAbsolutePositionAndVelocity();
 
     double potential();
+
+    // Left in header for optimization
+    const rowvec& velocity() const
+    {
+        return m_velocity;
+    }
+    const rowvec& position() const
+    {
+        return m_position;
+    }
 protected:
     rowvec m_relativePosition;
     rowvec m_relativeVelocity;
-    rowvec m_force;
     rowvec m_position;
+    rowvec m_force;
     rowvec m_velocity;
     AtomType m_type;
     double m_potential;
