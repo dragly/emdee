@@ -6,7 +6,9 @@
 class BerendsenThermostat : public Modifier
 {
 public:
-    BerendsenThermostat();
+    BerendsenThermostat(MoleculeSystem *moleculeSystem);
+
+    void apply();
 };
 
 #endif // BERENDSENTHERMOSTAT_H

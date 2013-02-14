@@ -8,6 +8,7 @@ class Integrator;
 class MoleculeSystemCell;
 class InteratomicForce;
 class FileManager;
+class Modifier;
 
 // System includes
 #include <iostream>
@@ -63,9 +64,20 @@ public:
     void obeyBoundaries();
     void setFileManager(FileManager* fileManager);
 
+    // Modifiers
+    void addModifier(Modifier* modifier);
+    void applyModifiers();
+
+    // Getters (fast)
+
     Integrator* integrator() {
         return m_integrator;
     }
+    double temperature() {
+        return m_temperature;
+    }
+
+    void setBoltzmannConstant(double boltzmannConstant);
 
 protected:
     vector<Molecule*> m_molecules;
@@ -101,6 +113,8 @@ protected:
     H5::H5File* hdf5File;
 
     double m_temperature;
+
+    vector<Modifier*> m_modifiers;
 };
 
 #endif // MOLECULESYSTEM_H

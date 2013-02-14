@@ -5,6 +5,7 @@
 #include <src/integrator/velocityverletintegrator.h>
 #include <src/integrator/eulercromerintegrator.h>
 #include <src/filemanager.h>
+#include <src/modifier/berendsenthermostat.h>
 
 #include <iostream>
 #include <libconfig.h++>
@@ -67,6 +68,7 @@ int main(/*int argc, char** argv*/)
     MoleculeSystem system;
 
     system.setInteratomicForce(force);
+    system.setBoltzmannConstant(boltzmannConstant);
 
     // Set up file manager
     FileManager fileManager(&system);
@@ -76,6 +78,10 @@ int main(/*int argc, char** argv*/)
     fileManager.setUnitMass(unitMass);
 
     system.setFileManager(&fileManager);
+
+    // Set up modifiers
+    BerendsenThermostat thermostat(&system);
+    system.addModifier(&thermostat);
 
     // Set up integrator
     Integrator* integrator = new VelocityVerletIntegrator(&system);

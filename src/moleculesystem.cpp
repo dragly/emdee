@@ -8,6 +8,7 @@
 #include <src/interatomicforce.h>
 #include <src/integrator/velocityverletintegrator.h>
 #include <src/filemanager.h>
+#include <src/modifier/modifier.h>
 
 // System headers
 #include <fstream>
@@ -50,7 +51,7 @@ void MoleculeSystem::updateStatistics()
     // Calculate kinetic energy
     double totalKineticEnergy = 0;
     for(Atom* atom : m_atoms) {
-        totalKineticEnergy += 0.5 * atom->mass() * atom->velocity() * atom->velocity();
+        totalKineticEnergy += 0.5 * atom->mass() * dot(atom->velocity(), atom->velocity());
     }
     m_temperature = totalKineticEnergy / (3./2. * m_boltzmannConstant * m_atoms.size());
 
@@ -194,10 +195,12 @@ void MoleculeSystem::simulate(int nSimulationSteps)
 //        updateForces();
 //        refreshCellContents();
         //        updateForces();
-//        updateStatistics();
+        applyModifiers();
+        updateStatistics();
         if(m_isSaveEnabled) {
             m_fileManager->save(iStep);
         }
+        cout << "Temperature: " << m_temperature << endl;
     }
 }
 
@@ -225,6 +228,16 @@ void MoleculeSystem::obeyBoundaries() {
 void MoleculeSystem::setFileManager(FileManager *fileManager)
 {
     m_fileManager = fileManager;
+}
+
+void MoleculeSystem::addModifier(Modifier *modifier)
+{
+    m_modifiers.push_back(modifier);
+}
+
+void MoleculeSystem::setBoltzmannConstant(double boltzmannConstant)
+{
+    m_boltzmannConstant = boltzmannConstant;
 }
 
 void MoleculeSystem::setBoundaries(double min, double max)
@@ -465,3 +478,10 @@ const mat &MoleculeSystem::cellShiftVectors()
     return m_cellShiftVectors;
 }
 
+
+void MoleculeSystem::applyModifiers()
+{
+    for(Modifier* modifier : m_modifiers) {
+        modifier->apply();
+    }
+}
