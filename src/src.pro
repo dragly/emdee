@@ -20,7 +20,9 @@ SOURCES += main.cpp \
     integrator/velocityverletintegrator.cpp \
     integrator/integrator.cpp \
     integrator/eulercromerintegrator.cpp \
-    filemanager.cpp
+    filemanager.cpp \
+    modifier/modifier.cpp \
+    modifier/berendsenthermostat.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -33,7 +35,9 @@ HEADERS += \
     integrator/velocityverletintegrator.h \
     integrator/integrator.h \
     integrator/eulercromerintegrator.h \
-    filemanager.h
+    filemanager.h \
+    modifier/modifier.h \
+    modifier/berendsenthermostat.h
 
 # Building
 myscript.target = myscript

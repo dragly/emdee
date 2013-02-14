@@ -55,7 +55,7 @@ void SystemTest::cellSetup()
     system.setBoundaries(generator.lastBoundaries());
     system.addMolecules(molecules);
     system.setupCells(potentialConstant * 3);
-    system.setUnitLength(unitLength);
+//    system.setUnitLength(unitLength);
 
     ulong nMoleculesInCells = 0;
     for(MoleculeSystemCell* cell : system.cells()) {

@@ -11,6 +11,7 @@ void VelocityVerletIntegrator::initialize() {
     m_moleculeSystem->updateForces();
 }
 
+// TODO Build the timestep into the velocity to reduce the number of computations
 void VelocityVerletIntegrator::stepForward() {
     double dt = m_timeStep;
     for(uint i = 0; i < m_moleculeSystem->molecules().size(); i++) {

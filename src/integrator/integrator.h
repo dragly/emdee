@@ -15,6 +15,10 @@ public:
     virtual void stepForward() = 0;
     virtual void initialize() = 0;
     void setTimeStep(double timeStep);
+    double timeStep() {
+        return m_timeStep;
+    }
+
 protected:
     MoleculeSystem *m_moleculeSystem;
 

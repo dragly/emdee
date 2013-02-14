@@ -27,7 +27,8 @@ SOURCES += tst_systemtest.cpp \
     ../../../src/atom.cpp \
     ../../../src/integrator/velocityverletintegrator.cpp \
     ../../../src/integrator/integrator.cpp \
-    ../../../src/integrator/eulercromerintegrator.cpp
+    ../../../src/integrator/eulercromerintegrator.cpp \
+    ../../../src/filemanager.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
@@ -41,4 +42,5 @@ HEADERS += \
     ../../../src/atom.h \
     ../../../src/integrator/velocityverletintegrator.h \
     ../../../src/integrator/integrator.h \
-    ../../../src/integrator/eulercromerintegrator.h
+    ../../../src/integrator/eulercromerintegrator.h \
+    ../../../src/filemanager.h

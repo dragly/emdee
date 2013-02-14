@@ -54,11 +54,6 @@ public:
     InteratomicForce* interatomicForce();
     void updateStatistics();
 
-    // Units
-    void setUnitLength(double unitLength);
-    void setUnitTime(double unitTime);
-    void setUnitMass(double unitMass);
-
     // I/O
     bool isOutputEnabled() const;
     void setOutputEnabled(bool enabled);
@@ -67,6 +62,11 @@ public:
     void setSaveEnabled(bool enabled);
     void obeyBoundaries();
     void setFileManager(FileManager* fileManager);
+
+    Integrator* integrator() {
+        return m_integrator;
+    }
+
 protected:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
@@ -100,11 +100,7 @@ protected:
     bool m_areCellsSetUp;
     H5::H5File* hdf5File;
 
-    // Units
-    double m_unitLength;
-    double m_unitTime;
-    double m_unitEnergy;
-    double m_unitMass;
+    double m_temperature;
 };
 
 #endif // MOLECULESYSTEM_H

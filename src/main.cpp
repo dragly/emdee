@@ -65,20 +65,24 @@ int main(/*int argc, char** argv*/)
 
     // Set up molecule system
     MoleculeSystem system;
-    system.setUnitLength(unitLength);
-    system.setUnitTime(unitTime);
-    system.setUnitMass(unitMass);
+
     system.setInteratomicForce(force);
 
     // Set up file manager
     FileManager fileManager(&system);
     fileManager.setOutFileName(outFileName);
+    fileManager.setUnitLength(unitLength);
+    fileManager.setUnitTime(unitTime);
+    fileManager.setUnitMass(unitMass);
+
     system.setFileManager(&fileManager);
 
     // Set up integrator
     Integrator* integrator = new VelocityVerletIntegrator(&system);
     integrator->setTimeStep(timeStep);
     system.setIntegrator(integrator);
+
+    // Set up the rest of the system
     system.loadConfiguration(&config); // TODO remove this
     system.addMolecules(molecules);
     cout << "addded" << endl;

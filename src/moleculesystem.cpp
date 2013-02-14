@@ -14,27 +14,8 @@
 #include <iomanip>
 #include <sys/stat.h>
 #include <algorithm>
-#include <boost/lexical_cast.hpp>
-#include <H5Cpp.h>
-#include <H5File.h>
-//#include <hdf5.h>
 
 using namespace std;
-using namespace H5;
-
-typedef struct s1_t {
-    char atomType[3];
-    double positionX;
-    double positionY;
-    double positionZ;
-    double velocityX;
-    double velocityY;
-    double velocityZ;
-    double forceX;
-    double forceY;
-    double forceZ;
-    int cellID;
-} s1_t;
 
 MoleculeSystem::MoleculeSystem() :
     m_boltzmannConstant(1.0),
@@ -44,10 +25,7 @@ MoleculeSystem::MoleculeSystem() :
     m_isSaveEnabled(true),
     m_isOutputEnabled(true),
     m_areCellsSetUp(false),
-    m_unitLength(1),
-    m_unitTime(1),
-    m_unitEnergy(1),
-    m_unitMass(1)
+    m_temperature(1.0)
 {
     m_interatomicForce = new InteratomicForce();
     m_integrator = new VelocityVerletIntegrator(this);
@@ -70,11 +48,15 @@ void MoleculeSystem::loadConfiguration(Config *config)
 void MoleculeSystem::updateStatistics()
 {
     // Calculate kinetic energy
+    double totalKineticEnergy = 0;
+    for(Atom* atom : m_atoms) {
+        totalKineticEnergy += 0.5 * atom->mass() * atom->velocity() * atom->velocity();
+    }
+    m_temperature = totalKineticEnergy / (3./2. * m_boltzmannConstant * m_atoms.size());
 
     // Calculate potential energy
 
     // Calculate pressure
-
 }
 
 //void MoleculeSystem::setupCells()
@@ -431,21 +413,6 @@ void MoleculeSystem::refreshCellContents() {
 //        }
     }
     //    cout << "The last added cell has " << nNeighbors << " neighbors" << endl;
-}
-
-void MoleculeSystem::setUnitLength(double unitLength)
-{
-    m_unitLength = unitLength;
-}
-
-void MoleculeSystem::setUnitTime(double unitTime)
-{
-    m_unitTime = unitTime;
-}
-
-void MoleculeSystem::setUnitMass(double unitMass)
-{
-    m_unitMass = unitMass;
 }
 
 //void MoleculeSystem::setPotentialConstant(double potentialConstant)
