@@ -30,13 +30,24 @@ public:
 
     void setOutFileName(string fileName);
 
-private:
+    // Units
+    void setUnitLength(double unitLength);
+    void setUnitTime(double unitTime);
+    void setUnitMass(double unitMass);
+
+protected:
     string m_outFileName;
 
     FileFormat outFileFormat;
 
     MoleculeSystem *m_moleculeSystem;
 
+
+    // Units
+    double m_unitLength;
+    double m_unitTime;
+    double m_unitEnergy;
+    double m_unitMass;
 };
 
 #endif // FILEMANAGER_H

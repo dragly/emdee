@@ -9,13 +9,35 @@
 // System includes
 #include <iomanip>
 #include <armadillo>
+#include <H5Cpp.h>
+#include <H5File.h>
+//#include <hdf5.h>
 
 using namespace std;
 using namespace arma;
+using namespace H5;
+
+typedef struct s1_t {
+    char atomType[3];
+    double positionX;
+    double positionY;
+    double positionZ;
+    double velocityX;
+    double velocityY;
+    double velocityZ;
+    double forceX;
+    double forceY;
+    double forceZ;
+    int cellID;
+} s1_t;
 
 FileManager::FileManager(MoleculeSystem* system) :
+    m_outFileName("/tmp/data*.bin"),
     m_moleculeSystem(system),
-    m_outFileName("/tmp/data*.bin")
+    m_unitLength(1),
+    m_unitTime(1),
+    m_unitEnergy(1),
+    m_unitMass(1)
 {
 }
 
@@ -176,7 +198,7 @@ bool FileManager::saveHDF5(int step) {
     /*
       * Create the data space.
       */
-    hsize_t dim[] = {m_atoms.size()};   /* Dataspace dimensions */
+    hsize_t dim[] = {m_moleculeSystem->atoms().size()};   /* Dataspace dimensions */
     DataSpace space( 1, dim );
 
     /*
@@ -223,4 +245,20 @@ bool FileManager::saveHDF5(int step) {
 void FileManager::setOutFileName(string fileName)
 {
     m_outFileName = fileName;
+}
+
+
+void FileManager::setUnitLength(double unitLength)
+{
+    m_unitLength = unitLength;
+}
+
+void FileManager::setUnitTime(double unitTime)
+{
+    m_unitTime = unitTime;
+}
+
+void FileManager::setUnitMass(double unitMass)
+{
+    m_unitMass = unitMass;
 }
