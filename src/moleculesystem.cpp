@@ -27,7 +27,8 @@ MoleculeSystem::MoleculeSystem() :
     m_areCellsSetUp(false),
     m_temperature(1.0),
     m_averageDisplacement(0),
-    m_averageSquareDisplacement(0)
+    m_averageSquareDisplacement(0),
+    m_step(0)
 {
     m_interatomicForce = new InteratomicForce();
     m_integrator = new VelocityVerletIntegrator(this);
@@ -45,7 +46,28 @@ void MoleculeSystem::loadConfiguration(Config *config)
     m_isSaveEnabled = config->lookup("simulation.saveEnabled");
 }
 
+bool MoleculeSystem::load(string fileName) {
+    return m_fileManager->load(fileName);
+}
 
+void MoleculeSystem::setStep(uint step)
+{
+    m_step = step;
+}
+
+void MoleculeSystem::deleteMoleculesAndAtoms() {
+    for(Molecule* molecule : m_molecules) {
+        delete molecule;
+    }
+    for(Atom* atom : m_atoms) {
+        delete atom;
+    }
+    for(MoleculeSystemCell* cell : m_cells) {
+        cell->clearMolecules();
+    }
+    m_molecules.clear();
+    m_atoms.clear();
+}
 
 void MoleculeSystem::updateStatistics()
 {
@@ -191,14 +213,15 @@ void MoleculeSystem::simulate(int nSimulationSteps)
     m_integrator->initialize();
     updateStatistics();
     if(m_isSaveEnabled) {
-        m_fileManager->save(0);
+        m_fileManager->save(m_step);
     }
     if(isOutputEnabled()) {
         cout << "Starting simulation " << endl;
     }
     for(int iStep = 1; iStep < nSimulationSteps; iStep++) {
+        m_step++;
         if(isOutputEnabled()) {
-            cout << iStep << ".." << endl;
+            cout << "Step " << m_step << ".." << endl;
         }
         m_integrator->stepForward();
         //        cout << "Integrator done" << endl;
@@ -208,7 +231,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         applyModifiers();
         updateStatistics();
         if(m_isSaveEnabled) {
-            m_fileManager->save(iStep);
+            m_fileManager->save(m_step);
         }
     }
 }
@@ -262,7 +285,7 @@ void MoleculeSystem::setBoundaries(double xMin, double xMax, double yMin, double
 void MoleculeSystem::setBoundaries(mat boundaries)
 {
     if(isOutputEnabled()) {
-        cout << "Setting boundaries" << endl;
+        cout << "Setting boundaries to" << endl << boundaries;
     }
     m_boundaries = boundaries;
     irowvec counters = zeros<irowvec>(m_nDimensions);
@@ -296,6 +319,7 @@ void MoleculeSystem::setupCells(double minCutLength) {
     m_cellLengths = zeros<rowvec>(m_nDimensions);
     for(int iDim = 0; iDim < m_nDimensions; iDim++) {
         double totalLength = m_boundaries(1,iDim) - m_boundaries(0,iDim);
+        cout << totalLength << endl;
         m_nCells(iDim) = totalLength / minCutLengthUnit;
         m_cellLengths(iDim) = totalLength / m_nCells(iDim);
         nCellsTotal *= m_nCells(iDim);
@@ -490,4 +514,12 @@ void MoleculeSystem::applyModifiers()
     for(Modifier* modifier : m_modifiers) {
         modifier->apply();
     }
+}
+
+void MoleculeSystem::setAverageDisplacement(double averageDisplacement) {
+    m_averageDisplacement = averageDisplacement;
+}
+
+void MoleculeSystem::setAverageSquareDisplacement(double averageSquareDisplacement) {
+    m_averageSquareDisplacement = averageSquareDisplacement;
 }

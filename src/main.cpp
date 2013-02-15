@@ -58,6 +58,17 @@ int main(/*int argc, char** argv*/)
     // Set up initial system
     // Set up molecule system
     MoleculeSystem system;
+
+    // Set up file manager
+    FileManager fileManager(&system);
+    fileManager.setOutFileName(outFileName);
+    fileManager.setUnitLength(unitLength);
+    fileManager.setUnitTime(unitTime);
+    fileManager.setUnitMass(unitMass);
+    fileManager.setUnitTemperature(unitTemperature);
+
+    system.setFileManager(&fileManager);
+
     Setting& initialization = config.lookup("initialization");
     for(uint i = 0; true; i++) {
         string initializationType;
@@ -74,6 +85,8 @@ int main(/*int argc, char** argv*/)
             int nCells = initialization[i]["nCells"];
             vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
             system.addMolecules(molecules);
+            system.setBoundaries(generator.lastBoundaries());
+            cout << "setbounds" << endl;
         } else if(initializationType == "boltzmannVelocity") {
             double initialTemperature = initialization[i]["initialTemperature"];
             initialTemperature /= unitTemperature;
@@ -82,6 +95,9 @@ int main(/*int argc, char** argv*/)
             double maxVelocity = initialization[i]["maxVelocity"];
             maxVelocity /= (unitLength / unitTime);
             generator.uniformDistributeVelocities(maxVelocity, system.molecules());
+        } else if(initializationType == "loadFile") {
+            string fileName = initialization[i]["fileName"];
+            system.load(fileName);
         }
     }
 //    vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
@@ -93,16 +109,6 @@ int main(/*int argc, char** argv*/)
 
     system.setInteratomicForce(force);
 //    system.setBoltzmannConstant(boltzmannConstant);
-
-    // Set up file manager
-    FileManager fileManager(&system);
-    fileManager.setOutFileName(outFileName);
-    fileManager.setUnitLength(unitLength);
-    fileManager.setUnitTime(unitTime);
-    fileManager.setUnitMass(unitMass);
-    fileManager.setUnitTemperature(unitTemperature);
-
-    system.setFileManager(&fileManager);
 
     // Set up modifiers
     Setting& modifiers = config.lookup("modifiers");
@@ -135,8 +141,6 @@ int main(/*int argc, char** argv*/)
     // Set up the rest of the system
     system.loadConfiguration(&config); // TODO remove this
     cout << "addded" << endl;
-    system.setBoundaries(generator.lastBoundaries());
-    cout << "setbounds" << endl;
     system.setupCells(potentialConstant * 3);
     cout << "Setup cells" << endl;
     system.simulate(nSimulationSteps);

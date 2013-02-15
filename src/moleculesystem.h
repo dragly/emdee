@@ -82,9 +82,18 @@ public:
     double averageSquareDisplacement() {
         return m_averageSquareDisplacement;
     }
+    const mat& boundaries() {
+        return m_boundaries;
+    }
 
     void setBoltzmannConstant(double boltzmannConstant);
 
+    bool load(string fileName);
+
+    void setStep(uint step);
+    void deleteMoleculesAndAtoms();
+    void setAverageSquareDisplacement(double averageSquareDisplacement);
+    void setAverageDisplacement(double averageDisplacement);
 protected:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
@@ -122,6 +131,8 @@ protected:
     vector<Modifier*> m_modifiers;
     double m_averageDisplacement;
     double m_averageSquareDisplacement;
+
+    uint m_step;
 };
 
 #endif // MOLECULESYSTEM_H

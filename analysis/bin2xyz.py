@@ -25,10 +25,10 @@ for fileName in fileNames:
     f.write("Some nice comment\n")
     for atom in atoms:
         atomString = ("%s %.4e %.4e %.4e %.4e %.4e %.4e %.4e %.4e %.4e %.4e %d\n" % (atom["type"], 
-                                                                                     atom["positionX"] / 1e-10,atom["positionY"] / 1e-10,atom["positionZ"] / 1e-10,
+                                                                                     atom["position"][0] / 1e-10,atom["position"][1] / 1e-10,atom["position"][2] / 1e-10,
 #                                                                                     atom["positionX"],atom["positionY"],atom["positionZ"],
-                                                                                atom["velocityX"],atom["velocityY"],atom["velocityZ"],
-                                                                                atom["forceX"],atom["forceY"],atom["forceZ"],
+                                                                                atom["velocity"][0], atom["velocity"][1], atom["velocity"][2],
+                                                                                atom["force"][0],atom["force"][1],atom["force"][2],
                                                                                 atom["potential"], atom["cellID"]))
         f.write(atomString)
             

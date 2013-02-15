@@ -39,7 +39,7 @@ for fileName in fileNames:
 #    f = h5py.File(fileName, "r")
 #    atoms = f.get("ArrayOfStructures")
     atomMass = 6.6353628e-26
-    velocityMagnitude = sqrt(atoms["velocityX"]**2 + atoms["velocityY"]**2 + atoms["velocityZ"]**2)
+    velocityMagnitude = sqrt(atoms["velocity"][0]**2 + atoms["velocity"][1]**2 + atoms["velocity"][2]**2)
     kineticEnergy = 0.5 * atomMass * sum(velocityMagnitude**2)
     potentialEnergy = sum(atoms["potential"])
 

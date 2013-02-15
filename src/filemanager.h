@@ -22,7 +22,8 @@ public:
         HDF5Format
     };
 
-    void load(string fileName);
+    bool load(string fileName);
+    bool loadBinary(string fileName);
     bool save(int step);
     bool saveXyz(int step);
     bool saveHDF5(int step);
