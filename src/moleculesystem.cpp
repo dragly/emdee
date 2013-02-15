@@ -78,15 +78,6 @@ void MoleculeSystem::updateStatistics()
     // Calculate pressure
 }
 
-//void MoleculeSystem::setupCells()
-//{
-//    setupCells(m_potentialConstant * 3);
-//    if(m_cells.size() < 27) {
-//        cerr << "The number of cells can never be less than 27!" << endl;
-//        throw new std::logic_error("The number of cells can never be less than 27!");
-//    }
-//}
-
 void MoleculeSystem::addMolecules(const vector<Molecule *>& molecule)
 {
     m_molecules.insert(m_molecules.end(), molecule.begin(), molecule.end());
