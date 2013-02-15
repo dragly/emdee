@@ -14,13 +14,17 @@ Generator::Generator() :
 {
 }
 
-//void Generator::loadConfiguration(Config *config)
-//{
-//    m_unitLength = config->lookup("units.length");
-//    m_boltzmannConstant = config->lookup("units.boltzmannConstant");
-//}
-
-vector<Molecule*> Generator::generateFcc(double b, int nCells, AtomType atomType) {
+/*!
+ * \brief Generator::generateFcc
+ * \param b
+ * \param nCells
+ * \param atomType
+ *
+ * All molecules start out with displacement zero.
+ *
+ * \return
+ */
+vector<Molecule*> Generator::generateFcc(double sideLength, int nCells, AtomType atomType) {
     vector<Molecule*> moleculeList;
     rowvec offset = zeros<rowvec>(3);
     for(int i = 0; i < nCells; i++) {
@@ -35,30 +39,31 @@ vector<Molecule*> Generator::generateFcc(double b, int nCells, AtomType atomType
                     case 0:
                         break;
                     case 1:
-                        face << b / 2 << b / 2 <<  0;
+                        face << sideLength / 2 << sideLength / 2 <<  0;
                         break;
                     case 2:
-                        face << b / 2 << 0 << b / 2;
+                        face << sideLength / 2 << 0 << sideLength / 2;
                         break;
                     case 3:
-                        face << 0 << b / 2 << b / 2;
+                        face << 0 << sideLength / 2 << sideLength / 2;
                         break;
                     }
                     rowvec position = zeros<rowvec>(3);
                     position = offset + face;
                     molecule->setPosition(position);
+                    molecule->clearDisplacement();
                     moleculeList.push_back(molecule);
                 }
-                offset(2) += b;
+                offset(2) += sideLength;
             }
-            offset(1) += b;
+            offset(1) += sideLength;
             offset(2) = 0;
         }
-        offset(0) += b;
+        offset(0) += sideLength;
         offset(1) = 0;
     }
     m_lastBoundaries << 0 << 0 << 0 << endr
-                        << nCells * b << nCells * b << nCells * b;
+                        << nCells * sideLength << nCells * sideLength << nCells * sideLength;
 
     cout << "Generated " << moleculeList.size() << " molecules in FCC structure!" << endl;
     cout << "Boundaries are " << m_lastBoundaries << endl;

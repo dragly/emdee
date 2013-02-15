@@ -25,6 +25,9 @@ int main(/*int argc, char** argv*/)
     double boltzmannConstant = config.lookup("units.boltzmannConstant");
     boltzmannConstant /= (unitLength*unitLength * unitMass / (unitTime*unitTime));
 
+    // TODO Why must the boltzmannConstant be set to one here?
+    boltzmannConstant = 1;
+
     // File manager config
     string outFileName;
     config.lookupValue("simulation.saveFileName", outFileName);
@@ -33,6 +36,7 @@ int main(/*int argc, char** argv*/)
     double timeStep = config.lookup("integrator.timeStep");
     timeStep /= unitTime;
     Generator generator;
+    generator.setBoltzmannConstant(boltzmannConstant);
 //    generator.loadConfiguration(&config);
 
     // Generator specific config
@@ -80,8 +84,29 @@ int main(/*int argc, char** argv*/)
     system.setFileManager(&fileManager);
 
     // Set up modifiers
-    BerendsenThermostat thermostat(&system);
-    system.addModifier(&thermostat);
+    Setting& modifiers = config.lookup("modifiers");
+    uint i = 0;
+    while(true) {
+        string modifierName;
+        try {
+            modifiers[i].lookupValue("type", modifierName);
+        } catch(exception) {
+            cout << "No more modifiers found. Breaking." << endl;
+            break;
+        }
+        cout << "Found modifier " << modifierName << endl;
+        if(modifierName == "berendsenThermostat") {
+            BerendsenThermostat thermostat(&system);
+            double targetTemperature = modifiers[i]["targetTemperature"];
+            targetTemperature /= unitTemperature;
+            double relaxationTime = modifiers[i]["relaxationTime"];
+            relaxationTime /= unitTime;
+            thermostat.setTargetTemperature(targetTemperature);
+            thermostat.setRelaxationTime(relaxationTime);
+            system.addModifier(&thermostat);
+        }
+        i++;
+    }
 
     // Set up integrator
     Integrator* integrator = new VelocityVerletIntegrator(&system);

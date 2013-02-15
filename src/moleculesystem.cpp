@@ -54,8 +54,25 @@ void MoleculeSystem::updateStatistics()
         totalKineticEnergy += 0.5 * atom->mass() * dot(atom->velocity(), atom->velocity());
     }
     m_temperature = totalKineticEnergy / (3./2. * m_boltzmannConstant * m_atoms.size());
+    cout << "Temperature: " << setprecision(25) << m_temperature << endl;
 
     // Calculate potential energy
+    double totalPotentialEnergy = 0;
+    for(Atom* atom : m_atoms) {
+        totalPotentialEnergy += atom->potential();
+    }
+    cout << "totaltPotentialEnergy " << setprecision(25) << totalPotentialEnergy << endl;
+    cout << "averagePotentialEnergy " << setprecision(25) << totalPotentialEnergy / m_atoms.size() << endl;
+
+    // Calculate diffusion constant
+    rowvec averageDisplacement = zeros<rowvec>(3);
+    double averageSquareDisplacement = 0;
+    for(Molecule* molecule : m_molecules) {
+        averageDisplacement += molecule->displacement();
+        averageSquareDisplacement += dot(molecule->displacement(), molecule->displacement());
+    }
+    cout << "averageDisplacement " << setprecision(25) << averageDisplacement;
+    cout << "averageSquareDisplacement " << setprecision(25) << averageSquareDisplacement << endl;
 
     // Calculate pressure
 }
@@ -180,6 +197,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
 
     // Set up integrator
     m_integrator->initialize();
+    updateStatistics();
     if(m_isSaveEnabled) {
         m_fileManager->save(0);
     }
@@ -200,7 +218,6 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         if(m_isSaveEnabled) {
             m_fileManager->save(iStep);
         }
-        cout << "Temperature: " << m_temperature << endl;
     }
 }
 
@@ -215,11 +232,13 @@ void MoleculeSystem::obeyBoundaries() {
                 cerr << "Wow! A molecule ended up  outside 2 x boundaries! The time step must be too big. No reason to continue..." << endl;
                 throw(new exception());
             } else if(molecule->position()(iDim) > m_boundaries(1,iDim)) {
-                position(iDim) -= (m_boundaries(1,iDim) - m_boundaries(0,iDim));
+                position(iDim) -= sideLength;
                 molecule->setPosition(position);
+                molecule->addDisplacement(sideLength, iDim);
             } else if(molecule->position()(iDim) < m_boundaries(0,iDim)) {
-                position(iDim) += (m_boundaries(1,iDim) - m_boundaries(0,iDim));
+                position(iDim) += sideLength;
                 molecule->setPosition(position);
+                molecule->addDisplacement(-sideLength, iDim);
             }
         }
     }

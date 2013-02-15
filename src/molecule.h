@@ -33,6 +33,9 @@ public:
     void addAtom(Atom* atom);
 
     const vector<Atom *> atoms();
+    void clearDisplacement();
+    void addDisplacement(const rowvec &displacement);
+    void addDisplacement(double displacement, uint component);
 
     // Simple getters left in header for optimization
     const rowvec &position() const
@@ -50,10 +53,16 @@ public:
     {
         return m_force;
     }
+
+    const rowvec& displacement() const
+    {
+        return m_displacement;
+    }
 protected:
     rowvec m_position;
     rowvec m_velocity;
     rowvec m_force;
+    rowvec m_displacement;
 
     double m_mass;
 

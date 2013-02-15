@@ -19,7 +19,7 @@ class Generator
 public:
     Generator();
 //    void loadConfiguration(Config* config);
-    vector<Molecule*> generateFcc(double b, int nCells, AtomType atomType);
+    vector<Molecule*> generateFcc(double sideLength, int nCells, AtomType atomType);
     void boltzmannDistributeVelocities(double temperature, vector<Molecule *> molecules);
     void uniformDistributeVelocities(double maxVelocity, vector<Molecule *> molecules);
 
