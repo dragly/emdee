@@ -80,6 +80,7 @@ int main(/*int argc, char** argv*/)
     fileManager.setUnitLength(unitLength);
     fileManager.setUnitTime(unitTime);
     fileManager.setUnitMass(unitMass);
+    fileManager.setUnitTemperature(unitTemperature);
 
     system.setFileManager(&fileManager);
 

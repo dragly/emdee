@@ -76,7 +76,7 @@ public:
     double temperature() {
         return m_temperature;
     }
-    const rowvec& averageDisplacement() {
+    double averageDisplacement() {
         return m_averageDisplacement;
     }
     double averageSquareDisplacement() {
@@ -120,7 +120,7 @@ protected:
     double m_temperature;
 
     vector<Modifier*> m_modifiers;
-    rowvec m_averageDisplacement;
+    double m_averageDisplacement;
     double m_averageSquareDisplacement;
 };
 

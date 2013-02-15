@@ -38,7 +38,8 @@ FileManager::FileManager(MoleculeSystem* system) :
     m_unitLength(1),
     m_unitTime(1),
     m_unitEnergy(1),
-    m_unitMass(1)
+    m_unitMass(1),
+    m_unitTemperature(1)
 {
 }
 
@@ -123,20 +124,18 @@ bool FileManager::saveBinary(int step) {
 
     //    char line[1000];
     // Write header data
-    double time = step * m_moleculeSystem->integrator()->timeStep();
-    double timeStep = m_moleculeSystem->integrator()->timeStep();
+    double time = step * m_moleculeSystem->integrator()->timeStep() * m_unitTime;
+    double timeStep = m_moleculeSystem->integrator()->timeStep() * m_unitTime;
     int nAtoms = m_moleculeSystem->atoms().size();
-    double temperature = m_moleculeSystem->temperature();
-    rowvec averageDisplacement = m_moleculeSystem->averageDisplacement();
-    double averageSquareDisplacement = m_moleculeSystem->averageSquareDisplacement();
+    double temperature = m_moleculeSystem->temperature() * m_unitTemperature;
+    double averageDisplacement = m_moleculeSystem->averageDisplacement() * m_unitLength;
+    double averageSquareDisplacement = m_moleculeSystem->averageSquareDisplacement() * m_unitLength * m_unitLength;
     outFile.write((char*)&step, sizeof(int));
     outFile.write((char*)&time, sizeof(double));
     outFile.write((char*)&timeStep, sizeof(double));
     outFile.write((char*)&nAtoms, sizeof(int));
     outFile.write((char*)&temperature, sizeof(double));
-    outFile.write((char*)&averageDisplacement(0), sizeof(double));
-    outFile.write((char*)&averageDisplacement(1), sizeof(double));
-    outFile.write((char*)&averageDisplacement(2), sizeof(double));
+    outFile.write((char*)&averageDisplacement, sizeof(double));
     outFile.write((char*)&averageSquareDisplacement, sizeof(double));
 
     // Write atom data
@@ -280,4 +279,8 @@ void FileManager::setUnitTime(double unitTime)
 void FileManager::setUnitMass(double unitMass)
 {
     m_unitMass = unitMass;
+}
+
+void FileManager::setUnitTemperature(double unitTemperature) {
+    m_unitTemperature = unitTemperature;
 }

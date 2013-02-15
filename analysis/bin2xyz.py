@@ -8,7 +8,7 @@ Created on Fri Feb  8 17:02:54 2013
 from pylab import *
 import time
 from sys import argv
-from fys4460 import dataType
+from fys4460 import dataType, headerType
 fileNames = argv[1:]
 for fileName in fileNames:
     print "Converting " + fileName
@@ -16,7 +16,9 @@ for fileName in fileNames:
         print "Filename should end with .bin"
         exit()
     t1 = time.time()
-    atoms = fromfile(fileName, dtype=dataType)
+    f1 = open(fileName, "rb")
+    header = fromfile(f1, dtype=headerType, count=1)
+    atoms = fromfile(f1, dtype=dataType)
     
     f = open(fileName.replace(".bin", ".xyz"), "w")
     f.write(str(len(atoms)) + "\n")

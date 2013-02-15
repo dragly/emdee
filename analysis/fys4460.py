@@ -1,7 +1,7 @@
 from pylab import dtype
-headerType = dtype([("step", int), ("time", float), ("timeStep", float), 
-                  ("nAtoms", int), ("temperature", float),
-                    ("averageDisplacementX", float), ("averageDisplacementY", float), ("averageDisplacementZ", float), 
+headerType = dtype([("step", 'int32'), ("time", float), ("timeStep", float), 
+                  ("nAtoms", 'int32'), ("temperature", float),
+                    ("averageDisplacement", float),
                     ("averageSquareDisplacement", float)])
 dataType = dtype([("type", "a3"),
                   ("positionX", float), ("positionY", float), ("positionZ", float), 

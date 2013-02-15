@@ -35,6 +35,7 @@ public:
     void setUnitTime(double unitTime);
     void setUnitMass(double unitMass);
 
+    void setUnitTemperature(double unitTemperature);
 protected:
     string m_outFileName;
 
@@ -48,6 +49,7 @@ protected:
     double m_unitTime;
     double m_unitEnergy;
     double m_unitMass;
+    double m_unitTemperature;
 };
 
 #endif // FILEMANAGER_H

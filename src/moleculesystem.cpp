@@ -26,7 +26,7 @@ MoleculeSystem::MoleculeSystem() :
     m_isOutputEnabled(true),
     m_areCellsSetUp(false),
     m_temperature(1.0),
-    m_averageDisplacement(zeros<rowvec>(3)),
+    m_averageDisplacement(0),
     m_averageSquareDisplacement(0)
 {
     m_interatomicForce = new InteratomicForce();
@@ -62,18 +62,18 @@ void MoleculeSystem::updateStatistics()
     for(Atom* atom : m_atoms) {
         totalPotentialEnergy += atom->potential();
     }
-    cout << "totaltPotentialEnergy " << setprecision(25) << totalPotentialEnergy << endl;
-    cout << "averagePotentialEnergy " << setprecision(25) << totalPotentialEnergy / m_atoms.size() << endl;
+//    cout << "totaltPotentialEnergy " << setprecision(25) << totalPotentialEnergy << endl;
+//    cout << "averagePotentialEnergy " << setprecision(25) << totalPotentialEnergy / m_atoms.size() << endl;
 
     // Calculate diffusion constant
-    rowvec averageDisplacement = zeros<rowvec>(3);
-    double averageSquareDisplacement = 0;
+    m_averageDisplacement = 0;
+    m_averageSquareDisplacement = 0;
     for(Molecule* molecule : m_molecules) {
-        averageDisplacement += molecule->displacement();
-        averageSquareDisplacement += dot(molecule->displacement(), molecule->displacement());
+        m_averageSquareDisplacement += dot(molecule->displacement(), molecule->displacement());
+        m_averageDisplacement += sqrt(m_averageSquareDisplacement);
     }
-    cout << "averageDisplacement " << setprecision(25) << averageDisplacement;
-    cout << "averageSquareDisplacement " << setprecision(25) << averageSquareDisplacement << endl;
+//    cout << "averageDisplacement " << setprecision(25) << m_averageDisplacement << endl;
+//    cout << "averageSquareDisplacement " << setprecision(25) << m_averageSquareDisplacement << endl;
 
     // Calculate pressure
 }
