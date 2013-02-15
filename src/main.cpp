@@ -26,7 +26,7 @@ int main(/*int argc, char** argv*/)
     boltzmannConstant /= (unitLength*unitLength * unitMass / (unitTime*unitTime));
 
     // TODO Why must the boltzmannConstant be set to one here?
-    boltzmannConstant = 1;
+//    boltzmannConstant = 1;
 
     // File manager config
     string outFileName;
@@ -36,7 +36,7 @@ int main(/*int argc, char** argv*/)
     double timeStep = config.lookup("integrator.timeStep");
     timeStep /= unitTime;
     Generator generator;
-    generator.setBoltzmannConstant(boltzmannConstant);
+//    generator.setBoltzmannConstant(boltzmannConstant);
 //    generator.loadConfiguration(&config);
 
     // Generator specific config
@@ -72,7 +72,7 @@ int main(/*int argc, char** argv*/)
     MoleculeSystem system;
 
     system.setInteratomicForce(force);
-    system.setBoltzmannConstant(boltzmannConstant);
+//    system.setBoltzmannConstant(boltzmannConstant);
 
     // Set up file manager
     FileManager fileManager(&system);

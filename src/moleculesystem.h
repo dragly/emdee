@@ -76,6 +76,12 @@ public:
     double temperature() {
         return m_temperature;
     }
+    const rowvec& averageDisplacement() {
+        return m_averageDisplacement;
+    }
+    double averageSquareDisplacement() {
+        return m_averageSquareDisplacement;
+    }
 
     void setBoltzmannConstant(double boltzmannConstant);
 
@@ -114,6 +120,8 @@ protected:
     double m_temperature;
 
     vector<Modifier*> m_modifiers;
+    rowvec m_averageDisplacement;
+    double m_averageSquareDisplacement;
 };
 
 #endif // MOLECULESYSTEM_H

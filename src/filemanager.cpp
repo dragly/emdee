@@ -5,6 +5,7 @@
 #include <src/atom.h>
 #include <src/molecule.h>
 #include <src/atomtype.h>
+#include <src/integrator/integrator.h>
 
 // System includes
 #include <iomanip>
@@ -121,6 +122,24 @@ bool FileManager::saveBinary(int step) {
     //    outFile << "Some nice comment" << endl;
 
     //    char line[1000];
+    // Write header data
+    double time = step * m_moleculeSystem->integrator()->timeStep();
+    double timeStep = m_moleculeSystem->integrator()->timeStep();
+    int nAtoms = m_moleculeSystem->atoms().size();
+    double temperature = m_moleculeSystem->temperature();
+    rowvec averageDisplacement = m_moleculeSystem->averageDisplacement();
+    double averageSquareDisplacement = m_moleculeSystem->averageSquareDisplacement();
+    outFile.write((char*)&step, sizeof(int));
+    outFile.write((char*)&time, sizeof(double));
+    outFile.write((char*)&timeStep, sizeof(double));
+    outFile.write((char*)&nAtoms, sizeof(int));
+    outFile.write((char*)&temperature, sizeof(double));
+    outFile.write((char*)&averageDisplacement(0), sizeof(double));
+    outFile.write((char*)&averageDisplacement(1), sizeof(double));
+    outFile.write((char*)&averageDisplacement(2), sizeof(double));
+    outFile.write((char*)&averageSquareDisplacement, sizeof(double));
+
+    // Write atom data
     for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
         for(Molecule* molecule : cell->molecules()) {
             for(Atom* atom : molecule->atoms()) {
@@ -130,7 +149,7 @@ bool FileManager::saveBinary(int step) {
                 double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
                 //                sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
                 //                        position(0), position(1), position(2),
-                //                        velocity(0), velocity(1), velocity(2),
+                //                        velo0city(0), velocity(1), velocity(2),
                 //                        force(0), force(1), force(2),
                 //                        cell->id());
                 int id = cell->id();

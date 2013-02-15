@@ -19,14 +19,15 @@
 using namespace std;
 
 MoleculeSystem::MoleculeSystem() :
-    m_boltzmannConstant(1.0),
     m_potentialConstant(1.0),
     m_nDimensions(3),
     pow3nDimensions(pow(3, m_nDimensions)),
     m_isSaveEnabled(true),
     m_isOutputEnabled(true),
     m_areCellsSetUp(false),
-    m_temperature(1.0)
+    m_temperature(1.0),
+    m_averageDisplacement(zeros<rowvec>(3)),
+    m_averageSquareDisplacement(0)
 {
     m_interatomicForce = new InteratomicForce();
     m_integrator = new VelocityVerletIntegrator(this);
@@ -252,11 +253,6 @@ void MoleculeSystem::setFileManager(FileManager *fileManager)
 void MoleculeSystem::addModifier(Modifier *modifier)
 {
     m_modifiers.push_back(modifier);
-}
-
-void MoleculeSystem::setBoltzmannConstant(double boltzmannConstant)
-{
-    m_boltzmannConstant = boltzmannConstant;
 }
 
 void MoleculeSystem::setBoundaries(double min, double max)
