@@ -85,7 +85,6 @@ protected:
 //    int nSimulationSteps;
     Integrator *m_integrator;
 
-    double m_boltzmannConstant;
     double m_potentialConstant;
 
     mat m_boundaries;

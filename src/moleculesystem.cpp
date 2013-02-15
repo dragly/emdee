@@ -53,7 +53,7 @@ void MoleculeSystem::updateStatistics()
     for(Atom* atom : m_atoms) {
         totalKineticEnergy += 0.5 * atom->mass() * dot(atom->velocity(), atom->velocity());
     }
-    m_temperature = totalKineticEnergy / (3./2. * m_boltzmannConstant * m_atoms.size());
+    m_temperature = totalKineticEnergy / (3./2. * m_atoms.size());
     cout << "Temperature: " << setprecision(25) << m_temperature << endl;
 
     // Calculate potential energy

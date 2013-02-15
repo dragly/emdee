@@ -9,7 +9,6 @@
 
 Generator::Generator() :
     m_unitLength(1),
-    m_boltzmannConstant(1),
     m_nDimensions(3)
 {
 }
@@ -70,12 +69,20 @@ vector<Molecule*> Generator::generateFcc(double sideLength, int nCells, AtomType
     return moleculeList;
 }
 
+/*!
+ * \brief Generator::boltzmannDistributeVelocities
+ * \param temperature unitless temperature
+ * \param molecules a vector of molecules to apply the Boltzmann distribution of velocities on.
+ *
+ * \note The Boltzmann constant should have been baked into the unitless temperature.
+ *
+ */
 void Generator::boltzmannDistributeVelocities(double temperature, vector<Molecule*> molecules) {
 
     rowvec totalVelocity = zeros<rowvec>(m_nDimensions);
     for(Molecule* molecule : molecules) {
         rowvec velocity = randn<rowvec>(m_nDimensions);
-        velocity *= sqrt(m_boltzmannConstant * temperature / molecule->mass());
+        velocity *= sqrt(temperature / molecule->mass());
         totalVelocity += velocity;
         molecule->setVelocity(velocity);
     }
@@ -120,8 +127,4 @@ void Generator::uniformDistributeVelocities(double maxVelocity, vector<Molecule*
 const mat &Generator::lastBoundaries() const
 {
     return m_lastBoundaries;
-}
-
-void Generator::setBoltzmannConstant(double boltzmannConstant) {
-    m_boltzmannConstant = boltzmannConstant;
 }

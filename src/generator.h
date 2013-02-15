@@ -29,10 +29,8 @@ public:
 
     void setNCells(int nCells);
     void setB(double b);
-    void setBoltzmannConstant(double boltzmannConstant);
 protected:
     double m_unitLength;
-    double m_boltzmannConstant;
 
     mat m_lastBoundaries;
 
