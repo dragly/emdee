@@ -25,6 +25,7 @@ public:
     void addPotential(double potential);
     const rowvec &force() const;
     AtomType type();
+    void setCellID(int cellID);
 
     double mass();
     void clearForceAndPotential();
@@ -41,6 +42,10 @@ public:
     {
         return m_position;
     }
+    int cellID() {
+        return m_cellID;
+    }
+    const rowvec& displacement() const;
 protected:
     rowvec m_relativePosition;
     rowvec m_relativeVelocity;
@@ -51,6 +56,8 @@ protected:
     double m_potential;
 
     Molecule* m_parent;
+
+    int m_cellID;
 };
 
 #endif // ATOM_H

@@ -203,9 +203,9 @@ bool FileManager::saveXyz(int step) {
     outFile << "Some nice comment" << endl;
 
     char line[1000];
-    for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
-        for(Molecule* molecule : cell->molecules()) {
-            for(Atom* atom : molecule->atoms()) {
+//    for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
+//        for(Molecule* molecule : cell->molecules()) {
+            for(Atom* atom : m_moleculeSystem->atoms()) {
                 rowvec position = atom->position() * m_unitLength;
                 rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
                 rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
@@ -213,7 +213,7 @@ bool FileManager::saveXyz(int step) {
                         position(0), position(1), position(2),
                         velocity(0), velocity(1), velocity(2),
                         force(0), force(1), force(2),
-                        cell->id());
+                        atom->cellID());
                 //                toPrint << atom->type().abbreviation
                 //                        << " " << position(0) << " " << position(1) << " " << position(2)
                 //                        << " " << velocity(0) << " " << velocity(1) << " " << velocity(2)
@@ -223,8 +223,8 @@ bool FileManager::saveXyz(int step) {
                 outFile << atom->type().abbreviation
                         << line;
             }
-        }
-    }
+//        }
+//    }
     outFile.close();
     return true;
 }
@@ -275,20 +275,20 @@ bool FileManager::saveBinary(int step) {
     // Write system boundaries
 
     // Write atom data
-    for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
-        for(Molecule* molecule : cell->molecules()) {
-            for(Atom* atom : molecule->atoms()) {
+//    for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
+//        for(Molecule* molecule : cell->molecules()) {
+            for(Atom* atom : m_moleculeSystem->atoms()) {
                 rowvec position = atom->position() * m_unitLength;
                 rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
                 rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
-                rowvec displacement = molecule->displacement() * m_unitLength;
+                rowvec displacement = atom->displacement() * m_unitLength;
                 double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
                 //                sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
                 //                        position(0), position(1), position(2),
                 //                        velo0city(0), velocity(1), velocity(2),
                 //                        force(0), force(1), force(2),
                 //                        cell->id());
-                int id = cell->id();
+                int id = atom->cellID();
                 char atomType[3];
                 sprintf(atomType, "Ar");
                 outFile.write(atomType, sizeof(atomType));
@@ -307,8 +307,8 @@ bool FileManager::saveBinary(int step) {
                 outFile.write((char*)&potential, sizeof(double));
                 outFile.write((char*)&id, sizeof(int));
             }
-        }
-    }
+//        }
+//    }
     outFile.close();
     return true;
 }
@@ -328,9 +328,9 @@ bool FileManager::saveHDF5(int step) {
     // TODO Rescale with units!
     int  i = 0;
     s1_t* s1 = new s1_t[m_moleculeSystem->atoms().size()];
-    for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
-        for(Molecule* molecule : cell->molecules()) {
-            for(Atom* atom : molecule->atoms()) {
+//    for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
+//        for(Molecule* molecule : cell->molecules()) {
+            for(Atom* atom : m_moleculeSystem->atoms()) {
                 sprintf(s1[i].atomType , "Ar");
                 s1[i].positionX = atom->position()(0);
                 s1[i].positionY = atom->position()(1);
@@ -341,11 +341,11 @@ bool FileManager::saveHDF5(int step) {
                 s1[i].forceX = atom->force()(0);
                 s1[i].forceY = atom->force()(1);
                 s1[i].forceZ = atom->force()(2);
-                s1[i].cellID = cell->id();
+                s1[i].cellID = atom->cellID();
                 i++;
             }
-        }
-    }
+//        }
+//    }
 
     /*
       * Turn off the auto-printing when failure occurs so that we can

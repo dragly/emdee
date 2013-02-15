@@ -10,7 +10,8 @@ Atom::Atom(Molecule *parent) :
     m_relativeVelocity(zeros<rowvec>(3)),
     m_force(zeros<rowvec>(3)),
     m_potential(0),
-    m_parent(parent)
+    m_parent(parent),
+    m_cellID(-999)
 {
 }
 
@@ -85,4 +86,13 @@ double Atom::mass()
 AtomType Atom::type()
 {
     return m_type;
+}
+
+void Atom::setCellID(int cellID)
+{
+    m_cellID = cellID;
+}
+
+const rowvec& Atom::displacement() const {
+    return m_parent->displacement();
 }

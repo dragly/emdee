@@ -66,6 +66,7 @@ void MoleculeSystemCell::addMolecule(Molecule *molecule) {
     m_molecules.push_back(molecule);
     for(Atom* atom : molecule->atoms()) {
         m_atoms.push_back(atom);
+        atom->setCellID(m_id);
     }
 }
 
