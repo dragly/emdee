@@ -77,24 +77,30 @@ vector<Molecule*> Generator::generateFcc(double sideLength, int nCells, AtomType
  * \note The Boltzmann constant should have been baked into the unitless temperature.
  *
  */
-void Generator::boltzmannDistributeVelocities(double temperature, vector<Molecule*> molecules) {
-
+void Generator::boltzmannDistributeVelocities(double temperature, const vector<Molecule*>& molecules) {
+    double averageVelocity = 0;
     rowvec totalVelocity = zeros<rowvec>(m_nDimensions);
     for(Molecule* molecule : molecules) {
         rowvec velocity = randn<rowvec>(m_nDimensions);
         velocity *= sqrt(temperature / molecule->mass());
         totalVelocity += velocity;
         molecule->setVelocity(velocity);
+//        averageVelocity += norm(velocity, 2) / molecules.size();
     }
+//    cout << "Average velocity was " << averageVelocity << endl;
     // Remove total linear momentum
     rowvec velocityToRemove = totalVelocity / molecules.size();
-    totalVelocity.zeros();
-    double averageVelocity = 0;
+//    cout << "Removing " << velocityToRemove << endl;
+    averageVelocity = 0;
+//    totalVelocity.zeros();
     for(Molecule* molecule : molecules) {
         rowvec newVelocity = molecule->velocity() - velocityToRemove;
         molecule->setVelocity(newVelocity);
         averageVelocity += norm(newVelocity, 2) / molecules.size();
+        totalVelocity += newVelocity;
     }
+//    velocityToRemove = totalVelocity / molecules.size();
+//    cout << "Removing " << velocityToRemove << endl;
     cout << "Boltzmann distributed velocities for " << molecules.size() << " molecules!" << endl;
     cout << "Average velocity is " << averageVelocity << endl;
 }

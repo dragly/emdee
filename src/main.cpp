@@ -35,18 +35,19 @@ int main(/*int argc, char** argv*/)
     int nSimulationSteps = config.lookup("simulation.nSimulationSteps");
     double timeStep = config.lookup("integrator.timeStep");
     timeStep /= unitTime;
+
     Generator generator;
 //    generator.setBoltzmannConstant(boltzmannConstant);
 //    generator.loadConfiguration(&config);
 
     // Generator specific config
-    string velocityDistributionType;
-    config.lookupValue("generator.velocity.distribution", velocityDistributionType);
-    int nCells = config.lookup("generator.fcc.nCells");
-    double b = config.lookup("generator.fcc.b");
-    double temperature = config.lookup("system.initialTemperature");
-    temperature /= unitTemperature;
-    b /= unitLength;
+//    string velocityDistributionType;
+//    config.lookupValue("generator.velocity.distribution", velocityDistributionType);
+//    int nCells = config.lookup("generator.fcc.nCells");
+//    double b = config.lookup("generator.fcc.b");
+//    double temperature = config.lookup("system.initialTemperature");
+//    temperature /= unitTemperature;
+//    b /= unitLength;
 
     // Force and potentials
     double potentialConstant = config.lookup("system.potentialConstant");
@@ -54,22 +55,41 @@ int main(/*int argc, char** argv*/)
     double energyConstant = config.lookup("system.energyConstant");
     energyConstant /= (unitMass * unitLength * unitLength / (unitTime * unitTime));
 
-    // Set up grid
-    vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
-
-    // Distribute velocities
-    if(velocityDistributionType == "boltzmann") {
-        generator.boltzmannDistributeVelocities(temperature, molecules);
-    } else if(velocityDistributionType == "uniform") {
-        generator.uniformDistributeVelocities(4, molecules);
+    // Set up initial system
+    // Set up molecule system
+    MoleculeSystem system;
+    Setting& initialization = config.lookup("initialization");
+    for(uint i = 0; true; i++) {
+        string initializationType;
+        try {
+            initialization[i].lookupValue("type", initializationType);
+        } catch(exception) {
+            cout << "No more initialization steps found. Breaking." << endl;
+            break;
+        }
+        cout << "Found initialization step " << initializationType << endl;
+        if(initializationType == "fcc") {
+            double b = initialization[i]["b"];
+            b /= unitLength;
+            int nCells = initialization[i]["nCells"];
+            vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
+            system.addMolecules(molecules);
+        } else if(initializationType == "boltzmannVelocity") {
+            double initialTemperature = initialization[i]["initialTemperature"];
+            initialTemperature /= unitTemperature;
+            generator.boltzmannDistributeVelocities(initialTemperature, system.molecules());
+        } else if(initializationType == "uniformVelocity") {
+            double maxVelocity = initialization[i]["maxVelocity"];
+            maxVelocity /= (unitLength / unitTime);
+            generator.uniformDistributeVelocities(maxVelocity, system.molecules());
+        }
     }
+//    vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
+
     // Set up force
     InteratomicForce* force = new InteratomicForce();
     force->setPotentialConstant(potentialConstant);
     force->setEnergyConstant(energyConstant);
-
-    // Set up molecule system
-    MoleculeSystem system;
 
     system.setInteratomicForce(force);
 //    system.setBoltzmannConstant(boltzmannConstant);
@@ -86,8 +106,7 @@ int main(/*int argc, char** argv*/)
 
     // Set up modifiers
     Setting& modifiers = config.lookup("modifiers");
-    uint i = 0;
-    while(true) {
+    for(uint i = 0; true; i++) {
         string modifierName;
         try {
             modifiers[i].lookupValue("type", modifierName);
@@ -106,7 +125,6 @@ int main(/*int argc, char** argv*/)
             thermostat.setRelaxationTime(relaxationTime);
             system.addModifier(&thermostat);
         }
-        i++;
     }
 
     // Set up integrator
@@ -116,7 +134,6 @@ int main(/*int argc, char** argv*/)
 
     // Set up the rest of the system
     system.loadConfiguration(&config); // TODO remove this
-    system.addMolecules(molecules);
     cout << "addded" << endl;
     system.setBoundaries(generator.lastBoundaries());
     cout << "setbounds" << endl;
