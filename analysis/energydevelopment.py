@@ -24,6 +24,7 @@ plotTime = 0
 myBins = array([])
 normBins = array([])
 kineticEnergies = zeros(len(fileNames))
+#kineticEnergies2 = zeros(len(fileNames))
 potentialEnergies = zeros(len(fileNames))
 times = zeros(len(fileNames))
 cTemperatures = zeros(len(fileNames))
@@ -39,13 +40,14 @@ for fileName in fileNames:
 #    f = h5py.File(fileName, "r")
 #    atoms = f.get("ArrayOfStructures")
     atomMass = 6.6353628e-26
-    velocityMagnitude = sqrt(atoms["velocity"][0]**2 + atoms["velocity"][1]**2 + atoms["velocity"][2]**2)
+    velocityMagnitude = sqrt(atoms["velocity"][:,0]**2 + atoms["velocity"][:,1]**2 + atoms["velocity"][:,2]**2)
     kineticEnergy = 0.5 * atomMass * sum(velocityMagnitude**2)
     potentialEnergy = sum(atoms["potential"])
 
     print "kineticEnergy: ", kineticEnergy
     print "potentialEnergy: ", potentialEnergy
     kineticEnergies[i] = kineticEnergy
+#    kineticEnergies2[i] = header["kineticEnergy"][0]
     potentialEnergies[i] = potentialEnergy
     cTemperatures[i] = header["temperature"][0]
     

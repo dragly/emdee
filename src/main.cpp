@@ -13,10 +13,14 @@
 using namespace std;
 using namespace libconfig;
 
-int main(/*int argc, char** argv*/)
+int main(int argc, char** argv)
 {
     Config config;
-    config.readFile("testconfig.cfg");
+    string configFileName = "testconfig.cfg";
+    if(argc > 1) {
+        configFileName = argv[1];
+    }
+    config.readFile(configFileName.c_str());
 
     double unitLength = config.lookup("units.length");
     double unitTime = config.lookup("units.time");
@@ -97,7 +101,10 @@ int main(/*int argc, char** argv*/)
             generator.uniformDistributeVelocities(maxVelocity, system.molecules());
         } else if(initializationType == "loadFile") {
             string fileName = initialization[i]["fileName"];
-            system.load(fileName);
+            if(!system.load(fileName)) {
+                cerr << "Could not load file " << fileName << endl;
+                throw(new exception);
+            }
         }
     }
 //    vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());

@@ -7,6 +7,10 @@
 #include <src/atomtype.h>
 #include <src/integrator/integrator.h>
 
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+
 // System includes
 #include <iomanip>
 #include <armadillo>
@@ -44,6 +48,7 @@ FileManager::FileManager(MoleculeSystem* system) :
 }
 
 bool FileManager::load(string fileName) {
+    fileName = parseFileName(fileName);
     if(fileName.find(".xyz") != string::npos) {
         //        return loadXyz(fileName);
     } else if(fileName.find(".bin") != string::npos) {
@@ -58,6 +63,9 @@ bool FileManager::loadBinary(string fileName) {
     cout << "Loading binary file " << fileName << endl;
     ifstream inFile;
     inFile.open(fileName, ios::binary | ios::in);
+    if(!inFile.good()) {
+        return false;
+    }
     // Read header data
     int step;
     double time; // = step * m_moleculeSystem->integrator()->timeStep() * m_unitTime;
@@ -110,6 +118,10 @@ bool FileManager::loadBinary(string fileName) {
     vector<Molecule*> molecules;
     // Read atom data
     m_moleculeSystem->deleteMoleculesAndAtoms();
+    cout << "Reading data for " << nAtoms << " atoms" << endl;
+    if(nAtoms > 10000) {
+        exit(9999);
+    }
     for(int i = 0; i < nAtoms; i++) {
 //        cout << "Reading atom " << i << endl;
         Molecule* molecule = new Molecule();
@@ -251,7 +263,6 @@ bool FileManager::saveBinary(int step) {
         }
     }
 
-
     outFile.write((char*)&step, sizeof(int));
     outFile.write((char*)&time, sizeof(double));
     outFile.write((char*)&timeStep, sizeof(double));
@@ -389,8 +400,24 @@ bool FileManager::saveHDF5(int step) {
     return true;
 }
 
+string FileManager::parseFileName(string fileName) {
+    // Replace tilde ~ with home directory
+    struct passwd *pw = getpwuid(getuid());
+    const char *homedir = pw->pw_dir;
+
+    stringstream homeDirName;
+    homeDirName << homedir;
+    size_t tildePos = fileName.find("~");
+    if(tildePos != string::npos) {
+        fileName.replace(tildePos, 1, homeDirName.str());
+    }
+    return fileName;
+}
+
 void FileManager::setOutFileName(string fileName)
 {
+    fileName = parseFileName(fileName);
+    // Continue
     m_outFileName = fileName;
 }
 

@@ -37,6 +37,7 @@ public:
     void setUnitMass(double unitMass);
 
     void setUnitTemperature(double unitTemperature);
+    string parseFileName(string fileName);
 protected:
     string m_outFileName;
 
