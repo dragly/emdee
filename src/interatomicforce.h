@@ -14,7 +14,9 @@ class MoleculeSystem;
 using namespace arma;
 using namespace libconfig;
 
-
+/*!
+ * \brief The InteratomicForce class calculates forces between atoms.
+ */
 class InteratomicForce
 {
 public:

@@ -22,7 +22,9 @@ SOURCES += main.cpp \
     integrator/eulercromerintegrator.cpp \
     filemanager.cpp \
     modifier/modifier.cpp \
-    modifier/berendsenthermostat.cpp
+    modifier/berendsenthermostat.cpp \
+    modifier/andersenthermostat.cpp \
+    random.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -37,7 +39,9 @@ HEADERS += \
     integrator/eulercromerintegrator.h \
     filemanager.h \
     modifier/modifier.h \
-    modifier/berendsenthermostat.h
+    modifier/berendsenthermostat.h \
+    modifier/andersenthermostat.h \
+    random.h
 
 # Building
 myscript.target = myscript
