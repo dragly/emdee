@@ -6,6 +6,7 @@
 #include <src/integrator/eulercromerintegrator.h>
 #include <src/filemanager.h>
 #include <src/modifier/berendsenthermostat.h>
+#include <src/modifier/andersenthermostat.h>
 
 #include <iostream>
 #include <libconfig.h++>
@@ -136,6 +137,15 @@ int main(int argc, char** argv)
             relaxationTime /= unitTime;
             thermostat.setTargetTemperature(targetTemperature);
             thermostat.setRelaxationTime(relaxationTime);
+            system.addModifier(&thermostat);
+        } else if(modifierName == "andersenThermostat") {
+            AndersenThermostat thermostat(&system);
+            double targetTemperature = modifiers[i]["targetTemperature"];
+            targetTemperature /= unitTemperature;
+            double collisionTime = modifiers[i]["collisionTime"];
+            collisionTime /= unitTime;
+            thermostat.setTargetTemperature(targetTemperature);
+            thermostat.setCollisionTime(collisionTime);
             system.addModifier(&thermostat);
         }
     }
