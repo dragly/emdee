@@ -47,6 +47,7 @@ bool convertFile(string fileName) {
     double timeStep; // = m_moleculeSystem->integrator()->timeStep() * m_unitTime;
     int nAtoms; // = m_moleculeSystem->atoms().size();
     double temperature; // = m_moleculeSystem->temperature() * m_unitTemperature;
+    double pressure; // = m_moleculeSystem->temperature() * m_unitTemperature;
     double averageDisplacement; // = m_moleculeSystem->averageDisplacement() * m_unitLength;
     double averageSquareDisplacement; // = m_moleculeSystem->averageSquareDisplacement() * m_unitLength * m_unitLength;
 
@@ -63,6 +64,7 @@ bool convertFile(string fileName) {
     inFile.read((char*)&timeStep, sizeof(double));
     inFile.read((char*)&nAtoms, sizeof(int));
     inFile.read((char*)&temperature, sizeof(double));
+    inFile.read((char*)&pressure, sizeof(double));
     inFile.read((char*)&averageDisplacement, sizeof(double));
     inFile.read((char*)&averageSquareDisplacement, sizeof(double));
     inFile.read((char*)&systemBoundaries[0], sizeof(double) * 6);

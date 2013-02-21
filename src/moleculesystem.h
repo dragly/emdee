@@ -70,19 +70,22 @@ public:
 
     // Getters (fast)
 
-    Integrator* integrator() {
+    Integrator* integrator() const {
         return m_integrator;
     }
-    double temperature() {
+    double temperature() const {
         return m_temperature;
     }
-    double averageDisplacement() {
+    double pressure() const {
+        return m_pressure;
+    }
+    double averageDisplacement() const {
         return m_averageDisplacement;
     }
-    double averageSquareDisplacement() {
+    double averageSquareDisplacement() const {
         return m_averageSquareDisplacement;
     }
-    const mat& boundaries() {
+    const mat& boundaries() const {
         return m_boundaries;
     }
 
@@ -131,6 +134,8 @@ protected:
     vector<Modifier*> m_modifiers;
     double m_averageDisplacement;
     double m_averageSquareDisplacement;
+
+    double m_pressure;
 
     uint m_step;
 };

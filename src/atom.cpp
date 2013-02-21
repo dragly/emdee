@@ -11,6 +11,7 @@ Atom::Atom(Molecule *parent) :
     m_force(zeros<rowvec>(3)),
     m_potential(0),
     m_parent(parent),
+    m_localPressure(0),
     m_cellID(-999)
 {
 }
@@ -49,8 +50,6 @@ const rowvec& Atom::relativePosition() const
     return m_relativePosition;
 }
 
-
-
 void Atom::setRelativeVelocity(const rowvec &velocity) {
     refreshAbsolutePositionAndVelocity();
     m_relativeVelocity = velocity;
@@ -61,10 +60,11 @@ const rowvec &Atom::relativeVelocity() const
     return m_relativeVelocity;
 }
 
-void Atom::clearForceAndPotential()
+void Atom::clearForcePotentialPressure()
 {
     m_force.zeros();
     m_potential = 0;
+    m_localPressure = 0;
 }
 
 void Atom::addForce(const rowvec &force)

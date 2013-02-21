@@ -1,6 +1,6 @@
 from pylab import dtype
 headerType = dtype([("step", 'int32'), ("time", float), ("timeStep", float), 
-                  ("nAtoms", 'int32'), ("temperature", float),
+                  ("nAtoms", 'int32'), ("temperature", float), ("pressure", float),
                     ("averageDisplacement", float),
                     ("averageSquareDisplacement", float),
                     ("lowerBounds", float, (3,)), ("upperBounds", float, (3,))])

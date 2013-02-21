@@ -28,7 +28,7 @@ public:
     void setCellID(int cellID);
 
     double mass();
-    void clearForceAndPotential();
+    void clearForcePotentialPressure();
     void refreshAbsolutePositionAndVelocity();
 
     double potential();
@@ -45,6 +45,10 @@ public:
     int cellID() {
         return m_cellID;
     }
+    double localPressure() const {
+        return m_localPressure;
+    }
+
     const rowvec& displacement() const;
 protected:
     rowvec m_relativePosition;
@@ -54,6 +58,7 @@ protected:
     rowvec m_velocity;
     AtomType m_type;
     double m_potential;
+    double m_localPressure;
 
     Molecule* m_parent;
 

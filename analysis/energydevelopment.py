@@ -26,6 +26,7 @@ normBins = array([])
 kineticEnergies = zeros(len(fileNames))
 #kineticEnergies2 = zeros(len(fileNames))
 potentialEnergies = zeros(len(fileNames))
+pressures = zeros(len(fileNames))
 times = zeros(len(fileNames))
 cTemperatures = zeros(len(fileNames))
 dt = 0.01
@@ -50,14 +51,17 @@ for fileName in fileNames:
 #    kineticEnergies2[i] = header["kineticEnergy"][0]
     potentialEnergies[i] = potentialEnergy
     cTemperatures[i] = header["temperature"][0]
+    pressures[i] = header["pressure"][0]
+    print "pressure: ", pressures[i]
     
     t2 = time()
     calculateTime += t2 - t1
     print calculateTime
-    times[i] = dt * i
+    times[i] = header["time"][0]
     i += 1
 #    f.close()
 
+# Energy plot
 figure()
 plot(times, kineticEnergies, label="Kinetic")
 plot(times, potentialEnergies, label="Potential")
@@ -65,13 +69,26 @@ plot(times, kineticEnergies + potentialEnergies, label="Sum")
 legend()
 grid()
 
+# Temperature plot
 nMovingAverage = 100
 figure()
 unitTemperature = 119.74
 temperatures = kineticEnergies / (3. / 2. * len(atoms) * boltzmannConstant)
 plot(times, temperatures, label="Temperature")
 plot(times, cTemperatures, label="Temperature")
-#plot(times[nMovingAverage - 1:], movavg(temperatures, nMovingAverage), label="Moving average")
+plot(times[nMovingAverage - 1:], movavg(temperatures, nMovingAverage), label="Moving average")
+legend()
+grid()
+
+# Pressure plot
+figure()
+plot(times, pressures, label="Pressure")
+legend()
+grid()
+
+# Pressure temperature plot
+figure()
+scatter(temperatures, pressures, label="Pressure vs temperature")
 legend()
 grid()
 

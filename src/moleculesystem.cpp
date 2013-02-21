@@ -26,8 +26,9 @@ MoleculeSystem::MoleculeSystem() :
     m_isOutputEnabled(true),
     m_areCellsSetUp(false),
     m_temperature(1.0),
-    m_averageDisplacement(0),
-    m_averageSquareDisplacement(0),
+    m_averageDisplacement(0.0),
+    m_averageSquareDisplacement(0.0),
+    m_pressure(0.0),
     m_step(0)
 {
     m_interatomicForce = new InteratomicForce();
@@ -98,6 +99,15 @@ void MoleculeSystem::updateStatistics()
 //    cout << "averageSquareDisplacement " << setprecision(25) << m_averageSquareDisplacement << endl;
 
     // Calculate pressure
+    rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
+    double volume = (sideLengths(0) * sideLengths(1) * sideLengths(2));
+    double density = m_atoms.size() / volume;
+    m_pressure = density * m_temperature;
+    double volumeThreeInverse = 1 / (3 * volume);
+    for(Atom* atom : m_atoms) {
+        m_pressure += volumeThreeInverse * atom->localPressure();
+    }
+//    cout << "Pressure " << m_pressure << endl;
 }
 
 void MoleculeSystem::addMolecules(const vector<Molecule *>& molecule)
@@ -181,7 +191,7 @@ void MoleculeSystem::updateForces()
     obeyBoundaries();
     refreshCellContents();
     for(Molecule* molecule : m_molecules) {
-        molecule->clearForces();
+        molecule->clearForcePotentialPressure();
     }
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearAlreadyCalculatedNeighbors();

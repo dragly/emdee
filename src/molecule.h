@@ -26,7 +26,7 @@ public:
     void setVelocity(const rowvec &velocity);
     void addForce(const rowvec &force);
 
-    void clearForces();
+    void clearForcePotentialPressure();
 
     double mass();
 

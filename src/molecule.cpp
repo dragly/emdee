@@ -33,11 +33,11 @@ void Molecule::addForce(const rowvec &force)
     m_force += force;
 }
 
-void Molecule::clearForces()
+void Molecule::clearForcePotentialPressure()
 {
     m_force = zeros<rowvec>(3);
     for(Atom* atom : m_atoms) {
-        atom->clearForceAndPotential();
+        atom->clearForcePotentialPressure();
     }
 }
 

@@ -72,6 +72,7 @@ bool FileManager::loadBinary(string fileName) {
     double timeStep; // = m_moleculeSystem->integrator()->timeStep() * m_unitTime;
     int nAtoms; // = m_moleculeSystem->atoms().size();
     double temperature; // = m_moleculeSystem->temperature() * m_unitTemperature;
+    double pressure;
     double averageDisplacement; // = m_moleculeSystem->averageDisplacement() * m_unitLength;
     double averageSquareDisplacement; // = m_moleculeSystem->averageSquareDisplacement() * m_unitLength * m_unitLength;
 
@@ -88,6 +89,7 @@ bool FileManager::loadBinary(string fileName) {
     inFile.read((char*)&timeStep, sizeof(double));
     inFile.read((char*)&nAtoms, sizeof(int));
     inFile.read((char*)&temperature, sizeof(double));
+    inFile.read((char*)&pressure, sizeof(double));
     inFile.read((char*)&averageDisplacement, sizeof(double));
     inFile.read((char*)&averageSquareDisplacement, sizeof(double));
     inFile.read((char*)&systemBoundaries[0], sizeof(double) * 6);
@@ -252,6 +254,7 @@ bool FileManager::saveBinary(int step) {
     double timeStep = m_moleculeSystem->integrator()->timeStep() * m_unitTime;
     int nAtoms = m_moleculeSystem->atoms().size();
     double temperature = m_moleculeSystem->temperature() * m_unitTemperature;
+    double pressure = m_moleculeSystem->pressure() * m_unitTemperature;
     double averageDisplacement = m_moleculeSystem->averageDisplacement() * m_unitLength;
     double averageSquareDisplacement = m_moleculeSystem->averageSquareDisplacement() * m_unitLength * m_unitLength;
 
@@ -268,6 +271,7 @@ bool FileManager::saveBinary(int step) {
     outFile.write((char*)&timeStep, sizeof(double));
     outFile.write((char*)&nAtoms, sizeof(int));
     outFile.write((char*)&temperature, sizeof(double));
+    outFile.write((char*)&pressure, sizeof(double));
     outFile.write((char*)&averageDisplacement, sizeof(double));
     outFile.write((char*)&averageSquareDisplacement, sizeof(double));
     outFile.write((char*)&systemBoundaries[0], sizeof(double) * 6);
