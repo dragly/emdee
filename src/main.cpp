@@ -27,8 +27,8 @@ int main(int argc, char** argv)
     double unitTime = config.lookup("units.time");
     double unitMass = config.lookup("units.mass");
     double unitTemperature = config.lookup("units.temperature");
-    double boltzmannConstant = config.lookup("units.boltzmannConstant");
-    boltzmannConstant /= (unitLength*unitLength * unitMass / (unitTime*unitTime));
+//    double boltzmannConstant = config.lookup("units.boltzmannConstant");
+//    boltzmannConstant /= (unitLength*unitLength * unitMass / (unitTime*unitTime));
 
     // TODO Why must the boltzmannConstant be set to one here?
 //    boltzmannConstant = 1;

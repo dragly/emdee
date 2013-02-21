@@ -254,7 +254,7 @@ bool FileManager::saveBinary(int step) {
     double timeStep = m_moleculeSystem->integrator()->timeStep() * m_unitTime;
     int nAtoms = m_moleculeSystem->atoms().size();
     double temperature = m_moleculeSystem->temperature() * m_unitTemperature;
-    double pressure = m_moleculeSystem->pressure() * m_unitTemperature;
+    double pressure = m_moleculeSystem->pressure() * m_unitMass / (m_unitLength * m_unitTime * m_unitTime);
     double averageDisplacement = m_moleculeSystem->averageDisplacement() * m_unitLength;
     double averageSquareDisplacement = m_moleculeSystem->averageSquareDisplacement() * m_unitLength * m_unitLength;
 

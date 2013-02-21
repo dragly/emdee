@@ -64,7 +64,7 @@ vector<Molecule*> Generator::generateFcc(double sideLength, int nCells, AtomType
     m_lastBoundaries << 0 << 0 << 0 << endr
                         << nCells * sideLength << nCells * sideLength << nCells * sideLength;
 
-    cout << "Generated " << moleculeList.size() << " molecules in FCC structure!" << endl;
+    cout << "Generated " << moleculeList.size() << " molecules in FCC structure with side length " << sideLength << endl;
     cout << "Boundaries are " << m_lastBoundaries << endl;
     return moleculeList;
 }
