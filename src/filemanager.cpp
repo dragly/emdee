@@ -17,6 +17,7 @@
 #include <H5Cpp.h>
 #include <H5File.h>
 //#include <hdf5.h>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 using namespace arma;
@@ -235,6 +236,9 @@ bool FileManager::saveBinary(int step) {
     stringstream outStepName;
     outStepName << setw(6) << setfill('0') << step;
     string outFileNameLocal = m_outFileName;
+    unsigned found = m_outFileName.find_last_of("/\\");
+    string outPath = m_outFileName.substr(0,found);
+    boost::filesystem::create_directories(outPath);
     size_t starPos = m_outFileName.find("*");
     ofstream outFile;
     if(starPos != string::npos) {

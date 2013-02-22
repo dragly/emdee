@@ -208,8 +208,6 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         cerr << "Cells must be set up before simulating!" << endl;
         throw(new exception());
     }
-    // Make output directory
-    mkdir("out", S_IRWXU|S_IRGRP|S_IXGRP);
 
     // Set up atoms list
     m_atoms.clear();
