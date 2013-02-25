@@ -10,12 +10,14 @@ from glob import glob
 from time import time
 from fys4460 import dataType, boltzmannConstant, headerType
 from scipy import stats
+from os.path import expanduser
 matplotlib.rcParams["mathtext.default"] = "regular"
 
 saveDir = argv[1]
 fileNames = argv[2:]
 
 if len(fileNames) == 1:
+    fileNames[0] = expanduser(fileNames[0])
     fileNames = glob(fileNames[0])
 fileNames.sort()
 loadTime = 0

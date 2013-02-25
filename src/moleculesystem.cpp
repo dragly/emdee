@@ -29,7 +29,9 @@ MoleculeSystem::MoleculeSystem() :
     m_averageDisplacement(0.0),
     m_averageSquareDisplacement(0.0),
     m_pressure(0.0),
-    m_step(0)
+    m_step(0),
+    m_time(0),
+    m_skipInitialize(false)
 {
     m_interatomicForce = new InteratomicForce();
     m_integrator = new VelocityVerletIntegrator(this);
@@ -40,14 +42,15 @@ MoleculeSystem::MoleculeSystem() :
 
 void MoleculeSystem::loadConfiguration(Config *config)
 {
-//    setUnitLength(config->lookup("units.length"));
-//    double potentialConstant = config->lookup("system.potentialConstant");
-//    potentialConstant /= m_unitLength;
-//    setPotentialConstant(potentialConstant);
+    //    setUnitLength(config->lookup("units.length"));
+    //    double potentialConstant = config->lookup("system.potentialConstant");
+    //    potentialConstant /= m_unitLength;
+    //    setPotentialConstant(potentialConstant);
     m_isSaveEnabled = config->lookup("simulation.saveEnabled");
 }
 
 bool MoleculeSystem::load(string fileName) {
+    m_skipInitialize = true;
     return m_fileManager->load(fileName);
 }
 
@@ -85,8 +88,8 @@ void MoleculeSystem::updateStatistics()
     for(Atom* atom : m_atoms) {
         totalPotentialEnergy += atom->potential();
     }
-//    cout << "totaltPotentialEnergy " << setprecision(25) << totalPotentialEnergy << endl;
-//    cout << "averagePotentialEnergy " << setprecision(25) << totalPotentialEnergy / m_atoms.size() << endl;
+    //    cout << "totaltPotentialEnergy " << setprecision(25) << totalPotentialEnergy << endl;
+    //    cout << "averagePotentialEnergy " << setprecision(25) << totalPotentialEnergy / m_atoms.size() << endl;
 
     // Calculate diffusion constant
     m_averageDisplacement = 0;
@@ -95,19 +98,21 @@ void MoleculeSystem::updateStatistics()
         m_averageSquareDisplacement += dot(molecule->displacement(), molecule->displacement());
         m_averageDisplacement += sqrt(m_averageSquareDisplacement);
     }
-//    cout << "averageDisplacement " << setprecision(25) << m_averageDisplacement << endl;
-//    cout << "averageSquareDisplacement " << setprecision(25) << m_averageSquareDisplacement << endl;
+    m_averageSquareDisplacement /= m_molecules.size();
+    m_averageDisplacement /= m_molecules.size();
+    //    cout << "averageDisplacement " << setprecision(25) << m_averageDisplacement << endl;
+    //    cout << "averageSquareDisplacement " << setprecision(25) << m_averageSquareDisplacement << endl;
 
     // Calculate pressure
     rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
     double volume = (sideLengths(0) * sideLengths(1) * sideLengths(2));
     double density = m_atoms.size() / volume;
     m_pressure = density * m_temperature;
-    double volumeThreeInverse = 1 / (3 * volume);
+    double volumeThreeInverse = 1. / (3. * volume);
     for(Atom* atom : m_atoms) {
         m_pressure += volumeThreeInverse * atom->localPressure();
     }
-//    cout << "Pressure " << m_pressure << endl;
+    //    cout << "Pressure " << m_pressure << endl;
 }
 
 void MoleculeSystem::addMolecules(const vector<Molecule *>& molecule)
@@ -203,7 +208,7 @@ void MoleculeSystem::updateForces()
 
 void MoleculeSystem::simulate(int nSimulationSteps)
 {
-//    cout << "Factor is " << m_unitLength / m_unitTime << endl;
+    //    cout << "Factor is " << m_unitLength / m_unitTime << endl;
     if(!m_areCellsSetUp) {
         cerr << "Cells must be set up before simulating!" << endl;
         throw(new exception());
@@ -217,30 +222,38 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         }
     }
 
-    // Set up integrator
-    m_integrator->initialize();
-    updateStatistics();
-    if(m_isSaveEnabled) {
-        m_fileManager->save(m_step);
+    int iStep = 0;
+    // Set up integrator if m_skipInitialize is not set (because file was loaded)
+    if(!m_skipInitialize) {
+        cout << "Initializing integrator" << endl;
+        m_integrator->initialize();
+        updateStatistics();
+        if(m_isSaveEnabled) {
+            m_fileManager->save(m_step);
+        }
+        m_time += m_integrator->timeStep();
+        iStep++;
+        m_step++;
     }
     if(isOutputEnabled()) {
         cout << "Starting simulation " << endl;
     }
-    for(int iStep = 1; iStep < nSimulationSteps; iStep++) {
-        m_step++;
+    for(iStep = iStep; iStep < nSimulationSteps; iStep++) {
         if(isOutputEnabled()) {
             cout << "Step " << m_step << ".." << endl;
         }
         m_integrator->stepForward();
         //        cout << "Integrator done" << endl;
-//        updateForces();
-//        refreshCellContents();
+        //        updateForces();
+        //        refreshCellContents();
         //        updateForces();
         applyModifiers();
         updateStatistics();
         if(m_isSaveEnabled) {
             m_fileManager->save(m_step);
         }
+        m_time += m_integrator->timeStep();
+        m_step++;
     }
 }
 
@@ -439,29 +452,29 @@ void MoleculeSystem::refreshCellContents() {
 
         int cellID = k * m_nCells(1) * m_nCells(2) + j *  m_nCells(2) + i;
 
-//        cout << cellID << endl;
+        //        cout << cellID << endl;
 
         MoleculeSystemCell* cell = m_cells.at(cellID);
         cell->addMolecule(molecule);
 
-//        urowvec moreThan = (molecule->position() >= cell->boundaries().row(0));
-//        urowvec lessThan = (molecule->position() < cell->boundaries().row(1));
-//        //            cout << "less is more" << endl;
-//        //            cout << moreThan << endl;
-//        //            cout << lessThan << endl;
-//        bool isInside = true;
-//        for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-//            if(!moreThan(iDim) || !lessThan(iDim)) {
-//                isInside = false;
-//                break;
-//            }
-//        }
-//        if(isInside) {
-//            cell->addMolecule(molecule);
-//        } else {
-//            cout << "wrong!" << endl;
-//            exit(919);
-//        }
+        //        urowvec moreThan = (molecule->position() >= cell->boundaries().row(0));
+        //        urowvec lessThan = (molecule->position() < cell->boundaries().row(1));
+        //        //            cout << "less is more" << endl;
+        //        //            cout << moreThan << endl;
+        //        //            cout << lessThan << endl;
+        //        bool isInside = true;
+        //        for(int iDim = 0; iDim < m_nDimensions; iDim++) {
+        //            if(!moreThan(iDim) || !lessThan(iDim)) {
+        //                isInside = false;
+        //                break;
+        //            }
+        //        }
+        //        if(isInside) {
+        //            cell->addMolecule(molecule);
+        //        } else {
+        //            cout << "wrong!" << endl;
+        //            exit(919);
+        //        }
     }
     //    cout << "The last added cell has " << nNeighbors << " neighbors" << endl;
 }
@@ -522,6 +535,11 @@ void MoleculeSystem::applyModifiers()
     for(Modifier* modifier : m_modifiers) {
         modifier->apply();
     }
+}
+
+void MoleculeSystem::setTime(double currentTime)
+{
+    m_time = currentTime;
 }
 
 void MoleculeSystem::setAverageDisplacement(double averageDisplacement) {

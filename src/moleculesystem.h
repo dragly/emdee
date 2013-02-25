@@ -88,6 +88,11 @@ public:
     const mat& boundaries() const {
         return m_boundaries;
     }
+    double time() const {
+        return m_time;
+    }
+
+    void setTime(double currentTime);
 
     void setBoltzmannConstant(double boltzmannConstant);
 
@@ -138,6 +143,9 @@ protected:
     double m_pressure;
 
     uint m_step;
+
+    double m_time;
+    bool m_skipInitialize;
 };
 
 #endif // MOLECULESYSTEM_H
