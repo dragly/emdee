@@ -10,8 +10,8 @@ Atom::Atom(Molecule *parent) :
     m_relativeVelocity(zeros<rowvec>(3)),
     m_force(zeros<rowvec>(3)),
     m_potential(0),
-    m_parent(parent),
     m_localPressure(0),
+    m_parent(parent),
     m_cellID(-999)
 {
 }
