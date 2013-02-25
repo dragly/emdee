@@ -36,7 +36,7 @@ void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const ro
     double sigmaOverR6 = sigmaSquaredOverRSquared * sigmaSquaredOverRSquared * sigmaSquaredOverRSquared;
     double sigmaOverR12 = sigmaOverR6 * sigmaOverR6;
     // TODO Verify force term
-    double factor = - ((eps24) / (rSquared)) * (2 * sigmaOverR12 - sigmaOverR6);
+    double factor = ((eps24) / (rSquared)) * (2 * sigmaOverR12 - sigmaOverR6);
 
     // The following is the same as
 
@@ -47,18 +47,18 @@ void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const ro
     //    atom1->m_force += tmpForce * factor;
 
     // Acting directly on elements
-    atom2->m_force(0) -= x * factor;
-    atom2->m_force(1) -= y * factor;
-    atom2->m_force(2) -= z * factor;
-    atom2->m_parent->m_force(0) -= x * factor;
-    atom2->m_parent->m_force(1) -= y * factor;
-    atom2->m_parent->m_force(2) -= z * factor;
-    atom1->m_force(0) += x * factor;
-    atom1->m_force(1) += y * factor;
-    atom1->m_force(2) += z * factor;
-    atom1->m_parent->m_force(0) += x * factor;
-    atom1->m_parent->m_force(1) += y * factor;
-    atom1->m_parent->m_force(2) += z * factor;
+    atom2->m_force(0) += x * factor;
+    atom2->m_force(1) += y * factor;
+    atom2->m_force(2) += z * factor;
+    atom2->m_parent->m_force(0) += x * factor;
+    atom2->m_parent->m_force(1) += y * factor;
+    atom2->m_parent->m_force(2) += z * factor;
+    atom1->m_force(0) -= x * factor;
+    atom1->m_force(1) -= y * factor;
+    atom1->m_force(2) -= z * factor;
+    atom1->m_parent->m_force(0) -= x * factor;
+    atom1->m_parent->m_force(1) -= y * factor;
+    atom1->m_parent->m_force(2) -= z * factor;
 
     // Potential
     double tmpPotential = eps4 * (sigmaOverR12 - sigmaOverR6);
@@ -66,7 +66,7 @@ void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const ro
     atom1->m_potential += 0.5 * tmpPotential;
 
     // Pressure
-    double pressure = factor * x * x + factor * y * y + factor * z * z; // dot product
+    double pressure = factor * rSquared; // dot product
     atom2->m_localPressure += 0.5 * pressure;
     atom1->m_localPressure += 0.5 * pressure;
 
