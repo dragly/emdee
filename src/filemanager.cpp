@@ -115,6 +115,7 @@ bool FileManager::loadBinary(string fileName) {
     // Append step by one
     m_moleculeSystem->setStep(step + 1);
     m_moleculeSystem->integrator()->setTimeStep(timeStep);
+    m_moleculeSystem->setTime(time);
     m_moleculeSystem->setBoundaries(systemBoundaries[0], systemBoundaries[3], systemBoundaries[1], systemBoundaries[4], systemBoundaries[2], systemBoundaries[5]);
 
 
@@ -254,7 +255,7 @@ bool FileManager::saveBinary(int step) {
 
     //    char line[1000];
     // Write header data
-    double time = step * m_moleculeSystem->integrator()->timeStep() * m_unitTime;
+    double time = m_moleculeSystem->time() * m_unitTime;
     double timeStep = m_moleculeSystem->integrator()->timeStep() * m_unitTime;
     int nAtoms = m_moleculeSystem->atoms().size();
     double temperature = m_moleculeSystem->temperature() * m_unitTemperature;
