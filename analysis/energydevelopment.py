@@ -9,6 +9,7 @@ from sys import argv
 from glob import glob
 from time import time
 from fys4460 import loadAtoms, boltzmannConstant
+from os.path import expanduser
 #import os
 #import h5py
 
@@ -17,6 +18,7 @@ saveDir = argv[1]
 fileNames = argv[2:]
 
 if len(fileNames) == 1:
+    fileNames[0] = expanduser(fileNames[0])
     fileNames = glob(fileNames[0])
 fileNames.sort()
 loadTime = 0
