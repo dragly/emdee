@@ -9,8 +9,11 @@ from sys import argv
 from glob import glob
 from time import time
 from fys4460 import dataType, boltzmannConstant, headerType
+from scipy import stats
+matplotlib.rcParams["mathtext.default"] = "regular"
 
-fileNames = argv[1:]
+saveDir = argv[1]
+fileNames = argv[2:]
 
 if len(fileNames) == 1:
     fileNames = glob(fileNames[0])
@@ -44,8 +47,17 @@ for fileName in fileNames:
 #    f.close()
 
 figure()
-plot(times, averageSquareDisplacements, label="Average square displacement")
+picoTimes = times / 1e-12
+plot(picoTimes, averageSquareDisplacements, label="Average square displacement")
+xlabel("t [ps]")
+ylabel(r"distance [$m^2$]")
 legend()
 grid()
-
+savefig(saveDir + "/displacement.pdf")
+gradient = stats.linregress(times, averageSquareDisplacements)[0]
+diffConstant = gradient / 6
+print "diffConstant ", diffConstant
+f = open(saveDir + "/displacement-diffusion.tex", "w")
+f.write(str(diffConstant))
+f.close()
 show()
