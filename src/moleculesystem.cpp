@@ -118,6 +118,14 @@ void MoleculeSystem::updateStatistics()
 void MoleculeSystem::addMolecules(const vector<Molecule *>& molecule)
 {
     m_molecules.insert(m_molecules.end(), molecule.begin(), molecule.end());
+
+    // Set up atoms list
+    m_atoms.clear();
+    for(Molecule* molecule : m_molecules) {
+        for(Atom* atom : molecule->atoms()) {
+            m_atoms.push_back(atom);
+        }
+    }
 }
 
 const vector<Molecule *> &MoleculeSystem::molecules() const
@@ -214,14 +222,6 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         throw(new exception());
     }
 
-    // Set up atoms list
-    m_atoms.clear();
-    for(Molecule* molecule : m_molecules) {
-        for(Atom* atom : molecule->atoms()) {
-            m_atoms.push_back(atom);
-        }
-    }
-
     int iStep = 0;
     // Set up integrator if m_skipInitialize is not set (because file was loaded)
     if(!m_skipInitialize) {
@@ -242,12 +242,12 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         if(isOutputEnabled()) {
             cout << "Step " << m_step << ".." << endl;
         }
+        applyModifiers();
         m_integrator->stepForward();
         //        cout << "Integrator done" << endl;
         //        updateForces();
         //        refreshCellContents();
         //        updateForces();
-        applyModifiers();
         updateStatistics();
         if(m_isSaveEnabled) {
             m_fileManager->save(m_step);
