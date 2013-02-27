@@ -8,18 +8,22 @@ from pylab import *
 from sys import argv
 from glob import glob
 from time import time
-from fys4460 import dataType, boltzmannConstant, headerType
+from fys4460 import loadAtoms
+from os.path import expanduser, join, split
 from scipy import stats
-from os.path import expanduser
+from pylibconfig import Config
 matplotlib.rcParams["mathtext.default"] = "regular"
 
-saveDir = argv[1]
-fileNames = argv[2:]
+configFilePath = argv[1]
+saveDir, configFileName = split(configFilePath)
 
-if len(fileNames) == 1:
-    fileNames[0] = expanduser(fileNames[0])
-    fileNames = glob(fileNames[0])
+config = Config()
+config.readFile(configFilePath)
+fileNames = config.value("simulation.saveFileName")[0]
+fileNames = expanduser(fileNames)
+fileNames = glob(fileNames)
 fileNames.sort()
+fileNames = fileNames[400:1400]
 loadTime = 0
 calculateTime = 0
 plotTime = 0
@@ -35,9 +39,7 @@ i = 0
 for fileName in fileNames:
     print "Loading data for " + fileName
     #velocities = loadtxt(fileName, skiprows=2, usecols=[4,5,6], unpack=True)
-    f = open(fileName, "rb")
-    header = fromfile(f, dtype=headerType, count=1)
-    atoms = fromfile(f, dtype=dataType)
+    header, atoms = loadAtoms(fileName)
 #    f = h5py.File(fileName, "r")
 #    atoms = f.get("ArrayOfStructures")
     averageDisplacements[i] = header["averageDisplacement"][0]

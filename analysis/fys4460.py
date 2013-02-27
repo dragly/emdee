@@ -31,3 +31,8 @@ def makedirsSilent(directory):
             pass
         else: 
             raise 
+    
+def createSymlink(source, destination):
+    if os.path.islink(destination):
+        os.unlink(destination)
+    os.symlink(source, destination)
