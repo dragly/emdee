@@ -1,6 +1,6 @@
 #include <src/moleculesystem.h>
 #include <src/generator.h>
-#include <src/interatomicforce.h>
+#include <src/force/lennardjonesforce.h>
 #include <src/integrator/velocityverletintegrator.h>
 
 #include <QString>
@@ -48,7 +48,7 @@ void BenchmarkTest::benchmarkDifferentSizes()
     vector<Atom*> atoms = generator.generateFcc(bUnit, nCells, AtomType::argon());
     generator.boltzmannDistributeVelocities(temperature, atoms);
     // Set up force
-    InteratomicForce interatomicForce;
+    LennardJonesForce interatomicForce;
     interatomicForce.setPotentialConstant(potentialConstant);
     // Set up molecule system
     MoleculeSystem system;

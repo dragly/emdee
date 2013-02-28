@@ -2,7 +2,7 @@
 #include <src/moleculesystemcell.h>
 #include <src/generator.h>
 #include <src/atomtype.h>
-#include <src/interatomicforce.h>
+#include <src/force/lennardjonesforce.h>
 #include <src/integrator/velocityverletintegrator.h>
 
 #include <QString>
@@ -42,7 +42,7 @@ void SystemTest::cellSetup()
     system.setSaveEnabled(false);
     Generator generator;
 //    generator.setUnitLength(unitLength);
-    InteratomicForce force;
+    LennardJonesForce force;
     force.setPotentialConstant(potentialConstant);
     vector<Atom*> atoms = generator.generateFcc(bUnit, 7, AtomType::argon());
     generator.boltzmannDistributeVelocities(20.0, atoms);

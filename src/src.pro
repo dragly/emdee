@@ -14,7 +14,6 @@ SOURCES += main.cpp \
     generator.cpp \
     atomtype.cpp \
     moleculesystemcell.cpp \
-    interatomicforce.cpp \
     integrator/velocityverletintegrator.cpp \
     integrator/integrator.cpp \
     integrator/eulercromerintegrator.cpp \
@@ -23,14 +22,15 @@ SOURCES += main.cpp \
     modifier/berendsenthermostat.cpp \
     modifier/andersenthermostat.cpp \
     random.cpp \
-    atom.cpp
+    atom.cpp \
+    force/lennardjonesforce.cpp \
+    force/twoparticleforce.cpp
 
 HEADERS += \
     moleculesystem.h \
     generator.h \
     atomtype.h \
     moleculesystemcell.h \
-    interatomicforce.h \
     integrator/velocityverletintegrator.h \
     integrator/integrator.h \
     integrator/eulercromerintegrator.h \
@@ -39,7 +39,9 @@ HEADERS += \
     modifier/berendsenthermostat.h \
     modifier/andersenthermostat.h \
     random.h \
-    atom.h
+    atom.h \
+    force/lennardjonesforce.h \
+    force/twoparticleforce.h
 
 # Building
 myscript.target = myscript

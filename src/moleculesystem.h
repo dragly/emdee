@@ -5,7 +5,7 @@
 class Atom;
 class Integrator;
 class MoleculeSystemCell;
-class InteratomicForce;
+class TwoParticleForce;
 class FileManager;
 class Modifier;
 
@@ -49,8 +49,8 @@ public:
 
 //    void setPotentialConstant(double potentialConstant);
     void setIntegrator(Integrator *integrator);
-    void setInteratomicForce(InteratomicForce* force);
-    InteratomicForce* interatomicForce();
+    void setInteratomicForce(TwoParticleForce* force);
+    TwoParticleForce* interatomicForce();
     void updateStatistics();
 
     // I/O
@@ -121,7 +121,7 @@ protected:
 
     Config *m_config;
 
-    InteratomicForce *m_interatomicForce;
+    TwoParticleForce *m_interatomicForce;
     FileManager *m_fileManager;
 
     bool m_isSaveEnabled;

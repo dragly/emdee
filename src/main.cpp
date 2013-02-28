@@ -1,6 +1,6 @@
 #include <src/moleculesystem.h>
 #include <src/generator.h>
-#include <src/interatomicforce.h>
+#include <src/force/lennardjonesforce.h>
 #include <src/integrator/integrator.h>
 #include <src/integrator/velocityverletintegrator.h>
 #include <src/integrator/eulercromerintegrator.h>
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
     }
 
     // Set up force
-    InteratomicForce* force = new InteratomicForce();
+    LennardJonesForce* force = new LennardJonesForce();
     force->setPotentialConstant(potentialConstant);
     force->setEnergyConstant(energyConstant);
 

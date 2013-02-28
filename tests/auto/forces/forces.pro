@@ -19,12 +19,14 @@ TEMPLATE = app
 INCLUDEPATH += ../../../src
 
 SOURCES += tst_forcestest.cpp \
-    ../../../src/interatomicforce.cpp \
+    ../../../src/force/twoparticleforce.cpp \
     ../../../src/atomtype.cpp \
-    ../../../src/atom.cpp
+    ../../../src/atom.cpp \
+    ../../../src/force/lennardjonesforce.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
-    ../../../src/interatomicforce.h \
+    ../../../src/force/twoparticleforce.h \
     ../../../src/atomtype.h \
-    ../../../src/atom.h
+    ../../../src/atom.h \
+    ../../../src/force/lennardjonesforce.h

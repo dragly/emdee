@@ -1,4 +1,4 @@
-#include <src/interatomicforce.h>
+#include <src/force/lennardjonesforce.h>
 #include <src/atom.h>
 
 #include <QString>
@@ -32,7 +32,7 @@ void ForcesTest::testForceBetweenArgons()
     position2 << 1 << 0 << 0;
     atom1->setPosition(position1);
     atom2->setPosition(position2);
-    InteratomicForce force;
+    LennardJonesForce force;
     force.setPotentialConstant(3);
     force.calculateAndApplyForce(atom1, atom2);
 //    rowvec calculatedForce = force.force();

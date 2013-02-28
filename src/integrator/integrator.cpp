@@ -1,6 +1,4 @@
 #include <src/integrator/integrator.h>
-#include <src/atom.h>
-#include <src/moleculesystem.h>
 
 Integrator::Integrator(MoleculeSystem *moleculeSystem) :
     m_moleculeSystem(moleculeSystem),

@@ -2,7 +2,7 @@
 
 #include <src/moleculesystemcell.h>
 #include <src/moleculesystem.h>
-#include <src/interatomicforce.h>
+#include <src/force/twoparticleforce.h>
 
 MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     m_nDimensions(3),
@@ -84,12 +84,12 @@ const irowvec &MoleculeSystemCell::indices() const
 
 void MoleculeSystemCell::updateForces()
 {
-    InteratomicForce* interatomicForce = moleculeSystem->interatomicForce();
+    TwoParticleForce* interatomicForce = moleculeSystem->interatomicForce();
 
     // Loop over neighbors and their atoms
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
         MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
-        rowvec& neighborOffset = m_neighborOffsets[iNeighbor];
+        const rowvec& neighborOffset = m_neighborOffsets[iNeighbor];
         if(neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()) {
             continue;
         }

@@ -4,7 +4,8 @@
 #include <src/atom.h>
 #include <src/integrator/integrator.h>
 #include <src/moleculesystemcell.h>
-#include <src/interatomicforce.h>
+#include <src/force/lennardjonesforce.h>
+#include <src/force/twoparticleforce.h>
 #include <src/integrator/velocityverletintegrator.h>
 #include <src/filemanager.h>
 #include <src/modifier/modifier.h>
@@ -32,7 +33,7 @@ MoleculeSystem::MoleculeSystem() :
     m_time(0),
     m_skipInitialize(false)
 {
-    m_interatomicForce = new InteratomicForce();
+    m_interatomicForce = new LennardJonesForce();
     m_integrator = new VelocityVerletIntegrator(this);
     m_fileManager = new FileManager(this);
     m_cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
@@ -375,12 +376,12 @@ void MoleculeSystem::setIntegrator(Integrator *integrator)
     m_integrator = integrator;
 }
 
-void MoleculeSystem::setInteratomicForce(InteratomicForce *force)
+void MoleculeSystem::setInteratomicForce(TwoParticleForce *force)
 {
     m_interatomicForce = force;
 }
 
-InteratomicForce *MoleculeSystem::interatomicForce()
+TwoParticleForce *MoleculeSystem::interatomicForce()
 {
     return m_interatomicForce;
 }
