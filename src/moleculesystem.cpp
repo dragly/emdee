@@ -529,7 +529,6 @@ const mat &MoleculeSystem::cellShiftVectors()
     return m_cellShiftVectors;
 }
 
-
 void MoleculeSystem::applyModifiers()
 {
     for(Modifier* modifier : m_modifiers) {
