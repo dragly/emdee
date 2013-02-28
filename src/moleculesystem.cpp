@@ -2,7 +2,6 @@
 
 // Local headers
 #include <src/atom.h>
-#include <src/molecule.h>
 #include <src/integrator/integrator.h>
 #include <src/moleculesystemcell.h>
 #include <src/interatomicforce.h>
@@ -357,17 +356,17 @@ void MoleculeSystem::refreshCellContents() {
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearAtoms();
     }
-    for(Atom* molecule : m_atoms) {
-        int i = molecule->position()(0) / m_cellLengths(0);
-        int j = molecule->position()(1) / m_cellLengths(1);
-        int k = molecule->position()(2) / m_cellLengths(2);
+    for(Atom* atom : m_atoms) {
+        int i = atom->position()(0) / m_cellLengths(0);
+        int j = atom->position()(1) / m_cellLengths(1);
+        int k = atom->position()(2) / m_cellLengths(2);
 
         int cellID = k * m_nCells(1) * m_nCells(2) + j *  m_nCells(2) + i;
 
         //        cout << cellID << endl;
 
         MoleculeSystemCell* cell = m_cells.at(cellID);
-        cell->addAtom(molecule);
+        cell->addAtom(atom);
     }
 }
 

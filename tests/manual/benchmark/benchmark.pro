@@ -22,7 +22,6 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 SOURCES += tst_benchmarktest.cpp \
     ../../../src/moleculesystemcell.cpp \
     ../../../src/moleculesystem.cpp \
-    ../../../src/molecule.cpp \
     ../../../src/interatomicforce.cpp \
     ../../../src/generator.cpp \
     ../../../src/atomtype.cpp \
@@ -35,7 +34,6 @@ SOURCES += tst_benchmarktest.cpp \
 HEADERS += \
     ../../../src/moleculesystemcell.h \
     ../../../src/moleculesystem.h \
-    ../../../src/molecule.h \
     ../../../src/interatomicforce.h \
     ../../../src/generator.h \
     ../../../src/atomtype.h \

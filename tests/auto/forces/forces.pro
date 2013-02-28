@@ -21,12 +21,10 @@ INCLUDEPATH += ../../../src
 SOURCES += tst_forcestest.cpp \
     ../../../src/interatomicforce.cpp \
     ../../../src/atomtype.cpp \
-    ../../../src/atom.cpp \
-    ../../../src/molecule.cpp
+    ../../../src/atom.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
     ../../../src/interatomicforce.h \
     ../../../src/atomtype.h \
-    ../../../src/atom.h \
-    ../../../src/molecule.h
+    ../../../src/atom.h

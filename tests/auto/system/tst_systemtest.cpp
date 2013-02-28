@@ -44,8 +44,8 @@ void SystemTest::cellSetup()
 //    generator.setUnitLength(unitLength);
     InteratomicForce force;
     force.setPotentialConstant(potentialConstant);
-    vector<Molecule*> molecules = generator.generateFcc(bUnit, 7, AtomType::argon());
-    generator.boltzmannDistributeVelocities(20.0, molecules);
+    vector<Atom*> atoms = generator.generateFcc(bUnit, 7, AtomType::argon());
+    generator.boltzmannDistributeVelocities(20.0, atoms);
 
     VelocityVerletIntegrator integrator(&system);
     integrator.setTimeStep(0.005);
@@ -53,23 +53,23 @@ void SystemTest::cellSetup()
     system.setInteratomicForce(&force);
 //    system.setPotentialConstant(potentialConstant);
     system.setBoundaries(generator.lastBoundaries());
-    system.addMolecules(molecules);
+    system.addAtoms(atoms);
     system.setupCells(potentialConstant * 3);
 //    system.setUnitLength(unitLength);
 
     ulong nMoleculesInCells = 0;
     for(MoleculeSystemCell* cell : system.cells()) {
-        nMoleculesInCells += cell->molecules().size();
+        nMoleculesInCells += cell->atoms().size();
     }
-    QCOMPARE(system.molecules().size(), nMoleculesInCells);
+    QCOMPARE(system.atoms().size(), nMoleculesInCells);
 
     system.simulate(50);
     system.refreshCellContents();
     nMoleculesInCells = 0;
     for(MoleculeSystemCell* cell : system.cells()) {
-        nMoleculesInCells += cell->molecules().size();
+        nMoleculesInCells += cell->atoms().size();
     }
-    QCOMPARE(system.molecules().size(), nMoleculesInCells);
+    QCOMPARE(system.atoms().size(), nMoleculesInCells);
 }
 
 QTEST_APPLESS_MAIN(SystemTest)

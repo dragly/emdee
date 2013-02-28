@@ -1,98 +1,60 @@
 #include <src/atom.h>
-#include <src/molecule.h>
 
-#include <armadillo>
-
-using namespace arma;
-
-Atom_old::Atom_old(Atom *parent) :
-    m_relativePosition(zeros<rowvec>(3)),
-    m_relativeVelocity(zeros<rowvec>(3)),
+Atom::Atom(AtomType atomType) :
+    m_position(zeros<rowvec>(3)),
+    m_velocity(zeros<rowvec>(3)),
     m_force(zeros<rowvec>(3)),
-    m_potential(0),
-    m_localPressure(0),
-    m_parent(parent),
-    m_cellID(-999)
+    m_displacement(zeros<rowvec>(3)),
+    m_mass(0.0),
+    m_potential(0.0),
+    m_localPressure(0.0),
+    m_cellID(-999),
+    m_type(atomType)
 {
 }
 
-Atom_old::Atom_old(Atom *parent, AtomType atomType) :
-    m_relativePosition(zeros<rowvec>(3)),
-    m_relativeVelocity(zeros<rowvec>(3)),
-    m_force(zeros<rowvec>(3)),
-    m_type(atomType),
-    m_parent(parent)
+void Atom::setPosition(const rowvec &position)
 {
+    m_displacement += (position - m_position);
+    m_position = position;
 }
 
-void Atom_old::refreshAbsolutePositionAndVelocity() {
-    m_position = m_relativePosition + m_parent->position();
-    m_velocity = m_relativeVelocity + m_parent->velocity();
-}
 
-double Atom_old::potential()
+void Atom::setVelocity(const rowvec &velocity)
 {
-    return m_potential;
+    m_velocity = velocity;
 }
 
-void Atom_old::addPotential(double potential) {
-    m_potential += potential;
-}
-
-void Atom_old::setRelativePosition(const rowvec &position)
+void Atom::addForce(const rowvec &force)
 {
-    refreshAbsolutePositionAndVelocity();
-    m_relativePosition = position;
+    m_force += force;
 }
 
-const rowvec& Atom_old::relativePosition() const
+void Atom::clearForcePotentialPressure()
 {
-    return m_relativePosition;
-}
-
-void Atom_old::setRelativeVelocity(const rowvec &velocity) {
-    refreshAbsolutePositionAndVelocity();
-    m_relativeVelocity = velocity;
-}
-
-const rowvec &Atom_old::relativeVelocity() const
-{
-    return m_relativeVelocity;
-}
-
-void Atom_old::clearForcePotentialPressure()
-{
-    m_force.zeros();
+    m_force = zeros<rowvec>(3);
     m_potential = 0;
     m_localPressure = 0;
 }
 
-void Atom_old::addForce(const rowvec &force)
-{
-    m_force += force;
-    m_parent->addForce(force);
+void Atom::clearDisplacement() {
+    m_displacement.zeros();
 }
 
-const rowvec &Atom_old::force() const
-{
-    return m_force;
+void Atom::addDisplacement(const rowvec& displacement) {
+    m_displacement += displacement;
 }
 
-double Atom_old::mass()
-{
-    return type().mass;
+void Atom::addDisplacement(double displacement, uint component) {
+    m_displacement(component) += displacement;
 }
 
-AtomType Atom_old::type()
-{
-    return m_type;
+void Atom::addPotential(double potential) {
+    m_potential += potential;
 }
 
-void Atom_old::setCellID(int cellID)
+
+void Atom::setCellID(int cellID)
 {
     m_cellID = cellID;
-}
-
-const rowvec& Atom_old::displacement() const {
-    return m_parent->displacement();
 }

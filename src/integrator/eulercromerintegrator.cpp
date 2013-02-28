@@ -1,6 +1,6 @@
 #include <src/integrator/eulercromerintegrator.h>
 #include <src/moleculesystem.h>
-#include <src/molecule.h>
+#include <src/atom.h>
 
 
 EulerCromerIntegrator::EulerCromerIntegrator(MoleculeSystem *moleculeSystem) :

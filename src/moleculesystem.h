@@ -2,7 +2,6 @@
 #define MOLECULESYSTEM_H
 
 // Forward declarations
-//class Atom_old;
 class Atom;
 class Integrator;
 class MoleculeSystemCell;
@@ -98,12 +97,11 @@ public:
     bool load(string fileName);
 
     void setStep(uint step);
-    void deleteMoleculesAndAtoms();
+    void deleteAtoms();
     void setAverageSquareDisplacement(double averageSquareDisplacement);
     void setAverageDisplacement(double averageDisplacement);
 protected:
     vector<Atom*> m_atoms;
-//    vector<Atom_old*> m_atoms_old;
     Integrator *m_integrator;
 
     double m_potentialConstant;

@@ -45,8 +45,8 @@ void BenchmarkTest::benchmarkDifferentSizes()
     double bUnit = 5.620 / 3.405;
     double temperature = 1.0;
     double potentialConstant = 1.0;
-    vector<Molecule*> molecules = generator.generateFcc(bUnit, nCells, AtomType::argon());
-    generator.boltzmannDistributeVelocities(temperature, molecules);
+    vector<Atom*> atoms = generator.generateFcc(bUnit, nCells, AtomType::argon());
+    generator.boltzmannDistributeVelocities(temperature, atoms);
     // Set up force
     InteratomicForce interatomicForce;
     interatomicForce.setPotentialConstant(potentialConstant);
@@ -60,7 +60,7 @@ void BenchmarkTest::benchmarkDifferentSizes()
     integrator.setTimeStep(0.001);
     system.setIntegrator(&integrator);
     // Add molecules
-    system.addMolecules(molecules);
+    system.addAtoms(atoms);
     cout << "addded" << endl;
     system.setBoundaries(generator.lastBoundaries());
     cout << "setbounds" << endl;

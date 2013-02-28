@@ -1,7 +1,6 @@
 #include <src/generator.h>
 
 #include <src/atom.h>
-#include <src/molecule.h>
 /*!
  * \brief Generator::Generator has multiple functions to generate different setups of atoms.
  * Something is longer than shorter is simple. This is bla bla bla boom.
@@ -84,6 +83,7 @@ void Generator::boltzmannDistributeVelocities(double temperature, const vector<A
         totalVelocity += velocity;
         atom->setVelocity(velocity);
     }
+    cout << totalVelocity << endl;
     // Remove total linear momentum
     rowvec velocityToRemove = totalVelocity / atoms.size();
     averageVelocity = 0;
@@ -94,7 +94,7 @@ void Generator::boltzmannDistributeVelocities(double temperature, const vector<A
         totalVelocity += newVelocity;
     }
     cout << "Boltzmann distributed velocities for " << atoms.size() << " atoms!" << endl;
-    cout << "Average velocity is " << averageVelocity << endl;
+    cout << "Average velocity is " << averageVelocity << " for the temperature " << temperature << endl;
 }
 
 void Generator::uniformDistributeVelocities(double maxVelocity, vector<Atom*> atoms) {

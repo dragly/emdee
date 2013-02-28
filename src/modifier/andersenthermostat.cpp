@@ -2,7 +2,6 @@
 
 #include <src/moleculesystem.h>
 #include <src/atom.h>
-#include <src/molecule.h>
 #include <src/random.h>
 #include <src/integrator/integrator.h>
 

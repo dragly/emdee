@@ -3,7 +3,6 @@
 #include <src/moleculesystem.h>
 #include <src/moleculesystemcell.h>
 #include <src/atom.h>
-#include <src/molecule.h>
 #include <src/atomtype.h>
 #include <src/integrator/integrator.h>
 
@@ -200,7 +199,6 @@ bool FileManager::saveXyz(int step) {
         outFile.open(outFileNameLocal, ios_base::app);
     }
 
-//    outFile << m_moleculeSystem->molecules().size() << endl;
     outFile << "Some nice comment" << endl;
 
     char line[1000];

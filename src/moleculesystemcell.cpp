@@ -1,4 +1,3 @@
-#include <src/molecule.h>
 #include <src/atom.h>
 
 #include <src/moleculesystemcell.h>
@@ -113,21 +112,13 @@ void MoleculeSystemCell::updateForces()
     }
 }
 
-void MoleculeSystemCell::clearMolecules()
+void MoleculeSystemCell::clearAtoms()
 {
     m_atoms.clear();
 }
 
-
-//void MoleculeSystemCell::addAlreadyCalculatedNeighbor(MoleculeSystemCell *neighbor, const rowvec& offset)
-//{
-//    m_alreadyCalculatedNeighbors.push_back(neighbor);
-//    m_neighborWithAlreadyCalculatedForcesOffsets.push_back(offset);
-//}
-
 void MoleculeSystemCell::clearAlreadyCalculatedNeighbors()
 {
-//    m_alreadyCalculatedNeighbors.clear();
     m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = false;
 }
 

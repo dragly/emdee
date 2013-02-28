@@ -19,13 +19,11 @@ TEMPLATE = app
 
 SOURCES += tst_generatortest.cpp \
     ../../../src/generator.cpp \
-    ../../../src/molecule.cpp \
     ../../../src/atomtype.cpp \
     ../../../src/atom.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
     ../../../src/generator.h \
-    ../../../src/molecule.h \
     ../../../src/atomtype.h \
     ../../../src/atom.h

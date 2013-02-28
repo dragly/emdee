@@ -2,7 +2,6 @@
 #define GENERATOR_H
 
 class Atom;
-//class Atom_old;
 
 #include <src/atomtype.h>
 

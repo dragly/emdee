@@ -1,7 +1,6 @@
 #include <src/interatomicforce.h>
 #include <src/moleculesystem.h>
 #include <src/atom.h>
-#include <src/molecule.h>
 
 InteratomicForce::InteratomicForce() :
 //    tmpForce(zeros<rowvec>(3)),
@@ -46,15 +45,9 @@ void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const ro
     atom2->m_force(0) += x * factor;
     atom2->m_force(1) += y * factor;
     atom2->m_force(2) += z * factor;
-    atom2->m_parent->m_force(0) += x * factor;
-    atom2->m_parent->m_force(1) += y * factor;
-    atom2->m_parent->m_force(2) += z * factor;
     atom1->m_force(0) -= x * factor;
     atom1->m_force(1) -= y * factor;
     atom1->m_force(2) -= z * factor;
-    atom1->m_parent->m_force(0) -= x * factor;
-    atom1->m_parent->m_force(1) -= y * factor;
-    atom1->m_parent->m_force(2) -= z * factor;
 
     // Potential
     double tmpPotential = eps4 * (sigmaOverR12 - sigmaOverR6);

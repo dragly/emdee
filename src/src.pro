@@ -11,10 +11,8 @@ TARGET = molecular-dynamics
 
 SOURCES += main.cpp \
     moleculesystem.cpp \
-    atom.cpp \
     generator.cpp \
     atomtype.cpp \
-    molecule.cpp \
     moleculesystemcell.cpp \
     interatomicforce.cpp \
     integrator/velocityverletintegrator.cpp \
@@ -24,14 +22,13 @@ SOURCES += main.cpp \
     modifier/modifier.cpp \
     modifier/berendsenthermostat.cpp \
     modifier/andersenthermostat.cpp \
-    random.cpp
+    random.cpp \
+    atom.cpp
 
 HEADERS += \
     moleculesystem.h \
-    atom.h \
     generator.h \
     atomtype.h \
-    molecule.h \
     moleculesystemcell.h \
     interatomicforce.h \
     integrator/velocityverletintegrator.h \
@@ -41,7 +38,8 @@ HEADERS += \
     modifier/modifier.h \
     modifier/berendsenthermostat.h \
     modifier/andersenthermostat.h \
-    random.h
+    random.h \
+    atom.h
 
 # Building
 myscript.target = myscript

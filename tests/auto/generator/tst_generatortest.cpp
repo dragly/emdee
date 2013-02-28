@@ -1,5 +1,5 @@
 #include <src/generator.h>
-#include <src/molecule.h>
+#include <src/atom.h>
 
 #include <QString>
 #include <QtTest>
@@ -35,12 +35,12 @@ void GeneratorTest::cleanupTestCase()
 void GeneratorTest::boltzmannDistributeVelocities()
 {
     Generator generator;
-    vector<Molecule*> molecules = generator.generateFcc(2,8,AtomType::argon());
-    generator.boltzmannDistributeVelocities(100, molecules);
+    vector<Atom*> atoms = generator.generateFcc(2,8,AtomType::argon());
+    generator.boltzmannDistributeVelocities(100, atoms);
 
     rowvec totalVelocity = zeros<rowvec>(3);
-    for(Molecule* molecule : molecules) {
-        totalVelocity += molecule->velocity();
+    for(Atom* atom : atoms) {
+        totalVelocity += atom->velocity();
     }
     double maxVelocity = totalVelocity.max();
     QVERIFY(fabs(maxVelocity) < 1e-5);

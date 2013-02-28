@@ -31,7 +31,7 @@ public:
     const irowvec& indices() const;
 
     void updateForces();
-    void clearMolecules();
+    void clearAtoms();
     void clearAlreadyCalculatedNeighbors();
     void setID(int id);
     int id();

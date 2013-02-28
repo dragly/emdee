@@ -20,7 +20,6 @@ TEMPLATE = app
 SOURCES += tst_systemtest.cpp \
     ../../../src/moleculesystemcell.cpp \
     ../../../src/moleculesystem.cpp \
-    ../../../src/molecule.cpp \
     ../../../src/interatomicforce.cpp \
     ../../../src/generator.cpp \
     ../../../src/atomtype.cpp \
@@ -35,7 +34,6 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 HEADERS += \
     ../../../src/moleculesystemcell.h \
     ../../../src/moleculesystem.h \
-    ../../../src/molecule.h \
     ../../../src/interatomicforce.h \
     ../../../src/generator.h \
     ../../../src/atomtype.h \
@@ -44,3 +42,4 @@ HEADERS += \
     ../../../src/integrator/integrator.h \
     ../../../src/integrator/eulercromerintegrator.h \
     ../../../src/filemanager.h
+
