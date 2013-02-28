@@ -13,22 +13,10 @@ Atom::Atom(AtomType atomType) :
 {
 }
 
-void Atom::setPosition(const rowvec &position)
-{
-    m_displacement += (position - m_position);
-    m_position = position;
-}
+//void Atom::
 
 
-void Atom::setVelocity(const rowvec &velocity)
-{
-    m_velocity = velocity;
-}
-
-void Atom::addForce(const rowvec &force)
-{
-    m_force += force;
-}
+//void Atom::
 
 void Atom::clearForcePotentialPressure()
 {
@@ -41,20 +29,16 @@ void Atom::clearDisplacement() {
     m_displacement.zeros();
 }
 
-void Atom::addDisplacement(const rowvec& displacement) {
-    m_displacement += displacement;
-}
+//void Atom::
 
-void Atom::addDisplacement(double displacement, uint component) {
-    m_displacement(component) += displacement;
-}
+//void Atom::
 
-void Atom::addPotential(double potential) {
-    m_potential += potential;
-}
+//void Atom::
 
+//void Atom::
 
-void Atom::setCellID(int cellID)
-{
-    m_cellID = cellID;
-}
+//void Atom::
+
+//void Atom::
+
+//void Atom::

@@ -2,7 +2,7 @@
 #define ATOM_H
 
 // Local includes
-class InteratomicForce;
+class TwoParticleForce;
 #include <src/atomtype.h>
 
 // System includes
@@ -18,58 +18,35 @@ using namespace std;
  */
 class Atom
 {
-    friend class InteratomicForce;
+    friend class TwoParticleForce;
 public:
     Atom(AtomType atomType);
+
+    void clearForcePotentialPressure();
+
+    void clearDisplacement();
+
+    // Simple getters left in header for optimization
+    const rowvec &position() const;
+    const rowvec &velocity() const;
+    const rowvec &force() const;
+    const rowvec& displacement() const;
+    AtomType type() const;
+    double potential() const;
+    double localPressure() const;
+    int cellID() const;
+    double mass() const;
+    void addLocalPressure(double pressure);
+    void addForce(int component, double force);
 
     void setPosition(const rowvec &position);
     void setVelocity(const rowvec &velocity);
     void addForce(const rowvec &force);
     void addPotential(double potential);
-
-    void clearForcePotentialPressure();
-
-    void clearDisplacement();
-    void addDisplacement(const rowvec &displacement);
+    void setCellID(int cellID);
+    void addDisplacement(const rowvec& displacement);
     void addDisplacement(double displacement, uint component);
 
-    void setCellID(int cellID);
-
-    // Simple getters left in header for optimization
-    const rowvec &position() const
-    {
-        return m_position;
-    }
-    const rowvec &velocity() const
-    {
-        return m_velocity;
-    }
-    const rowvec &force() const
-    {
-        return m_force;
-    }
-    const rowvec& displacement() const
-    {
-        return m_displacement;
-    }
-    AtomType type() const
-    {
-        return m_type;
-    }
-    double potential() const
-    {
-        return m_potential;
-    }
-    double localPressure() const {
-        return m_localPressure;
-    }
-    int cellID() const {
-        return m_cellID;
-    }
-    double mass()
-    {
-        return type().mass;
-    }
 protected:
     rowvec m_position;
     rowvec m_velocity;
@@ -82,5 +59,80 @@ protected:
     int m_cellID;
     AtomType m_type;
 };
+
+// Inlined functions
+inline void Atom::addForce(int component, double force)
+{
+   m_force(component) += force;
+}
+
+inline void Atom::addDisplacement(double displacement, uint component) {
+    m_displacement(component) += displacement;
+}
+
+inline void Atom::addDisplacement(const rowvec& displacement) {
+    m_displacement += displacement;
+}
+
+inline void Atom::setCellID(int cellID)
+{
+    m_cellID = cellID;
+}
+inline void Atom::addPotential(double potential) {
+    m_potential += potential;
+}
+inline void Atom::addForce(const rowvec &force)
+{
+    m_force += force;
+}
+inline void Atom::setVelocity(const rowvec &velocity)
+{
+    m_velocity = velocity;
+}
+inline void Atom::setPosition(const rowvec &position)
+{
+    m_displacement += (position - m_position);
+    m_position = position;
+}
+inline void Atom::addLocalPressure(double pressure) {
+    m_localPressure += pressure;
+}
+inline double Atom::mass() const
+{
+    return type().mass;
+}
+inline int Atom::cellID() const
+{
+    return m_cellID;
+}
+inline double Atom::localPressure() const
+{
+    return m_localPressure;
+}
+inline double Atom::potential() const
+{
+    return m_potential;
+}
+
+inline const rowvec &Atom::position() const
+{
+    return m_position;
+}
+inline const rowvec &Atom::velocity() const
+{
+    return m_velocity;
+}
+inline const rowvec &Atom::force() const
+{
+    return m_force;
+}
+inline const rowvec& Atom::displacement() const
+{
+    return m_displacement;
+}
+inline AtomType Atom::type() const
+{
+    return m_type;
+}
 
 #endif // ATOM_H
