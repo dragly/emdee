@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     random.cpp \
     atom.cpp \
     force/lennardjonesforce.cpp \
-    force/twoparticleforce.cpp
+    force/twoparticleforce.cpp \
+    configurationparser.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -41,7 +42,8 @@ HEADERS += \
     random.h \
     atom.h \
     force/lennardjonesforce.h \
-    force/twoparticleforce.h
+    force/twoparticleforce.h \
+    configurationparser.h
 
 # Building
 myscript.target = myscript
