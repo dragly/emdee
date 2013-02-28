@@ -172,7 +172,7 @@ bool FileManager::loadBinary(string fileName) {
         molecules.push_back(atom);
     }
 
-    m_moleculeSystem->addMolecules(molecules);
+    m_moleculeSystem->addAtoms(molecules);
     inFile.close();
     return true;
 }
@@ -202,11 +202,11 @@ bool FileManager::saveXyz(int step) {
         outFile.open(outFileNameLocal, ios_base::app);
     }
 
-    outFile << m_moleculeSystem->molecules().size() << endl;
+//    outFile << m_moleculeSystem->molecules().size() << endl;
     outFile << "Some nice comment" << endl;
 
     char line[1000];
-    for(Atom_old* atom : m_moleculeSystem->atoms()) {
+    for(Atom* atom : m_moleculeSystem->atoms()) {
         rowvec position = atom->position() * m_unitLength;
         rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
         rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
@@ -268,7 +268,7 @@ bool FileManager::saveBinary(int step) {
     // Write system boundaries
 
     // Write atom data
-    for(Atom_old* atom : m_moleculeSystem->atoms()) {
+    for(Atom* atom : m_moleculeSystem->atoms()) {
         rowvec position = atom->position() * m_unitLength;
         rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
         rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
@@ -312,7 +312,7 @@ bool FileManager::saveHDF5(int step) {
     // TODO Rescale with units!
     int  i = 0;
     s1_t* s1 = new s1_t[m_moleculeSystem->atoms().size()];
-    for(Atom_old* atom : m_moleculeSystem->atoms()) {
+    for(Atom* atom : m_moleculeSystem->atoms()) {
         sprintf(s1[i].atomType , "Ar");
         s1[i].positionX = atom->position()(0);
         s1[i].positionY = atom->position()(1);

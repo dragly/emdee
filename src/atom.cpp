@@ -5,7 +5,7 @@
 
 using namespace arma;
 
-Atom::Atom(Molecule *parent) :
+Atom_old::Atom_old(Atom *parent) :
     m_relativePosition(zeros<rowvec>(3)),
     m_relativeVelocity(zeros<rowvec>(3)),
     m_force(zeros<rowvec>(3)),
@@ -16,7 +16,7 @@ Atom::Atom(Molecule *parent) :
 {
 }
 
-Atom::Atom(Molecule *parent, AtomType atomType) :
+Atom_old::Atom_old(Atom *parent, AtomType atomType) :
     m_relativePosition(zeros<rowvec>(3)),
     m_relativeVelocity(zeros<rowvec>(3)),
     m_force(zeros<rowvec>(3)),
@@ -25,74 +25,74 @@ Atom::Atom(Molecule *parent, AtomType atomType) :
 {
 }
 
-void Atom::refreshAbsolutePositionAndVelocity() {
+void Atom_old::refreshAbsolutePositionAndVelocity() {
     m_position = m_relativePosition + m_parent->position();
     m_velocity = m_relativeVelocity + m_parent->velocity();
 }
 
-double Atom::potential()
+double Atom_old::potential()
 {
     return m_potential;
 }
 
-void Atom::addPotential(double potential) {
+void Atom_old::addPotential(double potential) {
     m_potential += potential;
 }
 
-void Atom::setRelativePosition(const rowvec &position)
+void Atom_old::setRelativePosition(const rowvec &position)
 {
     refreshAbsolutePositionAndVelocity();
     m_relativePosition = position;
 }
 
-const rowvec& Atom::relativePosition() const
+const rowvec& Atom_old::relativePosition() const
 {
     return m_relativePosition;
 }
 
-void Atom::setRelativeVelocity(const rowvec &velocity) {
+void Atom_old::setRelativeVelocity(const rowvec &velocity) {
     refreshAbsolutePositionAndVelocity();
     m_relativeVelocity = velocity;
 }
 
-const rowvec &Atom::relativeVelocity() const
+const rowvec &Atom_old::relativeVelocity() const
 {
     return m_relativeVelocity;
 }
 
-void Atom::clearForcePotentialPressure()
+void Atom_old::clearForcePotentialPressure()
 {
     m_force.zeros();
     m_potential = 0;
     m_localPressure = 0;
 }
 
-void Atom::addForce(const rowvec &force)
+void Atom_old::addForce(const rowvec &force)
 {
     m_force += force;
     m_parent->addForce(force);
 }
 
-const rowvec &Atom::force() const
+const rowvec &Atom_old::force() const
 {
     return m_force;
 }
 
-double Atom::mass()
+double Atom_old::mass()
 {
     return type().mass;
 }
 
-AtomType Atom::type()
+AtomType Atom_old::type()
 {
     return m_type;
 }
 
-void Atom::setCellID(int cellID)
+void Atom_old::setCellID(int cellID)
 {
     m_cellID = cellID;
 }
 
-const rowvec& Atom::displacement() const {
+const rowvec& Atom_old::displacement() const {
     return m_parent->displacement();
 }

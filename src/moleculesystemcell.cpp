@@ -62,22 +62,14 @@ ostream& operator<<(ostream& os, const MoleculeSystemCell& dt)
     return os;
 }
 
-void MoleculeSystemCell::addMolecule(Molecule *molecule) {
-    m_molecules.push_back(molecule);
-    for(Atom* atom : molecule->atoms()) {
-        m_atoms.push_back(atom);
-        atom->setCellID(m_id);
-    }
+void MoleculeSystemCell::addAtom(Atom *atom) {
+    m_atoms.push_back(atom);
+    atom->setCellID(m_id);
 }
 
 const vector<Atom *> &MoleculeSystemCell::atoms()
 {
     return m_atoms;
-}
-
-const vector<Molecule *> &MoleculeSystemCell::molecules()
-{
-    return m_molecules;
 }
 
 void MoleculeSystemCell::setIndices(const irowvec& indices)
@@ -123,7 +115,6 @@ void MoleculeSystemCell::updateForces()
 
 void MoleculeSystemCell::clearMolecules()
 {
-    m_molecules.clear();
     m_atoms.clear();
 }
 

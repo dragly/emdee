@@ -2,8 +2,9 @@
 #define MOLECULE_H
 
 // Local includes
-class Atom_old;
+//class Atom_old;
 class InteratomicForce;
+#include <src/atomtype.h>
 
 // System includes
 #include <armadillo>
@@ -25,6 +26,7 @@ public:
     void setPosition(const rowvec &position);
     void setVelocity(const rowvec &velocity);
     void addForce(const rowvec &force);
+    void addPotential(double potential);
 
     void clearForcePotentialPressure();
 
@@ -57,15 +59,20 @@ public:
     {
         return m_displacement;
     }
+    void setCellID(int cellID);
+    AtomType type();
 protected:
     rowvec m_position;
     rowvec m_velocity;
     rowvec m_force;
     rowvec m_displacement;
+    double m_potential;
+    double m_localPressure;
+    AtomType m_type;
 
     double m_mass;
 
-    vector<Atom_old*> m_atoms;
+//    vector<Atom_old*> m_atoms;
 };
 
 #endif // MOLECULE_H

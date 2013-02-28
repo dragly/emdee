@@ -56,24 +56,20 @@ void MoleculeSystem::setStep(uint step)
 }
 
 void MoleculeSystem::deleteMoleculesAndAtoms() {
-    for(Atom* molecule : m_atoms) {
-        delete molecule;
-    }
-    for(Atom_old* atom : m_atoms_old) {
+    for(Atom* atom : m_atoms) {
         delete atom;
     }
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearMolecules();
     }
     m_atoms.clear();
-    m_atoms_old.clear();
 }
 
 void MoleculeSystem::updateStatistics()
 {
     // Calculate kinetic energy
     double totalKineticEnergy = 0;
-    for(Atom_old* atom : m_atoms_old) {
+    for(Atom* atom : m_atoms) {
         totalKineticEnergy += 0.5 * atom->mass() * dot(atom->velocity(), atom->velocity());
     }
     m_temperature = totalKineticEnergy / (3./2. * m_atoms_old.size());
@@ -81,15 +77,15 @@ void MoleculeSystem::updateStatistics()
 
     // Calculate potential energy
     double totalPotentialEnergy = 0;
-    for(Atom_old* atom : m_atoms_old) {
+    for(Atom* atom : m_atoms) {
         totalPotentialEnergy += atom->potential();
     }
 
     // Calculate diffusion constant
     m_averageDisplacement = 0;
     m_averageSquareDisplacement = 0;
-    for(Atom* molecule : m_atoms) {
-        m_averageSquareDisplacement += dot(molecule->displacement(), molecule->displacement());
+    for(Atom* atom : m_atoms) {
+        m_averageSquareDisplacement += dot(atom->displacement(), atom->displacement());
         m_averageDisplacement += sqrt(m_averageSquareDisplacement);
     }
     m_averageSquareDisplacement /= m_atoms.size();
@@ -101,33 +97,20 @@ void MoleculeSystem::updateStatistics()
     double density = m_atoms_old.size() / volume;
     m_pressure = density * m_temperature;
     double volumeThreeInverse = 1. / (3. * volume);
-    for(Atom_old* atom : m_atoms_old) {
+    for(Atom* atom : m_atoms) {
         m_pressure += volumeThreeInverse * atom->localPressure();
     }
     //    cout << "Pressure " << m_pressure << endl;
 }
 
-void MoleculeSystem::addMolecules(const vector<Atom *>& molecule)
+void MoleculeSystem::addAtoms(const vector<Atom *>& atoms)
 {
-    m_atoms.insert(m_atoms.end(), molecule.begin(), molecule.end());
-
-    // Set up atoms list
-    m_atoms_old.clear();
-//    for(Atom* molecule : m_molecules) {
-//        for(Atom_old* atom : molecule->atoms()) {
-//            m_atoms.push_back(atom);
-//        }
-//    }
+    m_atoms.insert(m_atoms.end(), atoms.begin(), atoms.end());
 }
 
-const vector<Atom *> &MoleculeSystem::molecules() const
+const vector<Atom *> &MoleculeSystem::atoms() const
 {
     return m_atoms;
-}
-
-const vector<Atom_old *> &MoleculeSystem::atoms() const
-{
-    return m_atoms_old;
 }
 
 const vector<MoleculeSystemCell *> &MoleculeSystem::cells() const
@@ -139,8 +122,8 @@ void MoleculeSystem::updateForces()
 {
     obeyBoundaries();
     refreshCellContents();
-    for(Atom* molecule : m_atoms) {
-        molecule->clearForcePotentialPressure();
+    for(Atom* atom : m_atoms) {
+        atom->clearForcePotentialPressure();
     }
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearAlreadyCalculatedNeighbors();
@@ -384,7 +367,7 @@ void MoleculeSystem::refreshCellContents() {
         //        cout << cellID << endl;
 
         MoleculeSystemCell* cell = m_cells.at(cellID);
-        cell->addMolecule(molecule);
+        cell->addAtom(molecule);
     }
 }
 

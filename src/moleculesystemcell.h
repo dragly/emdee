@@ -1,7 +1,6 @@
 #ifndef MOLECULESYSTEMCELL_H
 #define MOLECULESYSTEMCELL_H
 
-class Molecule;
 class Atom;
 class MoleculeSystem;
 
@@ -25,9 +24,8 @@ public:
     void addNeighbor(MoleculeSystemCell *cell, const rowvec& offset);
 
     const mat &boundaries() const;
-    void addMolecule(Molecule *molecule);
+    void addAtom(Atom *atom);
     const vector<Atom*>& atoms();
-    const vector<Molecule*>& molecules();
 
     void setIndices(const irowvec& indices);
     const irowvec& indices() const;
@@ -56,7 +54,6 @@ protected:
     mat m_boundaries;
     mat cellShiftVectors;
 
-    vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
 
 

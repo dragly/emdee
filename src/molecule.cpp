@@ -30,6 +30,8 @@ void Atom::addForce(const rowvec &force)
 void Atom::clearForcePotentialPressure()
 {
     m_force = zeros<rowvec>(3);
+    m_potential = 0;
+    m_localPressure = 0;
 }
 
 double Atom::mass()
@@ -57,4 +59,19 @@ void Atom::addDisplacement(const rowvec& displacement) {
 
 void Atom::addDisplacement(double displacement, uint component) {
     m_displacement(component) += displacement;
+}
+
+void Atom::addPotential(double potential) {
+    m_potential += potential;
+}
+
+
+void Atom::setCellID(int cellID)
+{
+    m_cellID = cellID;
+}
+
+AtomType Atom::type()
+{
+    return m_type;
 }

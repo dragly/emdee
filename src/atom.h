@@ -1,7 +1,7 @@
 #ifndef ATOM_H
 #define ATOM_H
 
-class Molecule;
+class Atom;
 class InteratomicForce;
 #include <src/atomtype.h>
 
@@ -14,8 +14,8 @@ class Atom_old
 {
     friend class InteratomicForce;
 public:
-    Atom_old(Molecule* parent);
-    Atom_old(Molecule* parent, AtomType atomType);
+    Atom_old(Atom* parent);
+    Atom_old(Atom* parent, AtomType atomType);
 
     void setRelativePosition(const rowvec &position);
     const rowvec& relativePosition() const;
@@ -60,7 +60,7 @@ protected:
     double m_potential;
     double m_localPressure;
 
-    Molecule* m_parent;
+    Atom* m_parent;
 
     int m_cellID;
 };

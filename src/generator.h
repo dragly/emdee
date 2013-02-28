@@ -1,8 +1,8 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
-class Molecule;
 class Atom;
+//class Atom_old;
 
 #include <src/atomtype.h>
 
@@ -19,9 +19,9 @@ class Generator
 public:
     Generator();
 
-    vector<Molecule*> generateFcc(double sideLength, int nCells, AtomType atomType);
-    void boltzmannDistributeVelocities(double temperature, const vector<Molecule *> &molecules);
-    void uniformDistributeVelocities(double maxVelocity, vector<Molecule *> molecules);
+    vector<Atom*> generateFcc(double sideLength, int nCells, AtomType atomType);
+    void boltzmannDistributeVelocities(double temperature, const vector<Atom *> &atoms);
+    void uniformDistributeVelocities(double maxVelocity, vector<Atom *> atoms);
 
     const mat& lastBoundaries() const;
 

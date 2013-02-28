@@ -2,8 +2,8 @@
 #define MOLECULESYSTEM_H
 
 // Forward declarations
+//class Atom_old;
 class Atom;
-class Molecule;
 class Integrator;
 class MoleculeSystemCell;
 class InteratomicForce;
@@ -29,8 +29,7 @@ public:
 
     void loadConfiguration(Config* config);
 
-    void addMolecules(const vector<Molecule *> &molecule);
-    const vector<Molecule*> &molecules() const;
+    void addAtoms(const vector<Atom *> &atoms);
     const vector<Atom*> &atoms() const;
     const vector<MoleculeSystemCell*> &cells() const;
     void updateForces();
@@ -103,8 +102,8 @@ public:
     void setAverageSquareDisplacement(double averageSquareDisplacement);
     void setAverageDisplacement(double averageDisplacement);
 protected:
-    vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
+//    vector<Atom_old*> m_atoms_old;
     Integrator *m_integrator;
 
     double m_potentialConstant;

@@ -77,32 +77,32 @@ vector<Atom*> Generator::generateFcc(double sideLength, int nCells, AtomType ato
  * \note The Boltzmann constant should have been baked into the unitless temperature.
  *
  */
-void Generator::boltzmannDistributeVelocities(double temperature, const vector<Atom*>& molecules) {
+void Generator::boltzmannDistributeVelocities(double temperature, const vector<Atom*>& atoms) {
     double averageVelocity = 0;
     rowvec totalVelocity = zeros<rowvec>(m_nDimensions);
-    for(Atom* molecule : molecules) {
+    for(Atom* molecule : atoms) {
         rowvec velocity = randn<rowvec>(m_nDimensions);
         velocity *= sqrt(temperature / molecule->mass());
         totalVelocity += velocity;
         molecule->setVelocity(velocity);
     }
     // Remove total linear momentum
-    rowvec velocityToRemove = totalVelocity / molecules.size();
+    rowvec velocityToRemove = totalVelocity / atoms.size();
     averageVelocity = 0;
-    for(Atom* molecule : molecules) {
+    for(Atom* molecule : atoms) {
         rowvec newVelocity = molecule->velocity() - velocityToRemove;
         molecule->setVelocity(newVelocity);
-        averageVelocity += norm(newVelocity, 2) / molecules.size();
+        averageVelocity += norm(newVelocity, 2) / atoms.size();
         totalVelocity += newVelocity;
     }
-    cout << "Boltzmann distributed velocities for " << molecules.size() << " molecules!" << endl;
+    cout << "Boltzmann distributed velocities for " << atoms.size() << " molecules!" << endl;
     cout << "Average velocity is " << averageVelocity << endl;
 }
 
-void Generator::uniformDistributeVelocities(double maxVelocity, vector<Atom*> molecules) {
+void Generator::uniformDistributeVelocities(double maxVelocity, vector<Atom*> atoms) {
 
     rowvec totalVelocity = zeros<rowvec>(m_nDimensions);
-    for(Atom* molecule : molecules) {
+    for(Atom* molecule : atoms) {
         rowvec velocity = randu<rowvec>(m_nDimensions);
         velocity -= 0.5 * ones<rowvec>(m_nDimensions);
         velocity *= 2 * maxVelocity;
@@ -110,13 +110,13 @@ void Generator::uniformDistributeVelocities(double maxVelocity, vector<Atom*> mo
         molecule->setVelocity(velocity);
     }
     // Remove total linear momentum
-    rowvec velocityToRemove = totalVelocity / molecules.size();
+    rowvec velocityToRemove = totalVelocity / atoms.size();
     totalVelocity.zeros();
-    for(Atom* molecule : molecules) {
+    for(Atom* molecule : atoms) {
         rowvec newVelocity = molecule->velocity() - velocityToRemove;
         molecule->setVelocity(newVelocity);
     }
-    cout << "Uniformly distributed velocities for " << molecules.size() << " molecules!" << endl;
+    cout << "Uniformly distributed velocities for " << atoms.size() << " molecules!" << endl;
 }
 
 const mat &Generator::lastBoundaries() const

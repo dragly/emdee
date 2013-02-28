@@ -72,18 +72,18 @@ int main(int argc, char** argv)
             double b = initialization[i]["b"];
             b /= unitLength;
             int nCells = initialization[i]["nCells"];
-            vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
+            vector<Atom*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
             system.addMolecules(molecules);
             system.setBoundaries(generator.lastBoundaries());
             cout << "setbounds" << endl;
         } else if(initializationType == "boltzmannVelocity") {
             double initialTemperature = initialization[i]["initialTemperature"];
             initialTemperature /= unitTemperature;
-            generator.boltzmannDistributeVelocities(initialTemperature, system.molecules());
+            generator.boltzmannDistributeVelocities(initialTemperature, system.atoms());
         } else if(initializationType == "uniformVelocity") {
             double maxVelocity = initialization[i]["maxVelocity"];
             maxVelocity /= (unitLength / unitTime);
-            generator.uniformDistributeVelocities(maxVelocity, system.molecules());
+            generator.uniformDistributeVelocities(maxVelocity, system.atoms());
         } else if(initializationType == "loadFile") {
             string fileName = initialization[i]["fileName"];
             if(!system.load(fileName)) {
