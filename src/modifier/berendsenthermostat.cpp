@@ -18,8 +18,8 @@ void BerendsenThermostat::apply()
     double tau = m_relaxationTime;
     double currentTemperature = m_moleculeSystem->temperature();
     double gamma = sqrt(1 + dt / tau * (m_targetTemperature / currentTemperature - 1));
-    for(Molecule* molecule : m_moleculeSystem->molecules()) {
-        molecule->setVelocity(gamma * molecule->velocity());
+    for(Atom* atom : m_moleculeSystem->atoms()) {
+        atom->setVelocity(gamma * atom->velocity());
     }
 }
 

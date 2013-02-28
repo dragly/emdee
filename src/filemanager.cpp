@@ -121,9 +121,9 @@ bool FileManager::loadBinary(string fileName) {
     m_moleculeSystem->setBoundaries(systemBoundaries[0], systemBoundaries[3], systemBoundaries[1], systemBoundaries[4], systemBoundaries[2], systemBoundaries[5]);
 
 
-    vector<Atom*> molecules;
+    vector<Atom*> atoms;
     // Read atom data
-    m_moleculeSystem->deleteMoleculesAndAtoms();
+    m_moleculeSystem->deleteAtoms();
     cout << "Reading data for " << nAtoms << " atoms" << endl;
     if(nAtoms > 10000) {
         exit(9999);
@@ -131,8 +131,6 @@ bool FileManager::loadBinary(string fileName) {
     for(int i = 0; i < nAtoms; i++) {
         //        cout << "Reading atom " << i << endl;
         Atom* atom = new Atom(AtomType::argon());
-//        Atom_old* atom = new Atom_old(molecule, AtomType::argon());
-//        molecule->addAtom(atom);
         rowvec position = zeros<rowvec>(3);
         rowvec velocity = zeros<rowvec>(3);
         rowvec force = zeros<rowvec>(3);
@@ -169,10 +167,10 @@ bool FileManager::loadBinary(string fileName) {
         atom->clearDisplacement();
         atom->addDisplacement(displacement);
         atom->addPotential(potential);
-        molecules.push_back(atom);
+        atoms.push_back(atom);
     }
 
-    m_moleculeSystem->addAtoms(molecules);
+    m_moleculeSystem->addAtoms(atoms);
     inFile.close();
     return true;
 }

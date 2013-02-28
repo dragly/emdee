@@ -72,8 +72,8 @@ int main(int argc, char** argv)
             double b = initialization[i]["b"];
             b /= unitLength;
             int nCells = initialization[i]["nCells"];
-            vector<Atom*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
-            system.addMolecules(molecules);
+            vector<Atom*> atoms = generator.generateFcc(b, nCells, AtomType::argon());
+            system.addAtoms(atoms);
             system.setBoundaries(generator.lastBoundaries());
             cout << "setbounds" << endl;
         } else if(initializationType == "boltzmannVelocity") {

@@ -20,12 +20,12 @@ void AndersenThermostat::apply()
     double dt = m_moleculeSystem->integrator()->timeStep();
     double tau = m_collisionTime;
     double targetTemperature = m_targetTemperature;
-    for(Molecule* molecule : m_moleculeSystem->molecules()) {
+    for(Atom* atom : m_moleculeSystem->atoms()) {
         double randomNumber = random->ran2();
         if(randomNumber < dt / tau) {
             rowvec velocity = randn<rowvec>(m_nDimensions);
-            velocity *= sqrt(targetTemperature / molecule->mass());
-            molecule->setVelocity(velocity);
+            velocity *= sqrt(targetTemperature / atom->mass());
+            atom->setVelocity(velocity);
         }
     }
 }

@@ -2,7 +2,6 @@
 #define MOLECULE_H
 
 // Local includes
-//class Atom_old;
 class InteratomicForce;
 #include <src/atomtype.h>
 
@@ -32,9 +31,6 @@ public:
 
     double mass();
 
-//    void addAtom(Atom_old* atom);
-
-//    const vector<Atom_old *> atoms();
     void clearDisplacement();
     void addDisplacement(const rowvec &displacement);
     void addDisplacement(double displacement, uint component);
@@ -71,8 +67,6 @@ protected:
     AtomType m_type;
 
     double m_mass;
-
-//    vector<Atom_old*> m_atoms;
 };
 
 #endif // MOLECULE_H

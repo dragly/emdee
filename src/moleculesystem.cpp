@@ -55,12 +55,12 @@ void MoleculeSystem::setStep(uint step)
     m_step = step;
 }
 
-void MoleculeSystem::deleteMoleculesAndAtoms() {
+void MoleculeSystem::deleteAtoms() {
     for(Atom* atom : m_atoms) {
         delete atom;
     }
     for(MoleculeSystemCell* cell : m_cells) {
-        cell->clearMolecules();
+        cell->clearAtoms();
     }
     m_atoms.clear();
 }
@@ -72,7 +72,7 @@ void MoleculeSystem::updateStatistics()
     for(Atom* atom : m_atoms) {
         totalKineticEnergy += 0.5 * atom->mass() * dot(atom->velocity(), atom->velocity());
     }
-    m_temperature = totalKineticEnergy / (3./2. * m_atoms_old.size());
+    m_temperature = totalKineticEnergy / (3./2. * m_atoms.size());
     cout << "Temperature: " << setprecision(25) << m_temperature << endl;
 
     // Calculate potential energy
@@ -94,7 +94,7 @@ void MoleculeSystem::updateStatistics()
     // Calculate pressure
     rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
     double volume = (sideLengths(0) * sideLengths(1) * sideLengths(2));
-    double density = m_atoms_old.size() / volume;
+    double density = m_atoms.size() / volume;
     m_pressure = density * m_temperature;
     double volumeThreeInverse = 1. / (3. * volume);
     for(Atom* atom : m_atoms) {
@@ -176,22 +176,22 @@ void MoleculeSystem::simulate(int nSimulationSteps)
 
 void MoleculeSystem::obeyBoundaries() {
     // Boundary conditions
-    for(Atom* molecule : m_atoms) {
-        rowvec position = molecule->position();
+    for(Atom* atom : m_atoms) {
+        rowvec position = atom->position();
         for(int iDim = 0; iDim < m_nDimensions; iDim++) {
             double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
-            if(fabs(molecule->position()(iDim)) > (m_boundaries(1,iDim) + sideLength)
-                    || fabs(molecule->position()(iDim)) < (m_boundaries(0,iDim) - sideLength)) {
-                cerr << "Wow! A molecule ended up  outside 2 x boundaries! The time step must be too big. No reason to continue..." << endl;
+            if(fabs(atom->position()(iDim)) > (m_boundaries(1,iDim) + sideLength)
+                    || fabs(atom->position()(iDim)) < (m_boundaries(0,iDim) - sideLength)) {
+                cerr << "Wow! An atom ended up  outside 2 x boundaries! The time step must be too big. No reason to continue..." << endl;
                 throw(new exception());
-            } else if(molecule->position()(iDim) > m_boundaries(1,iDim)) {
+            } else if(atom->position()(iDim) > m_boundaries(1,iDim)) {
                 position(iDim) -= sideLength;
-                molecule->setPosition(position);
-                molecule->addDisplacement(sideLength, iDim);
-            } else if(molecule->position()(iDim) < m_boundaries(0,iDim)) {
+                atom->setPosition(position);
+                atom->addDisplacement(sideLength, iDim);
+            } else if(atom->position()(iDim) < m_boundaries(0,iDim)) {
                 position(iDim) += sideLength;
-                molecule->setPosition(position);
-                molecule->addDisplacement(-sideLength, iDim);
+                atom->setPosition(position);
+                atom->addDisplacement(-sideLength, iDim);
             }
         }
     }
@@ -355,7 +355,7 @@ void MoleculeSystem::setupCells(double minCutLength) {
 void MoleculeSystem::refreshCellContents() {
     // Add contents (molecules) to the cells
     for(MoleculeSystemCell* cell : m_cells) {
-        cell->clearMolecules();
+        cell->clearAtoms();
     }
     for(Atom* molecule : m_atoms) {
         int i = molecule->position()(0) / m_cellLengths(0);
