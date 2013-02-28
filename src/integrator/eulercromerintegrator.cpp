@@ -15,7 +15,7 @@ void EulerCromerIntegrator::initialize() {
 void EulerCromerIntegrator::stepForward() {
     double dt = m_timeStep;
     for(uint i = 0; i < m_moleculeSystem->molecules().size(); i++) {
-        Molecule *molecule = m_moleculeSystem->molecules().at(i);
+        Atom *molecule = m_moleculeSystem->molecules().at(i);
         rowvec velocity = molecule->velocity();
         rowvec position = molecule->position();
         velocity += molecule->force() / (molecule->mass()) * dt;

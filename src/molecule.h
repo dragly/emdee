@@ -2,7 +2,7 @@
 #define MOLECULE_H
 
 // Local includes
-class Atom;
+class Atom_old;
 class InteratomicForce;
 
 // System includes
@@ -16,11 +16,11 @@ using namespace std;
  * \brief The Molecule class contains a list of atoms which are positioned
  * relatively to the molecule's position.
  */
-class Molecule
+class Atom
 {
     friend class InteratomicForce;
 public:
-    Molecule();
+    Atom();
 
     void setPosition(const rowvec &position);
     void setVelocity(const rowvec &velocity);
@@ -30,9 +30,9 @@ public:
 
     double mass();
 
-    void addAtom(Atom* atom);
+//    void addAtom(Atom_old* atom);
 
-    const vector<Atom *> atoms();
+//    const vector<Atom_old *> atoms();
     void clearDisplacement();
     void addDisplacement(const rowvec &displacement);
     void addDisplacement(double displacement, uint component);
@@ -42,7 +42,6 @@ public:
     {
         return m_position;
     }
-
 
     const rowvec &velocity() const
     {
@@ -66,7 +65,7 @@ protected:
 
     double m_mass;
 
-    vector<Atom*> m_atoms;
+    vector<Atom_old*> m_atoms;
 };
 
 #endif // MOLECULE_H

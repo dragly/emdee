@@ -10,12 +10,12 @@ class InteratomicForce;
 using namespace arma;
 using namespace std;
 
-class Atom
+class Atom_old
 {
     friend class InteratomicForce;
 public:
-    Atom(Molecule* parent);
-    Atom(Molecule* parent, AtomType atomType);
+    Atom_old(Molecule* parent);
+    Atom_old(Molecule* parent, AtomType atomType);
 
     void setRelativePosition(const rowvec &position);
     const rowvec& relativePosition() const;

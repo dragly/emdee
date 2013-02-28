@@ -1,7 +1,7 @@
 #include <src/molecule.h>
 #include <src/atom.h>
 
-Molecule::Molecule() :
+Atom::Atom() :
     m_position(zeros<rowvec>(3)),
     m_velocity(zeros<rowvec>(3)),
     m_force(zeros<rowvec>(3)),
@@ -10,60 +10,51 @@ Molecule::Molecule() :
 {
 }
 
-void Molecule::setPosition(const rowvec &position)
+void Atom::setPosition(const rowvec &position)
 {
     m_displacement += (position - m_position);
     m_position = position;
-    for(Atom* atom : m_atoms) {
-        atom->refreshAbsolutePositionAndVelocity();
-    }
 }
 
 
-void Molecule::setVelocity(const rowvec &velocity)
+void Atom::setVelocity(const rowvec &velocity)
 {
     m_velocity = velocity;
-    for(Atom* atom : m_atoms) {
-        atom->refreshAbsolutePositionAndVelocity();
-    }
 }
 
-void Molecule::addForce(const rowvec &force)
+void Atom::addForce(const rowvec &force)
 {
     m_force += force;
 }
 
-void Molecule::clearForcePotentialPressure()
+void Atom::clearForcePotentialPressure()
 {
     m_force = zeros<rowvec>(3);
-    for(Atom* atom : m_atoms) {
-        atom->clearForcePotentialPressure();
-    }
 }
 
-double Molecule::mass()
+double Atom::mass()
 {
     return m_mass;
 }
 
-void Molecule::addAtom(Atom *atom)
-{
-    m_atoms.push_back(atom);
-    m_mass += atom->mass();
-}
+//void Atom::addAtom(Atom_old *atom)
+//{
+//    m_atoms.push_back(atom);
+//    m_mass += atom->mass();
+//}
 
-const vector<Atom *> Molecule::atoms() {
-    return m_atoms;
-}
+//const vector<Atom_old *> Atom::atoms() {
+//    return m_atoms;
+//}
 
-void Molecule::clearDisplacement() {
+void Atom::clearDisplacement() {
     m_displacement.zeros();
 }
 
-void Molecule::addDisplacement(const rowvec& displacement) {
+void Atom::addDisplacement(const rowvec& displacement) {
     m_displacement += displacement;
 }
 
-void Molecule::addDisplacement(double displacement, uint component) {
+void Atom::addDisplacement(double displacement, uint component) {
     m_displacement(component) += displacement;
 }

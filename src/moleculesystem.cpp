@@ -56,78 +56,78 @@ void MoleculeSystem::setStep(uint step)
 }
 
 void MoleculeSystem::deleteMoleculesAndAtoms() {
-    for(Molecule* molecule : m_molecules) {
+    for(Atom* molecule : m_atoms) {
         delete molecule;
     }
-    for(Atom* atom : m_atoms) {
+    for(Atom_old* atom : m_atoms_old) {
         delete atom;
     }
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearMolecules();
     }
-    m_molecules.clear();
     m_atoms.clear();
+    m_atoms_old.clear();
 }
 
 void MoleculeSystem::updateStatistics()
 {
     // Calculate kinetic energy
     double totalKineticEnergy = 0;
-    for(Atom* atom : m_atoms) {
+    for(Atom_old* atom : m_atoms_old) {
         totalKineticEnergy += 0.5 * atom->mass() * dot(atom->velocity(), atom->velocity());
     }
-    m_temperature = totalKineticEnergy / (3./2. * m_atoms.size());
+    m_temperature = totalKineticEnergy / (3./2. * m_atoms_old.size());
     cout << "Temperature: " << setprecision(25) << m_temperature << endl;
 
     // Calculate potential energy
     double totalPotentialEnergy = 0;
-    for(Atom* atom : m_atoms) {
+    for(Atom_old* atom : m_atoms_old) {
         totalPotentialEnergy += atom->potential();
     }
 
     // Calculate diffusion constant
     m_averageDisplacement = 0;
     m_averageSquareDisplacement = 0;
-    for(Molecule* molecule : m_molecules) {
+    for(Atom* molecule : m_atoms) {
         m_averageSquareDisplacement += dot(molecule->displacement(), molecule->displacement());
         m_averageDisplacement += sqrt(m_averageSquareDisplacement);
     }
-    m_averageSquareDisplacement /= m_molecules.size();
-    m_averageDisplacement /= m_molecules.size();
+    m_averageSquareDisplacement /= m_atoms.size();
+    m_averageDisplacement /= m_atoms.size();
 
     // Calculate pressure
     rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
     double volume = (sideLengths(0) * sideLengths(1) * sideLengths(2));
-    double density = m_atoms.size() / volume;
+    double density = m_atoms_old.size() / volume;
     m_pressure = density * m_temperature;
     double volumeThreeInverse = 1. / (3. * volume);
-    for(Atom* atom : m_atoms) {
+    for(Atom_old* atom : m_atoms_old) {
         m_pressure += volumeThreeInverse * atom->localPressure();
     }
     //    cout << "Pressure " << m_pressure << endl;
 }
 
-void MoleculeSystem::addMolecules(const vector<Molecule *>& molecule)
+void MoleculeSystem::addMolecules(const vector<Atom *>& molecule)
 {
-    m_molecules.insert(m_molecules.end(), molecule.begin(), molecule.end());
+    m_atoms.insert(m_atoms.end(), molecule.begin(), molecule.end());
 
     // Set up atoms list
-    m_atoms.clear();
-    for(Molecule* molecule : m_molecules) {
-        for(Atom* atom : molecule->atoms()) {
-            m_atoms.push_back(atom);
-        }
-    }
+    m_atoms_old.clear();
+//    for(Atom* molecule : m_molecules) {
+//        for(Atom_old* atom : molecule->atoms()) {
+//            m_atoms.push_back(atom);
+//        }
+//    }
 }
 
-const vector<Molecule *> &MoleculeSystem::molecules() const
-{
-    return m_molecules;
-}
-
-const vector<Atom *> &MoleculeSystem::atoms() const
+const vector<Atom *> &MoleculeSystem::molecules() const
 {
     return m_atoms;
+}
+
+const vector<Atom_old *> &MoleculeSystem::atoms() const
+{
+    return m_atoms_old;
 }
 
 const vector<MoleculeSystemCell *> &MoleculeSystem::cells() const
@@ -139,7 +139,7 @@ void MoleculeSystem::updateForces()
 {
     obeyBoundaries();
     refreshCellContents();
-    for(Molecule* molecule : m_molecules) {
+    for(Atom* molecule : m_atoms) {
         molecule->clearForcePotentialPressure();
     }
     for(MoleculeSystemCell* cell : m_cells) {
@@ -193,7 +193,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
 
 void MoleculeSystem::obeyBoundaries() {
     // Boundary conditions
-    for(Molecule* molecule : m_molecules) {
+    for(Atom* molecule : m_atoms) {
         rowvec position = molecule->position();
         for(int iDim = 0; iDim < m_nDimensions; iDim++) {
             double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
@@ -374,7 +374,7 @@ void MoleculeSystem::refreshCellContents() {
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearMolecules();
     }
-    for(Molecule* molecule : m_molecules) {
+    for(Atom* molecule : m_atoms) {
         int i = molecule->position()(0) / m_cellLengths(0);
         int j = molecule->position()(1) / m_cellLengths(1);
         int k = molecule->position()(2) / m_cellLengths(2);

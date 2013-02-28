@@ -121,7 +121,7 @@ bool FileManager::loadBinary(string fileName) {
     m_moleculeSystem->setBoundaries(systemBoundaries[0], systemBoundaries[3], systemBoundaries[1], systemBoundaries[4], systemBoundaries[2], systemBoundaries[5]);
 
 
-    vector<Molecule*> molecules;
+    vector<Atom*> molecules;
     // Read atom data
     m_moleculeSystem->deleteMoleculesAndAtoms();
     cout << "Reading data for " << nAtoms << " atoms" << endl;
@@ -130,9 +130,9 @@ bool FileManager::loadBinary(string fileName) {
     }
     for(int i = 0; i < nAtoms; i++) {
         //        cout << "Reading atom " << i << endl;
-        Molecule* molecule = new Molecule();
-        Atom* atom = new Atom(molecule, AtomType::argon());
-        molecule->addAtom(atom);
+        Atom* atom = new Atom(AtomType::argon());
+//        Atom_old* atom = new Atom_old(molecule, AtomType::argon());
+//        molecule->addAtom(atom);
         rowvec position = zeros<rowvec>(3);
         rowvec velocity = zeros<rowvec>(3);
         rowvec force = zeros<rowvec>(3);
@@ -163,13 +163,13 @@ bool FileManager::loadBinary(string fileName) {
         velocity /= (m_unitLength / m_unitTime);
         force /= (m_unitLength * m_unitMass / (m_unitTime * m_unitTime));
 
-        molecule->setPosition(position);
-        molecule->setVelocity(velocity);
+        atom->setPosition(position);
+        atom->setVelocity(velocity);
         atom->addForce(force);
-        molecule->clearDisplacement();
-        molecule->addDisplacement(displacement);
+        atom->clearDisplacement();
+        atom->addDisplacement(displacement);
         atom->addPotential(potential);
-        molecules.push_back(molecule);
+        molecules.push_back(atom);
     }
 
     m_moleculeSystem->addMolecules(molecules);
@@ -206,7 +206,7 @@ bool FileManager::saveXyz(int step) {
     outFile << "Some nice comment" << endl;
 
     char line[1000];
-    for(Atom* atom : m_moleculeSystem->atoms()) {
+    for(Atom_old* atom : m_moleculeSystem->atoms()) {
         rowvec position = atom->position() * m_unitLength;
         rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
         rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
@@ -268,7 +268,7 @@ bool FileManager::saveBinary(int step) {
     // Write system boundaries
 
     // Write atom data
-    for(Atom* atom : m_moleculeSystem->atoms()) {
+    for(Atom_old* atom : m_moleculeSystem->atoms()) {
         rowvec position = atom->position() * m_unitLength;
         rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
         rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
@@ -312,7 +312,7 @@ bool FileManager::saveHDF5(int step) {
     // TODO Rescale with units!
     int  i = 0;
     s1_t* s1 = new s1_t[m_moleculeSystem->atoms().size()];
-    for(Atom* atom : m_moleculeSystem->atoms()) {
+    for(Atom_old* atom : m_moleculeSystem->atoms()) {
         sprintf(s1[i].atomType , "Ar");
         s1[i].positionX = atom->position()(0);
         s1[i].positionY = atom->position()(1);
