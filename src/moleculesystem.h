@@ -105,7 +105,6 @@ public:
 protected:
     vector<Molecule*> m_molecules;
     vector<Atom*> m_atoms;
-//    int nSimulationSteps;
     Integrator *m_integrator;
 
     double m_potentialConstant;

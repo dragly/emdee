@@ -25,21 +25,17 @@ void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const ro
     double &sigmaSquared = m_potentialConstantSquared;
     double &eps4 = m_energyConstant4;
     double &eps24 = m_energyConstant24;
-//    tmpForce = atom2->position() + atom2Offset - atom1->position();
     // Check distances to the nearby cells
     double x = atom2->m_position(0) + atom2Offset(0) - atom1->m_position(0);
     double y = atom2->m_position(1) + atom2Offset(1) - atom1->m_position(1);
     double z = atom2->m_position(2) + atom2Offset(2) - atom1->m_position(2);
     rSquared = x*x + y*y + z*z;
-//    rSquared = dot(tmpForce, tmpForce);
     sigmaSquaredOverRSquared = sigmaSquared/rSquared;
     double sigmaOverR6 = sigmaSquaredOverRSquared * sigmaSquaredOverRSquared * sigmaSquaredOverRSquared;
     double sigmaOverR12 = sigmaOverR6 * sigmaOverR6;
-    // TODO Verify force term
     double factor = ((eps24) / (rSquared)) * (2 * sigmaOverR12 - sigmaOverR6);
 
     // The following is the same as
-
     //    atom2->m_force -= tmpForce * factor;
     //    atom2->m_parent->m_force -= tmpForce * factor;
     //    atom1->m_force += tmpForce * factor;
@@ -72,11 +68,6 @@ void InteratomicForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const ro
 
 }
 
-//const rowvec &InteratomicForce::force()
-//{
-//    return tmpForce;
-//}
-
 void InteratomicForce::setPotentialConstant(double potentialConstant)
 {
     m_potentialConstant = potentialConstant;
@@ -89,9 +80,3 @@ void InteratomicForce::setEnergyConstant(double energyConstant)
     m_energyConstant4 = energyConstant * 4;
     m_energyConstant24 = energyConstant * 24;
 }
-
-
-//double InteratomicForce::potential()
-//{
-//    return tmpPotential;
-//}

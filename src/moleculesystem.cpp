@@ -42,10 +42,6 @@ MoleculeSystem::MoleculeSystem() :
 
 void MoleculeSystem::loadConfiguration(Config *config)
 {
-    //    setUnitLength(config->lookup("units.length"));
-    //    double potentialConstant = config->lookup("system.potentialConstant");
-    //    potentialConstant /= m_unitLength;
-    //    setPotentialConstant(potentialConstant);
     m_isSaveEnabled = config->lookup("simulation.saveEnabled");
 }
 
@@ -88,8 +84,6 @@ void MoleculeSystem::updateStatistics()
     for(Atom* atom : m_atoms) {
         totalPotentialEnergy += atom->potential();
     }
-    //    cout << "totaltPotentialEnergy " << setprecision(25) << totalPotentialEnergy << endl;
-    //    cout << "averagePotentialEnergy " << setprecision(25) << totalPotentialEnergy / m_atoms.size() << endl;
 
     // Calculate diffusion constant
     m_averageDisplacement = 0;
@@ -100,8 +94,6 @@ void MoleculeSystem::updateStatistics()
     }
     m_averageSquareDisplacement /= m_molecules.size();
     m_averageDisplacement /= m_molecules.size();
-    //    cout << "averageDisplacement " << setprecision(25) << m_averageDisplacement << endl;
-    //    cout << "averageSquareDisplacement " << setprecision(25) << m_averageSquareDisplacement << endl;
 
     // Calculate pressure
     rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
@@ -145,62 +137,6 @@ const vector<MoleculeSystemCell *> &MoleculeSystem::cells() const
 
 void MoleculeSystem::updateForces()
 {
-    //        for(Molecule* molecule : m_molecules) {
-    //            molecule->clearForces();
-    //        }
-    //        //    double kB = boltzmannConstant;
-    //        double eps = m_potentialConstant;
-    //        double sigma = 4.5;
-    //        Atom* atom1;
-    //        Atom* atom2;
-    //        rowvec rVec;
-    //        rowvec otherPosition;
-    //        rowvec shortestVec;
-    //        rowvec cellShiftVector;
-    //        rowvec cellShiftVectorInUse;
-    //        double shortestVecSquaredLength;
-    //        double r;
-    //        double sigmar;
-    //        double factor;
-    //        rowvec force;
-    //        cout << "Updating forces..." << endl;
-    //        int nCalculations = 0;
-    //        for(uint i = 0; i < m_atoms.size(); i++) {
-    //            for(uint j = 0; j < m_atoms.size(); j++) {
-    //                atom1 = m_atoms.at(i);
-    //                atom2 = m_atoms.at(j);
-    //                if(atom1 == atom2) {
-    //                    continue;
-    //                }
-    //    //            rVec = atom2->absolutePosition() - atom1->absolutePosition();
-    //                // Minimum image convention
-    //                shortestVecSquaredLength = INFINITY;
-    //                for(uint iShiftVec = 0; iShiftVec < m_cellShiftVectors.n_rows; iShiftVec++) {
-    //                    cellShiftVector = m_cellShiftVectors.row(iShiftVec);
-    //                    otherPosition = atom2->absolutePosition() + cellShiftVector;
-    //                    rVec = otherPosition - atom1->absolutePosition();
-    //                    double rVecSquaredLength = dot(rVec, rVec);
-    //                    if(rVecSquaredLength < shortestVecSquaredLength) {
-    //                        shortestVecSquaredLength = rVecSquaredLength;
-    //                        shortestVec = rVec;
-    //                        cellShiftVectorInUse = cellShiftVector;
-    //                    }
-    //                }
-    //                // Check distances to the nearby cells
-    //                r = norm(shortestVec, 2);
-    //                sigmar = sigma/r;
-    //                // TODO Verify force term
-    //                factor = - ((24 * eps) / (r*r)) * (2 * pow((sigmar), 12) - pow((sigmar), 6));
-
-    //                force = factor * rVec;
-    //                atom1->addForce(force);
-    ////                atom2->addForce(-force);
-    //                nCalculations++;
-    //            }
-    //        }
-    //        cout << "nCalculations" << endl;
-    //        cout << nCalculations << endl;
-
     obeyBoundaries();
     refreshCellContents();
     for(Molecule* molecule : m_molecules) {
@@ -242,13 +178,11 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         if(isOutputEnabled()) {
             cout << "Step " << m_step << ".." << endl;
         }
+
         applyModifiers();
         m_integrator->stepForward();
-        //        cout << "Integrator done" << endl;
-        //        updateForces();
-        //        refreshCellContents();
-        //        updateForces();
         updateStatistics();
+
         if(m_isSaveEnabled) {
             m_fileManager->save(m_step);
         }
@@ -323,8 +257,6 @@ void MoleculeSystem::setBoundaries(mat boundaries)
             }
         }
     }
-    //    cout << "Cell shift vectors" << endl;
-    //    cout << m_cellShiftVectors << endl;
 }
 
 void MoleculeSystem::setupCells(double minCutLength) {
@@ -368,9 +300,6 @@ void MoleculeSystem::setupCells(double minCutLength) {
 
         cellBoundaries.row(0) = shiftVector;
         cellBoundaries.row(1) = shiftVector + m_cellLengths;
-
-        //        cout << "cellBoundaries" << endl;
-        //        cout << cellBoundaries << endl;
 
         cell->setBoundaries(cellBoundaries);
 
@@ -456,33 +385,8 @@ void MoleculeSystem::refreshCellContents() {
 
         MoleculeSystemCell* cell = m_cells.at(cellID);
         cell->addMolecule(molecule);
-
-        //        urowvec moreThan = (molecule->position() >= cell->boundaries().row(0));
-        //        urowvec lessThan = (molecule->position() < cell->boundaries().row(1));
-        //        //            cout << "less is more" << endl;
-        //        //            cout << moreThan << endl;
-        //        //            cout << lessThan << endl;
-        //        bool isInside = true;
-        //        for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-        //            if(!moreThan(iDim) || !lessThan(iDim)) {
-        //                isInside = false;
-        //                break;
-        //            }
-        //        }
-        //        if(isInside) {
-        //            cell->addMolecule(molecule);
-        //        } else {
-        //            cout << "wrong!" << endl;
-        //            exit(919);
-        //        }
     }
-    //    cout << "The last added cell has " << nNeighbors << " neighbors" << endl;
 }
-
-//void MoleculeSystem::setPotentialConstant(double potentialConstant)
-//{
-//    m_potentialConstant = potentialConstant; // / m_unitLength;
-//}
 
 void MoleculeSystem::setIntegrator(Integrator *integrator)
 {

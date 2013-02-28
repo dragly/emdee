@@ -18,12 +18,10 @@ class Generator
 {
 public:
     Generator();
-//    void loadConfiguration(Config* config);
+
     vector<Molecule*> generateFcc(double sideLength, int nCells, AtomType atomType);
     void boltzmannDistributeVelocities(double temperature, const vector<Molecule *> &molecules);
     void uniformDistributeVelocities(double maxVelocity, vector<Molecule *> molecules);
-
-//    void setUnitLength(double unitLength);
 
     const mat& lastBoundaries() const;
 

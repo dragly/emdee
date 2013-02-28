@@ -27,11 +27,6 @@ int main(int argc, char** argv)
     double unitTime = config.lookup("units.time");
     double unitMass = config.lookup("units.mass");
     double unitTemperature = config.lookup("units.temperature");
-//    double boltzmannConstant = config.lookup("units.boltzmannConstant");
-//    boltzmannConstant /= (unitLength*unitLength * unitMass / (unitTime*unitTime));
-
-    // TODO Why must the boltzmannConstant be set to one here?
-//    boltzmannConstant = 1;
 
     // File manager config
     string outFileName;
@@ -42,17 +37,6 @@ int main(int argc, char** argv)
     timeStep /= unitTime;
 
     Generator generator;
-//    generator.setBoltzmannConstant(boltzmannConstant);
-//    generator.loadConfiguration(&config);
-
-    // Generator specific config
-//    string velocityDistributionType;
-//    config.lookupValue("generator.velocity.distribution", velocityDistributionType);
-//    int nCells = config.lookup("generator.fcc.nCells");
-//    double b = config.lookup("generator.fcc.b");
-//    double temperature = config.lookup("system.initialTemperature");
-//    temperature /= unitTemperature;
-//    b /= unitLength;
 
     // Force and potentials
     double potentialConstant = config.lookup("system.potentialConstant");
@@ -108,7 +92,6 @@ int main(int argc, char** argv)
             }
         }
     }
-//    vector<Molecule*> molecules = generator.generateFcc(b, nCells, AtomType::argon());
 
     // Set up force
     InteratomicForce* force = new InteratomicForce();
@@ -116,7 +99,6 @@ int main(int argc, char** argv)
     force->setEnergyConstant(energyConstant);
 
     system.setInteratomicForce(force);
-//    system.setBoltzmannConstant(boltzmannConstant);
 
     // Set up modifiers
     Setting& modifiers = config.lookup("modifiers");

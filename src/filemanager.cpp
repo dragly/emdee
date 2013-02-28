@@ -52,10 +52,12 @@ bool FileManager::load(string fileName) {
     fileName = parseFileName(fileName);
     if(fileName.find(".xyz") != string::npos) {
         //        return loadXyz(fileName);
+        cerr << "HDF5 saving is not yet implemented" << endl;
     } else if(fileName.find(".bin") != string::npos) {
         return loadBinary(fileName);
     } else if(fileName.find(".h5") != string::npos) {
         //        return saveHDF5(step);
+        cerr << "HDF5 saving is not yet implemented" << endl;
     }
     return false;
 }
@@ -127,7 +129,7 @@ bool FileManager::loadBinary(string fileName) {
         exit(9999);
     }
     for(int i = 0; i < nAtoms; i++) {
-//        cout << "Reading atom " << i << endl;
+        //        cout << "Reading atom " << i << endl;
         Molecule* molecule = new Molecule();
         Atom* atom = new Atom(molecule, AtomType::argon());
         molecule->addAtom(atom);
@@ -154,7 +156,7 @@ bool FileManager::loadBinary(string fileName) {
         inFile.read((char*)&potential, sizeof(double));
         inFile.read((char*)&id, sizeof(int));
 
-//        cout << "Atom type is " << atomType << endl;
+        //        cout << "Atom type is " << atomType << endl;
 
         position /= m_unitLength;
         displacement /= m_unitLength;
@@ -177,8 +179,6 @@ bool FileManager::loadBinary(string fileName) {
 
 bool FileManager::save(int step) {
     // Refreshing to make sure we don't save any wrong cell IDs
-    //    refreshCellContents();
-
     if(m_outFileName.find(".xyz") != string::npos) {
         return saveXyz(step);
     } else if(m_outFileName.find(".bin") != string::npos) {
@@ -201,34 +201,23 @@ bool FileManager::saveXyz(int step) {
     } else {
         outFile.open(outFileNameLocal, ios_base::app);
     }
-    //    cout << "Saving xyz data to " << outFileNameLocal  << endl;
 
     outFile << m_moleculeSystem->molecules().size() << endl;
     outFile << "Some nice comment" << endl;
 
     char line[1000];
-//    for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
-//        for(Molecule* molecule : cell->molecules()) {
-            for(Atom* atom : m_moleculeSystem->atoms()) {
-                rowvec position = atom->position() * m_unitLength;
-                rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
-                rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
-                sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
-                        position(0), position(1), position(2),
-                        velocity(0), velocity(1), velocity(2),
-                        force(0), force(1), force(2),
-                        atom->cellID());
-                //                toPrint << atom->type().abbreviation
-                //                        << " " << position(0) << " " << position(1) << " " << position(2)
-                //                        << " " << velocity(0) << " " << velocity(1) << " " << velocity(2)
-                //                        << " " << force(0) << " " << force(1) << " " << force(2)
-                //                        << " " << cell->id()
-                //                        << "\n";
-                outFile << atom->type().abbreviation
-                        << line;
-            }
-//        }
-//    }
+    for(Atom* atom : m_moleculeSystem->atoms()) {
+        rowvec position = atom->position() * m_unitLength;
+        rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
+        rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
+        sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
+                position(0), position(1), position(2),
+                velocity(0), velocity(1), velocity(2),
+                force(0), force(1), force(2),
+                atom->cellID());
+        outFile << atom->type().abbreviation
+                << line;
+    }
     outFile.close();
     return true;
 }
@@ -248,12 +237,7 @@ bool FileManager::saveBinary(int step) {
     } else {
         outFile.open(outFileNameLocal, ios::app | ios::out | ios::binary);
     }
-    //    cout << "Saving binary data to " << outFileNameLocal  << endl;
 
-    //    outFile << m_molecules.size() << endl;
-    //    outFile << "Some nice comment" << endl;
-
-    //    char line[1000];
     // Write header data
     double time = m_moleculeSystem->time() * m_unitTime;
     double timeStep = m_moleculeSystem->integrator()->timeStep() * m_unitTime;
@@ -284,40 +268,31 @@ bool FileManager::saveBinary(int step) {
     // Write system boundaries
 
     // Write atom data
-//    for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
-//        for(Molecule* molecule : cell->molecules()) {
-            for(Atom* atom : m_moleculeSystem->atoms()) {
-                rowvec position = atom->position() * m_unitLength;
-                rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
-                rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
-                rowvec displacement = atom->displacement() * m_unitLength;
-                double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
-                //                sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
-                //                        position(0), position(1), position(2),
-                //                        velo0city(0), velocity(1), velocity(2),
-                //                        force(0), force(1), force(2),
-                //                        cell->id());
-                int id = atom->cellID();
-                char atomType[3];
-                sprintf(atomType, "Ar");
-                outFile.write(atomType, sizeof(atomType));
-                outFile.write((char*)&position(0), sizeof(double));
-                outFile.write((char*)&position(1), sizeof(double));
-                outFile.write((char*)&position(2), sizeof(double));
-                outFile.write((char*)&velocity(0), sizeof(double));
-                outFile.write((char*)&velocity(1), sizeof(double));
-                outFile.write((char*)&velocity(2), sizeof(double));
-                outFile.write((char*)&force(0), sizeof(double));
-                outFile.write((char*)&force(1), sizeof(double));
-                outFile.write((char*)&force(2), sizeof(double));
-                outFile.write((char*)&displacement(0), sizeof(double));
-                outFile.write((char*)&displacement(1), sizeof(double));
-                outFile.write((char*)&displacement(2), sizeof(double));
-                outFile.write((char*)&potential, sizeof(double));
-                outFile.write((char*)&id, sizeof(int));
-            }
-//        }
-//    }
+    for(Atom* atom : m_moleculeSystem->atoms()) {
+        rowvec position = atom->position() * m_unitLength;
+        rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
+        rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
+        rowvec displacement = atom->displacement() * m_unitLength;
+        double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
+        int id = atom->cellID();
+        char atomType[3];
+        sprintf(atomType, "Ar");
+        outFile.write(atomType, sizeof(atomType));
+        outFile.write((char*)&position(0), sizeof(double));
+        outFile.write((char*)&position(1), sizeof(double));
+        outFile.write((char*)&position(2), sizeof(double));
+        outFile.write((char*)&velocity(0), sizeof(double));
+        outFile.write((char*)&velocity(1), sizeof(double));
+        outFile.write((char*)&velocity(2), sizeof(double));
+        outFile.write((char*)&force(0), sizeof(double));
+        outFile.write((char*)&force(1), sizeof(double));
+        outFile.write((char*)&force(2), sizeof(double));
+        outFile.write((char*)&displacement(0), sizeof(double));
+        outFile.write((char*)&displacement(1), sizeof(double));
+        outFile.write((char*)&displacement(2), sizeof(double));
+        outFile.write((char*)&potential, sizeof(double));
+        outFile.write((char*)&id, sizeof(int));
+    }
     outFile.close();
     return true;
 }
@@ -337,24 +312,20 @@ bool FileManager::saveHDF5(int step) {
     // TODO Rescale with units!
     int  i = 0;
     s1_t* s1 = new s1_t[m_moleculeSystem->atoms().size()];
-//    for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
-//        for(Molecule* molecule : cell->molecules()) {
-            for(Atom* atom : m_moleculeSystem->atoms()) {
-                sprintf(s1[i].atomType , "Ar");
-                s1[i].positionX = atom->position()(0);
-                s1[i].positionY = atom->position()(1);
-                s1[i].positionZ = atom->position()(2);
-                s1[i].velocityX = atom->velocity()(0);
-                s1[i].velocityY = atom->velocity()(1);
-                s1[i].velocityZ = atom->velocity()(2);
-                s1[i].forceX = atom->force()(0);
-                s1[i].forceY = atom->force()(1);
-                s1[i].forceZ = atom->force()(2);
-                s1[i].cellID = atom->cellID();
-                i++;
-            }
-//        }
-//    }
+    for(Atom* atom : m_moleculeSystem->atoms()) {
+        sprintf(s1[i].atomType , "Ar");
+        s1[i].positionX = atom->position()(0);
+        s1[i].positionY = atom->position()(1);
+        s1[i].positionZ = atom->position()(2);
+        s1[i].velocityX = atom->velocity()(0);
+        s1[i].velocityY = atom->velocity()(1);
+        s1[i].velocityZ = atom->velocity()(2);
+        s1[i].forceX = atom->force()(0);
+        s1[i].forceY = atom->force()(1);
+        s1[i].forceZ = atom->force()(2);
+        s1[i].cellID = atom->cellID();
+        i++;
+    }
 
     /*
       * Turn off the auto-printing when failure occurs so that we can
