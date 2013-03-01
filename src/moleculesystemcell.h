@@ -8,6 +8,8 @@ class MoleculeSystem;
 #include <vector>
 #include <iostream>
 
+#include <src/vector3d.h>
+
 using namespace arma;
 using namespace std;
 
@@ -21,7 +23,7 @@ public:
 
     void setBoundaries(mat boundaries);
 
-    void addNeighbor(MoleculeSystemCell *cell, const rowvec& offset);
+    void addNeighbor(MoleculeSystemCell *cell, const Vector3& offset);
 
     const mat &boundaries() const;
     void addAtom(Atom *atom);
@@ -43,7 +45,7 @@ public:
 protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
-    vector<rowvec> m_neighborOffsets;
+    vector<Vector3> m_neighborOffsets;
 
     int m_nDimensions;
     int pow3nDimensions;
@@ -58,8 +60,8 @@ protected:
 
 
     int m_id;
-    rowvec& force;
-    rowvec blankForce;
+    Vector3& force;
+    Vector3 blankForce;
 };
 
 #endif // MOLECULESYSTEMCELL_H

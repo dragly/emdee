@@ -4,12 +4,13 @@
 // Local includes
 class TwoParticleForce;
 #include <src/atomtype.h>
+#include <src/vector3d.h>
 
 // System includes
-#include <armadillo>
+//#include <armadillo>
 #include <vector>
 
-using namespace arma;
+//using namespace arma;
 using namespace std;
 
 /*!
@@ -27,10 +28,10 @@ public:
     void clearDisplacement();
 
     // Simple getters left in header for optimization
-    const rowvec &position() const;
-    const rowvec &velocity() const;
-    const rowvec &force() const;
-    const rowvec& displacement() const;
+    const Vector3 &position() const;
+    const Vector3 &velocity() const;
+    const Vector3 &force() const;
+    const Vector3& displacement() const;
     AtomType type() const;
     double potential() const;
     double localPressure() const;
@@ -39,19 +40,19 @@ public:
     void addLocalPressure(double pressure);
     void addForce(int component, double force);
 
-    void setPosition(const rowvec &position);
-    void setVelocity(const rowvec &velocity);
-    void addForce(const rowvec &force);
+    void setPosition(const Vector3 &position);
+    void setVelocity(const Vector3 &velocity);
+    void addForce(const Vector3 &force);
     void addPotential(double potential);
     void setCellID(int cellID);
-    void addDisplacement(const rowvec& displacement);
+    void addDisplacement(const Vector3& displacement);
     void addDisplacement(double displacement, uint component);
 
 protected:
-    rowvec m_position;
-    rowvec m_velocity;
-    rowvec m_force;
-    rowvec m_displacement;
+    Vector3 m_position;
+    Vector3 m_velocity;
+    Vector3 m_force;
+    Vector3 m_displacement;
     double m_mass;
     double m_potential;
     double m_localPressure;
@@ -70,7 +71,7 @@ inline void Atom::addDisplacement(double displacement, uint component) {
     m_displacement(component) += displacement;
 }
 
-inline void Atom::addDisplacement(const rowvec& displacement) {
+inline void Atom::addDisplacement(const Vector3& displacement) {
     m_displacement += displacement;
 }
 
@@ -81,15 +82,15 @@ inline void Atom::setCellID(int cellID)
 inline void Atom::addPotential(double potential) {
     m_potential += potential;
 }
-inline void Atom::addForce(const rowvec &force)
+inline void Atom::addForce(const Vector3 &force)
 {
     m_force += force;
 }
-inline void Atom::setVelocity(const rowvec &velocity)
+inline void Atom::setVelocity(const Vector3 &velocity)
 {
     m_velocity = velocity;
 }
-inline void Atom::setPosition(const rowvec &position)
+inline void Atom::setPosition(const Vector3 &position)
 {
     m_displacement += (position - m_position);
     m_position = position;
@@ -114,19 +115,19 @@ inline double Atom::potential() const
     return m_potential;
 }
 
-inline const rowvec &Atom::position() const
+inline const Vector3 &Atom::position() const
 {
     return m_position;
 }
-inline const rowvec &Atom::velocity() const
+inline const Vector3 &Atom::velocity() const
 {
     return m_velocity;
 }
-inline const rowvec &Atom::force() const
+inline const Vector3 &Atom::force() const
 {
     return m_force;
 }
-inline const rowvec& Atom::displacement() const
+inline const Vector3& Atom::displacement() const
 {
     return m_displacement;
 }

@@ -9,13 +9,14 @@ public:
     LennardJonesForce();
 
     void calculateAndApplyForce(Atom *atom1, Atom *atom2);
-    void calculateAndApplyForce(Atom* atom1, Atom* atom2, const rowvec &atom2Offset);
+    void calculateAndApplyForce(Atom* atom1, Atom* atom2, const Vector3 &atom2Offset);
 
     void setPotentialConstant(double potentialConstant);
     void setEnergyConstant(double energyConstant);
 
 protected:
-    rowvec zeroVector;
+    Vector3 zeroVector;
+    Vector3 tmpVector;
 
     double m_potentialConstant;
     double m_potentialConstantSquared;

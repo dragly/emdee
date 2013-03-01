@@ -16,8 +16,8 @@ void VelocityVerletIntegrator::stepForward() {
     double dt = m_timeStep;
     for(uint i = 0; i < m_moleculeSystem->atoms().size(); i++) {
         Atom *atom = m_moleculeSystem->atoms().at(i);
-        rowvec velocity = atom->velocity();
-        rowvec position = atom->position();
+        Vector3 velocity = atom->velocity();
+        Vector3 position = atom->position();
         velocity += atom->force() / (2*atom->mass()) * dt;
         atom->setVelocity(velocity);
         position += velocity * dt;
@@ -27,7 +27,7 @@ void VelocityVerletIntegrator::stepForward() {
 
     for(uint i = 0; i < m_moleculeSystem->atoms().size(); i++) {
         Atom *atom = m_moleculeSystem->atoms().at(i);
-        rowvec velocity = atom->velocity();
+        Vector3 velocity = atom->velocity();
         velocity += atom->force() / (2*atom->mass()) * dt;
         atom->setVelocity(velocity);
     }

@@ -20,10 +20,12 @@ TEMPLATE = app
 SOURCES += tst_generatortest.cpp \
     ../../../src/generator.cpp \
     ../../../src/atomtype.cpp \
-    ../../../src/atom.cpp
+    ../../../src/atom.cpp \
+    ../../../src/vector3d.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
     ../../../src/generator.h \
     ../../../src/atomtype.h \
-    ../../../src/atom.h
+    ../../../src/atom.h \
+    ../../../src/vector3d.h

@@ -9,6 +9,8 @@ class TwoParticleForce;
 class FileManager;
 class Modifier;
 
+#include <src/vector3d.h>
+
 // System includes
 #include <iostream>
 #include <vector>

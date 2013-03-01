@@ -14,6 +14,13 @@ Vector3::Vector3(double x, double y, double z)
     mem_local[2] = z;
 }
 
+Vector3::Vector3(arma::rowvec armaVector)
+{
+    mem_local[0] = armaVector(0);
+    mem_local[1] = armaVector(1);
+    mem_local[2] = armaVector(2);
+}
+
 template<class Archive>
 void Vector3::serialize(Archive & ar, const unsigned int version)
 {
@@ -26,4 +33,9 @@ std::ostream& operator<< (std::ostream &out, const Vector3 &vector)
 {
     out << vector.mem_local[0] << ", " << vector.mem_local[1] << ", " << vector.mem_local[2];
     return out;
+}
+
+Vector3 Vector3::ones()
+{
+    return Vector3(1,1,1);
 }

@@ -24,27 +24,27 @@ Generator::Generator() :
  */
 vector<Atom*> Generator::generateFcc(double sideLength, int nCells, AtomType atomType) {
     vector<Atom*> atomList;
-    rowvec offset = zeros<rowvec>(3);
+    Vector3 offset;
     for(int i = 0; i < nCells; i++) {
         for(int j = 0; j < nCells; j++) {
             for(int k = 0; k < nCells; k++) {
                 for(int atomi = 0; atomi < 4; atomi++) {
                     Atom* atom = new Atom(atomType);
-                    rowvec face = zeros<rowvec>(3);
+                    Vector3 face;;
                     switch(atomi) {
                     case 0:
                         break;
                     case 1:
-                        face << sideLength / 2 << sideLength / 2 <<  0;
+                        face = Vector3(sideLength / 2, sideLength / 2, 0);
                         break;
                     case 2:
-                        face << sideLength / 2 << 0 << sideLength / 2;
+                        face = Vector3(sideLength / 2, 0, sideLength / 2);
                         break;
                     case 3:
-                        face << 0 << sideLength / 2 << sideLength / 2;
+                        face = Vector3(0, sideLength / 2, sideLength / 2);
                         break;
                     }
-                    rowvec position = zeros<rowvec>(3);
+                    Vector3 position;
                     position = offset + face;
                     atom->setPosition(position);
                     atom->clearDisplacement();
@@ -76,21 +76,25 @@ vector<Atom*> Generator::generateFcc(double sideLength, int nCells, AtomType ato
  */
 void Generator::boltzmannDistributeVelocities(double temperature, const vector<Atom*>& atoms) {
     double averageVelocity = 0;
-    rowvec totalVelocity = zeros<rowvec>(m_nDimensions);
+    Vector3 totalVelocity;
     for(Atom* atom : atoms) {
-        rowvec velocity = randn<rowvec>(m_nDimensions);
+        rowvec randVec = randn<rowvec>(m_nDimensions);
+        Vector3 velocity;
+        velocity[0] = randVec[0];
+        velocity[1] = randVec[1];
+        velocity[2] = randVec[2];
         velocity *= sqrt(temperature / atom->mass());
         totalVelocity += velocity;
         atom->setVelocity(velocity);
     }
     cout << totalVelocity << endl;
     // Remove total linear momentum
-    rowvec velocityToRemove = totalVelocity / atoms.size();
+    Vector3 velocityToRemove = totalVelocity / atoms.size();
     averageVelocity = 0;
     for(Atom* atom : atoms) {
-        rowvec newVelocity = atom->velocity() - velocityToRemove;
+        Vector3 newVelocity = atom->velocity() - velocityToRemove;
         atom->setVelocity(newVelocity);
-        averageVelocity += norm(newVelocity, 2) / atoms.size();
+        averageVelocity += (newVelocity * newVelocity) / atoms.size();
         totalVelocity += newVelocity;
     }
     cout << "Boltzmann distributed velocities for " << atoms.size() << " atoms!" << endl;
@@ -99,19 +103,20 @@ void Generator::boltzmannDistributeVelocities(double temperature, const vector<A
 
 void Generator::uniformDistributeVelocities(double maxVelocity, vector<Atom*> atoms) {
 
-    rowvec totalVelocity = zeros<rowvec>(m_nDimensions);
+    Vector3 totalVelocity;
     for(Atom* atom : atoms) {
-        rowvec velocity = randu<rowvec>(m_nDimensions);
-        velocity -= 0.5 * ones<rowvec>(m_nDimensions);
+        rowvec randVec = randu<rowvec>(m_nDimensions);
+        randVec -= 0.5 * ones<rowvec>(m_nDimensions);
+        Vector3 velocity(randVec);
         velocity *= 2 * maxVelocity;
         totalVelocity += velocity;
         atom->setVelocity(velocity);
     }
     // Remove total linear momentum
-    rowvec velocityToRemove = totalVelocity / atoms.size();
+    Vector3 velocityToRemove = totalVelocity / atoms.size();
     totalVelocity.zeros();
     for(Atom* atom : atoms) {
-        rowvec newVelocity = atom->velocity() - velocityToRemove;
+        Vector3 newVelocity = atom->velocity() - velocityToRemove;
         atom->setVelocity(newVelocity);
     }
     cout << "Uniformly distributed velocities for " << atoms.size() << " atoms!" << endl;

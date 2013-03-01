@@ -2,8 +2,6 @@
 #include <src/atom.h>
 
 LennardJonesForce::LennardJonesForce() :
-    //    tmpForce(zeros<rowvec>(3)),
-    zeroVector(zeros<rowvec>(3)),
     m_potentialConstant(1),
     m_potentialConstantSquared(1),
     m_energyConstant(1),
@@ -17,7 +15,7 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2) {
     return calculateAndApplyForce(atom1, atom2, zeroVector);
 }
 
-void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const rowvec& atom2Offset)
+void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const Vector3& atom2Offset)
 {
     double rSquared;
     double sigmaSquaredOverRSquared;
@@ -25,10 +23,13 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const r
     double &eps4 = m_energyConstant4;
     double &eps24 = m_energyConstant24;
     // Check distances to the nearby cells
-    double x = atom2->position()(0) + atom2Offset(0) - atom1->position()(0);
-    double y = atom2->position()(1) + atom2Offset(1) - atom1->position()(1);
-    double z = atom2->position()(2) + atom2Offset(2) - atom1->position()(2);
-    rSquared = x*x + y*y + z*z;
+
+//    tmpVector = atom2->position() + atom2Offset - atom1->position();
+    // For some silly reason this is faster than the line above...
+    tmpVector(0) = atom2->position()(0) + atom2Offset(0) - atom1->position()(0);
+    tmpVector(1) = atom2->position()(1) + atom2Offset(1) - atom1->position()(1);
+    tmpVector(2) = atom2->position()(2) + atom2Offset(2) - atom1->position()(2);
+    rSquared = tmpVector * tmpVector;
     sigmaSquaredOverRSquared = sigmaSquared/rSquared;
     double sigmaOverR6 = sigmaSquaredOverRSquared * sigmaSquaredOverRSquared * sigmaSquaredOverRSquared;
     double sigmaOverR12 = sigmaOverR6 * sigmaOverR6;
@@ -42,12 +43,12 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const r
     //    atom1->m_force += tmpForce * factor;
 
     // Acting directly on elements
-    atom2->addForce(0, x * factor);
-    atom2->addForce(1, y * factor);
-    atom2->addForce(2, z * factor);
-    atom1->addForce(0, -x * factor);
-    atom1->addForce(1, -y * factor);
-    atom1->addForce(2, -z * factor);
+    atom2->addForce(0, tmpVector[0] * factor);
+    atom2->addForce(1, tmpVector[1] * factor);
+    atom2->addForce(2, tmpVector[2] * factor);
+    atom1->addForce(0, -tmpVector[0] * factor);
+    atom1->addForce(1, -tmpVector[1] * factor);
+    atom1->addForce(2, -tmpVector[2] * factor);
 
     // Potential
     double tmpPotential = eps4 * (sigmaOverR12 - sigmaOverR6);

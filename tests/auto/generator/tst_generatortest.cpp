@@ -38,11 +38,11 @@ void GeneratorTest::boltzmannDistributeVelocities()
     vector<Atom*> atoms = generator.generateFcc(2,8,AtomType::argon());
     generator.boltzmannDistributeVelocities(100, atoms);
 
-    rowvec totalVelocity = zeros<rowvec>(3);
+    Vector3 totalVelocity; // = zeros<Vector3>(3);
     for(Atom* atom : atoms) {
         totalVelocity += atom->velocity();
     }
-    double maxVelocity = totalVelocity.max();
+    double maxVelocity = 1;
     QVERIFY(fabs(maxVelocity) < 1e-5);
 }
 

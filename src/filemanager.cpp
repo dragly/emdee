@@ -130,10 +130,10 @@ bool FileManager::loadBinary(string fileName) {
     for(int i = 0; i < nAtoms; i++) {
         //        cout << "Reading atom " << i << endl;
         Atom* atom = new Atom(AtomType::argon());
-        rowvec position = zeros<rowvec>(3);
-        rowvec velocity = zeros<rowvec>(3);
-        rowvec force = zeros<rowvec>(3);
-        rowvec displacement = zeros<rowvec>(3);
+        Vector3 position;
+        Vector3 velocity;
+        Vector3 force;
+        Vector3 displacement;
         double potential = 0;
         int id = 0;
         char atomType[3];
@@ -203,9 +203,9 @@ bool FileManager::saveXyz(int step) {
 
     char line[1000];
     for(Atom* atom : m_moleculeSystem->atoms()) {
-        rowvec position = atom->position() * m_unitLength;
-        rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
-        rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
+        Vector3 position = atom->position() * m_unitLength;
+        Vector3 velocity = atom->velocity() * (m_unitLength / m_unitTime);
+        Vector3 force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
         sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
                 position(0), position(1), position(2),
                 velocity(0), velocity(1), velocity(2),
@@ -265,10 +265,10 @@ bool FileManager::saveBinary(int step) {
 
     // Write atom data
     for(Atom* atom : m_moleculeSystem->atoms()) {
-        rowvec position = atom->position() * m_unitLength;
-        rowvec velocity = atom->velocity() * (m_unitLength / m_unitTime);
-        rowvec force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
-        rowvec displacement = atom->displacement() * m_unitLength;
+        Vector3 position = atom->position() * m_unitLength;
+        Vector3 velocity = atom->velocity() * (m_unitLength / m_unitTime);
+        Vector3 force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
+        Vector3 displacement = atom->displacement() * m_unitLength;
         double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
         int id = atom->cellID();
         char atomType[3];

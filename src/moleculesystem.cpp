@@ -70,7 +70,7 @@ void MoleculeSystem::updateStatistics()
     // Calculate kinetic energy
     double totalKineticEnergy = 0;
     for(Atom* atom : m_atoms) {
-        totalKineticEnergy += 0.5 * atom->mass() * dot(atom->velocity(), atom->velocity());
+        totalKineticEnergy += 0.5 * atom->mass() * (atom->velocity() * atom->velocity());
     }
     m_temperature = totalKineticEnergy / (3./2. * m_atoms.size());
     cout << "Temperature: " << setprecision(25) << m_temperature << endl;
@@ -85,7 +85,7 @@ void MoleculeSystem::updateStatistics()
     m_averageDisplacement = 0;
     m_averageSquareDisplacement = 0;
     for(Atom* atom : m_atoms) {
-        m_averageSquareDisplacement += dot(atom->displacement(), atom->displacement());
+        m_averageSquareDisplacement += (atom->displacement() * atom->displacement());
         m_averageDisplacement += sqrt(m_averageSquareDisplacement);
     }
     m_averageSquareDisplacement /= m_atoms.size();
@@ -177,7 +177,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
 void MoleculeSystem::obeyBoundaries() {
     // Boundary conditions
     for(Atom* atom : m_atoms) {
-        rowvec position = atom->position();
+        Vector3 position = atom->position();
         for(int iDim = 0; iDim < m_nDimensions; iDim++) {
             double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
             if(fabs(atom->position()(iDim)) > (m_boundaries(1,iDim) + sideLength)
@@ -302,12 +302,12 @@ void MoleculeSystem::setupCells(double minCutLength) {
     // Find the neighbor cells
     int nNeighbors;
     for(MoleculeSystemCell *cell1 : m_cells) {
-        irowvec counters = zeros<irowvec>(m_nDimensions);
+        rowvec counters = zeros<rowvec>(3);
         nNeighbors = 0;
         for(int i = 0; i < pow3nDimensions; i++) {
-            irowvec direction = counters - ones<irowvec>(m_nDimensions);
-            irowvec shiftVec = (cell1->indices() + direction);
-            rowvec offsetVec = zeros<rowvec>(m_nDimensions);
+            rowvec direction = counters - ones<rowvec>(3);
+            rowvec shiftVec = (cell1->indices() + direction);
+            rowvec offsetVec = zeros<rowvec>(3);
             // Boundaries
             for(uint j = 0; j < shiftVec.n_cols; j++) {
                 if(shiftVec(j) >= m_nCells(j)) {

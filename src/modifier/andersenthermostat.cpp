@@ -22,7 +22,7 @@ void AndersenThermostat::apply()
     for(Atom* atom : m_moleculeSystem->atoms()) {
         double randomNumber = random->ran2();
         if(randomNumber < dt / tau) {
-            rowvec velocity = randn<rowvec>(m_nDimensions);
+            Vector3 velocity(randn<rowvec>(m_nDimensions));
             velocity *= sqrt(targetTemperature / atom->mass());
             atom->setVelocity(velocity);
         }

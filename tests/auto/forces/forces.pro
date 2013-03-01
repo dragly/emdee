@@ -22,11 +22,13 @@ SOURCES += tst_forcestest.cpp \
     ../../../src/force/twoparticleforce.cpp \
     ../../../src/atomtype.cpp \
     ../../../src/atom.cpp \
-    ../../../src/force/lennardjonesforce.cpp
+    ../../../src/force/lennardjonesforce.cpp \
+    ../../../src/vector3d.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
     ../../../src/force/twoparticleforce.h \
     ../../../src/atomtype.h \
     ../../../src/atom.h \
-    ../../../src/force/lennardjonesforce.h
+    ../../../src/force/lennardjonesforce.h \
+    ../../../src/vector3d.h

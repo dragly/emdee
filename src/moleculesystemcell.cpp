@@ -7,7 +7,7 @@
 MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     m_nDimensions(3),
     pow3nDimensions(pow(3, m_nDimensions)),
-    m_indices(zeros<irowvec>(m_nDimensions)),
+//    m_indices(zeros<iVector3>(m_nDimensions)),
     moleculeSystem(parent),
     m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false),
     m_id(0),
@@ -26,7 +26,7 @@ void MoleculeSystemCell::setBoundaries(mat boundaries)
         rowvec directionVec = conv_to<rowvec>::from(direction);
         cellShiftVectors.row(i) = lengths % directionVec;
         counters(0) += 1;
-        for(uint idim = 1; idim < counters.size(); idim++) {
+        for(uint idim = 1; idim < 3; idim++) {
             if(counters(idim - 1) > 2) {
                 counters(idim - 1) = 0;
                 counters(idim) += 1;
@@ -36,7 +36,7 @@ void MoleculeSystemCell::setBoundaries(mat boundaries)
     //    cout << cellShiftVectors << endl;
 }
 
-void MoleculeSystemCell::addNeighbor(MoleculeSystemCell *cell, const rowvec &offset)
+void MoleculeSystemCell::addNeighbor(MoleculeSystemCell *cell, const Vector3 &offset)
 {
     m_neighborCells.push_back(cell);
     m_neighborOffsets.push_back(offset);
@@ -71,7 +71,7 @@ const vector<Atom *> &MoleculeSystemCell::atoms()
     return m_atoms;
 }
 
-void MoleculeSystemCell::setIndices(const irowvec& indices)
+void MoleculeSystemCell::setIndices(const irowvec & indices)
 {
     m_indices = indices;
 }
@@ -89,7 +89,7 @@ void MoleculeSystemCell::updateForces()
     // Loop over neighbors and their atoms
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
         MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
-        const rowvec& neighborOffset = m_neighborOffsets[iNeighbor];
+        const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
         if(neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()) {
             continue;
         }

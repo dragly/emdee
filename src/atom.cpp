@@ -1,10 +1,6 @@
 #include <src/atom.h>
 
 Atom::Atom(AtomType atomType) :
-    m_position(zeros<rowvec>(3)),
-    m_velocity(zeros<rowvec>(3)),
-    m_force(zeros<rowvec>(3)),
-    m_displacement(zeros<rowvec>(3)),
     m_mass(0.0),
     m_potential(0.0),
     m_localPressure(0.0),
@@ -20,7 +16,7 @@ Atom::Atom(AtomType atomType) :
 
 void Atom::clearForcePotentialPressure()
 {
-    m_force = zeros<rowvec>(3);
+    m_force.zeros();
     m_potential = 0;
     m_localPressure = 0;
 }

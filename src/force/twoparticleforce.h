@@ -2,6 +2,7 @@
 #define TWOPARTICLEFORCE_H
 
 // Local headers
+#include <src/vector3d.h>
 
 // Forward declarations
 class Atom;
@@ -22,7 +23,7 @@ public:
     TwoParticleForce();
 
     virtual void calculateAndApplyForce(Atom *atom1, Atom *atom2) = 0;
-    virtual void calculateAndApplyForce(Atom* atom1, Atom* atom2, const rowvec &atom2Offset) = 0;
+    virtual void calculateAndApplyForce(Atom* atom1, Atom* atom2, const Vector3 &atom2Offset) = 0;
 
 protected:
 };
