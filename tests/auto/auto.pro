@@ -3,4 +3,5 @@ TEMPLATE = subdirs
 SUBDIRS += \
     forces \
     system \
-    generator
+    generator \
+    vector3
