@@ -10,6 +10,7 @@ class FileManager;
 class Modifier;
 
 #include <src/math/vector3.h>
+#include <src/processor.h>
 
 // System includes
 #include <iostream>
@@ -18,6 +19,9 @@ class Modifier;
 #include <libconfig.h++>
 #include <H5Cpp.h>
 #include <H5File.h>
+
+#include <boost/mpi.hpp>
+namespace mpi = boost::mpi;
 
 using namespace std;
 using namespace arma;
@@ -69,7 +73,6 @@ public:
     void applyModifiers();
 
     // Getters (fast)
-
     Integrator* integrator() const {
         return m_integrator;
     }
@@ -91,6 +94,7 @@ public:
     double time() const {
         return m_time;
     }
+    inline const irowvec& nCells() const;
 
     void setTime(double currentTime);
 
@@ -102,6 +106,9 @@ public:
     void deleteAtoms();
     void setAverageSquareDisplacement(double averageSquareDisplacement);
     void setAverageDisplacement(double averageDisplacement);
+
+    void setupProcessors();
+    MoleculeSystemCell *cell(int i, int j, int k);
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
@@ -144,6 +151,11 @@ protected:
 
     double m_time;
     bool m_skipInitialize;
+    Processor processor;
 };
+
+inline const irowvec &MoleculeSystem::nCells() const {
+    return m_nCells;
+}
 
 #endif // MOLECULESYSTEM_H

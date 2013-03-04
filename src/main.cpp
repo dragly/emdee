@@ -4,6 +4,9 @@
 #include <iostream>
 #include <libconfig.h++>
 
+#include <boost/mpi.hpp>
+namespace mpi = boost::mpi;
+
 //#include <openmpi/mpi.h>
 
 using namespace std;
@@ -11,7 +14,11 @@ using namespace libconfig;
 
 int main(int argc, char** argv)
 {
-//    MPI_Init(&argc, &argv);
+    mpi::environment env(argc, argv);
+    mpi::communicator world;
+    mpi::timer timer;
+    timer.restart();
+    cout << "I am processor number " << world.rank() << endl;
     string configFileName = "testconfig.cfg";
     if(argc > 1) {
         configFileName = argv[1];
@@ -19,7 +26,7 @@ int main(int argc, char** argv)
     MoleculeSystem system;
     ConfigurationParser parser(&system);
     parser.runConfiguration(configFileName);
-//    MPI_Finalize();
+    cout << "Finished after " << timer.elapsed() << " seconds" << endl;
     return 0;
 }
 

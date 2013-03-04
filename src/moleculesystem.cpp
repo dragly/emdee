@@ -31,7 +31,8 @@ MoleculeSystem::MoleculeSystem() :
     m_pressure(0.0),
     m_step(0),
     m_time(0),
-    m_skipInitialize(false)
+    m_skipInitialize(false),
+    processor(this)
 {
     m_interatomicForce = new LennardJonesForce();
     m_integrator = new VelocityVerletIntegrator(this);
@@ -133,6 +134,10 @@ void MoleculeSystem::updateForces()
     }
 }
 
+MoleculeSystemCell* MoleculeSystem::cell(int i, int j, int k) {
+    return m_cells.at(i + j * m_nCells(0) + k * m_nCells(0) * m_nCells(1));
+}
+
 void MoleculeSystem::simulate(int nSimulationSteps)
 {
     //    cout << "Factor is " << m_unitLength / m_unitTime << endl;
@@ -147,7 +152,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         cout << "Initializing integrator" << endl;
         m_integrator->initialize();
         updateStatistics();
-        if(m_isSaveEnabled) {
+        if(m_isSaveEnabled && processor.rank() == 0) {
             m_fileManager->save(m_step);
         }
         m_time += m_integrator->timeStep();
@@ -166,7 +171,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         m_integrator->stepForward();
         updateStatistics();
 
-        if(m_isSaveEnabled) {
+        if(m_isSaveEnabled && processor.rank() == 0) {
             m_fileManager->save(m_step);
         }
         m_time += m_integrator->timeStep();
@@ -347,6 +352,8 @@ void MoleculeSystem::setupCells(double minCutLength) {
         cerr << "The number of cells can never be less than 27!" << endl;
         throw new std::logic_error("The number of cells can never be less than 27!");
     }
+
+    processor.setupProcessors();
 
     refreshCellContents();
     m_areCellsSetUp = true;

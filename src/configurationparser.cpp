@@ -12,6 +12,9 @@
 #include <src/modifier/andersenthermostat.h>
 
 // System includes
+#include <boost/mpi.hpp>
+namespace mpi = boost::mpi;
+
 #include <string>
 using namespace std;
 
@@ -22,7 +25,14 @@ ConfigurationParser::ConfigurationParser(MoleculeSystem *moleculeSystem) :
 
 void ConfigurationParser::runConfiguration(string configurationFileName) {
     Config config;
-    config.readFile(configurationFileName.c_str());
+    // Make sure only one processor reads the config file at a time
+    mpi::communicator world;
+    for(int rank = 0; rank < world.size(); rank++) {
+        if(world.rank() == rank) {
+            config.readFile(configurationFileName.c_str());
+        }
+        world.barrier();
+    }
 
     double unitLength = config.lookup("units.length");
     double unitTime = config.lookup("units.time");
