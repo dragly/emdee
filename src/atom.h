@@ -50,6 +50,7 @@ public:
     void addDisplacement(const Vector3& displacement);
     void addDisplacement(double displacement, uint component);
 
+    void setForce(const Vector3 &force);
 protected:
     Vector3 m_position;
     Vector3 m_velocity;
@@ -70,11 +71,11 @@ private:
         ar & m_velocity;
         ar & m_force;
         ar & m_displacement;
-        ar & m_mass;
+//        ar & m_mass;
         ar & m_potential;
         ar & m_localPressure;
-        ar & m_cellID;
-        ar & m_type;
+//        ar & m_cellID;
+//        ar & m_type;
     }
 };
 
@@ -103,6 +104,11 @@ inline void Atom::addForce(const Vector3 &force)
 {
     m_force += force;
 }
+
+inline void Atom::setForce(const Vector3 &force) {
+    m_force = force;
+}
+
 inline void Atom::setVelocity(const Vector3 &velocity)
 {
     m_velocity = velocity;

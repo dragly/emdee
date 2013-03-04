@@ -129,7 +129,10 @@ void MoleculeSystem::updateForces()
 //    for(MoleculeSystemCell* cell : m_cells) {
 //        cell->clearAlreadyCalculatedNeighbors();
 //    }
-    for(MoleculeSystemCell* cell : m_cells) {
+//    for(MoleculeSystemCell* cell : m_cells) {
+//        cell->updateForces();
+//    }
+    for(MoleculeSystemCell* cell : processor.cells()) {
         cell->updateForces();
     }
 }

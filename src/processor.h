@@ -21,6 +21,8 @@ public:
 
     int rank();
     void communicateAtoms();
+
+    const vector<MoleculeSystemCell*> cells() const;
 protected:
     MoleculeSystem* m_moleculeSystem;
 
@@ -42,5 +44,9 @@ protected:
 
     vector<MoleculeSystemCell*> m_cells;
 };
+
+inline const vector<MoleculeSystemCell*> Processor::cells() const {
+    return m_cells;
+}
 
 #endif // PROCESSOR_H

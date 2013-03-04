@@ -92,16 +92,17 @@ void MoleculeSystemCell::updateForces()
         MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
         const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
         const irowvec& direction = m_neighborDirections[iNeighbor];
-        if(
-                !( // if not one of ..
-                   ((direction(0) >= 0 && direction(1) >= 0) && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1)) // 2x2 in upper right (except right down)
-                || (direction(0) == 1 && direction(1) == -1)) // 1x1 lower right
-                ) // then continue ...
-//                neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
-//            )
-        {
-            continue;
-        }
+
+//        if(
+//                !( // if not one of ..
+//                   ((direction(0) >= 0 && direction(1) >= 0) && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1)) // 2x2 in upper right (except right down)
+//                || (direction(0) == 1 && direction(1) == -1)) // 1x1 lower right
+//                ) // then continue ...
+////                neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
+////            )
+//        {
+//            continue;
+//        }
         const vector<Atom*>& neighborAtoms = neighbor->atoms();
         for(Atom* atom1 : m_atoms) {
             for(Atom* atom2 : neighborAtoms) {
@@ -114,7 +115,11 @@ void MoleculeSystemCell::updateForces()
     // Loop over own atoms
     for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
         Atom* atom1 = m_atoms[iAtom];
-        for(uint jAtom = iAtom + 1; jAtom < m_atoms.size(); jAtom++) {
+//        for(uint jAtom = iAtom + 1; jAtom < m_atoms.size(); jAtom++) {
+        for(uint jAtom = 0; jAtom < m_atoms.size(); jAtom++) {
+            if(iAtom == jAtom) {
+                continue;
+            }
             Atom* atom2 = m_atoms[jAtom];
             interatomicForce->calculateAndApplyForce(atom1, atom2);
         }
