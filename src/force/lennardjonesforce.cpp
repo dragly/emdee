@@ -24,7 +24,10 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const V
     double &eps24 = m_energyConstant24;
     // Check distances to the nearby cells
 
-//    tmpVector = atom2->position() + atom2Offset - atom1->position();
+//    tmpVector += atom2->position() + atom2Offset - atom1->position();
+//    tmpVector = atom2->position();
+//    tmpVector += atom2Offset;
+//    tmpVector -= atom1->position();
     // For some silly reason this is faster than the line above...
     tmpVector(0) = atom2->position()(0) + atom2Offset(0) - atom1->position()(0);
     tmpVector(1) = atom2->position()(1) + atom2Offset(1) - atom1->position()(1);

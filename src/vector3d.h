@@ -48,6 +48,7 @@ public:
 
     // Statics
     static Vector3 ones();
+    static Vector3 createZeros();
 protected:
     double mem_local[3];
 

@@ -24,7 +24,7 @@ Generator::Generator() :
  */
 vector<Atom*> Generator::generateFcc(double sideLength, int nCells, AtomType atomType) {
     vector<Atom*> atomList;
-    Vector3 offset;
+    Vector3 offset = Vector3::createZeros();
     for(int i = 0; i < nCells; i++) {
         for(int j = 0; j < nCells; j++) {
             for(int k = 0; k < nCells; k++) {
@@ -44,7 +44,7 @@ vector<Atom*> Generator::generateFcc(double sideLength, int nCells, AtomType ato
                         face = Vector3(0, sideLength / 2, sideLength / 2);
                         break;
                     }
-                    Vector3 position;
+                    Vector3 position = Vector3::createZeros();
                     position = offset + face;
                     atom->setPosition(position);
                     atom->clearDisplacement();
@@ -76,7 +76,7 @@ vector<Atom*> Generator::generateFcc(double sideLength, int nCells, AtomType ato
  */
 void Generator::boltzmannDistributeVelocities(double temperature, const vector<Atom*>& atoms) {
     double averageVelocity = 0;
-    Vector3 totalVelocity;
+    Vector3 totalVelocity = Vector3::createZeros();
     for(Atom* atom : atoms) {
         rowvec randVec = randn<rowvec>(m_nDimensions);
         Vector3 velocity;
@@ -103,7 +103,7 @@ void Generator::boltzmannDistributeVelocities(double temperature, const vector<A
 
 void Generator::uniformDistributeVelocities(double maxVelocity, vector<Atom*> atoms) {
 
-    Vector3 totalVelocity;
+    Vector3 totalVelocity = Vector3::createZeros();
     for(Atom* atom : atoms) {
         rowvec randVec = randu<rowvec>(m_nDimensions);
         randVec -= 0.5 * ones<rowvec>(m_nDimensions);

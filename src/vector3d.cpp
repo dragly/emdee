@@ -39,3 +39,9 @@ Vector3 Vector3::ones()
 {
     return Vector3(1,1,1);
 }
+
+
+Vector3 Vector3::createZeros()
+{
+    return Vector3(0,0,0);
+}

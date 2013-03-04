@@ -1,6 +1,10 @@
 #include <src/atom.h>
 
 Atom::Atom(AtomType atomType) :
+    m_position(Vector3::createZeros()),
+    m_velocity(Vector3::createZeros()),
+    m_force(Vector3::createZeros()),
+    m_displacement(Vector3::createZeros()),
     m_mass(0.0),
     m_potential(0.0),
     m_localPressure(0.0),
