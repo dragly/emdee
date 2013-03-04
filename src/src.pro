@@ -26,7 +26,7 @@ SOURCES += main.cpp \
     force/lennardjonesforce.cpp \
     force/twoparticleforce.cpp \
     configurationparser.cpp \
-    vector3d.cpp
+    math/vector3.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -45,7 +45,7 @@ HEADERS += \
     force/lennardjonesforce.h \
     force/twoparticleforce.h \
     configurationparser.h \
-    vector3d.h
+    math/vector3.h
 
 # Building
 myscript.target = myscript

@@ -9,7 +9,7 @@ class TwoParticleForce;
 class FileManager;
 class Modifier;
 
-#include <src/vector3d.h>
+#include <src/math/vector3.h>
 
 // System includes
 #include <iostream>

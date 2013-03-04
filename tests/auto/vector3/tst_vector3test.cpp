@@ -1,4 +1,4 @@
-#include <src/vector3d.h>
+#include <src/math/vector3.h>
 
 #include <QString>
 #include <QtTest>

@@ -1,6 +1,6 @@
 #include <src/force/lennardjonesforce.h>
 #include <src/atom.h>
-#include <src/vector3d.h>
+#include <src/math/vector3.h>
 
 #include <QString>
 #include <QtTest>

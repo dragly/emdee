@@ -7,8 +7,8 @@ public:
     Random();
     double ran2();
 private:
-    long *idum;
     long m_idum;
+    long *idum;
 };
 
 #endif // RANDOM_H

@@ -21,11 +21,11 @@ SOURCES += tst_generatortest.cpp \
     ../../../src/generator.cpp \
     ../../../src/atomtype.cpp \
     ../../../src/atom.cpp \
-    ../../../src/vector3d.cpp
+    ../../../src/math/vector3.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
     ../../../src/generator.h \
     ../../../src/atomtype.h \
     ../../../src/atom.h \
-    ../../../src/vector3d.h
+    ../../../src/math/vector3.h

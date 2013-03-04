@@ -20,8 +20,8 @@ INCLUDEPATH += $$ROOT_DIR
 
 
 SOURCES += tst_vector3test.cpp \
-    ../../../src/vector3d.cpp
+    ../../../src/math/vector3.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
-    ../../../src/vector3d.h
+    ../../../src/math/vector3.h

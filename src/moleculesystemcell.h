@@ -8,7 +8,7 @@ class MoleculeSystem;
 #include <vector>
 #include <iostream>
 
-#include <src/vector3d.h>
+#include <src/math/vector3.h>
 
 using namespace arma;
 using namespace std;

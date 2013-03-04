@@ -23,7 +23,7 @@ SOURCES += tst_forcestest.cpp \
     ../../../src/atomtype.cpp \
     ../../../src/atom.cpp \
     ../../../src/force/lennardjonesforce.cpp \
-    ../../../src/vector3d.cpp
+    ../../../src/math/vector3.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 HEADERS += \
@@ -31,4 +31,4 @@ HEADERS += \
     ../../../src/atomtype.h \
     ../../../src/atom.h \
     ../../../src/force/lennardjonesforce.h \
-    ../../../src/vector3d.h
+    ../../../src/math/vector3.h

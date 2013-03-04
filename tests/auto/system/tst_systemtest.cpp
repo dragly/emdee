@@ -35,7 +35,7 @@ void SystemTest::cleanupTestCase()
 
 void SystemTest::cellSetup()
 {
-    double unitLength = 3.405;
+//    double unitLength = 3.405;
     double potentialConstant = 1;
     double bUnit = 5.620 / 3.405;
     MoleculeSystem system;

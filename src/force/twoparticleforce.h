@@ -2,7 +2,7 @@
 #define TWOPARTICLEFORCE_H
 
 // Local headers
-#include <src/vector3d.h>
+#include <src/math/vector3.h>
 
 // Forward declarations
 class Atom;

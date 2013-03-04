@@ -29,7 +29,7 @@ SOURCES += tst_systemtest.cpp \
     ../../../src/integrator/eulercromerintegrator.cpp \
     ../../../src/filemanager.cpp \
     ../../../src/force/lennardjonesforce.cpp \
-    ../../../src/vector3d.cpp
+    ../../../src/math/vector3.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
@@ -45,5 +45,5 @@ HEADERS += \
     ../../../src/integrator/eulercromerintegrator.h \
     ../../../src/filemanager.h \
     ../../../src/force/lennardjonesforce.h \
-    ../../../src/vector3d.h
+    ../../../src/math/vector3.h
 

@@ -4,7 +4,7 @@
 // Local includes
 class TwoParticleForce;
 #include <src/atomtype.h>
-#include <src/vector3d.h>
+#include <src/math/vector3.h>
 
 // System includes
 //#include <armadillo>
