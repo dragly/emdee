@@ -47,9 +47,15 @@ HEADERS += \
     configurationparser.h \
     math/vector3.h
 
+CURRENT_BRANCH = $$system(git rev-parse --abbrev-ref HEAD)
+
+OBJECTS_DIR = $$CURRENT_BRANCH
+
+system(mkdir -p $$CURRENT_BRANCH)
+
 # Building
 myscript.target = myscript
-myscript.commands = python $$PWD/../myscript.py $$PWD/../
+myscript.commands = python $$PWD/../myscript.py $$PWD/../ $$CURRENT_BRANCH
 QMAKE_EXTRA_TARGETS += myscript
 PRE_TARGETDEPS += myscript
 

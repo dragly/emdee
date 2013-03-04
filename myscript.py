@@ -1,5 +1,6 @@
 #!/usr/bin/python
-from os import system
+from os import system, makedirs
+from os.path import isdir
 from sys import argv
 sourceDir = argv[1]
 
