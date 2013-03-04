@@ -47,11 +47,11 @@ HEADERS += \
     configurationparser.h \
     math/vector3.h
 
-CURRENT_BRANCH = $$system(git rev-parse --abbrev-ref HEAD)
+#CURRENT_BRANCH = $$system(git rev-parse --abbrev-ref HEAD)
 
-OBJECTS_DIR = $$CURRENT_BRANCH
+#OBJECTS_DIR = $$CURRENT_BRANCH
 
-system(mkdir -p $$CURRENT_BRANCH)
+#system(mkdir -p $$CURRENT_BRANCH)
 
 # Building
 myscript.target = myscript
