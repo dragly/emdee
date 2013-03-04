@@ -9,6 +9,7 @@ class TwoParticleForce;
 // System includes
 //#include <armadillo>
 #include <vector>
+#include <boost/serialization/serialization.hpp>
 
 //using namespace arma;
 using namespace std;
@@ -21,6 +22,7 @@ class Atom
 {
     friend class TwoParticleForce;
 public:
+    Atom();
     Atom(AtomType atomType);
 
     void clearForcePotentialPressure();
@@ -32,7 +34,7 @@ public:
     const Vector3 &velocity() const;
     const Vector3 &force() const;
     const Vector3& displacement() const;
-    AtomType type() const;
+    const AtomType &type() const;
     double potential() const;
     double localPressure() const;
     int cellID() const;
@@ -59,6 +61,21 @@ protected:
 
     int m_cellID;
     AtomType m_type;
+
+private:
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int ){
+        ar & m_position;
+        ar & m_velocity;
+        ar & m_force;
+        ar & m_displacement;
+        ar & m_mass;
+        ar & m_potential;
+        ar & m_localPressure;
+        ar & m_cellID;
+        ar & m_type;
+    }
 };
 
 // Inlined functions
@@ -131,7 +148,7 @@ inline const Vector3& Atom::displacement() const
 {
     return m_displacement;
 }
-inline AtomType Atom::type() const
+inline const AtomType& Atom::type() const
 {
     return m_type;
 }

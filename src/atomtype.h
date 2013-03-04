@@ -3,6 +3,9 @@
 
 #include <string>
 
+#include <boost/mpi.hpp>
+#include <boost/serialization/string.hpp>
+
 using namespace std;
 
 class AtomType
@@ -22,6 +25,18 @@ public:
     int number;
     double mass;
     static AtomType argon();
+
+private:
+    friend class boost::serialization::access;
+
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int )
+    {
+        ar & name;
+        ar & abbreviation;
+        ar & number;
+        ar & mass;
+    }
 };
 
 #endif // ATOMICTYPE_H

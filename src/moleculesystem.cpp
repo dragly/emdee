@@ -57,11 +57,11 @@ void MoleculeSystem::setStep(uint step)
 }
 
 void MoleculeSystem::deleteAtoms() {
-    for(Atom* atom : m_atoms) {
-        delete atom;
-    }
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearAtoms();
+    }
+    for(Atom* atom : m_atoms) {
+        delete atom;
     }
     m_atoms.clear();
 }
@@ -126,9 +126,9 @@ void MoleculeSystem::updateForces()
     for(Atom* atom : m_atoms) {
         atom->clearForcePotentialPressure();
     }
-    for(MoleculeSystemCell* cell : m_cells) {
-        cell->clearAlreadyCalculatedNeighbors();
-    }
+//    for(MoleculeSystemCell* cell : m_cells) {
+//        cell->clearAlreadyCalculatedNeighbors();
+//    }
     for(MoleculeSystemCell* cell : m_cells) {
         cell->updateForces();
     }
@@ -155,6 +155,9 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         if(m_isSaveEnabled && processor.rank() == 0) {
             m_fileManager->save(m_step);
         }
+        processor.communicateAtoms();
+
+        // Finalize step
         m_time += m_integrator->timeStep();
         iStep++;
         m_step++;
@@ -174,6 +177,9 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         if(m_isSaveEnabled && processor.rank() == 0) {
             m_fileManager->save(m_step);
         }
+        processor.communicateAtoms();
+
+        // Finalize step
         m_time += m_integrator->timeStep();
         m_step++;
     }
@@ -307,11 +313,11 @@ void MoleculeSystem::setupCells(double minCutLength) {
     // Find the neighbor cells
     int nNeighbors;
     for(MoleculeSystemCell *cell1 : m_cells) {
-        rowvec counters = zeros<rowvec>(3);
+        irowvec counters = zeros<irowvec>(3);
         nNeighbors = 0;
         for(int i = 0; i < pow3nDimensions; i++) {
-            rowvec direction = counters - ones<rowvec>(3);
-            rowvec shiftVec = (cell1->indices() + direction);
+            irowvec direction = counters - ones<irowvec>(3);
+            irowvec shiftVec = (cell1->indices() + direction);
             rowvec offsetVec = zeros<rowvec>(3);
             // Boundaries
             for(uint j = 0; j < shiftVec.n_cols; j++) {
@@ -335,7 +341,7 @@ void MoleculeSystem::setupCells(double minCutLength) {
             //            cout << offsetVec << endl;
             MoleculeSystemCell* cell2 = m_cells.at(cellIndex);
             if(cell2 != cell1 || m_cells.size() == 1) {
-                cell1->addNeighbor(cell2, offsetVec);
+                cell1->addNeighbor(cell2, offsetVec, direction);
                 nNeighbors++;
             }
             counters(0) += 1;

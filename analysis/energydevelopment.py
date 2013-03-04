@@ -100,7 +100,7 @@ for configFilePath in configFilePaths:
         #temperatures = kineticEnergies / (3. / 2. * len(atoms) * boltzmannConstant)
         #plot(times, temperatures, label="Temperature")
         plot(picoTimes, cTemperaturesCutoff, label="Temperature")
-        plot(picoTimes[nMovingAverage - 1:], movavg(cTemperaturesCutoff, nMovingAverage), label="Moving average")
+#        plot(picoTimes[nMovingAverage - 1:], movavg(cTemperaturesCutoff, nMovingAverage), label="Moving average")
         xlabel("t [ps]")
         ylabel(r"temperature [K]")
         legend()

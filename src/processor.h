@@ -10,6 +10,7 @@ namespace mpi = boost::mpi;
 
 class MoleculeSystem;
 class MoleculeSystemCell;
+class Atom;
 
 class Processor
 {
@@ -19,6 +20,7 @@ public:
     void setupProcessors();
 
     int rank();
+    void communicateAtoms();
 protected:
     MoleculeSystem* m_moleculeSystem;
 

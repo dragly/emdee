@@ -9,7 +9,7 @@ MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     pow3nDimensions(pow(3, m_nDimensions)),
 //    m_indices(zeros<iVector3>(m_nDimensions)),
     moleculeSystem(parent),
-    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false),
+//    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false),
     m_id(0),
     force(blankForce)
 {
@@ -36,10 +36,11 @@ void MoleculeSystemCell::setBoundaries(mat boundaries)
     //    cout << cellShiftVectors << endl;
 }
 
-void MoleculeSystemCell::addNeighbor(MoleculeSystemCell *cell, const Vector3 &offset)
+void MoleculeSystemCell::addNeighbor(MoleculeSystemCell *cell, const Vector3 &offset, const irowvec& direction)
 {
     m_neighborCells.push_back(cell);
     m_neighborOffsets.push_back(offset);
+    m_neighborDirections.push_back(direction);
 }
 
 const mat &MoleculeSystemCell::boundaries() const
@@ -90,7 +91,15 @@ void MoleculeSystemCell::updateForces()
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
         MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
         const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
-        if(neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()) {
+        const irowvec& direction = m_neighborDirections[iNeighbor];
+        if(
+                !( // if not one of ..
+                   ((direction(0) >= 0 && direction(1) >= 0) && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1)) // 2x2 in upper right (except right down)
+                || (direction(0) == 1 && direction(1) == -1)) // 1x1 lower right
+                ) // then continue ...
+//                neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
+//            )
+        {
             continue;
         }
         const vector<Atom*>& neighborAtoms = neighbor->atoms();
@@ -99,7 +108,7 @@ void MoleculeSystemCell::updateForces()
                 interatomicForce->calculateAndApplyForce(atom1, atom2, neighborOffset);
             }
         }
-        m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = true;
+//        m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = true;
     }
 
     // Loop over own atoms
@@ -117,10 +126,10 @@ void MoleculeSystemCell::clearAtoms()
     m_atoms.clear();
 }
 
-void MoleculeSystemCell::clearAlreadyCalculatedNeighbors()
-{
-    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = false;
-}
+//void MoleculeSystemCell::clearAlreadyCalculatedNeighbors()
+//{
+//    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = false;
+//}
 
 void MoleculeSystemCell::setID(int id)
 {
