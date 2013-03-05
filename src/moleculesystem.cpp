@@ -122,16 +122,17 @@ const vector<MoleculeSystemCell *> &MoleculeSystem::cells() const
 void MoleculeSystem::updateForces()
 {
     obeyBoundaries();
+    m_processor.communicateAtoms();
     refreshCellContents();
     for(Atom* atom : m_atoms) {
         atom->clearForcePotentialPressure();
     }
-//    for(MoleculeSystemCell* cell : m_cells) {
-//        cell->clearAlreadyCalculatedNeighbors();
-//    }
-//    for(MoleculeSystemCell* cell : m_cells) {
-//        cell->updateForces();
-//    }
+    //    for(MoleculeSystemCell* cell : m_cells) {
+    //        cell->clearAlreadyCalculatedNeighbors();
+    //    }
+    //    for(MoleculeSystemCell* cell : m_cells) {
+    //        cell->updateForces();
+    //    }
     for(MoleculeSystemCell* cell : m_processor.cells()) {
         cell->updateForces();
     }
@@ -158,7 +159,6 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         if(m_isSaveEnabled && m_processor.rank() == 0) {
             m_fileManager->save(m_step);
         }
-        m_processor.communicateAtoms();
 
         // Finalize step
         m_time += m_integrator->timeStep();
@@ -180,9 +180,6 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         if(m_isSaveEnabled && m_processor.rank() == 0) {
             m_fileManager->save(m_step);
         }
-        if(iStep > 3) {
-            m_processor.communicateAtoms();
-        }
 
         // Finalize step
         m_time += m_integrator->timeStep();
@@ -192,22 +189,25 @@ void MoleculeSystem::simulate(int nSimulationSteps)
 
 void MoleculeSystem::obeyBoundaries() {
     // Boundary conditions
-    for(Atom* atom : m_atoms) {
-        Vector3 position = atom->position();
-        for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-            double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
-            if(fabs(atom->position()(iDim)) > (m_boundaries(1,iDim) + sideLength)
-                    || fabs(atom->position()(iDim)) < (m_boundaries(0,iDim) - sideLength)) {
-                cerr << "Wow! An atom ended up  outside 2 x boundaries! The time step must be too big. No reason to continue..." << endl;
-                throw(new exception());
-            } else if(atom->position()(iDim) > m_boundaries(1,iDim)) {
-                position(iDim) -= sideLength;
-                atom->setPosition(position);
-                atom->addDisplacement(sideLength, iDim);
-            } else if(atom->position()(iDim) < m_boundaries(0,iDim)) {
-                position(iDim) += sideLength;
-                atom->setPosition(position);
-                atom->addDisplacement(-sideLength, iDim);
+    for(MoleculeSystemCell* cell : m_processor.cells()) {
+        for(Atom* atom : cell->atoms()) {
+//    for(Atom* atom : m_atoms) {
+            Vector3 position = atom->position();
+            for(int iDim = 0; iDim < m_nDimensions; iDim++) {
+                double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
+                if(fabs(atom->position()(iDim)) > (m_boundaries(1,iDim) + sideLength)
+                        || fabs(atom->position()(iDim)) < (m_boundaries(0,iDim) - sideLength)) {
+                    cerr << "Wow! An atom ended up  outside 2 x boundaries! The time step must be too big. No reason to continue..." << endl;
+                    throw(new exception());
+                } else if(atom->position()(iDim) > m_boundaries(1,iDim)) {
+                    position(iDim) -= sideLength;
+                    atom->setPosition(position);
+                    atom->addDisplacement(sideLength, iDim);
+                } else if(atom->position()(iDim) < m_boundaries(0,iDim)) {
+                    position(iDim) += sideLength;
+                    atom->setPosition(position);
+                    atom->addDisplacement(-sideLength, iDim);
+                }
             }
         }
     }
@@ -382,7 +382,7 @@ void MoleculeSystem::refreshCellContents() {
 
         int cellID = k * m_nCells(1) * m_nCells(2) + j *  m_nCells(2) + i;
 
-//        cout << cellID << " ";
+        //        cout << cellID << " ";
 
         MoleculeSystemCell* cell = m_cells.at(cellID);
         cell->addAtom(atom);
