@@ -19,7 +19,8 @@ Processor::Processor(MoleculeSystem *moleculeSystem) :
     m_nProcessors(0),
     m_nProcessorsX(0),
     m_nProcessorsY(0),
-    m_nProcessorsZ(0)
+    m_nProcessorsZ(0),
+    m_totalCommunicationTime(0)
 {
 }
 
@@ -67,6 +68,9 @@ int Processor::rank()
 }
 
 void Processor::communicateAtoms() {
+    communicationTimer.restart();
+//    m_moleculeSystem->refreshCellContents();
+
     vector<Atom*> myAtoms;
     for(MoleculeSystemCell* cell : m_cells) {
         myAtoms.insert(myAtoms.end(), cell->atoms().begin(), cell->atoms().end());
@@ -80,7 +84,6 @@ void Processor::communicateAtoms() {
             world.recv(iRank, 0, receivedAtoms);
             allAtoms.insert(allAtoms.begin(), receivedAtoms.begin(), receivedAtoms.end());
         }
-        cout << "Received " << allAtoms.size() << " atoms" << endl;
         for(int iRank = 1; iRank < world.size(); iRank++) {
             world.send(iRank, 1, allAtoms);
         }
@@ -91,21 +94,19 @@ void Processor::communicateAtoms() {
 
     vector<Atom*> myLocalAtoms;
 
-    cout << "I now have " << allAtoms.size() << " atoms" << endl;
-
     // Allocate new atoms because we don't trust Boost::MPI to do it for us
-    for(Atom* atom : allAtoms) {
+    for(uint i = 0; i < allAtoms.size(); i++) {
+        Atom* atom = allAtoms.at(i);
         Atom* localAtom = new Atom(AtomType::argon());
-        localAtom->setPosition(atom->position());
-        localAtom->setVelocity(atom->velocity());
-        localAtom->setForce(atom->force());
-
+        localAtom->clone(*atom);
         myLocalAtoms.push_back(localAtom);
     }
-
     m_moleculeSystem->deleteAtoms();
     m_moleculeSystem->addAtoms(myLocalAtoms);
-    m_moleculeSystem->refreshCellContents();
+
+
+    m_totalCommunicationTime += communicationTimer.elapsed();
+    cout << "Total communication time so far: " << m_totalCommunicationTime << endl;
 }
 
 

@@ -27,6 +27,7 @@ protected:
     MoleculeSystem* m_moleculeSystem;
 
     mpi::communicator world;
+    mpi::timer communicationTimer;
 
     int m_nProcessors;
 
@@ -43,6 +44,8 @@ protected:
     Range m_rangeZ;
 
     vector<MoleculeSystemCell*> m_cells;
+
+    double m_totalCommunicationTime;
 };
 
 inline const vector<MoleculeSystemCell*> Processor::cells() const {

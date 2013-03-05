@@ -180,7 +180,9 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         if(m_isSaveEnabled && processor.rank() == 0) {
             m_fileManager->save(m_step);
         }
-        processor.communicateAtoms();
+        if(iStep > 3) {
+            processor.communicateAtoms();
+        }
 
         // Finalize step
         m_time += m_integrator->timeStep();
@@ -362,9 +364,9 @@ void MoleculeSystem::setupCells(double minCutLength) {
         throw new std::logic_error("The number of cells can never be less than 27!");
     }
 
-    processor.setupProcessors();
-
     refreshCellContents();
+
+    processor.setupProcessors();
     m_areCellsSetUp = true;
 }
 
@@ -380,7 +382,7 @@ void MoleculeSystem::refreshCellContents() {
 
         int cellID = k * m_nCells(1) * m_nCells(2) + j *  m_nCells(2) + i;
 
-        //        cout << cellID << endl;
+//        cout << cellID << " ";
 
         MoleculeSystemCell* cell = m_cells.at(cellID);
         cell->addAtom(atom);

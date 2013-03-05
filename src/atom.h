@@ -51,12 +51,13 @@ public:
     void addDisplacement(double displacement, uint component);
 
     void setForce(const Vector3 &force);
+
+    void clone(const Atom &other);
 protected:
     Vector3 m_position;
     Vector3 m_velocity;
     Vector3 m_force;
     Vector3 m_displacement;
-    double m_mass;
     double m_potential;
     double m_localPressure;
 
