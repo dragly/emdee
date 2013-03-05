@@ -45,6 +45,7 @@ protected:
 
     mpi::communicator world;
     mpi::timer communicationTimer;
+    mpi::timer pureCommunicationTimer;
 
     int m_nProcessors;
 
@@ -63,6 +64,7 @@ protected:
     vector<MoleculeSystemCell*> m_cells;
 
     double m_totalCommunicationTime;
+    double m_pureCommunicationTime;
 
     vector<ProcessorNeighbor> processorNeighbors;
 

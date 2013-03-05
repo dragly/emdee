@@ -20,7 +20,8 @@ Processor::Processor(MoleculeSystem *moleculeSystem) :
     m_nProcessorsX(0),
     m_nProcessorsY(0),
     m_nProcessorsZ(0),
-    m_totalCommunicationTime(0)
+    m_totalCommunicationTime(0),
+    m_pureCommunicationTime(0)
 {
     irowvec left = {-1, 0, 0};
     directions.push_back(left);
@@ -211,11 +212,14 @@ void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
 //        cout << "Removed " << cellToReceive->atoms().size() << " atoms from " << cellToReceive->indices();
         atomsRemoved += cellToReceive->atoms().size();
         cellToReceive->deleteAtomsFromCellAndSystem();
+        pureCommunicationTimer.restart();
         world.recv(neighbor.rank, 0, atomsToReceive);
+        m_pureCommunicationTime += pureCommunicationTimer.elapsed();
         vector<Atom*> locallyAllocatedAtoms;
         for(Atom* atom : atomsToReceive) {
             Atom* localAtom = new Atom(AtomType::argon());
-            localAtom->clone(*atom);
+//            localAtom->clone(*atom);
+            localAtom->communicationClone(*atom);
             locallyAllocatedAtoms.push_back(localAtom);
         }
         m_moleculeSystem->addAtoms(locallyAllocatedAtoms);
@@ -229,7 +233,9 @@ void Processor::sendAtomsToNeighbor(const ProcessorNeighbor& neighbor) {
         vector<Atom*> atomsToSend;
         atomsToSend.insert(atomsToSend.end(), cellToSend->atoms().begin(), cellToSend->atoms().end());
 //        cout << "Sending " << cellToSend->atoms().size() << " atoms from " << cellToSend->indices();
+        pureCommunicationTimer.restart();
         world.send(neighbor.rank, 0, atomsToSend);
+        m_pureCommunicationTime += pureCommunicationTimer.elapsed();
     }
 }
 
@@ -266,6 +272,7 @@ void Processor::communicateAtoms() {
     cout << "Now I have " << m_moleculeSystem->atoms().size() << " atoms in the system" << endl;
     m_totalCommunicationTime += communicationTimer.elapsed();
     cout << "Total communication time so far: " << m_totalCommunicationTime << endl;
+    cout << "Pure communication time so far: " << m_pureCommunicationTime << endl;
 //    exit(999);
     // Receive atoms from neighbors
 

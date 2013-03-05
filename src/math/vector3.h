@@ -59,6 +59,11 @@ private:
     void serialize(Archive & ar, const unsigned int version);
 };
 
+BOOST_CLASS_IMPLEMENTATION(Vector3,object_serializable)
+BOOST_IS_BITWISE_SERIALIZABLE(Vector3)
+BOOST_IS_MPI_DATATYPE(Vector3)
+BOOST_CLASS_TRACKING(Vector3,track_never)
+
 inline Vector3::Vector3()
 {
     mem_local[0] = 0;
@@ -81,7 +86,7 @@ inline Vector3::Vector3(arma::rowvec armaVector)
 }
 
 template<class Archive>
-void Vector3::serialize(Archive & ar, const unsigned int)
+inline void Vector3::serialize(Archive & ar, const unsigned int)
 {
     ar &mem_local[0];
     ar &mem_local[1];

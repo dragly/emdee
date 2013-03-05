@@ -1,30 +1,5 @@
 #include "atom.h"
 
-Atom::Atom()  :
-    m_position(Vector3::createZeros()),
-    m_velocity(Vector3::createZeros()),
-    m_force(Vector3::createZeros()),
-    m_displacement(Vector3::createZeros()),
-    m_potential(0.0),
-    m_localPressure(0.0),
-    m_cellID(-999),
-    m_type(AtomType::argon())
-{
-
-}
-
-Atom::Atom(AtomType atomType) :
-    m_position(Vector3::createZeros()),
-    m_velocity(Vector3::createZeros()),
-    m_force(Vector3::createZeros()),
-    m_displacement(Vector3::createZeros()),
-    m_potential(0.0),
-    m_localPressure(0.0),
-    m_cellID(-999),
-    m_type(atomType)
-{
-}
-
 //void Atom::
 
 

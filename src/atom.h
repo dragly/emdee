@@ -53,6 +53,7 @@ public:
     void setForce(const Vector3 &force);
 
     void clone(const Atom &other);
+    void communicationClone(const Atom &other);
 protected:
     Vector3 m_position;
     Vector3 m_velocity;
@@ -67,23 +68,57 @@ protected:
 private:
     friend class boost::serialization::access;
     template<class Archive>
-    void serialize(Archive & ar, const unsigned int ){
-        ar & m_position;
-        ar & m_velocity;
-        ar & m_force;
-        ar & m_displacement;
-//        ar & m_mass;
-        ar & m_potential;
-        ar & m_localPressure;
-//        ar & m_cellID;
-//        ar & m_type;
-    }
+    void serialize(Archive & ar, const unsigned int );
 };
+
+BOOST_CLASS_IMPLEMENTATION(Atom,object_serializable)
+BOOST_IS_BITWISE_SERIALIZABLE(Atom)
+BOOST_IS_MPI_DATATYPE(Atom)
+BOOST_CLASS_TRACKING(Atom,track_never)
+
+// Inlined constructors
+inline Atom::Atom()  :
+    m_position(Vector3::createZeros()),
+    m_velocity(Vector3::createZeros()),
+    m_force(Vector3::createZeros()),
+    m_displacement(Vector3::createZeros()),
+    m_potential(0.0),
+    m_localPressure(0.0),
+    m_cellID(-999),
+    m_type(AtomType::argon())
+{
+}
+
+inline Atom::Atom(AtomType atomType) :
+    m_position(Vector3::createZeros()),
+    m_velocity(Vector3::createZeros()),
+    m_force(Vector3::createZeros()),
+    m_displacement(Vector3::createZeros()),
+    m_potential(0.0),
+    m_localPressure(0.0),
+    m_cellID(-999),
+    m_type(atomType)
+{
+}
+
+template<class Archive>
+inline void Atom::serialize(Archive & ar, const unsigned int)
+{
+    ar & m_position;
+    ar & m_velocity;
+    //        ar & m_force;
+    ar & m_displacement;
+    //        ar & m_mass;
+    //        ar & m_potential;
+    //        ar & m_localPressure;
+    //        ar & m_cellID;
+    //        ar & m_type;
+}
 
 // Inlined functions
 inline void Atom::addForce(int component, double force)
 {
-   m_force(component) += force;
+    m_force(component) += force;
 }
 
 inline void Atom::addDisplacement(double displacement, uint component) {
@@ -158,6 +193,18 @@ inline const Vector3& Atom::displacement() const
 inline const AtomType& Atom::type() const
 {
     return m_type;
+}
+
+inline void Atom::communicationClone(const Atom &other)
+{
+    this->m_position = other.m_position;
+    this->m_displacement = other.m_displacement;
+    this->m_velocity = other.m_velocity;
+    //    this->m_cellID = other.m_cellID;
+    //    this->m_force = other.m_force;
+    //    this->m_localPressure = other.m_localPressure;
+    //    this->m_potential = other.m_potential;
+    //    this->m_type = other.m_type;
 }
 
 #endif // ATOM_H
