@@ -109,6 +109,8 @@ public:
 
     void setupProcessors();
     MoleculeSystemCell *cell(int i, int j, int k);
+
+    Processor* processor();
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
@@ -151,11 +153,15 @@ protected:
 
     double m_time;
     bool m_skipInitialize;
-    Processor processor;
+    Processor m_processor;
 };
 
 inline const irowvec &MoleculeSystem::nCells() const {
     return m_nCells;
+}
+
+inline Processor* MoleculeSystem::processor() {
+    return &m_processor;
 }
 
 #endif // MOLECULESYSTEM_H

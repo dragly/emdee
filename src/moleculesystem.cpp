@@ -32,7 +32,7 @@ MoleculeSystem::MoleculeSystem() :
     m_step(0),
     m_time(0),
     m_skipInitialize(false),
-    processor(this)
+    m_processor(this)
 {
     m_interatomicForce = new LennardJonesForce();
     m_integrator = new VelocityVerletIntegrator(this);
@@ -132,7 +132,7 @@ void MoleculeSystem::updateForces()
 //    for(MoleculeSystemCell* cell : m_cells) {
 //        cell->updateForces();
 //    }
-    for(MoleculeSystemCell* cell : processor.cells()) {
+    for(MoleculeSystemCell* cell : m_processor.cells()) {
         cell->updateForces();
     }
 }
@@ -155,10 +155,10 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         cout << "Initializing integrator" << endl;
         m_integrator->initialize();
         updateStatistics();
-        if(m_isSaveEnabled && processor.rank() == 0) {
+        if(m_isSaveEnabled && m_processor.rank() == 0) {
             m_fileManager->save(m_step);
         }
-        processor.communicateAtoms();
+        m_processor.communicateAtoms();
 
         // Finalize step
         m_time += m_integrator->timeStep();
@@ -177,11 +177,11 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         m_integrator->stepForward();
         updateStatistics();
 
-        if(m_isSaveEnabled && processor.rank() == 0) {
+        if(m_isSaveEnabled && m_processor.rank() == 0) {
             m_fileManager->save(m_step);
         }
         if(iStep > 3) {
-            processor.communicateAtoms();
+            m_processor.communicateAtoms();
         }
 
         // Finalize step
@@ -366,7 +366,7 @@ void MoleculeSystem::setupCells(double minCutLength) {
 
     refreshCellContents();
 
-    processor.setupProcessors();
+    m_processor.setupProcessors();
     m_areCellsSetUp = true;
 }
 
