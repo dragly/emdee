@@ -131,6 +131,10 @@ void MoleculeSystemCell::clearAtoms()
     m_atoms.clear();
 }
 
+void MoleculeSystemCell::addAtoms(const vector<Atom*>& atoms) {
+    m_atoms.insert(m_atoms.end(), atoms.begin(), atoms.end());
+}
+
 //void MoleculeSystemCell::clearAlreadyCalculatedNeighbors()
 //{
 //    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = false;
@@ -144,4 +148,22 @@ void MoleculeSystemCell::setID(int id)
 int MoleculeSystemCell::id()
 {
     return m_id;
+}
+
+
+void MoleculeSystemCell::deleteAtomsFromCellAndSystem()
+{
+    vector<Atom*> atomsExceptThisCell;
+    for(MoleculeSystemCell* cell : moleculeSystem->cells()) {
+        if(cell == this) {
+            continue;
+        }
+        atomsExceptThisCell.insert(atomsExceptThisCell.end(), cell->atoms().begin(), cell->atoms().end());
+    }
+    moleculeSystem->clearAtoms();
+    moleculeSystem->addAtoms(atomsExceptThisCell);
+    for(Atom* atom : m_atoms) {
+        delete atom;
+    }
+    m_atoms.clear();
 }

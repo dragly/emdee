@@ -9,6 +9,7 @@
 #include <src/integrator/velocityverletintegrator.h>
 #include <src/filemanager.h>
 #include <src/modifier/modifier.h>
+#include <src/processor.h>
 
 // System headers
 #include <fstream>
@@ -32,7 +33,7 @@ MoleculeSystem::MoleculeSystem() :
     m_step(0),
     m_time(0),
     m_skipInitialize(false),
-    m_processor(this)
+    m_processor(new Processor(this))
 {
     m_interatomicForce = new LennardJonesForce();
     m_integrator = new VelocityVerletIntegrator(this);
@@ -49,6 +50,27 @@ void MoleculeSystem::loadConfiguration(Config *config)
 bool MoleculeSystem::load(string fileName) {
     m_skipInitialize = true;
     return m_fileManager->load(fileName);
+}
+
+void MoleculeSystem::clearAtoms()
+{
+    m_atoms.clear();
+}
+
+void MoleculeSystem::addAtomsToCorrectCells(vector<Atom *> &atoms)
+{
+    for(Atom* atom : atoms) {
+        int i = atom->position()(0) / m_cellLengths(0);
+        int j = atom->position()(1) / m_cellLengths(1);
+        int k = atom->position()(2) / m_cellLengths(2);
+
+        int cellID = k * m_nCells(0) * m_nCells(1) + j *  m_nCells(0) + i;
+
+
+        MoleculeSystemCell* cell = m_cells.at(cellID);
+//        cout << "Put atom into " << cell->indices();
+        cell->addAtom(atom);
+    }
 }
 
 void MoleculeSystem::setStep(uint step)
@@ -122,7 +144,8 @@ const vector<MoleculeSystemCell *> &MoleculeSystem::cells() const
 void MoleculeSystem::updateForces()
 {
     obeyBoundaries();
-    m_processor.communicateAtoms();
+//    refreshCellContents();
+    m_processor->communicateAtoms();
     refreshCellContents();
     for(Atom* atom : m_atoms) {
         atom->clearForcePotentialPressure();
@@ -133,7 +156,7 @@ void MoleculeSystem::updateForces()
     //    for(MoleculeSystemCell* cell : m_cells) {
     //        cell->updateForces();
     //    }
-    for(MoleculeSystemCell* cell : m_processor.cells()) {
+    for(MoleculeSystemCell* cell : m_processor->cells()) {
         cell->updateForces();
     }
 }
@@ -156,7 +179,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         cout << "Initializing integrator" << endl;
         m_integrator->initialize();
         updateStatistics();
-        if(m_isSaveEnabled && m_processor.rank() == 0) {
+        if(m_isSaveEnabled && m_processor->rank() == 0) {
             m_fileManager->save(m_step);
         }
 
@@ -177,7 +200,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         m_integrator->stepForward();
         updateStatistics();
 
-        if(m_isSaveEnabled && m_processor.rank() == 0) {
+        if(m_isSaveEnabled && m_processor->rank() == 0) {
             m_fileManager->save(m_step);
         }
 
@@ -189,7 +212,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
 
 void MoleculeSystem::obeyBoundaries() {
     // Boundary conditions
-    for(MoleculeSystemCell* cell : m_processor.cells()) {
+    for(MoleculeSystemCell* cell : m_processor->cells()) {
         for(Atom* atom : cell->atoms()) {
 //    for(Atom* atom : m_atoms) {
             Vector3 position = atom->position();
@@ -366,7 +389,7 @@ void MoleculeSystem::setupCells(double minCutLength) {
 
     refreshCellContents();
 
-    m_processor.setupProcessors();
+    m_processor->setupProcessors();
     m_areCellsSetUp = true;
 }
 
@@ -375,18 +398,7 @@ void MoleculeSystem::refreshCellContents() {
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearAtoms();
     }
-    for(Atom* atom : m_atoms) {
-        int i = atom->position()(0) / m_cellLengths(0);
-        int j = atom->position()(1) / m_cellLengths(1);
-        int k = atom->position()(2) / m_cellLengths(2);
-
-        int cellID = k * m_nCells(1) * m_nCells(2) + j *  m_nCells(2) + i;
-
-        //        cout << cellID << " ";
-
-        MoleculeSystemCell* cell = m_cells.at(cellID);
-        cell->addAtom(atom);
-    }
+    addAtomsToCorrectCells(m_atoms);
 }
 
 void MoleculeSystem::setIntegrator(Integrator *integrator)

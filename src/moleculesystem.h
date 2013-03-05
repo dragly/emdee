@@ -8,9 +8,9 @@ class MoleculeSystemCell;
 class TwoParticleForce;
 class FileManager;
 class Modifier;
+class Processor;
 
 #include <src/math/vector3.h>
-#include <src/processor.h>
 
 // System includes
 #include <iostream>
@@ -101,6 +101,8 @@ public:
     void setBoltzmannConstant(double boltzmannConstant);
 
     bool load(string fileName);
+    void clearAtoms();
+    void addAtomsToCorrectCells(vector<Atom*>& atoms);
 
     void setStep(uint step);
     void deleteAtoms();
@@ -153,7 +155,7 @@ protected:
 
     double m_time;
     bool m_skipInitialize;
-    Processor m_processor;
+    Processor* m_processor;
 };
 
 inline const irowvec &MoleculeSystem::nCells() const {
@@ -161,7 +163,7 @@ inline const irowvec &MoleculeSystem::nCells() const {
 }
 
 inline Processor* MoleculeSystem::processor() {
-    return &m_processor;
+    return m_processor;
 }
 
 #endif // MOLECULESYSTEM_H

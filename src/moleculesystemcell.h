@@ -35,13 +35,15 @@ public:
     void updateForces();
     void clearAtoms();
     void clearAlreadyCalculatedNeighbors();
+    void deleteAtomsFromCellAndSystem();
     void setID(int id);
     int id();
 
 //    bool hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
 //    {
 //        return m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
-//    }
+    //    }
+    void addAtoms(const vector<Atom *> &atoms);
 protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;

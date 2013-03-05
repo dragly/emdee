@@ -2,6 +2,7 @@
 #include <src/moleculesystem.h>
 #include <src/atom.h>
 #include <src/moleculesystemcell.h>
+#include <src/processor.h>
 
 VelocityVerletIntegrator::VelocityVerletIntegrator(MoleculeSystem *moleculeSystem) :
     Integrator(moleculeSystem)

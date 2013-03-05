@@ -5,12 +5,25 @@
 
 #include <boost/mpi.hpp>
 #include <vector>
+#include <armadillo>
 using namespace std;
+using namespace arma;
 namespace mpi = boost::mpi;
 
 class MoleculeSystem;
 class MoleculeSystemCell;
 class Atom;
+
+class ProcessorNeighbor {
+public:
+    ProcessorNeighbor();
+
+    vector<MoleculeSystemCell*> cellsToSend;
+    vector<MoleculeSystemCell*> cellsToReceive;
+    irowvec direction;
+    irowvec coordinates;
+    int rank;
+};
 
 class Processor
 {
@@ -24,6 +37,10 @@ public:
 
     const vector<MoleculeSystemCell*> cells() const;
 protected:
+
+    void receiveAtomsFromNeighbor(const ProcessorNeighbor &neighbor);
+    void sendAtomsToNeighbor(const ProcessorNeighbor &neighbor);
+
     MoleculeSystem* m_moleculeSystem;
 
     mpi::communicator world;
@@ -39,13 +56,17 @@ protected:
     int m_coordinateY;
     int m_coordinateZ;
 
-    Range m_rangeX;
-    Range m_rangeY;
-    Range m_rangeZ;
+    Range m_cellRangeX;
+    Range m_cellRangeY;
+    Range m_cellRangeZ;
 
     vector<MoleculeSystemCell*> m_cells;
 
     double m_totalCommunicationTime;
+
+    vector<ProcessorNeighbor> processorNeighbors;
+
+    vector<irowvec> directions;
 };
 
 inline const vector<MoleculeSystemCell*> Processor::cells() const {
