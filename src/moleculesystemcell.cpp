@@ -89,7 +89,7 @@ void MoleculeSystemCell::updateForces()
 
     //    cout << "I have " << m_neighborCells.size() << " neighbors" << endl;
     // Loop over neighbors and their atoms
-    interatomicForce->setNewtonsThirdLawEnabled(false);
+//    interatomicForce->setNewtonsThirdLawEnabled(true);
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
         MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
         const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];

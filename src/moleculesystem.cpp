@@ -159,6 +159,7 @@ void MoleculeSystem::updateForces()
     for(MoleculeSystemCell* cell : m_processor->cells()) {
         cell->updateForces();
     }
+//    m_processor->communicateForces();
 }
 
 MoleculeSystemCell* MoleculeSystem::cell(int i, int j, int k) {

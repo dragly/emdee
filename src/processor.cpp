@@ -120,11 +120,11 @@ void Processor::setupProcessors()
             continue;
         }
 
-        cout << "Neighbor in direction " << sendNeighbor.direction;
+//        cout << "Neighbor in direction " << sendNeighbor.direction;
 
-        cout << "Neighbor at " << sendNeighbor.coordinates;
+//        cout << "Neighbor at " << sendNeighbor.coordinates;
 
-        cout << "Has ID " << sendNeighbor.rank << endl;
+//        cout << "Has ID " << sendNeighbor.rank << endl;
 
         // Find cells to transfer to this neighbor
         vector<MoleculeSystemCell*>& cellsToSend = sendNeighbor.cells;
@@ -215,8 +215,8 @@ void Processor::setupProcessors()
                 }
             }
         }
-        cout << "Wanna send " << cellsToSend.size() << " cells" << endl;
-        cout << "Wanna receive " << cellsToReceive.size() << " cells" << endl;
+//        cout << "Wanna send " << cellsToSend.size() << " cells" << endl;
+//        cout << "Wanna receive " << cellsToReceive.size() << " cells" << endl;
 
         cout << endl;
         sendNeighbors.push_back(sendNeighbor);
@@ -300,21 +300,21 @@ void Processor::setupProcessors()
                 }
             }
 
-            cout << "MIN MAX" << endl << minMax;
+//            cout << "MIN MAX" << endl << minMax;
             for(int i = minMax(0, 0); i <= minMax(0, 1); i++) {
                 for(int j = minMax(1, 0); j <= minMax(1, 1); j++) {
                     for(int k = minMax(2, 0); k <= minMax(2, 1); k++) {
-                        cout << "Pushing cell " << m_moleculeSystem->cell(i,j,k)->indices();
+//                        cout << "Pushing cell " << m_moleculeSystem->cell(i,j,k)->indices();
                         cells.push_back(m_moleculeSystem->cell(i,j,k));
                     }
                 }
             }
 
             if(isSend == 1) {
-                cout << "Wanna send " << cells.size() << " cells" << endl;
+//                cout << "Wanna send " << cells.size() << " cells" << endl;
                 forceSendNeighbors.push_back(neighbor);
             } else {
-                cout << "Wanna receive " << cells.size() << " cells" << endl;
+//                cout << "Wanna receive " << cells.size() << " cells" << endl;
                 forceReceiveNeighbors.push_back(neighbor);
             }
             cout << "Done..." << endl;
@@ -436,59 +436,73 @@ void Processor::communicateAtoms() {
 }
 
 
-//vector<Vector3> myPositions;
-//vector<Vector3> myVelocities;
-//vector<Vector3> myForces;
-//for(MoleculeSystemCell* cell : m_cells) {
-//    for(Atom* atom : cell->atoms()) {
-//        myPositions.push_back(atom->position());
-//        myVelocities.push_back(atom->velocity());
-//        myForces.push_back(atom->force());
-//    }
-//}
+void Processor::receiveForcesFromNeighbor(const ProcessorNeighbor& neighbor) {
+    //    int atomsRemoved = 0;
+    //    cout << "Expecting to receive " << neighbor.forceCells.size() << " cells" << endl;
+    for(MoleculeSystemCell* cellToReceive : neighbor.cells) {
+        vector<Atom*> atomsToReceive;
+        //        cout << "Removed " << cellToReceive->atoms().size() << " atoms from " << cellToReceive->indices();
+        //        atomsRemoved += cellToReceive->atoms().size();
+        //        cellToReceive->deleteAtomsFromCellAndSystem();
+        pureCommunicationTimer.restart();
+        world.recv(neighbor.rank, 0, atomsToReceive);
+        m_pureCommunicationTime += pureCommunicationTimer.elapsed();
+        //        vector<Atom*> locallyAllocatedAtoms;
+        cout << "Receiving cell " << cellToReceive->indices() << " which should have " << cellToReceive->atoms().size() << " atoms" << "and I will be receiving " << atomsToReceive.size() << " atoms" << endl;
+        for(uint iAtom = 0; iAtom < cellToReceive->atoms().size(); iAtom++) {
+            //            Atom* localAtom = new Atom(AtomType::argon());
+            //            localAtom->clone(*atom);
+            //            localAtom->communicationClone(*atom);
+            Atom* localAtom = cellToReceive->atoms().at(iAtom);
+            Atom* receivedAtom = atomsToReceive.at(iAtom);
+            localAtom->addForce(receivedAtom->force());
+            //            locallyAllocatedAtoms.push_back(localAtom);
+        }
+        //        m_moleculeSystem->addAtoms(locallyAllocatedAtoms);
+        //        cellToReceive->addAtoms(locallyAllocatedAtoms);
+    }
+    //    cout << "Removed a total of " << atomsRemoved << " atoms" << endl;
+    //    cout << "Cells received" << endl;
+}
 
-//vector<Vector3> allPositions;
-//vector<Vector3> allVelocities;
-//vector<Vector3> allForces;
-//if(world.rank() == 0) {
-//    allPositions.insert(allPositions.end(), myPositions.begin(), myPositions.end());
-//    allVelocities.insert(allVelocities.end(), myVelocities.begin(), myVelocities.end());
-//    allForces.insert(allForces.end(), myForces.begin(), myForces.end());
+void Processor::sendForcesToNeighbor(const ProcessorNeighbor& neighbor) {
+    //    cout << "Expecting to send " << neighbor.cellsToSendForces.size() << " cells" << endl;
+    for(MoleculeSystemCell* cellToSend : neighbor.cells) {
+        vector<Atom*> atomsToSend;
+        //        cout << "Sending cell cell " << cellToSend->indices() << endl;
+        atomsToSend.insert(atomsToSend.end(), cellToSend->atoms().begin(), cellToSend->atoms().end());
+        cout << "Sending  from cell " <<  cellToSend->indices() << " with " << cellToSend->atoms().size() << " atoms" << endl;
+        pureCommunicationTimer.restart();
+        world.send(neighbor.rank, 0, atomsToSend);
+        m_pureCommunicationTime += pureCommunicationTimer.elapsed();
+    }
+    //    cout << "Cells sent" << endl;
+}
 
-//    for(int iRank = 1; iRank < world.size(); iRank++) {
-//        vector<Vector3> receivedPositions;
-//        vector<Vector3> receivedVelocities;
-//        vector<Vector3> receivedForces;
-//        world.recv(iRank, 0, receivedPositions);
-//        world.recv(iRank, 1, receivedVelocities);
-//        world.recv(iRank, 2, receivedForces);
-//        allPositions.insert(allPositions.begin(), receivedPositions.begin(), receivedPositions.end());
-//        allVelocities.insert(allVelocities.begin(), receivedVelocities.begin(), receivedVelocities.end());
-//        allForces.insert(allForces.begin(), receivedForces.begin(), receivedForces.end());
-//    }
-//    cout << "Received " << allPositions.size() << " positions" << endl;
-//    for(int iRank = 1; iRank < world.size(); iRank++) {
-//        world.send(iRank, 10, allPositions);
-//        world.send(iRank, 11, allVelocities);
-//        world.send(iRank, 12, allForces);
-//    }
-//} else {
-//    world.send(0, 0, myPositions);
-//    world.send(0, 1, myVelocities);
-//    world.send(0, 2, myForces);
-//    world.recv(0, 10, allPositions);
-//    world.recv(0, 11, allVelocities);
-//    world.recv(0, 12, allForces);
-//}
-
-//vector<Atom*> allAtoms;
-
-//for(int i = 0; i < allPositions.size(); i++) {
-//    Atom* atom = new Atom(AtomType::argon());
-//    atom->setPosition(allPositions.at(i));
-//    atom->setVelocity(allVelocities.at(i));
-//    atom->setForce(allForces.at(i));
-//}
+void Processor::communicateForces() {
+    cout << "Started force communication" << endl;
+    for(uint i = 0; i < forceDirections.size(); i++) {
+        cout << "Communication direction is " << forceDirections.at(i) << endl;
+        const ProcessorNeighbor& sendNeighbor = forceSendNeighbors.at(i);
+        const ProcessorNeighbor& receiveNeighbor = forceReceiveNeighbors.at(i);
+        cout << "Communicating with rank " << sendNeighbor.rank << " (I am " << world.rank() << ") " << endl;
+        if(sendNeighbor.rank == world.rank()) {
+            //            cout << "No need to communicate with self..." << endl;
+            continue;
+        }
+        if(shouldSendFirst(forceDirections.at(i))) {
+            cout << "Should send with " << sendNeighbor.rank << endl;
+            cout << "Should receive with " << receiveNeighbor.rank << endl;
+            sendForcesToNeighbor(sendNeighbor);
+            receiveForcesFromNeighbor(receiveNeighbor);
+        } else {
+            cout << "Should receive with " << receiveNeighbor.rank << endl;
+            cout << "Should send with " << sendNeighbor.rank << endl;
+            receiveForcesFromNeighbor(sendNeighbor);
+            sendForcesToNeighbor(receiveNeighbor);
+        }
+    }
+}
 
 
 ProcessorNeighbor::ProcessorNeighbor() :
