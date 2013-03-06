@@ -14,7 +14,7 @@ release {
     QMAKE_CXXFLAGS_RELEASE -= -O2
     QMAKE_CXXFLAGS_RELEASE += -O3
 }
-
+CONFIG += mpi
 mpi {
     QMAKE_CXX = ccache mpicxx
     QMAKE_CXX_RELEASE = $$QMAKE_CXX
