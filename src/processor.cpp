@@ -87,6 +87,10 @@ void Processor::setupProcessors()
             for(int k = m_cellRangeZ.firstElement(); k <= m_cellRangeZ.lastElement(); k++) {
                 //                cout << "I have cells " << i << " " << j << " " << k << endl;
                 MoleculeSystemCell* cell = m_moleculeSystem->cell(i,j,k);
+                if(m_cellRangeX.firstElement() == i || m_cellRangeY.firstElement() == j || m_cellRangeZ.firstElement() == k ||
+                        m_cellRangeX.lastElement() == i || m_cellRangeY.lastElement() == j || m_cellRangeZ.lastElement() == k) {
+                    cell->setOnProcessorEdge(true);
+                }
                 m_cells.push_back(cell);
             }
         }

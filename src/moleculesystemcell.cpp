@@ -11,7 +11,8 @@ MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     moleculeSystem(parent),
     //    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false),
     m_id(0),
-    force(blankForce)
+    force(blankForce),
+    m_isOnProcessorEdge(false)
 {
     cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
 }
@@ -89,7 +90,11 @@ void MoleculeSystemCell::updateForces()
 
     //    cout << "I have " << m_neighborCells.size() << " neighbors" << endl;
     // Loop over neighbors and their atoms
-//    interatomicForce->setNewtonsThirdLawEnabled(true);
+    if(m_isOnProcessorEdge) {
+        interatomicForce->setNewtonsThirdLawEnabled(false);
+    } else {
+        interatomicForce->setNewtonsThirdLawEnabled(true);
+    }
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
         MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
         const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
@@ -115,6 +120,7 @@ void MoleculeSystemCell::updateForces()
     }
 
     // Loop over own atoms
+    interatomicForce->setNewtonsThirdLawEnabled(true);
     for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
         Atom* atom1 = m_atoms[iAtom];
         int jAtomStart = 0;

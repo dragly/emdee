@@ -44,6 +44,7 @@ public:
 //        return m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
     //    }
     void addAtoms(const vector<Atom *> &atoms);
+    void setOnProcessorEdge(bool enable);
 protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
@@ -65,6 +66,11 @@ protected:
     int m_id;
     Vector3& force;
     Vector3 blankForce;
+    bool m_isOnProcessorEdge;
 };
+
+inline void MoleculeSystemCell::setOnProcessorEdge(bool enable) {
+    m_isOnProcessorEdge = enable;
+}
 
 #endif // MOLECULESYSTEMCELL_H
