@@ -162,7 +162,10 @@ void MoleculeSystem::updateForces()
 }
 
 MoleculeSystemCell* MoleculeSystem::cell(int i, int j, int k) {
-    return m_cells.at(i + j * m_nCells(0) + k * m_nCells(0) * m_nCells(1));
+    int iPeriodic = (i + m_nCells(0)) % m_nCells(0);
+    int jPeriodic = (j + m_nCells(1)) % m_nCells(1);
+    int kPeriodic = (k + m_nCells(2)) % m_nCells(2);
+    return m_cells.at(iPeriodic + jPeriodic * m_nCells(0) + kPeriodic * m_nCells(0) * m_nCells(1));
 }
 
 void MoleculeSystem::simulate(int nSimulationSteps)

@@ -70,7 +70,11 @@ protected:
     vector<ProcessorNeighbor> sendNeighbors;
     vector<ProcessorNeighbor> receiveNeighbors;
 
+    vector<ProcessorNeighbor> forceSendNeighbors;
+    vector<ProcessorNeighbor> forceReceiveNeighbors;
+
     vector<irowvec> directions;
+    vector<irowvec> forceDirections;
 };
 
 inline const vector<MoleculeSystemCell*> Processor::cells() const {
