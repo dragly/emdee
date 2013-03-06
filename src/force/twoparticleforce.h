@@ -25,7 +25,18 @@ public:
     virtual void calculateAndApplyForce(Atom *atom1, Atom *atom2) = 0;
     virtual void calculateAndApplyForce(Atom* atom1, Atom* atom2, const Vector3 &atom2Offset) = 0;
 
+    void setNewtonsThirdLawEnabled(bool enable);
+    bool isNewtonsThirdLawEnabled();
 protected:
+    bool m_isNewtonsThirdLawEnabled;
 };
+
+inline void TwoParticleForce::setNewtonsThirdLawEnabled(bool enable) {
+    m_isNewtonsThirdLawEnabled = enable;
+}
+
+inline bool TwoParticleForce::isNewtonsThirdLawEnabled() {
+    return m_isNewtonsThirdLawEnabled;
+}
 
 #endif // TWOPARTICLEFORCE_H
