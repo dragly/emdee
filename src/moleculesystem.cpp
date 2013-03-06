@@ -189,6 +189,26 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         throw(new exception());
     }
 
+    // Forget about all cells but our own
+    for(MoleculeSystemCell* systemCell : m_cells) {
+        bool inMyCells = false;
+        for(MoleculeSystemCell* cell : m_processor->cells()) {
+            if(cell == systemCell) {
+                inMyCells = true;
+            }
+        }
+        if(!inMyCells) {
+            for(Atom* atom : systemCell->atoms()) {
+                delete atom;
+            }
+            systemCell->clearAtoms();
+        }
+    }
+    m_atoms.clear();
+    for(MoleculeSystemCell* cell : m_processor->cells()) {
+        addAtoms(cell->atoms());
+    }
+
     int iStep = 0;
     // Set up integrator if m_skipInitialize is not set (because file was loaded)
     if(!m_skipInitialize) {
