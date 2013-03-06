@@ -5,7 +5,8 @@
 AtomType::AtomType() :
     name(""),
     abbreviation(""),
-    number(-1)
+    number(-1),
+    mass(-1)
 {
 }
 

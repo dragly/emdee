@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <boost/serialization/serialization.hpp>
+#include <boost/mpi.hpp>
 #include <armadillo>
 
 class Vector3
@@ -58,6 +59,39 @@ private:
     void serialize(Archive & ar, const unsigned int version);
 };
 
+BOOST_CLASS_IMPLEMENTATION(Vector3,object_serializable)
+BOOST_IS_BITWISE_SERIALIZABLE(Vector3)
+BOOST_IS_MPI_DATATYPE(Vector3)
+BOOST_CLASS_TRACKING(Vector3,track_never)
+
+inline Vector3::Vector3()
+{
+    mem_local[0] = 0;
+    mem_local[1] = 0;
+    mem_local[2] = 0;
+}
+
+inline Vector3::Vector3(double x, double y, double z)
+{
+    mem_local[0] = x;
+    mem_local[1] = y;
+    mem_local[2] = z;
+}
+
+inline Vector3::Vector3(arma::rowvec armaVector)
+{
+    mem_local[0] = armaVector(0);
+    mem_local[1] = armaVector(1);
+    mem_local[2] = armaVector(2);
+}
+
+template<class Archive>
+inline void Vector3::serialize(Archive & ar, const unsigned int)
+{
+    ar &mem_local[0];
+    ar &mem_local[1];
+    ar &mem_local[2];
+}
 
 inline double& Vector3::operator[](const int component)
 {

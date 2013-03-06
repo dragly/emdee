@@ -7,9 +7,9 @@
 MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     m_nDimensions(3),
     pow3nDimensions(pow(3, m_nDimensions)),
-//    m_indices(zeros<iVector3>(m_nDimensions)),
+    //    m_indices(zeros<iVector3>(m_nDimensions)),
     moleculeSystem(parent),
-    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false),
+    //    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false),
     m_id(0),
     force(blankForce)
 {
@@ -36,10 +36,11 @@ void MoleculeSystemCell::setBoundaries(mat boundaries)
     //    cout << cellShiftVectors << endl;
 }
 
-void MoleculeSystemCell::addNeighbor(MoleculeSystemCell *cell, const Vector3 &offset)
+void MoleculeSystemCell::addNeighbor(MoleculeSystemCell *cell, const Vector3 &offset, const irowvec& direction)
 {
     m_neighborCells.push_back(cell);
     m_neighborOffsets.push_back(offset);
+    m_neighborDirections.push_back(direction);
 }
 
 const mat &MoleculeSystemCell::boundaries() const
@@ -86,12 +87,24 @@ void MoleculeSystemCell::updateForces()
 {
     TwoParticleForce* interatomicForce = moleculeSystem->interatomicForce();
 
+    //    cout << "I have " << m_neighborCells.size() << " neighbors" << endl;
     // Loop over neighbors and their atoms
+//    interatomicForce->setNewtonsThirdLawEnabled(true);
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
         MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
         const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
-        if(neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()) {
-            continue;
+        if(interatomicForce->isNewtonsThirdLawEnabled()) {
+            const irowvec& direction = m_neighborDirections[iNeighbor];
+            if(
+                    !( // if not one of ..
+                       ((direction(0) >= 0 && direction(1) >= 0) && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1)) // 2x2 in upper right (except right down)
+                       || (direction(0) == 1 && direction(1) == -1)) // 1x1 lower right
+                    ) // then continue ...
+                //                neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
+                //            )
+            {
+                continue;
+            }
         }
         const vector<Atom*>& neighborAtoms = neighbor->atoms();
         for(Atom* atom1 : m_atoms) {
@@ -99,13 +112,21 @@ void MoleculeSystemCell::updateForces()
                 interatomicForce->calculateAndApplyForce(atom1, atom2, neighborOffset);
             }
         }
-        m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = true;
     }
 
     // Loop over own atoms
     for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
         Atom* atom1 = m_atoms[iAtom];
-        for(uint jAtom = iAtom + 1; jAtom < m_atoms.size(); jAtom++) {
+        int jAtomStart = 0;
+        if(interatomicForce->isNewtonsThirdLawEnabled()) {
+            jAtomStart = iAtom + 1;
+        }
+        for(uint jAtom = jAtomStart; jAtom < m_atoms.size(); jAtom++) {
+            if(!interatomicForce->isNewtonsThirdLawEnabled()) {
+                if(iAtom == jAtom) {
+                    continue;
+                }
+            }
             Atom* atom2 = m_atoms[jAtom];
             interatomicForce->calculateAndApplyForce(atom1, atom2);
         }
@@ -117,10 +138,14 @@ void MoleculeSystemCell::clearAtoms()
     m_atoms.clear();
 }
 
-void MoleculeSystemCell::clearAlreadyCalculatedNeighbors()
-{
-    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = false;
+void MoleculeSystemCell::addAtoms(const vector<Atom*>& atoms) {
+    m_atoms.insert(m_atoms.end(), atoms.begin(), atoms.end());
 }
+
+//void MoleculeSystemCell::clearAlreadyCalculatedNeighbors()
+//{
+//    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors = false;
+//}
 
 void MoleculeSystemCell::setID(int id)
 {
@@ -130,4 +155,22 @@ void MoleculeSystemCell::setID(int id)
 int MoleculeSystemCell::id()
 {
     return m_id;
+}
+
+
+void MoleculeSystemCell::deleteAtomsFromCellAndSystem()
+{
+    vector<Atom*> atomsExceptThisCell;
+    for(MoleculeSystemCell* cell : moleculeSystem->cells()) {
+        if(cell == this) {
+            continue;
+        }
+        atomsExceptThisCell.insert(atomsExceptThisCell.end(), cell->atoms().begin(), cell->atoms().end());
+    }
+    moleculeSystem->clearAtoms();
+    moleculeSystem->addAtoms(atomsExceptThisCell);
+    for(Atom* atom : m_atoms) {
+        delete atom;
+    }
+    m_atoms.clear();
 }

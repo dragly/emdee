@@ -8,6 +8,7 @@ class MoleculeSystemCell;
 class TwoParticleForce;
 class FileManager;
 class Modifier;
+class Processor;
 
 #include <src/math/vector3.h>
 
@@ -18,6 +19,9 @@ class Modifier;
 #include <libconfig.h++>
 #include <H5Cpp.h>
 #include <H5File.h>
+
+#include <boost/mpi.hpp>
+namespace mpi = boost::mpi;
 
 using namespace std;
 using namespace arma;
@@ -69,7 +73,6 @@ public:
     void applyModifiers();
 
     // Getters (fast)
-
     Integrator* integrator() const {
         return m_integrator;
     }
@@ -91,17 +94,25 @@ public:
     double time() const {
         return m_time;
     }
+    inline const irowvec& nCells() const;
 
     void setTime(double currentTime);
 
     void setBoltzmannConstant(double boltzmannConstant);
 
     bool load(string fileName);
+    void clearAtoms();
+    void addAtomsToCorrectCells(vector<Atom*>& atoms);
 
     void setStep(uint step);
     void deleteAtoms();
     void setAverageSquareDisplacement(double averageSquareDisplacement);
     void setAverageDisplacement(double averageDisplacement);
+
+    void setupProcessors();
+    MoleculeSystemCell *cell(int i, int j, int k);
+
+    Processor* processor();
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
@@ -144,6 +155,15 @@ protected:
 
     double m_time;
     bool m_skipInitialize;
+    Processor* m_processor;
 };
+
+inline const irowvec &MoleculeSystem::nCells() const {
+    return m_nCells;
+}
+
+inline Processor* MoleculeSystem::processor() {
+    return m_processor;
+}
 
 #endif // MOLECULESYSTEM_H

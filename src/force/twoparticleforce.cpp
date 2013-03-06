@@ -1,5 +1,6 @@
 #include "twoparticleforce.h"
 
-TwoParticleForce::TwoParticleForce()
+TwoParticleForce::TwoParticleForce() :
+    m_isNewtonsThirdLawEnabled(false)
 {
 }

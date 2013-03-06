@@ -9,6 +9,7 @@
 #include <src/integrator/velocityverletintegrator.h>
 #include <src/filemanager.h>
 #include <src/modifier/modifier.h>
+#include <src/processor.h>
 
 // System headers
 #include <fstream>
@@ -31,7 +32,8 @@ MoleculeSystem::MoleculeSystem() :
     m_pressure(0.0),
     m_step(0),
     m_time(0),
-    m_skipInitialize(false)
+    m_skipInitialize(false),
+    m_processor(new Processor(this))
 {
     m_interatomicForce = new LennardJonesForce();
     m_integrator = new VelocityVerletIntegrator(this);
@@ -50,55 +52,86 @@ bool MoleculeSystem::load(string fileName) {
     return m_fileManager->load(fileName);
 }
 
+void MoleculeSystem::clearAtoms()
+{
+    m_atoms.clear();
+}
+
+void MoleculeSystem::addAtomsToCorrectCells(vector<Atom *> &atoms)
+{
+    for(Atom* atom : atoms) {
+        int i = atom->position()(0) / m_cellLengths(0);
+        int j = atom->position()(1) / m_cellLengths(1);
+        int k = atom->position()(2) / m_cellLengths(2);
+
+        int cellID = k * m_nCells(0) * m_nCells(1) + j *  m_nCells(0) + i;
+
+
+        MoleculeSystemCell* cell = m_cells.at(cellID);
+        //        cout << "Put atom into " << cell->indices();
+        cell->addAtom(atom);
+    }
+}
+
 void MoleculeSystem::setStep(uint step)
 {
     m_step = step;
 }
 
 void MoleculeSystem::deleteAtoms() {
-    for(Atom* atom : m_atoms) {
-        delete atom;
-    }
     for(MoleculeSystemCell* cell : m_cells) {
+        for(Atom* atom : cell->atoms()) {
+            delete atom;
+        }
         cell->clearAtoms();
     }
-    m_atoms.clear();
+    //    m_atoms.clear();
 }
 
 void MoleculeSystem::updateStatistics()
 {
     // Calculate kinetic energy
     double totalKineticEnergy = 0;
-    for(Atom* atom : m_atoms) {
-        totalKineticEnergy += 0.5 * atom->mass() * (atom->velocity() * atom->velocity());
+    int nAtomsTotal = 0;
+    for(MoleculeSystemCell* cell : m_cells) {
+        nAtomsTotal += cell->atoms().size();
+        for(Atom* atom : cell->atoms()) {
+            totalKineticEnergy += 0.5 * atom->mass() * (atom->velocity() * atom->velocity());
+        }
     }
-    m_temperature = totalKineticEnergy / (3./2. * m_atoms.size());
+    m_temperature = totalKineticEnergy / (3./2. * nAtomsTotal);
     cout << "Temperature: " << setprecision(25) << m_temperature << endl;
 
     // Calculate potential energy
     double totalPotentialEnergy = 0;
-    for(Atom* atom : m_atoms) {
-        totalPotentialEnergy += atom->potential();
+    for(MoleculeSystemCell* cell : m_cells) {
+        for(Atom* atom : cell->atoms()) {
+            totalPotentialEnergy += atom->potential();
+        }
     }
 
     // Calculate diffusion constant
     m_averageDisplacement = 0;
     m_averageSquareDisplacement = 0;
-    for(Atom* atom : m_atoms) {
-        m_averageSquareDisplacement += (atom->displacement() * atom->displacement());
-        m_averageDisplacement += sqrt(m_averageSquareDisplacement);
+    for(MoleculeSystemCell* cell : m_cells) {
+        for(Atom* atom : cell->atoms()) {
+            m_averageSquareDisplacement += (atom->displacement() * atom->displacement());
+            m_averageDisplacement += sqrt(m_averageSquareDisplacement);
+        }
     }
-    m_averageSquareDisplacement /= m_atoms.size();
-    m_averageDisplacement /= m_atoms.size();
+    m_averageSquareDisplacement /= nAtomsTotal;
+    m_averageDisplacement /= nAtomsTotal;
 
     // Calculate pressure
     rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
     double volume = (sideLengths(0) * sideLengths(1) * sideLengths(2));
-    double density = m_atoms.size() / volume;
+    double density = nAtomsTotal / volume;
     m_pressure = density * m_temperature;
     double volumeThreeInverse = 1. / (3. * volume);
-    for(Atom* atom : m_atoms) {
-        m_pressure += volumeThreeInverse * atom->localPressure();
+    for(MoleculeSystemCell* cell : m_cells) {
+        for(Atom* atom : cell->atoms()) {
+            m_pressure += volumeThreeInverse * atom->localPressure();
+        }
     }
     //    cout << "Pressure " << m_pressure << endl;
 }
@@ -121,16 +154,31 @@ const vector<MoleculeSystemCell *> &MoleculeSystem::cells() const
 void MoleculeSystem::updateForces()
 {
     obeyBoundaries();
+    //    refreshCellContents();
+    m_processor->communicateAtoms();
     refreshCellContents();
-    for(Atom* atom : m_atoms) {
-        atom->clearForcePotentialPressure();
-    }
     for(MoleculeSystemCell* cell : m_cells) {
-        cell->clearAlreadyCalculatedNeighbors();
+        for(Atom* atom : cell->atoms()) {
+            atom->clearForcePotentialPressure();
+        }
     }
-    for(MoleculeSystemCell* cell : m_cells) {
+    //    for(MoleculeSystemCell* cell : m_cells) {
+    //        cell->clearAlreadyCalculatedNeighbors();
+    //    }
+    //    for(MoleculeSystemCell* cell : m_cells) {
+    //        cell->updateForces();
+    //    }
+    for(MoleculeSystemCell* cell : m_processor->cells()) {
         cell->updateForces();
     }
+    //    m_processor->communicateForces();
+}
+
+MoleculeSystemCell* MoleculeSystem::cell(int i, int j, int k) {
+    int iPeriodic = (i + m_nCells(0)) % m_nCells(0);
+    int jPeriodic = (j + m_nCells(1)) % m_nCells(1);
+    int kPeriodic = (k + m_nCells(2)) % m_nCells(2);
+    return m_cells.at(iPeriodic + jPeriodic * m_nCells(0) + kPeriodic * m_nCells(0) * m_nCells(1));
 }
 
 void MoleculeSystem::simulate(int nSimulationSteps)
@@ -147,9 +195,11 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         cout << "Initializing integrator" << endl;
         m_integrator->initialize();
         updateStatistics();
-        if(m_isSaveEnabled) {
+        if(m_isSaveEnabled && m_processor->rank() == 0) {
             m_fileManager->save(m_step);
         }
+
+        // Finalize step
         m_time += m_integrator->timeStep();
         iStep++;
         m_step++;
@@ -166,9 +216,11 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         m_integrator->stepForward();
         updateStatistics();
 
-        if(m_isSaveEnabled) {
+        if(m_isSaveEnabled && m_processor->rank() == 0) {
             m_fileManager->save(m_step);
         }
+
+        // Finalize step
         m_time += m_integrator->timeStep();
         m_step++;
     }
@@ -176,22 +228,25 @@ void MoleculeSystem::simulate(int nSimulationSteps)
 
 void MoleculeSystem::obeyBoundaries() {
     // Boundary conditions
-    for(Atom* atom : m_atoms) {
-        Vector3 position = atom->position();
-        for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-            double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
-            if(fabs(atom->position()(iDim)) > (m_boundaries(1,iDim) + sideLength)
-                    || fabs(atom->position()(iDim)) < (m_boundaries(0,iDim) - sideLength)) {
-                cerr << "Wow! An atom ended up  outside 2 x boundaries! The time step must be too big. No reason to continue..." << endl;
-                throw(new exception());
-            } else if(atom->position()(iDim) > m_boundaries(1,iDim)) {
-                position(iDim) -= sideLength;
-                atom->setPosition(position);
-                atom->addDisplacement(sideLength, iDim);
-            } else if(atom->position()(iDim) < m_boundaries(0,iDim)) {
-                position(iDim) += sideLength;
-                atom->setPosition(position);
-                atom->addDisplacement(-sideLength, iDim);
+    for(MoleculeSystemCell* cell : m_processor->cells()) {
+        for(Atom* atom : cell->atoms()) {
+            //    for(Atom* atom : m_atoms) {
+            Vector3 position = atom->position();
+            for(int iDim = 0; iDim < m_nDimensions; iDim++) {
+                double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
+                if(fabs(atom->position()(iDim)) > (m_boundaries(1,iDim) + sideLength)
+                        || fabs(atom->position()(iDim)) < (m_boundaries(0,iDim) - sideLength)) {
+                    cerr << "Wow! An atom ended up  outside 2 x boundaries! The time step must be too big. No reason to continue..." << endl;
+                    throw(new exception());
+                } else if(atom->position()(iDim) > m_boundaries(1,iDim)) {
+                    position(iDim) -= sideLength;
+                    atom->setPosition(position);
+                    atom->addDisplacement(sideLength, iDim);
+                } else if(atom->position()(iDim) < m_boundaries(0,iDim)) {
+                    position(iDim) += sideLength;
+                    atom->setPosition(position);
+                    atom->addDisplacement(-sideLength, iDim);
+                }
             }
         }
     }
@@ -302,11 +357,11 @@ void MoleculeSystem::setupCells(double minCutLength) {
     // Find the neighbor cells
     int nNeighbors;
     for(MoleculeSystemCell *cell1 : m_cells) {
-        rowvec counters = zeros<rowvec>(3);
+        irowvec counters = zeros<irowvec>(3);
         nNeighbors = 0;
         for(int i = 0; i < pow3nDimensions; i++) {
-            rowvec direction = counters - ones<rowvec>(3);
-            rowvec shiftVec = (cell1->indices() + direction);
+            irowvec direction = counters - ones<irowvec>(3);
+            irowvec shiftVec = (cell1->indices() + direction);
             rowvec offsetVec = zeros<rowvec>(3);
             // Boundaries
             for(uint j = 0; j < shiftVec.n_cols; j++) {
@@ -330,7 +385,7 @@ void MoleculeSystem::setupCells(double minCutLength) {
             //            cout << offsetVec << endl;
             MoleculeSystemCell* cell2 = m_cells.at(cellIndex);
             if(cell2 != cell1 || m_cells.size() == 1) {
-                cell1->addNeighbor(cell2, offsetVec);
+                cell1->addNeighbor(cell2, offsetVec, direction);
                 nNeighbors++;
             }
             counters(0) += 1;
@@ -349,6 +404,8 @@ void MoleculeSystem::setupCells(double minCutLength) {
     }
 
     refreshCellContents();
+
+    m_processor->setupProcessors();
     m_areCellsSetUp = true;
 }
 
@@ -357,18 +414,7 @@ void MoleculeSystem::refreshCellContents() {
     for(MoleculeSystemCell* cell : m_cells) {
         cell->clearAtoms();
     }
-    for(Atom* atom : m_atoms) {
-        int i = atom->position()(0) / m_cellLengths(0);
-        int j = atom->position()(1) / m_cellLengths(1);
-        int k = atom->position()(2) / m_cellLengths(2);
-
-        int cellID = k * m_nCells(1) * m_nCells(2) + j *  m_nCells(2) + i;
-
-        //        cout << cellID << endl;
-
-        MoleculeSystemCell* cell = m_cells.at(cellID);
-        cell->addAtom(atom);
-    }
+    addAtomsToCorrectCells(m_atoms);
 }
 
 void MoleculeSystem::setIntegrator(Integrator *integrator)

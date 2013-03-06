@@ -4,6 +4,8 @@ QMAKE_CXX = ccache g++
 # Libraries
 LIBS += -larmadillo -llapack -lblas -lconfig++ -lhdf5_cpp -lhdf5 -lboost_filesystem -lboost_system
 
+LIBS += -lboost_mpi -lboost_serialization
+
 COMMON_CXXFLAGS = -std=c++0x
 QMAKE_CXXFLAGS += $$COMMON_CXXFLAGS
 QMAKE_CXXFLAGS_RELEASE += $$COMMON_CXXFLAGS
@@ -14,8 +16,12 @@ release {
     QMAKE_CXXFLAGS_RELEASE -= -O2
     QMAKE_CXXFLAGS_RELEASE += -O3
 }
+
 CONFIG += mpi
 mpi {
+    message(Using MPI)
+    DEFINES += MD_USE_MPI
+
     QMAKE_CXX = ccache mpicxx
     QMAKE_CXX_RELEASE = $$QMAKE_CXX
     QMAKE_CXX_DEBUG = $$QMAKE_CXX

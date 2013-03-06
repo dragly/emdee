@@ -23,7 +23,7 @@ public:
 
     void setBoundaries(mat boundaries);
 
-    void addNeighbor(MoleculeSystemCell *cell, const Vector3& offset);
+    void addNeighbor(MoleculeSystemCell *cell, const Vector3& offset, const irowvec &direction);
 
     const mat &boundaries() const;
     void addAtom(Atom *atom);
@@ -35,23 +35,26 @@ public:
     void updateForces();
     void clearAtoms();
     void clearAlreadyCalculatedNeighbors();
+    void deleteAtomsFromCellAndSystem();
     void setID(int id);
     int id();
 
-    bool hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
-    {
-        return m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
-    }
+//    bool hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
+//    {
+//        return m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
+    //    }
+    void addAtoms(const vector<Atom *> &atoms);
 protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
     vector<Vector3> m_neighborOffsets;
+    vector<irowvec> m_neighborDirections;
 
     int m_nDimensions;
     int pow3nDimensions;
     irowvec m_indices;
     MoleculeSystem* moleculeSystem;
-    bool m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
+//    bool m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
 
     mat m_boundaries;
     mat cellShiftVectors;

@@ -26,7 +26,9 @@ SOURCES += main.cpp \
     force/lennardjonesforce.cpp \
     force/twoparticleforce.cpp \
     configurationparser.cpp \
-    math/vector3.cpp
+    math/vector3.cpp \
+    processor.cpp \
+    range.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -45,7 +47,9 @@ HEADERS += \
     force/lennardjonesforce.h \
     force/twoparticleforce.h \
     configurationparser.h \
-    math/vector3.h
+    math/vector3.h \
+    processor.h \
+    range.h
 
 #CURRENT_BRANCH = $$system(git rev-parse --abbrev-ref HEAD)
 
