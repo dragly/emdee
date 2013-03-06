@@ -87,6 +87,7 @@ void MoleculeSystemCell::updateForces()
 {
     TwoParticleForce* interatomicForce = moleculeSystem->interatomicForce();
 
+//    cout << "I have " << m_neighborCells.size() << " neighbors" << endl;
     // Loop over neighbors and their atoms
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
         MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
