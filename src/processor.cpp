@@ -396,43 +396,6 @@ void Processor::communicateAtoms() {
     m_totalCommunicationTime += communicationTimer.elapsed();
     cout << "Total communication time so far: " << m_totalCommunicationTime << endl;
     cout << "Pure communication time so far: " << m_pureCommunicationTime << endl;
-//    exit(999);
-    // Receive atoms from neighbors
-
-    //    vector<Atom*> myAtoms;
-    //    for(MoleculeSystemCell* cell : m_cells) {
-    //        myAtoms.insert(myAtoms.end(), cell->atoms().begin(), cell->atoms().end());
-    //    }
-    //    vector<Atom*> allAtoms;
-    //    if(world.rank() == 0) {
-    //        allAtoms.insert(allAtoms.end(), myAtoms.begin(), myAtoms.end());
-
-    //        for(int iRank = 1; iRank < world.size(); iRank++) {
-    //            vector<Atom*> receivedAtoms;
-    //            world.recv(iRank, 0, receivedAtoms);
-    //            allAtoms.insert(allAtoms.begin(), receivedAtoms.begin(), receivedAtoms.end());
-    //        }
-    //        for(int iRank = 1; iRank < world.size(); iRank++) {
-    //            world.send(iRank, 1, allAtoms);
-    //        }
-    //    } else {
-    //        world.send(0, 0, myAtoms);
-    //        world.recv(0, 1, allAtoms);
-    //    }
-
-    //    vector<Atom*> myLocalAtoms;
-
-    //    // Allocate new atoms because we don't trust Boost::MPI to do it for us
-    //    for(uint i = 0; i < allAtoms.size(); i++) {
-    //        Atom* atom = allAtoms.at(i);
-    //        Atom* localAtom = new Atom(AtomType::argon());
-    //        localAtom->clone(*atom);
-    //        myLocalAtoms.push_back(localAtom);
-    //    }
-    //    m_moleculeSystem->deleteAtoms();
-    //    m_moleculeSystem->addAtoms(myLocalAtoms);
-
-
 }
 
 
