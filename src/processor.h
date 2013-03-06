@@ -18,8 +18,8 @@ class ProcessorNeighbor {
 public:
     ProcessorNeighbor();
 
-    vector<MoleculeSystemCell*> cellsToSend;
-    vector<MoleculeSystemCell*> cellsToReceive;
+    vector<MoleculeSystemCell*> cells;
+//    vector<MoleculeSystemCell*> cellsToReceive;
     irowvec direction;
     irowvec coordinates;
     int rank;
@@ -36,6 +36,7 @@ public:
     void communicateAtoms();
 
     const vector<MoleculeSystemCell*> cells() const;
+    bool shouldSendFirst(const irowvec &direction);
 protected:
 
     void receiveAtomsFromNeighbor(const ProcessorNeighbor &neighbor);
@@ -66,7 +67,8 @@ protected:
     double m_totalCommunicationTime;
     double m_pureCommunicationTime;
 
-    vector<ProcessorNeighbor> processorNeighbors;
+    vector<ProcessorNeighbor> sendNeighbors;
+    vector<ProcessorNeighbor> receiveNeighbors;
 
     vector<irowvec> directions;
 };
