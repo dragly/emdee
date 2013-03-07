@@ -93,7 +93,7 @@ void MoleculeSystem::updateStatistics()
     // Calculate kinetic energy
     double totalKineticEnergy = 0;
     int nAtomsTotal = 0;
-    for(MoleculeSystemCell* cell : m_cells) {
+    for(MoleculeSystemCell* cell : m_processor->cells()) {
         nAtomsTotal += cell->atoms().size();
         for(Atom* atom : cell->atoms()) {
             totalKineticEnergy += 0.5 * atom->mass() * (atom->velocity() * atom->velocity());
@@ -104,7 +104,7 @@ void MoleculeSystem::updateStatistics()
 
     // Calculate potential energy
     double totalPotentialEnergy = 0;
-    for(MoleculeSystemCell* cell : m_cells) {
+    for(MoleculeSystemCell* cell : m_processor->cells()) {
         for(Atom* atom : cell->atoms()) {
             totalPotentialEnergy += atom->potential();
         }
@@ -113,7 +113,7 @@ void MoleculeSystem::updateStatistics()
     // Calculate diffusion constant
     m_averageDisplacement = 0;
     m_averageSquareDisplacement = 0;
-    for(MoleculeSystemCell* cell : m_cells) {
+    for(MoleculeSystemCell* cell : m_processor->cells()) {
         for(Atom* atom : cell->atoms()) {
             m_averageSquareDisplacement += (atom->displacement() * atom->displacement());
             m_averageDisplacement += sqrt(m_averageSquareDisplacement);
@@ -128,7 +128,7 @@ void MoleculeSystem::updateStatistics()
     double density = nAtomsTotal / volume;
     m_pressure = density * m_temperature;
     double volumeThreeInverse = 1. / (3. * volume);
-    for(MoleculeSystemCell* cell : m_cells) {
+    for(MoleculeSystemCell* cell : m_processor->cells()) {
         for(Atom* atom : cell->atoms()) {
             m_pressure += volumeThreeInverse * atom->localPressure();
         }
@@ -157,7 +157,7 @@ void MoleculeSystem::updateForces()
     //    refreshCellContents();
     m_processor->communicateAtoms();
     refreshCellContents();
-    for(MoleculeSystemCell* cell : m_cells) {
+    for(MoleculeSystemCell* cell : m_processor->cells()) {
         for(Atom* atom : cell->atoms()) {
             atom->clearForcePotentialPressure();
         }
@@ -184,10 +184,6 @@ MoleculeSystemCell* MoleculeSystem::cell(int i, int j, int k) {
 void MoleculeSystem::simulate(int nSimulationSteps)
 {
     //    cout << "Factor is " << m_unitLength / m_unitTime << endl;
-    if(!m_areCellsSetUp) {
-        cerr << "Cells must be set up before simulating!" << endl;
-        throw(new exception());
-    }
 
     // Forget about all cells but our own
     for(MoleculeSystemCell* systemCell : m_cells) {
@@ -423,18 +419,25 @@ void MoleculeSystem::setupCells(double minCutLength) {
         throw new std::logic_error("The number of cells can never be less than 27!");
     }
 
-    refreshCellContents();
+    m_areCellsSetUp = true;
+
+    addAtomsToCorrectCells(m_atoms);
 
     m_processor->setupProcessors();
-    m_areCellsSetUp = true;
 }
 
 void MoleculeSystem::refreshCellContents() {
-    // Add contents (molecules) to the cells
+    if(!m_areCellsSetUp) {
+        cerr << "Cells must be set up before refreshing their contents!" << endl;
+        throw(new exception());
+    }
+    vector<Atom*> allAtoms;
     for(MoleculeSystemCell* cell : m_cells) {
+        allAtoms.insert(allAtoms.end(), cell->atoms().begin(), cell->atoms().end());
         cell->clearAtoms();
     }
-    addAtomsToCorrectCells(m_atoms);
+    cout << "Refreshing cell contents with " << allAtoms.size() << " atoms" << endl;
+    addAtomsToCorrectCells(allAtoms);
 }
 
 void MoleculeSystem::setIntegrator(Integrator *integrator)

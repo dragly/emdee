@@ -4,6 +4,8 @@
 #include <src/atom.h>
 #include <src/random.h>
 #include <src/integrator/integrator.h>
+#include <src/processor.h>
+#include <src/moleculesystemcell.h>
 
 AndersenThermostat::AndersenThermostat(MoleculeSystem* moleculeSystem) :
     Modifier(moleculeSystem),
@@ -19,12 +21,14 @@ void AndersenThermostat::apply()
     double dt = m_moleculeSystem->integrator()->timeStep();
     double tau = m_collisionTime;
     double targetTemperature = m_targetTemperature;
-    for(Atom* atom : m_moleculeSystem->atoms()) {
-        double randomNumber = random->ran2();
-        if(randomNumber < dt / tau) {
-            Vector3 velocity(randn<rowvec>(m_nDimensions));
-            velocity *= sqrt(targetTemperature / atom->mass());
-            atom->setVelocity(velocity);
+    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
+        for(Atom* atom : cell->atoms()) {
+            double randomNumber = random->ran2();
+            if(randomNumber < dt / tau) {
+                Vector3 velocity(randn<rowvec>(m_nDimensions));
+                velocity *= sqrt(targetTemperature / atom->mass());
+                atom->setVelocity(velocity);
+            }
         }
     }
 }

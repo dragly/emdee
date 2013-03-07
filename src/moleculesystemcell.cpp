@@ -90,13 +90,13 @@ void MoleculeSystemCell::updateForces()
 
     //    cout << "I have " << m_neighborCells.size() << " neighbors" << endl;
     // Loop over neighbors and their atoms
-    if(m_isOnProcessorEdge) {
-        interatomicForce->setNewtonsThirdLawEnabled(false);
-    } else {
-        interatomicForce->setNewtonsThirdLawEnabled(true);
-    }
     for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
         MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
+        if(m_isOnProcessorEdge || neighbor->isOnProcessorEdge()) {
+            interatomicForce->setNewtonsThirdLawEnabled(false);
+        } else {
+            interatomicForce->setNewtonsThirdLawEnabled(true);
+        }
         const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
         if(interatomicForce->isNewtonsThirdLawEnabled()) {
             const irowvec& direction = m_neighborDirections[iNeighbor];
@@ -179,4 +179,8 @@ void MoleculeSystemCell::deleteAtomsFromCellAndSystem()
         delete atom;
     }
     m_atoms.clear();
+}
+
+void MoleculeSystemCell::deleteAtoms(int nAtoms) {
+    m_atoms.erase(m_atoms.end() - nAtoms, m_atoms.end());
 }

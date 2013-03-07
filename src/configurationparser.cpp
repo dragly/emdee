@@ -83,8 +83,8 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
             b /= unitLength;
             int nCells = initialization[i]["nCells"];
             vector<Atom*> atoms = generator.generateFcc(b, nCells, AtomType::argon());
-            m_moleculeSystem->addAtoms(atoms);
             m_moleculeSystem->setBoundaries(generator.lastBoundaries());
+            m_moleculeSystem->addAtoms(atoms);
             cout << "setbounds" << endl;
         } else if(initializationType == "boltzmannVelocity") {
             double initialTemperature = initialization[i]["initialTemperature"];

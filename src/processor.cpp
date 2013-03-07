@@ -87,8 +87,8 @@ void Processor::setupProcessors()
             for(int k = m_cellRangeZ.firstElement(); k <= m_cellRangeZ.lastElement(); k++) {
                 //                cout << "I have cells " << i << " " << j << " " << k << endl;
                 MoleculeSystemCell* cell = m_moleculeSystem->cell(i,j,k);
-                if(m_cellRangeX.firstElement() == i || m_cellRangeY.firstElement() == j || m_cellRangeZ.firstElement() == k ||
-                        m_cellRangeX.lastElement() == i || m_cellRangeY.lastElement() == j || m_cellRangeZ.lastElement() == k) {
+                if((m_nProcessorsX > 1 && m_cellRangeX.firstElement() == i) || (m_nProcessorsY > 1 && m_cellRangeY.firstElement() == j) || (m_nProcessorsZ > 1 && m_cellRangeZ.firstElement() == k) ||
+                        (m_nProcessorsX > 1 && m_cellRangeX.lastElement() == i) || (m_nProcessorsY > 1 && m_cellRangeY.lastElement() == j) || (m_nProcessorsZ > 1 && m_cellRangeZ.lastElement() == k)) {
                     cell->setOnProcessorEdge(true);
                 }
                 m_cells.push_back(cell);
@@ -333,24 +333,43 @@ int Processor::rank()
 }
 
 void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
-    int atomsRemoved = 0;
+//    int atomsRemoved = 0;
     for(MoleculeSystemCell* cellToReceive : neighbor.cells) {
         vector<Atom*> atomsToReceive;
 //        cout << "Removed " << cellToReceive->atoms().size() << " atoms from " << cellToReceive->indices();
-        atomsRemoved += cellToReceive->atoms().size();
-        cellToReceive->deleteAtomsFromCellAndSystem();
+//        atomsRemoved += cellToReceive->atoms().size();
+//        cellToReceive->deleteAtomsFromCellAndSystem();
         pureCommunicationTimer.restart();
         world.recv(neighbor.rank, 0, atomsToReceive);
         m_pureCommunicationTime += pureCommunicationTimer.elapsed();
-        vector<Atom*> locallyAllocatedAtoms;
-        for(Atom* atom : atomsToReceive) {
-            Atom* localAtom = new Atom(AtomType::argon());
+
+        uint nAtomsAvailable = cellToReceive->atoms().size();
+
+        cout << "Received " << atomsToReceive.size() << " atoms" << endl;
+        cout << "Has room for " << nAtomsAvailable << " atoms" << endl;
+
+        if(atomsToReceive.size() > nAtomsAvailable) {
+            vector<Atom*> locallyAllocatedAtoms;
+            for(uint i = nAtomsAvailable; i < atomsToReceive.size(); i++) {
+                Atom* localAtom = new Atom(AtomType::argon());
+                locallyAllocatedAtoms.push_back(localAtom);
+            }
+            cellToReceive->addAtoms(locallyAllocatedAtoms);
+        } else if(atomsToReceive.size() < nAtomsAvailable) {
+            for(uint i = atomsToReceive.size(); i < nAtomsAvailable; i++) {
+                Atom* localAtom = cellToReceive->atoms().at(i);
+                delete localAtom;
+            }
+            cellToReceive->deleteAtoms(nAtomsAvailable - atomsToReceive.size());
+        }
+        for(uint i = 0; i < atomsToReceive.size(); i++) {
+            Atom* atom = atomsToReceive.at(i);
+            Atom* localAtom = cellToReceive->atoms().at(i);
+//            Atom* localAtom = new Atom(AtomType::argon());
 //            localAtom->clone(*atom);
             localAtom->communicationClone(*atom);
-            locallyAllocatedAtoms.push_back(localAtom);
         }
-        m_moleculeSystem->addAtoms(locallyAllocatedAtoms);
-        cellToReceive->addAtoms(locallyAllocatedAtoms);
+//        m_moleculeSystem->addAtoms(locallyAllocatedAtoms);
     }
 //    cout << "Removed a total of " << atomsRemoved << " atoms" << endl;
 }
@@ -368,6 +387,15 @@ void Processor::sendAtomsToNeighbor(const ProcessorNeighbor& neighbor) {
 
 bool Processor::shouldSendFirst(const irowvec& direction) {
     return (abs(direction(0)) && !(m_coordinateX % 2)) || (abs(direction(1)) && !(m_coordinateY % 2)) || (abs(direction(2)) && !(m_coordinateZ % 2));
+}
+
+int Processor::nAtoms()
+{
+    int numberOfAtoms = 0;
+    for(MoleculeSystemCell* cell : m_cells) {
+        numberOfAtoms += cell->atoms().size();
+    }
+    return numberOfAtoms;
 }
 
 void Processor::communicateAtoms() {
@@ -396,7 +424,7 @@ void Processor::communicateAtoms() {
 
 //            m_moleculeSystem->addAtomsToCorrectCells(locallyAllocatedAtoms);
     }
-    cout << "Now I have " << m_moleculeSystem->atoms().size() << " atoms in the system" << endl;
+    cout << "Now I have " << nAtoms() << " atoms in my cells " << endl;
     m_totalCommunicationTime += communicationTimer.elapsed();
     cout << "Total communication time so far: " << m_totalCommunicationTime << endl;
     cout << "Pure communication time so far: " << m_pureCommunicationTime << endl;

@@ -3,6 +3,8 @@
 #include <src/moleculesystem.h>
 #include <src/atom.h>
 #include <src/integrator/integrator.h>
+#include <src/processor.h>
+#include <src/moleculesystemcell.h>
 
 BerendsenThermostat::BerendsenThermostat(MoleculeSystem* moleculeSystem) :
     Modifier(moleculeSystem),
@@ -17,8 +19,10 @@ void BerendsenThermostat::apply()
     double tau = m_relaxationTime;
     double currentTemperature = m_moleculeSystem->temperature();
     double gamma = sqrt(1 + dt / tau * (m_targetTemperature / currentTemperature - 1));
-    for(Atom* atom : m_moleculeSystem->atoms()) {
-        atom->setVelocity(gamma * atom->velocity());
+    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
+        for(Atom* atom : cell->atoms()) {
+            atom->setVelocity(gamma * atom->velocity());
+        }
     }
 }
 

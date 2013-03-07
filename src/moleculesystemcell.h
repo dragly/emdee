@@ -45,6 +45,8 @@ public:
     //    }
     void addAtoms(const vector<Atom *> &atoms);
     void setOnProcessorEdge(bool enable);
+    bool isOnProcessorEdge();
+    void deleteAtoms(int nAtoms);
 protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
@@ -71,6 +73,10 @@ protected:
 
 inline void MoleculeSystemCell::setOnProcessorEdge(bool enable) {
     m_isOnProcessorEdge = enable;
+}
+
+inline bool MoleculeSystemCell::isOnProcessorEdge() {
+    return m_isOnProcessorEdge;
 }
 
 #endif // MOLECULESYSTEMCELL_H

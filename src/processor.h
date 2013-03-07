@@ -37,6 +37,7 @@ public:
 
     const vector<MoleculeSystemCell*> cells() const;
     bool shouldSendFirst(const irowvec &direction);
+    int nAtoms();
 //    void receiveForcesFromNeighbor(const ProcessorNeighbor &neighbor);
 //    void sendForcesToNeighbor(const ProcessorNeighbor &neighbor);
 //    void communicateForces();
