@@ -23,6 +23,7 @@ def loadAtoms(fileName):
     f.close()
     
     nProcessors = header['nProcessors'][0] 
+    print "Has", nProcessors, "processor(s)"
     
     if nProcessors > 1:
         for i in range(1, nProcessors):
