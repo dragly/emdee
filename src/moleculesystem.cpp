@@ -211,7 +211,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         cout << "Initializing integrator" << endl;
         m_integrator->initialize();
         updateStatistics();
-        if(m_isSaveEnabled && m_processor->rank() == 0) {
+        if(m_isSaveEnabled) {
             m_fileManager->save(m_step);
         }
 
@@ -232,7 +232,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         m_integrator->stepForward();
         updateStatistics();
 
-        if(m_isSaveEnabled && m_processor->rank() == 0) {
+        if(m_isSaveEnabled) {
             m_fileManager->save(m_step);
         }
 

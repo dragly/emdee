@@ -345,8 +345,8 @@ void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
 
         uint nAtomsAvailable = cellToReceive->atoms().size();
 
-        cout << "Received " << atomsToReceive.size() << " atoms" << endl;
-        cout << "Has room for " << nAtomsAvailable << " atoms" << endl;
+//        cout << "Received " << atomsToReceive.size() << " atoms" << endl;
+//        cout << "Has room for " << nAtomsAvailable << " atoms" << endl;
 
         if(atomsToReceive.size() > nAtomsAvailable) {
             vector<Atom*> locallyAllocatedAtoms;
@@ -396,6 +396,11 @@ int Processor::nAtoms()
         numberOfAtoms += cell->atoms().size();
     }
     return numberOfAtoms;
+}
+
+int Processor::nProcessors()
+{
+    return world.size();
 }
 
 void Processor::communicateAtoms() {

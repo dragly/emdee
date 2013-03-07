@@ -229,6 +229,11 @@ bool FileManager::saveBinary(int step) {
     string outPath = m_outFileName.substr(0,found);
     boost::filesystem::create_directories(outPath);
     size_t starPos = m_outFileName.find("*");
+    stringstream processorName;
+    processorName << "." << setw(4) << setfill('0') << m_moleculeSystem->processor()->rank();
+    if(m_moleculeSystem->processor()->rank() != 0) {
+        outFileNameLocal.append(processorName.str());
+    }
     ofstream outFile;
     if(starPos != string::npos) {
         outFileNameLocal.replace(starPos, 1, outStepName.str());
@@ -237,7 +242,11 @@ bool FileManager::saveBinary(int step) {
         outFile.open(outFileNameLocal, ios::app | ios::out | ios::binary);
     }
 
+//    cout << "Writing to file " << outFileNameLocal << endl;
+
     // Write header data
+    int rank = m_moleculeSystem->processor()->rank();
+    int nProcessors = m_moleculeSystem->processor()->nProcessors();
     double time = m_moleculeSystem->time() * m_unitTime;
     double timeStep = m_moleculeSystem->integrator()->timeStep() * m_unitTime;
     int nAtoms = m_moleculeSystem->processor()->nAtoms();
@@ -248,11 +257,16 @@ bool FileManager::saveBinary(int step) {
 
     double systemBoundaries[6];
 
+//    cout << "Writing temperature of " << temperature << endl;
+
     for(int i = 0; i < 2; i++) {
         for(int iDim = 0; iDim < 3; iDim++) {
             systemBoundaries[i*3 + iDim] = m_moleculeSystem->boundaries()(i, iDim) * m_unitLength;
         }
     }
+
+    outFile.write((char*)&rank, sizeof(int));
+    outFile.write((char*)&nProcessors, sizeof(int));
 
     outFile.write((char*)&step, sizeof(int));
     outFile.write((char*)&time, sizeof(double));
