@@ -18,6 +18,9 @@ void VelocityVerletIntegrator::stepForward() {
     double dt = m_timeStep;
     for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
         for(Atom* atom : cell->atoms()) {
+            if(atom->isPositionFixed()) {
+                continue;
+            }
             Vector3 velocity = atom->velocity();
             Vector3 position = atom->position();
             velocity += atom->force() / (2*atom->mass()) * dt;
@@ -30,6 +33,9 @@ void VelocityVerletIntegrator::stepForward() {
 
     for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
         for(Atom* atom : cell->atoms()) {
+            if(atom->isPositionFixed()) {
+                continue;
+            }
             Vector3 velocity = atom->velocity();
             velocity += atom->force() / (2*atom->mass()) * dt;
             atom->setVelocity(velocity);

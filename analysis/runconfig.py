@@ -66,23 +66,6 @@ def parseAndRun(executable, configFile, runDir):
             subConfigFileDir, subConfigFileName = split(subConfigFile)
             subConfigRunDir = join(runDir, subConfigFileName).replace(".cfg", "")
             parseAndRun(executable, subConfigFile, subConfigRunDir)
-#            prefix = subConfigFileName.replace(".cfg", "")
-#            subRunDir = join(runDir, prefix)
-#            subDateDir = join(dateDir, prefix)
-#            makedirsSilent(subRunDir)  
-#            subRunConfigFile = join(subRunDir, subConfigFileName)
-#            subConfig = Config()
-#            print "Loading " + subConfigFile
-#            subConfig.readFile(subConfigFile)
-#            subConfig.writeFile(subRunConfigFile)
-#            
-#            # Create symlink to root datedir
-#            saveFile = subConfig.value("simulation.saveFileName")[0]
-#            saveFile = parseSaveFile(saveFile, dateDir)
-#            saveDir = os.path.dirname(saveFile)
-#            createSymlink(saveDir, "/tmp/latestsaveroot")            
-#            
-#            run(executable, subRunConfigFile, subDateDir)
         
         config.writeFile(join(configFileDir, configFileName))
     else:
@@ -136,16 +119,36 @@ def run(executable, configFile, dateDir, runDir):
     saveDir = os.path.dirname(saveFile)
     createSymlink(saveDir, "/tmp/latestsavedir")
     
+    runList = []
+    if config.exists("mpi"):
+        nProcesses = config.value("mpi.nProcesses")[0]
+        runList = ["mpirun", "-n", str(nProcesses), executable, configFileName]
+    else:
+        runList = [executable, configFileName]
+    
     logFilePath = join(runDir, "run_" + configFileName.replace(".cfg", "") + ".log")
     f = open(logFilePath, "w")
-    print "Executable: " + executable + "\nConfig: " + configFileName + "\nRunDir: " + runDir + "\nLogFile: " + logFilePath
+    print "RunList: " + str(runList) + "\nRunDir: " + runDir + "\nLogFile: " + logFilePath
     print "Starting..."
-    process = subprocess.Popen([executable, configFileName], cwd=runDir, stdout=f, stderr=subprocess.STDOUT)
+#    try:
+    process = subprocess.Popen(runList, cwd=runDir, stdout=f, stderr=subprocess.STDOUT)
     process.wait()
-    f.close()
+#    except Exception:
+#        process.kill()
+#        f.close()
         
+    f.close()
+
+def signal_handler(signal, frame):
+        print 'You pressed Ctrl+C!'
+        sys.exit(0)
+
 if __name__ == "__main__":
+#    import signal
+#    signal.signal(signal.SIGINT, signal_handler)
     executable = argv[1]
     configFiles = argv[2]
     
     parseAndRun(executable, configFiles, "")
+    #print 'Press Ctrl+C'
+   # signal.pause()

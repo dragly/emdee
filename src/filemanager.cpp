@@ -70,6 +70,8 @@ bool FileManager::loadBinary(string fileName) {
         return false;
     }
     // Read header data
+    int rank;
+    int nProcessors;
     int step;
     double time; // = step * m_moleculeSystem->integrator()->timeStep() * m_unitTime;
     double timeStep; // = m_moleculeSystem->integrator()->timeStep() * m_unitTime;
@@ -86,6 +88,14 @@ bool FileManager::loadBinary(string fileName) {
     //            systemBoundaries[i*3 + iDim] = m_moleculeSystem->boundaries()(i, iDim);
     //        }
     //    }
+
+    inFile.read((char*)&rank, sizeof(int));
+    inFile.read((char*)&nProcessors, sizeof(int));
+
+    if(nProcessors > 1) {
+        cerr << "Can currently not load more than one processor!" << endl;
+        throw new exception();
+    }
 
     inFile.read((char*)&step, sizeof(int));
     inFile.read((char*)&time, sizeof(double));
@@ -110,7 +120,7 @@ bool FileManager::loadBinary(string fileName) {
         }
     }
 
-    cout << step << " " << time << " " << timeStep << " " << nAtoms << " " << temperature << " " << endl;
+    cout << "step: " << step << " time: " << time << " timeStep: " << timeStep << " nAtoms: " << nAtoms << " temperature: " << temperature << endl << "boundaries:" << endl;
     cout << systemBoundaries[0] << " "  << systemBoundaries[1] << " "  << systemBoundaries[2] << " " << endl;
     cout << systemBoundaries[3] << " "  << systemBoundaries[4] << " "  << systemBoundaries[5] << " " << endl;
 
@@ -125,9 +135,10 @@ bool FileManager::loadBinary(string fileName) {
     // Read atom data
     m_moleculeSystem->deleteAtoms();
     cout << "Reading data for " << nAtoms << " atoms" << endl;
-    if(nAtoms > 10000) {
-        exit(9999);
-    }
+//    if(nAtoms > 10000) {
+//        cout << "Too many atoms, "
+//        exit(9999);
+//    }
     for(int i = 0; i < nAtoms; i++) {
         //        cout << "Reading atom " << i << endl;
         Atom* atom = new Atom(AtomType::argon());
@@ -136,6 +147,7 @@ bool FileManager::loadBinary(string fileName) {
         Vector3 force;
         Vector3 displacement;
         double potential = 0;
+        bool isPositionFixed;
         int id = 0;
         char atomType[3];
         inFile.read(atomType, sizeof(atomType));
@@ -152,6 +164,7 @@ bool FileManager::loadBinary(string fileName) {
         inFile.read((char*)&displacement(1), sizeof(double));
         inFile.read((char*)&displacement(2), sizeof(double));
         inFile.read((char*)&potential, sizeof(double));
+        inFile.read((char*)&isPositionFixed, sizeof(bool));
         inFile.read((char*)&id, sizeof(int));
 
         //        cout << "Atom type is " << atomType << endl;
@@ -167,6 +180,7 @@ bool FileManager::loadBinary(string fileName) {
         atom->clearDisplacement();
         atom->addDisplacement(displacement);
         atom->addPotential(potential);
+        atom->setPositionFixed(isPositionFixed);
         atoms.push_back(atom);
     }
 
@@ -174,53 +188,6 @@ bool FileManager::loadBinary(string fileName) {
     inFile.close();
     return true;
 }
-
-bool FileManager::save(int step) {
-    // Refreshing to make sure we don't save any wrong cell IDs
-    if(m_outFileName.find(".xyz") != string::npos) {
-        return saveXyz(step);
-    } else if(m_outFileName.find(".bin") != string::npos) {
-        return saveBinary(step);
-    } else if(m_outFileName.find(".h5") != string::npos) {
-        return saveHDF5(step);
-    }
-    return false;
-}
-
-bool FileManager::saveXyz(int step) {
-    stringstream outStepName;
-    outStepName << setw(6) << setfill('0') << step;
-    string outFileNameLocal = m_outFileName;
-    size_t starPos = m_outFileName.find("*");
-    ofstream outFile;
-    if(starPos != string::npos) {
-        outFileNameLocal.replace(starPos, 1, outStepName.str());
-        outFile.open(outFileNameLocal);
-    } else {
-        outFile.open(outFileNameLocal, ios_base::app);
-    }
-
-    outFile << "Some nice comment" << endl;
-
-    char line[1000];
-    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
-        for(Atom* atom : cell->atoms()) {
-            Vector3 position = atom->position() * m_unitLength;
-            Vector3 velocity = atom->velocity() * (m_unitLength / m_unitTime);
-            Vector3 force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
-            sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
-                    position(0), position(1), position(2),
-                    velocity(0), velocity(1), velocity(2),
-                    force(0), force(1), force(2),
-                    atom->cellID());
-            outFile << atom->type().abbreviation
-                    << line;
-        }
-    }
-    outFile.close();
-    return true;
-}
-
 bool FileManager::saveBinary(int step) {
     stringstream outStepName;
     outStepName << setw(6) << setfill('0') << step;
@@ -288,6 +255,7 @@ bool FileManager::saveBinary(int step) {
             Vector3 force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
             Vector3 displacement = atom->displacement() * m_unitLength;
             double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
+            bool isPositionFixed = atom->isPositionFixed();
             int id = atom->cellID();
             char atomType[3];
             sprintf(atomType, "Ar");
@@ -305,12 +273,60 @@ bool FileManager::saveBinary(int step) {
             outFile.write((char*)&displacement(1), sizeof(double));
             outFile.write((char*)&displacement(2), sizeof(double));
             outFile.write((char*)&potential, sizeof(double));
+            outFile.write((char*)&isPositionFixed, sizeof(bool));
             outFile.write((char*)&id, sizeof(int));
         }
     }
     outFile.close();
     return true;
 }
+
+bool FileManager::save(int step) {
+    // Refreshing to make sure we don't save any wrong cell IDs
+    if(m_outFileName.find(".xyz") != string::npos) {
+        return saveXyz(step);
+    } else if(m_outFileName.find(".bin") != string::npos) {
+        return saveBinary(step);
+    } else if(m_outFileName.find(".h5") != string::npos) {
+        return saveHDF5(step);
+    }
+    return false;
+}
+
+bool FileManager::saveXyz(int step) {
+    stringstream outStepName;
+    outStepName << setw(6) << setfill('0') << step;
+    string outFileNameLocal = m_outFileName;
+    size_t starPos = m_outFileName.find("*");
+    ofstream outFile;
+    if(starPos != string::npos) {
+        outFileNameLocal.replace(starPos, 1, outStepName.str());
+        outFile.open(outFileNameLocal);
+    } else {
+        outFile.open(outFileNameLocal, ios_base::app);
+    }
+
+    outFile << "Some nice comment" << endl;
+
+    char line[1000];
+    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
+        for(Atom* atom : cell->atoms()) {
+            Vector3 position = atom->position() * m_unitLength;
+            Vector3 velocity = atom->velocity() * (m_unitLength / m_unitTime);
+            Vector3 force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
+            sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
+                    position(0), position(1), position(2),
+                    velocity(0), velocity(1), velocity(2),
+                    force(0), force(1), force(2),
+                    atom->cellID());
+            outFile << atom->type().abbreviation
+                    << line;
+        }
+    }
+    outFile.close();
+    return true;
+}
+
 
 bool FileManager::saveHDF5(int step) {
     cerr << "saveHDF5 is not yet fully implemented. Missing some parameters and rescaling with units." << endl;

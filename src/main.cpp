@@ -18,7 +18,8 @@ int main(int argc, char** argv)
     mpi::communicator world;
     mpi::timer timer;
     timer.restart();
-    cout << "I am processor number " << world.rank() << endl;
+    cout << "Starting molecular-dynamics" << endl;
+    cout << "I am processor number " << world.rank() << " of " << world.size() << endl;
     string configFileName = "testconfig.cfg";
     if(argc > 1) {
         configFileName = argv[1];

@@ -5,17 +5,6 @@
 
 //void Atom::
 
-void Atom::clearForcePotentialPressure()
-{
-    m_force.zeros();
-    m_potential = 0;
-    m_localPressure = 0;
-}
-
-void Atom::clearDisplacement() {
-    m_displacement.zeros();
-}
-
 void Atom::clone(const Atom &other)
 {
     this->m_position = other.m_position;

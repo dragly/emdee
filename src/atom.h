@@ -22,38 +22,41 @@ class Atom
 {
     friend class TwoParticleForce;
 public:
-    Atom();
-    Atom(AtomType atomType);
+    inline Atom();
+    inline Atom(AtomType atomType);
 
-    void clearForcePotentialPressure();
+    inline void clearForcePotentialPressure();
 
-    void clearDisplacement();
+    inline void clearDisplacement();
 
-    // Simple getters left in header for optimization
-    const Vector3 &position() const;
-    const Vector3 &velocity() const;
-    const Vector3 &force() const;
-    const Vector3& displacement() const;
-    const AtomType &type() const;
-    double potential() const;
-    double localPressure() const;
-    int cellID() const;
-    double mass() const;
-    void addLocalPressure(double pressure);
-    void addForce(int component, double force);
+    inline const Vector3 &position() const;
+    inline const Vector3 &velocity() const;
+    inline const Vector3 &force() const;
+    inline const Vector3& displacement() const;
+    inline const AtomType &type() const;
+    inline double potential() const;
+    inline double localPressure() const;
+    inline int cellID() const;
+    inline double mass() const;
+    inline void addLocalPressure(double pressure);
+    inline void addForce(int component, double force);
 
-    void setPosition(const Vector3 &position);
-    void setVelocity(const Vector3 &velocity);
-    void addForce(const Vector3 &force);
-    void addPotential(double potential);
-    void setCellID(int cellID);
-    void addDisplacement(const Vector3& displacement);
-    void addDisplacement(double displacement, uint component);
+    inline void setPosition(const Vector3 &position);
+    inline void setVelocity(const Vector3 &velocity);
+    inline void addForce(const Vector3 &force);
+    inline void addPotential(double potential);
+    inline void setCellID(int cellID);
+    inline void addDisplacement(const Vector3& displacement);
+    inline void addDisplacement(double displacement, uint component);
 
-    void setForce(const Vector3 &force);
+    inline void setForce(const Vector3 &force);
 
     void clone(const Atom &other);
-    void communicationClone(const Atom &other);
+    inline void communicationClone(const Atom &other);
+
+    inline bool isPositionFixed();
+    inline void setPositionFixed(bool fixed);
+
 protected:
     Vector3 m_position;
     Vector3 m_velocity;
@@ -64,6 +67,8 @@ protected:
 
     int m_cellID;
     AtomType m_type;
+
+    bool m_isPositionFixed;
 
 private:
     friend class boost::serialization::access;
@@ -85,7 +90,8 @@ inline Atom::Atom()  :
     m_potential(0.0),
     m_localPressure(0.0),
     m_cellID(-999),
-    m_type(AtomType::argon())
+    m_type(AtomType::argon()),
+    m_isPositionFixed(false)
 {
 }
 
@@ -97,7 +103,8 @@ inline Atom::Atom(AtomType atomType) :
     m_potential(0.0),
     m_localPressure(0.0),
     m_cellID(-999),
-    m_type(atomType)
+    m_type(atomType),
+    m_isPositionFixed(false)
 {
 }
 
@@ -161,6 +168,7 @@ inline double Atom::mass() const
 {
     return type().mass;
 }
+
 inline int Atom::cellID() const
 {
     return m_cellID;
@@ -205,6 +213,26 @@ inline void Atom::communicationClone(const Atom &other)
     //    this->m_localPressure = other.m_localPressure;
     //    this->m_potential = other.m_potential;
     //    this->m_type = other.m_type;
+}
+
+inline bool Atom::isPositionFixed() {
+    return m_isPositionFixed;
+}
+
+inline void Atom::setPositionFixed(bool fixed)
+{
+    m_isPositionFixed = fixed;
+}
+
+inline void Atom::clearForcePotentialPressure()
+{
+    m_force.zeros();
+    m_potential = 0;
+    m_localPressure = 0;
+}
+
+inline void Atom::clearDisplacement() {
+    m_displacement.zeros();
 }
 
 #endif // ATOM_H

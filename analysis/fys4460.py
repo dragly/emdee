@@ -1,6 +1,10 @@
 from pylab import dtype, fromfile, concatenate
+from pylibconfig import Config
+from os.path import expanduser, join, split
+from glob import glob
 import os
 import errno
+
 headerType = dtype([("rank", 'int32'),("nProcessors", 'int32'),
                   ("step", 'int32'), ("time", float), ("timeStep", float), 
                   ("nAtoms", 'int32'), ("temperature", float), ("pressure", float),
@@ -13,8 +17,30 @@ dataType = dtype([("type", "a3"),
                     ("force", float, (3,)),
                     ("displacement", float, (3,)),
                     ("potential", float), 
+                    ("isPositionFixed", bool),
                     ("cellID", 'int32')])
 boltzmannConstant = 1.3806503e-23
+
+def listSaveFileNames(configFilePath):
+#    saveDir, configFileName = split(configFilePath)
+
+    config = Config()
+    config.readFile(configFilePath)
+    fileNames = config.value("simulation.saveFileName")[0]
+    fileNames = expanduser(fileNames)
+    fileNames = glob(fileNames)
+    
+    fileNames.sort()
+    
+    return fileNames
+    
+def saveAtoms(header, atoms, fileName):
+    header["nProcessors"] = 1
+    
+    f = open(fileName, "wb")
+    header.tofile(f)
+    atoms.tofile(f)
+    f.close()
 
 def loadAtoms(fileName):
     f = open(fileName, "rb")

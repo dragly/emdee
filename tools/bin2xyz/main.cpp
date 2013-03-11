@@ -146,6 +146,7 @@ bool readWriteFile(string fileName, ofstream &outFile, bool isFirst) {
         rowvec force = zeros<rowvec>(3);
         rowvec displacement = zeros<rowvec>(3);
         double potential = 0;
+        bool isPositionFixed;
         int id = 0;
         char atomType[3];
         inFile.read(atomType, sizeof(atomType));
@@ -162,15 +163,17 @@ bool readWriteFile(string fileName, ofstream &outFile, bool isFirst) {
         inFile.read((char*)&displacement(1), sizeof(double));
         inFile.read((char*)&displacement(2), sizeof(double));
         inFile.read((char*)&potential, sizeof(double));
+        inFile.read((char*)&isPositionFixed, sizeof(bool));
         inFile.read((char*)&id, sizeof(int));
 
         position /= unitLength;
 
-        sprintf(line, " %.8e %.8e %.8e %.8e %.8e %.8e %.8e %.8e %.8e %.8e %d\n",
+        sprintf(line, " %.8e %.8e %.8e %.8e %.8e %.8e %.8e %.8e %.8e %.8e %d %d\n",
                 position(0), position(1), position(2),
                 velocity(0), velocity(1), velocity(2),
                 force(0), force(1), force(2),
                 potential,
+                (int)isPositionFixed,
                 id);
         //                toPrint << atom->type().abbreviation
         //                        << " " << position(0) << " " << position(1) << " " << position(2)
