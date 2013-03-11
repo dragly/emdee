@@ -11,14 +11,18 @@ headerType = dtype([("rank", 'int32'),("nProcessors", 'int32'),
                     ("averageDisplacement", float),
                     ("averageSquareDisplacement", float),
                     ("lowerBounds", float, (3,)), ("upperBounds", float, (3,))])
-dataType = dtype([("type", "a3"),
+lammpsHeaderType = dtype([("step", 'int32'),("nAtoms", 'int32'),
+                          ("bounds", float, (9,)),
+                          ("nColumns", 'int32'),("nChunks", 'int32'),
+                          ("chunkLength", 'int32')])
+dataType = dtype([("type", 'int64'),
                   ("position", float, (3,)),
                   ("velocity", float, (3,)),
                     ("force", float, (3,)),
                     ("displacement", float, (3,)),
                     ("potential", float), 
-                    ("isPositionFixed", bool),
-                    ("cellID", 'int32')])
+                    ("isPositionFixed", 'int64'),
+                    ("cellID", 'int64')])
 boltzmannConstant = 1.3806503e-23
 
 def listSaveFileNames(configFilePath):
@@ -43,10 +47,14 @@ def saveAtoms(header, atoms, fileName):
     f.close()
 
 def loadAtoms(fileName):
-    f = open(fileName, "rb")
-    header = fromfile(f, dtype=headerType, count=1)
-    atoms = fromfile(f, dtype=dataType)
-    f.close()
+    lammpsFileName = fileName.replace(".bin", ".lmp")
+    headerFile = open(fileName, "rb")
+    lammpsFile = open(lammpsFileName, "rb")
+    header = fromfile(headerFile, dtype=headerType, count=1)
+    lammpsHeader = fromfile(lammpsFile, dtype=lammpsHeaderType)
+    atoms = fromfile(lammpsFile, dtype=dataType)
+    lammpsFile.close()
+    headerFile.close()
     
     nProcessors = header['nProcessors'][0] 
     print "Has", nProcessors, "processor(s)"
@@ -54,11 +62,14 @@ def loadAtoms(fileName):
     if nProcessors > 1:
         for i in range(1, nProcessors):
             subFileName = fileName + (".%04d" % i)
-            print "Should load " + subFileName
-            f2 = open(subFileName, "rb")
-            header2 = fromfile(f2, dtype=headerType, count=1)
-            atoms2 = fromfile(f2, dtype=dataType)
-            f2.close()
+            subLammpsFileName = subFileName.replace(".bin", ".lmp")
+            print "Loading " + split(subFileName)[1]
+            headerFile2 = open(subFileName, "rb")
+            lammpsFile2 = open(subLammpsFileName, "rb")
+            header2 = fromfile(headerFile2, dtype=headerType, count=1)
+            atoms2 = fromfile(lammpsFile2, dtype=dataType)
+            headerFile2.close()
+            lammpsFile2.close()
             
             atoms = concatenate([atoms, atoms2])
             
@@ -92,4 +103,4 @@ def createSymlink(source, destination):
     os.symlink(source, destination)
     
 if __name__ == "__main__":
-    header, atoms = loadAtoms("/home/svenni/scratch/fys4460/tmp/parallel/testing/data000000.bin")
+    header, atoms = loadAtoms("/home/svenni/scratch/fys4460/project2/1c-thermalize/2013-03-11_182308/data000000.bin")

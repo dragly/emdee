@@ -18,9 +18,11 @@
 #include <H5File.h>
 //#include <hdf5.h>
 #include <boost/filesystem.hpp>
+#include <boost/mpi.hpp>
 
 using namespace std;
 using namespace arma;
+namespace mpi = boost::mpi;
 //using namespace H5;
 
 typedef struct s1_t {
@@ -188,10 +190,13 @@ bool FileManager::loadBinary(string fileName) {
     inFile.close();
     return true;
 }
+
 bool FileManager::saveBinary(int step) {
+    mpi::communicator world;
+
     stringstream outStepName;
     outStepName << setw(6) << setfill('0') << step;
-    string outFileNameLocal = m_outFileName;
+    string headerFileName = m_outFileName;
     unsigned found = m_outFileName.find_last_of("/\\");
     string outPath = m_outFileName.substr(0,found);
     boost::filesystem::create_directories(outPath);
@@ -199,17 +204,17 @@ bool FileManager::saveBinary(int step) {
     stringstream processorName;
     processorName << "." << setw(4) << setfill('0') << m_moleculeSystem->processor()->rank();
     if(m_moleculeSystem->processor()->rank() != 0) {
-        outFileNameLocal.append(processorName.str());
+        headerFileName.append(processorName.str());
     }
-    ofstream outFile;
-    if(starPos != string::npos) {
-        outFileNameLocal.replace(starPos, 1, outStepName.str());
-        outFile.open(outFileNameLocal, ios::out | ios::binary);
-    } else {
-        outFile.open(outFileNameLocal, ios::app | ios::out | ios::binary);
-    }
+    ofstream headerFile;
+    ofstream lammpsFile;
+    headerFileName.replace(starPos, 1, outStepName.str());
+    string lammpsFileName = headerFileName;
+    lammpsFileName.replace(lammpsFileName.find(".bin"), 4, ".lmp");
+    headerFile.open(headerFileName, ios::out | ios::binary);
+    lammpsFile.open(lammpsFileName, ios::out | ios::binary);
 
-//    cout << "Writing to file " << outFileNameLocal << endl;
+    cout << "Writing to file " << headerFileName << endl;
 
     // Write header data
     int rank = m_moleculeSystem->processor()->rank();
@@ -232,20 +237,56 @@ bool FileManager::saveBinary(int step) {
         }
     }
 
-    outFile.write((char*)&rank, sizeof(int));
-    outFile.write((char*)&nProcessors, sizeof(int));
+    // Write to header file
+    headerFile.write((char*)&rank, sizeof(int));
+    headerFile.write((char*)&nProcessors, sizeof(int));
 
-    outFile.write((char*)&step, sizeof(int));
-    outFile.write((char*)&time, sizeof(double));
-    outFile.write((char*)&timeStep, sizeof(double));
-    outFile.write((char*)&nAtoms, sizeof(int));
-    outFile.write((char*)&temperature, sizeof(double));
-    outFile.write((char*)&pressure, sizeof(double));
-    outFile.write((char*)&averageDisplacement, sizeof(double));
-    outFile.write((char*)&averageSquareDisplacement, sizeof(double));
-    outFile.write((char*)&systemBoundaries[0], sizeof(double) * 6);
+    headerFile.write((char*)&step, sizeof(int));
+    headerFile.write((char*)&time, sizeof(double));
+    headerFile.write((char*)&timeStep, sizeof(double));
+    headerFile.write((char*)&nAtoms, sizeof(int));
+    headerFile.write((char*)&temperature, sizeof(double));
+    headerFile.write((char*)&pressure, sizeof(double));
+    headerFile.write((char*)&averageDisplacement, sizeof(double));
+    headerFile.write((char*)&averageSquareDisplacement, sizeof(double));
+    headerFile.write((char*)&systemBoundaries[0], sizeof(double) * 6);
 
-    // Write system boundaries
+    // Write to LAMMPS type file
+    int nColumns = 16;
+    int nChunks = 1;
+    double shear = 0.0;
+
+    if(m_moleculeSystem->processor()->rank() == 0) {
+        int nAtomsTotal = nAtoms;
+        for(int i = 1; i < m_moleculeSystem->processor()->nProcessors(); i++) {
+            int nOtherAtoms = 0;
+            world.recv(i, 141, nOtherAtoms);
+            nAtomsTotal += nOtherAtoms;
+        }
+
+        for(int i = 0; i < 6; i++) {
+            systemBoundaries[i] /= 1e-10; // LAMMPS wants lengths in Ångstrøm
+        }
+
+        cout << "The total number of atoms written to file will be " << nAtomsTotal << endl;
+        int chunkLength = nAtomsTotal * nColumns;
+        lammpsFile.write((char*)&step, sizeof(int));
+        lammpsFile.write((char*)&nAtomsTotal, sizeof(int));
+        lammpsFile.write((char*)&systemBoundaries[0], sizeof(double));
+        lammpsFile.write((char*)&systemBoundaries[3], sizeof(double));
+        lammpsFile.write((char*)&systemBoundaries[1], sizeof(double));
+        lammpsFile.write((char*)&systemBoundaries[4], sizeof(double));
+        lammpsFile.write((char*)&systemBoundaries[2], sizeof(double));
+        lammpsFile.write((char*)&systemBoundaries[5], sizeof(double));
+        lammpsFile.write((char*)&shear, sizeof(double));
+        lammpsFile.write((char*)&shear, sizeof(double));
+        lammpsFile.write((char*)&shear, sizeof(double));
+        lammpsFile.write((char*)&nColumns, sizeof(int));
+        lammpsFile.write((char*)&nChunks, sizeof(int));
+        lammpsFile.write((char*)&chunkLength, sizeof(int));
+    } else {
+        world.send(0, 141, nAtoms);
+    }
 
     // Write atom data
     for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
@@ -255,29 +296,32 @@ bool FileManager::saveBinary(int step) {
             Vector3 force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
             Vector3 displacement = atom->displacement() * m_unitLength;
             double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
-            bool isPositionFixed = atom->isPositionFixed();
-            int id = atom->cellID();
-            char atomType[3];
-            sprintf(atomType, "Ar");
-            outFile.write(atomType, sizeof(atomType));
-            outFile.write((char*)&position(0), sizeof(double));
-            outFile.write((char*)&position(1), sizeof(double));
-            outFile.write((char*)&position(2), sizeof(double));
-            outFile.write((char*)&velocity(0), sizeof(double));
-            outFile.write((char*)&velocity(1), sizeof(double));
-            outFile.write((char*)&velocity(2), sizeof(double));
-            outFile.write((char*)&force(0), sizeof(double));
-            outFile.write((char*)&force(1), sizeof(double));
-            outFile.write((char*)&force(2), sizeof(double));
-            outFile.write((char*)&displacement(0), sizeof(double));
-            outFile.write((char*)&displacement(1), sizeof(double));
-            outFile.write((char*)&displacement(2), sizeof(double));
-            outFile.write((char*)&potential, sizeof(double));
-            outFile.write((char*)&isPositionFixed, sizeof(bool));
-            outFile.write((char*)&id, sizeof(int));
+            long isPositionFixed = (long)atom->isPositionFixed();
+            long id = (long)atom->cellID();
+            long atomType = 18;
+
+            position /= 1e-10; // LAMMPS wants lengths in Ångstrøm
+
+            lammpsFile.write((char*)&atomType, sizeof(long));
+            lammpsFile.write((char*)&position(0), sizeof(double));
+            lammpsFile.write((char*)&position(1), sizeof(double));
+            lammpsFile.write((char*)&position(2), sizeof(double));
+            lammpsFile.write((char*)&velocity(0), sizeof(double));
+            lammpsFile.write((char*)&velocity(1), sizeof(double));
+            lammpsFile.write((char*)&velocity(2), sizeof(double));
+            lammpsFile.write((char*)&force(0), sizeof(double));
+            lammpsFile.write((char*)&force(1), sizeof(double));
+            lammpsFile.write((char*)&force(2), sizeof(double));
+            lammpsFile.write((char*)&displacement(0), sizeof(double));
+            lammpsFile.write((char*)&displacement(1), sizeof(double));
+            lammpsFile.write((char*)&displacement(2), sizeof(double));
+            lammpsFile.write((char*)&potential, sizeof(double));
+            lammpsFile.write((char*)&isPositionFixed, sizeof(long));
+            lammpsFile.write((char*)&id, sizeof(long));
         }
     }
-    outFile.close();
+    headerFile.close();
+    lammpsFile.close();
     return true;
 }
 
