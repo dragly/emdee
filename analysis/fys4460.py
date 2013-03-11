@@ -1,4 +1,4 @@
-from pylab import dtype, fromfile, concatenate
+from pylab import *
 from pylibconfig import Config
 from os.path import expanduser, join, split
 from glob import glob
@@ -15,14 +15,14 @@ lammpsHeaderType = dtype([("step", 'int32'),("nAtoms", 'int32'),
                           ("bounds", float, (9,)),
                           ("nColumns", 'int32'),("nChunks", 'int32'),
                           ("chunkLength", 'int32')])
-dataType = dtype([("type", 'int64'),
+dataType = dtype([("type", float),
                   ("position", float, (3,)),
                   ("velocity", float, (3,)),
                     ("force", float, (3,)),
                     ("displacement", float, (3,)),
                     ("potential", float), 
-                    ("isPositionFixed", 'int64'),
-                    ("cellID", 'int64')])
+                    ("isPositionFixed", float),
+                    ("cellID", float)])
 boltzmannConstant = 1.3806503e-23
 
 def listSaveFileNames(configFilePath):
@@ -38,20 +38,27 @@ def listSaveFileNames(configFilePath):
     
     return fileNames
     
-def saveAtoms(header, atoms, fileName):
+def saveAtoms(header, lammpsHeader, atoms, fileName):
     header["nProcessors"] = 1
+    atoms["position"] *= 1e10 # Convert to LAMMPS units
     
-    f = open(fileName, "wb")
-    header.tofile(f)
-    atoms.tofile(f)
-    f.close()
+    headerFile = open(fileName, "wb")
+    header.tofile(headerFile)
+    headerFile.close()
+    lammpsFileName = fileName.replace(".bin", ".lmp")
+    print "Saving " + split(lammpsFileName)[1] 
+    lammpsFile = open(lammpsFileName, "wb")
+    lammpsHeader.tofile(lammpsFile)
+    atoms.tofile(lammpsFile)
+    lammpsFile.close()
+    atoms["position"] *= 1e-10 # Convert back
 
 def loadAtoms(fileName):
     lammpsFileName = fileName.replace(".bin", ".lmp")
     headerFile = open(fileName, "rb")
     lammpsFile = open(lammpsFileName, "rb")
     header = fromfile(headerFile, dtype=headerType, count=1)
-    lammpsHeader = fromfile(lammpsFile, dtype=lammpsHeaderType)
+    lammpsHeader = fromfile(lammpsFile, dtype=lammpsHeaderType, count=1)
     atoms = fromfile(lammpsFile, dtype=dataType)
     lammpsFile.close()
     headerFile.close()
@@ -86,7 +93,8 @@ def loadAtoms(fileName):
         header["averageDisplacement"][0] /= nProcessors
         header["averageSquareDisplacement"][0] /= nProcessors
     
-    return header, atoms
+    atoms["position"] *= 1e-10
+    return header, lammpsHeader, atoms
     
 def makedirsSilent(directory):
     try:
@@ -103,4 +111,4 @@ def createSymlink(source, destination):
     os.symlink(source, destination)
     
 if __name__ == "__main__":
-    header, atoms = loadAtoms("/home/svenni/scratch/fys4460/project2/1c-thermalize/2013-03-11_182308/data000000.bin")
+    header, lammpsHeader, atoms = loadAtoms("frozen.bin")

@@ -66,9 +66,10 @@ bool FileManager::load(string fileName) {
 
 bool FileManager::loadBinary(string fileName) {
     cout << "Loading binary file " << fileName << endl;
-    ifstream inFile;
-    inFile.open(fileName, ios::binary | ios::in);
-    if(!inFile.good()) {
+    ifstream headerFile;
+    headerFile.open(fileName, ios::binary | ios::in);
+    if(!headerFile.good()) {
+        cout << "Header file " << fileName << " no good...";
         return false;
     }
     // Read header data
@@ -91,103 +92,143 @@ bool FileManager::loadBinary(string fileName) {
     //        }
     //    }
 
-    inFile.read((char*)&rank, sizeof(int));
-    inFile.read((char*)&nProcessors, sizeof(int));
+    headerFile.read((char*)&rank, sizeof(int));
+    headerFile.read((char*)&nProcessors, sizeof(int));
+    headerFile.close();
 
-    if(nProcessors > 1) {
-        cerr << "Can currently not load more than one processor!" << endl;
-        throw new exception();
-    }
-
-    inFile.read((char*)&step, sizeof(int));
-    inFile.read((char*)&time, sizeof(double));
-    inFile.read((char*)&timeStep, sizeof(double));
-    inFile.read((char*)&nAtoms, sizeof(int));
-    inFile.read((char*)&temperature, sizeof(double));
-    inFile.read((char*)&pressure, sizeof(double));
-    inFile.read((char*)&averageDisplacement, sizeof(double));
-    inFile.read((char*)&averageSquareDisplacement, sizeof(double));
-    inFile.read((char*)&systemBoundaries[0], sizeof(double) * 6);
-
-    // Convert back units
-    time /= m_unitTime;
-    timeStep /= m_unitTime;
-    temperature /= m_unitTemperature;
-    averageDisplacement /= m_unitLength;
-    averageSquareDisplacement /= (m_unitLength * m_unitLength);
-
-    for(int i = 0; i < 2; i++) {
-        for(int iDim = 0; iDim < 3; iDim++) {
-            systemBoundaries[i*3 + iDim] /= m_unitLength;
+    for(int processor = 0; processor < nProcessors; processor++) {
+        ifstream lammpsFile;
+        string subFileName = fileName;
+        string lammpsFileName = fileName;
+        lammpsFileName.replace(lammpsFileName.find(".bin"), 4, ".lmp");
+        stringstream processorName;
+        processorName << "." << setw(4) << setfill('0') << processor;
+        if(processor > 0) {
+            lammpsFileName.append(processorName.str());
+            subFileName.append(processorName.str());
         }
+        headerFile.open(subFileName, ios::binary | ios::in);
+        lammpsFile.open(lammpsFileName, ios::binary | ios::in);
+        if(!lammpsFile.good() || !headerFile.good()) {
+            cout << "File " << subFileName << " or " << lammpsFileName << " no good...";
+            return false;
+        }
+
+        if(processor == 0) {
+            int nAtomsTotal;
+            double shear;
+            int nChunks;
+            int chunkLength;
+            int nColumns;
+            lammpsFile.read((char*)&step, sizeof(int));
+            lammpsFile.read((char*)&nAtomsTotal, sizeof(int));
+            lammpsFile.read((char*)&systemBoundaries[0], sizeof(double));
+            lammpsFile.read((char*)&systemBoundaries[3], sizeof(double));
+            lammpsFile.read((char*)&systemBoundaries[1], sizeof(double));
+            lammpsFile.read((char*)&systemBoundaries[4], sizeof(double));
+            lammpsFile.read((char*)&systemBoundaries[2], sizeof(double));
+            lammpsFile.read((char*)&systemBoundaries[5], sizeof(double));
+            lammpsFile.read((char*)&shear, sizeof(double));
+            lammpsFile.read((char*)&shear, sizeof(double));
+            lammpsFile.read((char*)&shear, sizeof(double));
+            lammpsFile.read((char*)&nColumns, sizeof(int));
+            lammpsFile.read((char*)&nChunks, sizeof(int));
+            lammpsFile.read((char*)&chunkLength, sizeof(int));
+        }
+
+        headerFile.read((char*)&rank, sizeof(int));
+        headerFile.read((char*)&nProcessors, sizeof(int));
+        headerFile.read((char*)&step, sizeof(int));
+        headerFile.read((char*)&time, sizeof(double));
+        headerFile.read((char*)&timeStep, sizeof(double));
+        headerFile.read((char*)&nAtoms, sizeof(int));
+        headerFile.read((char*)&temperature, sizeof(double));
+        headerFile.read((char*)&pressure, sizeof(double));
+        headerFile.read((char*)&averageDisplacement, sizeof(double));
+        headerFile.read((char*)&averageSquareDisplacement, sizeof(double));
+        headerFile.read((char*)&systemBoundaries[0], sizeof(double) * 6);
+
+        // Convert back units
+        time /= m_unitTime;
+        timeStep /= m_unitTime;
+        temperature /= m_unitTemperature;
+        averageDisplacement /= m_unitLength;
+        averageSquareDisplacement /= (m_unitLength * m_unitLength);
+
+        for(int i = 0; i < 2; i++) {
+            for(int iDim = 0; iDim < 3; iDim++) {
+                systemBoundaries[i*3 + iDim] /= m_unitLength;
+            }
+        }
+
+        cout << "step: " << step << " time: " << time << " timeStep: " << timeStep << " nAtoms: " << nAtoms << " temperature: " << temperature << endl << "boundaries:" << endl;
+        cout << systemBoundaries[0] << " "  << systemBoundaries[1] << " "  << systemBoundaries[2] << " " << endl;
+        cout << systemBoundaries[3] << " "  << systemBoundaries[4] << " "  << systemBoundaries[5] << " " << endl;
+
+        // Append step by one
+        m_moleculeSystem->setStep(step + 1);
+        m_moleculeSystem->integrator()->setTimeStep(timeStep);
+        m_moleculeSystem->setTime(time);
+        m_moleculeSystem->setBoundaries(systemBoundaries[0], systemBoundaries[3], systemBoundaries[1], systemBoundaries[4], systemBoundaries[2], systemBoundaries[5]);
+
+
+        vector<Atom*> atoms;
+        // Read atom data
+        //    m_moleculeSystem->deleteAtoms();
+        cout << "Reading data for " << nAtoms << " atoms" << endl;
+        //    if(nAtoms > 10000) {
+        //        cout << "Too many atoms, "
+        //        exit(9999);
+        //    }
+        for(int i = 0; i < nAtoms; i++) {
+            //        cout << "Reading atom " << i << endl;
+            Atom* atom = new Atom(AtomType::argon());
+            Vector3 position;
+            Vector3 velocity;
+            Vector3 force;
+            Vector3 displacement;
+            double potential = 0;
+            long isPositionFixed;
+            long id = 0;
+            long atomType = 0;
+            lammpsFile.read((char*)&atomType, sizeof(long));
+            lammpsFile.read((char*)&position(0), sizeof(double));
+            lammpsFile.read((char*)&position(1), sizeof(double));
+            lammpsFile.read((char*)&position(2), sizeof(double));
+            lammpsFile.read((char*)&velocity(0), sizeof(double));
+            lammpsFile.read((char*)&velocity(1), sizeof(double));
+            lammpsFile.read((char*)&velocity(2), sizeof(double));
+            lammpsFile.read((char*)&force(0), sizeof(double));
+            lammpsFile.read((char*)&force(1), sizeof(double));
+            lammpsFile.read((char*)&force(2), sizeof(double));
+            lammpsFile.read((char*)&displacement(0), sizeof(double));
+            lammpsFile.read((char*)&displacement(1), sizeof(double));
+            lammpsFile.read((char*)&displacement(2), sizeof(double));
+            lammpsFile.read((char*)&potential, sizeof(double));
+            lammpsFile.read((char*)&isPositionFixed, sizeof(long));
+            lammpsFile.read((char*)&id, sizeof(long));
+
+            //        cout << "Atom type is " << atomType << endl;
+
+            position /= (m_unitLength * 1e10);
+            displacement /= m_unitLength;
+            velocity /= (m_unitLength / m_unitTime);
+            force /= (m_unitLength * m_unitMass / (m_unitTime * m_unitTime));
+
+            atom->setPosition(position);
+            atom->setVelocity(velocity);
+            atom->addForce(force);
+            atom->clearDisplacement();
+            atom->addDisplacement(displacement);
+            atom->addPotential(potential);
+            atom->setPositionFixed(isPositionFixed);
+            atoms.push_back(atom);
+        }
+
+        m_moleculeSystem->addAtoms(atoms);
+        headerFile.close();
+        lammpsFile.close();
     }
-
-    cout << "step: " << step << " time: " << time << " timeStep: " << timeStep << " nAtoms: " << nAtoms << " temperature: " << temperature << endl << "boundaries:" << endl;
-    cout << systemBoundaries[0] << " "  << systemBoundaries[1] << " "  << systemBoundaries[2] << " " << endl;
-    cout << systemBoundaries[3] << " "  << systemBoundaries[4] << " "  << systemBoundaries[5] << " " << endl;
-
-    // Append step by one
-    m_moleculeSystem->setStep(step + 1);
-    m_moleculeSystem->integrator()->setTimeStep(timeStep);
-    m_moleculeSystem->setTime(time);
-    m_moleculeSystem->setBoundaries(systemBoundaries[0], systemBoundaries[3], systemBoundaries[1], systemBoundaries[4], systemBoundaries[2], systemBoundaries[5]);
-
-
-    vector<Atom*> atoms;
-    // Read atom data
-    m_moleculeSystem->deleteAtoms();
-    cout << "Reading data for " << nAtoms << " atoms" << endl;
-//    if(nAtoms > 10000) {
-//        cout << "Too many atoms, "
-//        exit(9999);
-//    }
-    for(int i = 0; i < nAtoms; i++) {
-        //        cout << "Reading atom " << i << endl;
-        Atom* atom = new Atom(AtomType::argon());
-        Vector3 position;
-        Vector3 velocity;
-        Vector3 force;
-        Vector3 displacement;
-        double potential = 0;
-        bool isPositionFixed;
-        int id = 0;
-        char atomType[3];
-        inFile.read(atomType, sizeof(atomType));
-        inFile.read((char*)&position(0), sizeof(double));
-        inFile.read((char*)&position(1), sizeof(double));
-        inFile.read((char*)&position(2), sizeof(double));
-        inFile.read((char*)&velocity(0), sizeof(double));
-        inFile.read((char*)&velocity(1), sizeof(double));
-        inFile.read((char*)&velocity(2), sizeof(double));
-        inFile.read((char*)&force(0), sizeof(double));
-        inFile.read((char*)&force(1), sizeof(double));
-        inFile.read((char*)&force(2), sizeof(double));
-        inFile.read((char*)&displacement(0), sizeof(double));
-        inFile.read((char*)&displacement(1), sizeof(double));
-        inFile.read((char*)&displacement(2), sizeof(double));
-        inFile.read((char*)&potential, sizeof(double));
-        inFile.read((char*)&isPositionFixed, sizeof(bool));
-        inFile.read((char*)&id, sizeof(int));
-
-        //        cout << "Atom type is " << atomType << endl;
-
-        position /= m_unitLength;
-        displacement /= m_unitLength;
-        velocity /= (m_unitLength / m_unitTime);
-        force /= (m_unitLength * m_unitMass / (m_unitTime * m_unitTime));
-
-        atom->setPosition(position);
-        atom->setVelocity(velocity);
-        atom->addForce(force);
-        atom->clearDisplacement();
-        atom->addDisplacement(displacement);
-        atom->addPotential(potential);
-        atom->setPositionFixed(isPositionFixed);
-        atoms.push_back(atom);
-    }
-
-    m_moleculeSystem->addAtoms(atoms);
-    inFile.close();
     return true;
 }
 
@@ -229,7 +270,7 @@ bool FileManager::saveBinary(int step) {
 
     double systemBoundaries[6];
 
-//    cout << "Writing temperature of " << temperature << endl;
+    //    cout << "Writing temperature of " << temperature << endl;
 
     for(int i = 0; i < 2; i++) {
         for(int iDim = 0; iDim < 3; iDim++) {
@@ -296,13 +337,13 @@ bool FileManager::saveBinary(int step) {
             Vector3 force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
             Vector3 displacement = atom->displacement() * m_unitLength;
             double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
-            long isPositionFixed = (long)atom->isPositionFixed();
-            long id = (long)atom->cellID();
-            long atomType = 18;
+            double isPositionFixed = (double)atom->isPositionFixed();
+            double id = (double)atom->cellID();
+            double atomType = 18;
 
             position /= 1e-10; // LAMMPS wants lengths in Ångstrøm
 
-            lammpsFile.write((char*)&atomType, sizeof(long));
+            lammpsFile.write((char*)&atomType, sizeof(double));
             lammpsFile.write((char*)&position(0), sizeof(double));
             lammpsFile.write((char*)&position(1), sizeof(double));
             lammpsFile.write((char*)&position(2), sizeof(double));
@@ -316,8 +357,8 @@ bool FileManager::saveBinary(int step) {
             lammpsFile.write((char*)&displacement(1), sizeof(double));
             lammpsFile.write((char*)&displacement(2), sizeof(double));
             lammpsFile.write((char*)&potential, sizeof(double));
-            lammpsFile.write((char*)&isPositionFixed, sizeof(long));
-            lammpsFile.write((char*)&id, sizeof(long));
+            lammpsFile.write((char*)&isPositionFixed, sizeof(double));
+            lammpsFile.write((char*)&id, sizeof(double));
         }
     }
     headerFile.close();
