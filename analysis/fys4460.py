@@ -43,6 +43,7 @@ def saveAtoms(header, lammpsHeader, atoms, fileName):
     atoms["position"] *= 1e10 # Convert to LAMMPS units
     
     headerFile = open(fileName, "wb")
+    print "Saving " + split(fileName)[1] 
     header.tofile(headerFile)
     headerFile.close()
     lammpsFileName = fileName.replace(".bin", ".lmp")

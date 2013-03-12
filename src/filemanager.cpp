@@ -188,10 +188,11 @@ bool FileManager::loadBinary(string fileName) {
             Vector3 force;
             Vector3 displacement;
             double potential = 0;
-            long isPositionFixed;
-            long id = 0;
-            long atomType = 0;
-            lammpsFile.read((char*)&atomType, sizeof(long));
+            double isPositionFixed;
+            double id = 0;
+            double atomType = 0;
+
+            lammpsFile.read((char*)&atomType, sizeof(double)); // Why is the atomType a double? Because this is the standard in LAMMPS files, which are now used as output
             lammpsFile.read((char*)&position(0), sizeof(double));
             lammpsFile.read((char*)&position(1), sizeof(double));
             lammpsFile.read((char*)&position(2), sizeof(double));
@@ -205,8 +206,8 @@ bool FileManager::loadBinary(string fileName) {
             lammpsFile.read((char*)&displacement(1), sizeof(double));
             lammpsFile.read((char*)&displacement(2), sizeof(double));
             lammpsFile.read((char*)&potential, sizeof(double));
-            lammpsFile.read((char*)&isPositionFixed, sizeof(long));
-            lammpsFile.read((char*)&id, sizeof(long));
+            lammpsFile.read((char*)&isPositionFixed, sizeof(double));
+            lammpsFile.read((char*)&id, sizeof(double));
 
             //        cout << "Atom type is " << atomType << endl;
 
@@ -328,6 +329,8 @@ bool FileManager::saveBinary(int step) {
     } else {
         world.send(0, 141, nAtoms);
     }
+
+    cout << "long long int " << sizeof(long long int) << endl;
 
     // Write atom data
     for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
