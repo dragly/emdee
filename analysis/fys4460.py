@@ -41,7 +41,10 @@ def listSaveFileNames(configFilePath):
     return fileNames
     
 def saveAtoms(header, lammpsHeader, atoms, fileName):
+    fileName = expanduser(fileName)
     header["nProcessors"] = 1
+    header["nAtoms"] = len(atoms)
+    lammpsHeader["nAtoms"] = len(atoms)
     atoms["position"] *= 1e10 # Convert to LAMMPS units
     
     headerFile = open(fileName, "wb")
@@ -57,6 +60,7 @@ def saveAtoms(header, lammpsHeader, atoms, fileName):
     atoms["position"] *= 1e-10 # Convert back
     
 def loadHeader(fileName):
+    fileName = expanduser(fileName)
     headerFile = open(fileName, "rb")
     header = fromfile(headerFile, dtype=headerType, count=1)
     headerFile.close()
@@ -65,6 +69,7 @@ def loadHeader(fileName):
     
 
 def loadAtoms(fileName):
+    fileName = expanduser(fileName)
     header = loadHeader(fileName)
     lammpsFileName = fileName.replace(".bin", ".lmp")
     lammpsFile = open(lammpsFileName, "rb")
@@ -72,7 +77,7 @@ def loadAtoms(fileName):
     atoms = fromfile(lammpsFile, dtype=dataType)
     lammpsFile.close()
     
-    nProcessors = header['nProcessors'][0] 
+    nProcessors = header['nProcessors'][0]
     print "Has", nProcessors, "processor(s)"
     
     if nProcessors > 1:

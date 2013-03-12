@@ -9,7 +9,7 @@ from sys import argv
 from glob import glob
 from time import time
 from fys4460 import loadHeader, boltzmannConstant
-from os.path import expanduser, join, split
+from os.path import expanduser, join, split, isdir
 from pylibconfig import Config
 #matplotlib.rcParams["mathtext.default"] = "regular"
 #matplotlib.rcParams["font.size"] = 16
@@ -19,6 +19,10 @@ configFilePaths = argv[1:]
 if len(configFilePaths) == 1:
     configFilePaths = glob(configFilePaths[0])
 for configFilePath in configFilePaths:
+    if isdir(configFilePath):
+        print "Info: Input is directory, selecting first config file"
+        configFilePath = glob(join(configFilePath, "*.cfg"))[0]
+        
     saveDir, configFileName = split(configFilePath)
     
     config = Config()
