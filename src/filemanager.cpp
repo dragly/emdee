@@ -86,6 +86,8 @@ bool FileManager::loadBinary(string fileName) {
     double averageSquareDisplacement; // = m_moleculeSystem->averageSquareDisplacement() * m_unitLength * m_unitLength;
 
     double systemBoundaries[6];
+    double kineticEnergyTotal;
+    double potentialEnergyTotal;
 
     //    for(int i = 0; i < 2; i++) {
     //        for(int iDim = 0; iDim < 3; iDim++) {
@@ -148,6 +150,8 @@ bool FileManager::loadBinary(string fileName) {
         headerFile.read((char*)&averageDisplacement, sizeof(double));
         headerFile.read((char*)&averageSquareDisplacement, sizeof(double));
         headerFile.read((char*)&systemBoundaries[0], sizeof(double) * 6);
+        headerFile.read((char*)&kineticEnergyTotal, sizeof(double));
+        headerFile.read((char*)&potentialEnergyTotal, sizeof(double));
 
         // Convert back units
         time /= m_unitTime;
@@ -251,15 +255,19 @@ bool FileManager::saveBinary(int step) {
     }
     ofstream headerFile;
     ofstream lammpsFile;
-    string headerSymlinkFileName = headerFileName;
     headerFileName.replace(starPos, 1, outStepName.str());
     string lammpsFileName = headerFileName;
     lammpsFileName.replace(lammpsFileName.find(".bin"), 4, ".lmp");
 
     // Create symlink
-    headerSymlinkFileName.replace(starPos, 1, "latest");
+    string headerSymlinkFileName = headerFileName.substr(0, headerFileName.find_last_of("/") + 1);
+    headerSymlinkFileName.append(m_configurationName);
+    headerSymlinkFileName.replace(headerSymlinkFileName.find(".cfg"), 4, ".bin");
     string lammpsSymlinkFileName = headerSymlinkFileName;
     lammpsSymlinkFileName.replace(lammpsSymlinkFileName.find(".bin"), 4, ".lmp");
+
+    headerSymlinkFileName.append(processorName.str());
+    lammpsSymlinkFileName.append(processorName.str());
 
     symlink(headerFileName.c_str(), headerSymlinkFileName.c_str());
     symlink(lammpsFileName.c_str(), lammpsSymlinkFileName.c_str());
@@ -281,6 +289,8 @@ bool FileManager::saveBinary(int step) {
     double pressure = m_moleculeSystem->pressure() * m_unitMass / (m_unitLength * m_unitTime * m_unitTime);
     double averageDisplacement = m_moleculeSystem->averageDisplacement() * m_unitLength;
     double averageSquareDisplacement = m_moleculeSystem->averageSquareDisplacement() * m_unitLength * m_unitLength;
+    double kineticEnergyTotal = m_moleculeSystem->kineticEnergyTotal() * m_unitLength * m_unitLength * m_unitMass / (m_unitTime * m_unitTime);
+    double potentialEnergyTotal = m_moleculeSystem->potentialEnergyTotal() * m_unitLength * m_unitLength * m_unitMass / (m_unitTime * m_unitTime);
 
     double systemBoundaries[6];
 
@@ -305,6 +315,8 @@ bool FileManager::saveBinary(int step) {
     headerFile.write((char*)&averageDisplacement, sizeof(double));
     headerFile.write((char*)&averageSquareDisplacement, sizeof(double));
     headerFile.write((char*)&systemBoundaries[0], sizeof(double) * 6);
+    headerFile.write((char*)&kineticEnergyTotal, sizeof(double));
+    headerFile.write((char*)&potentialEnergyTotal, sizeof(double));
 
     // Write to LAMMPS type file
     int nColumns = 16;

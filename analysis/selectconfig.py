@@ -29,14 +29,14 @@ print "Loading config " + configFilePath + "\n"
 config = Config()
 config.readFile(configFilePath)
 
-symlinkNameConfig = "/tmp/selectedconfig.cfg"
+symlinkNameConfig = "/tmp/latestconfig.cfg"
 print "Target: " + configFilePath
 print "Name: " + symlinkNameConfig
 createSymlink(configFilePath, symlinkNameConfig)
 
 saveFilePath, saveFileName = split(config.value("simulation.saveFileName")[0])
 saveFilePath = expanduser(saveFilePath)
-symLinkNameSave = "/tmp/selectedsave"
+symLinkNameSave = "/tmp/latestsavedir"
 print "Target: " + saveFilePath
 print "Name: " + symLinkNameSave
 createSymlink(saveFilePath, symLinkNameSave)

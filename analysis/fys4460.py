@@ -10,7 +10,9 @@ headerType = dtype([("rank", 'int32'),("nProcessors", 'int32'),
                   ("nAtoms", 'int32'), ("temperature", float), ("pressure", float),
                     ("averageDisplacement", float),
                     ("averageSquareDisplacement", float),
-                    ("lowerBounds", float, (3,)), ("upperBounds", float, (3,))])
+                    ("lowerBounds", float, (3,)), ("upperBounds", float, (3,)),
+                    ("kineticEnergy", float),
+                    ("potentialEnergy", float),])
 lammpsHeaderType = dtype([("step", 'int32'),("nAtoms", 'int32'),
                           ("bounds", float, (9,)),
                           ("nColumns", 'int32'),("nChunks", 'int32'),
@@ -58,28 +60,6 @@ def loadHeader(fileName):
     headerFile = open(fileName, "rb")
     header = fromfile(headerFile, dtype=headerType, count=1)
     headerFile.close()
-    
-    nProcessors = header['nProcessors'][0] 
-    print "Has", nProcessors, "processor(s)"
-    
-    if nProcessors > 1:
-        for i in range(1, nProcessors):
-            subFileName = fileName + (".%04d" % i)
-            print "Loading " + split(subFileName)[1]
-            headerFile2 = open(subFileName, "rb")
-            header2 = fromfile(headerFile2, dtype=headerType, count=1)
-            headerFile2.close()
-            
-            header["nAtoms"][0] += header2["nAtoms"][0]
-            header["temperature"][0] += header2["temperature"][0]
-            header["pressure"][0] += header2["pressure"][0]
-            header["averageDisplacement"][0] += header2["averageDisplacement"][0]
-            header["averageSquareDisplacement"][0] += header2["averageSquareDisplacement"][0]
-            
-        header["temperature"][0] /= nProcessors
-        header["pressure"][0] /= nProcessors
-        header["averageDisplacement"][0] /= nProcessors
-        header["averageSquareDisplacement"][0] /= nProcessors
     
     return header
     

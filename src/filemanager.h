@@ -37,6 +37,7 @@ public:
     void setUnitMass(double unitMass);
 
     void setUnitTemperature(double unitTemperature);
+    void setConfigurationName(string configurationName);
     string parseFileName(string fileName);
 protected:
     string m_outFileName;
@@ -52,6 +53,12 @@ protected:
     double m_unitEnergy;
     double m_unitMass;
     double m_unitTemperature;
+
+    string m_configurationName;
 };
+
+inline void FileManager::setConfigurationName(string configurationName) {
+    m_configurationName = configurationName;
+}
 
 #endif // FILEMANAGER_H

@@ -91,26 +91,22 @@ void MoleculeSystem::deleteAtoms() {
 void MoleculeSystem::updateStatistics()
 {
     // Calculate kinetic and potential energy
-    m_totalKineticEnergy = 0;
-    m_totalPotentialEnergy = 0;
+    m_kineticEnergyTotal = 0;
+    m_potentialEnergyTotal = 0;
     int nAtomsTotal = 0;
     for(MoleculeSystemCell* cell : m_processor->cells()) {
         nAtomsTotal += cell->atoms().size();
         for(Atom* atom : cell->atoms()) {
-            m_totalKineticEnergy += 0.5 * atom->mass() * (atom->velocity() * atom->velocity());
-            m_totalPotentialEnergy += atom->potential();
+            m_kineticEnergyTotal += 0.5 * atom->mass() * (atom->velocity() * atom->velocity());
+            m_potentialEnergyTotal += atom->potential();
         }
     }
-    m_temperature = m_totalKineticEnergy / (3./2. * nAtomsTotal);
+    mpi::all_reduce(world, nAtomsTotal, nAtomsTotal, std::plus<int>());
+    mpi::all_reduce(world, m_kineticEnergyTotal, m_kineticEnergyTotal, std::plus<double>());
+    mpi::all_reduce(world, m_potentialEnergyTotal, m_potentialEnergyTotal, std::plus<double>());
+    cout << "allNAtomsTotal " << nAtomsTotal << endl;
+    m_temperature = m_kineticEnergyTotal / (3./2. * nAtomsTotal);
     cout << "Temperature: " << setprecision(25) << m_temperature << endl;
-
-    // Calculate potential energy
-    double totalPotentialEnergy = 0;
-    for(MoleculeSystemCell* cell : m_processor->cells()) {
-        for(Atom* atom : cell->atoms()) {
-            totalPotentialEnergy += atom->potential();
-        }
-    }
 
     // Calculate diffusion constant
     m_averageDisplacement = 0;
@@ -123,18 +119,22 @@ void MoleculeSystem::updateStatistics()
     }
     m_averageSquareDisplacement /= nAtomsTotal;
     m_averageDisplacement /= nAtomsTotal;
+    mpi::all_reduce(world, m_averageSquareDisplacement, m_averageSquareDisplacement, std::plus<double>());
+    mpi::all_reduce(world, m_averageDisplacement, m_averageDisplacement, std::plus<double>());
 
     // Calculate pressure
     rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
     double volume = (sideLengths(0) * sideLengths(1) * sideLengths(2));
     double density = nAtomsTotal / volume;
-    m_pressure = density * m_temperature;
     double volumeThreeInverse = 1. / (3. * volume);
+    m_pressure = 0;
     for(MoleculeSystemCell* cell : m_processor->cells()) {
         for(Atom* atom : cell->atoms()) {
             m_pressure += volumeThreeInverse * atom->localPressure();
         }
     }
+    mpi::all_reduce(world, m_pressure, m_pressure, std::plus<double>());
+    m_pressure += density * m_temperature;
     //    cout << "Pressure " << m_pressure << endl;
 }
 

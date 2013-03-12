@@ -76,6 +76,8 @@ public:
     Integrator* integrator() const {
         return m_integrator;
     }
+    double kineticEnergyTotal();
+    double potentialEnergyTotal();
     double temperature() const {
         return m_temperature;
     }
@@ -157,8 +159,10 @@ protected:
     bool m_skipInitialize;
     Processor* m_processor;
 
-    double m_totalKineticEnergy;
-    double m_totalPotentialEnergy;
+    double m_kineticEnergyTotal;
+    double m_potentialEnergyTotal;
+
+    mpi::communicator world;
 };
 
 inline const irowvec &MoleculeSystem::nCells() const {
@@ -167,6 +171,16 @@ inline const irowvec &MoleculeSystem::nCells() const {
 
 inline Processor* MoleculeSystem::processor() {
     return m_processor;
+}
+
+inline double MoleculeSystem::kineticEnergyTotal()
+{
+    return m_kineticEnergyTotal;
+}
+
+inline double MoleculeSystem::potentialEnergyTotal()
+{
+    return m_potentialEnergyTotal;
 }
 
 #endif // MOLECULESYSTEM_H

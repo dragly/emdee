@@ -52,8 +52,8 @@ for configFilePath in configFilePaths:
     #    atoms = f.get("ArrayOfStructures")
 #        atomMass = 6.6353628e-26
 #        velocityMagnitude = sqrt(atoms["velocity"][:,0]**2 + atoms["velocity"][:,1]**2 + atoms["velocity"][:,2]**2)
-        kineticEnergy = 0 #header["kineticEnergy"]
-        potentialEnergy = 0 # header["potentialEnergy"]
+        kineticEnergy = header["kineticEnergy"]
+        potentialEnergy = header["potentialEnergy"]
     
 #        print "kineticEnergy: ", kineticEnergy
         print "potentialEnergy: ", potentialEnergy

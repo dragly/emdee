@@ -65,6 +65,8 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     fileManager.setUnitTime(unitTime);
     fileManager.setUnitMass(unitMass);
     fileManager.setUnitTemperature(unitTemperature);
+    string configurationName = configurationFileName.substr(configurationFileName.find_last_of("/") + 1);
+    fileManager.setConfigurationName(configurationName);
 
     m_moleculeSystem->setFileManager(&fileManager);
 
