@@ -156,6 +156,9 @@ protected:
     double m_time;
     bool m_skipInitialize;
     Processor* m_processor;
+
+    double m_totalKineticEnergy;
+    double m_totalPotentialEnergy;
 };
 
 inline const irowvec &MoleculeSystem::nCells() const {

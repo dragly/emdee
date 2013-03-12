@@ -53,15 +53,10 @@ def saveAtoms(header, lammpsHeader, atoms, fileName):
     atoms.tofile(lammpsFile)
     lammpsFile.close()
     atoms["position"] *= 1e-10 # Convert back
-
-def loadAtoms(fileName):
-    lammpsFileName = fileName.replace(".bin", ".lmp")
+    
+def loadHeader(fileName):
     headerFile = open(fileName, "rb")
-    lammpsFile = open(lammpsFileName, "rb")
     header = fromfile(headerFile, dtype=headerType, count=1)
-    lammpsHeader = fromfile(lammpsFile, dtype=lammpsHeaderType, count=1)
-    atoms = fromfile(lammpsFile, dtype=dataType)
-    lammpsFile.close()
     headerFile.close()
     
     nProcessors = header['nProcessors'][0] 
@@ -70,18 +65,10 @@ def loadAtoms(fileName):
     if nProcessors > 1:
         for i in range(1, nProcessors):
             subFileName = fileName + (".%04d" % i)
-            subLammpsFileName = subFileName.replace(".bin", ".lmp")
             print "Loading " + split(subFileName)[1]
             headerFile2 = open(subFileName, "rb")
-            lammpsFile2 = open(subLammpsFileName, "rb")
             header2 = fromfile(headerFile2, dtype=headerType, count=1)
-            atoms2 = fromfile(lammpsFile2, dtype=dataType)
             headerFile2.close()
-            lammpsFile2.close()
-            
-            atoms = concatenate([atoms, atoms2])
-            
-            print header2["temperature"][0]
             
             header["nAtoms"][0] += header2["nAtoms"][0]
             header["temperature"][0] += header2["temperature"][0]
@@ -93,6 +80,31 @@ def loadAtoms(fileName):
         header["pressure"][0] /= nProcessors
         header["averageDisplacement"][0] /= nProcessors
         header["averageSquareDisplacement"][0] /= nProcessors
+    
+    return header
+    
+
+def loadAtoms(fileName):
+    header = loadHeader(fileName)
+    lammpsFileName = fileName.replace(".bin", ".lmp")
+    lammpsFile = open(lammpsFileName, "rb")
+    lammpsHeader = fromfile(lammpsFile, dtype=lammpsHeaderType, count=1)
+    atoms = fromfile(lammpsFile, dtype=dataType)
+    lammpsFile.close()
+    
+    nProcessors = header['nProcessors'][0] 
+    print "Has", nProcessors, "processor(s)"
+    
+    if nProcessors > 1:
+        for i in range(1, nProcessors):
+            subFileName = fileName + (".%04d" % i)
+            subLammpsFileName = subFileName.replace(".bin", ".lmp")
+            print "Loading " + split(subFileName)[1]
+            lammpsFile2 = open(subLammpsFileName, "rb")
+            atoms2 = fromfile(lammpsFile2, dtype=dataType)
+            lammpsFile2.close()
+            
+            atoms = concatenate([atoms, atoms2])
     
     atoms["position"] *= 1e-10
     return header, lammpsHeader, atoms

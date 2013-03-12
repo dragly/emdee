@@ -12,6 +12,7 @@
 #include <pwd.h>
 
 // System includes
+#include <unistd.h>
 #include <iomanip>
 #include <armadillo>
 #include <H5Cpp.h>
@@ -250,9 +251,21 @@ bool FileManager::saveBinary(int step) {
     }
     ofstream headerFile;
     ofstream lammpsFile;
+    string headerSymlinkFileName = headerFileName;
     headerFileName.replace(starPos, 1, outStepName.str());
     string lammpsFileName = headerFileName;
     lammpsFileName.replace(lammpsFileName.find(".bin"), 4, ".lmp");
+
+    // Create symlink
+    headerSymlinkFileName.replace(starPos, 1, "latest");
+    string lammpsSymlinkFileName = headerSymlinkFileName;
+    lammpsSymlinkFileName.replace(lammpsSymlinkFileName.find(".bin"), 4, ".lmp");
+
+    symlink(headerFileName.c_str(), headerSymlinkFileName.c_str());
+    symlink(lammpsFileName.c_str(), lammpsSymlinkFileName.c_str());
+
+
+    // Open files for writing
     headerFile.open(headerFileName, ios::out | ios::binary);
     lammpsFile.open(lammpsFileName, ios::out | ios::binary);
 

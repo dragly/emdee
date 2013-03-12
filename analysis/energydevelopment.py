@@ -8,7 +8,7 @@ from pylab import *
 from sys import argv
 from glob import glob
 from time import time
-from fys4460 import loadAtoms, boltzmannConstant
+from fys4460 import loadHeader, boltzmannConstant
 from os.path import expanduser, join, split
 from pylibconfig import Config
 #matplotlib.rcParams["mathtext.default"] = "regular"
@@ -47,15 +47,15 @@ for configFilePath in configFilePaths:
         t1 = time()
         print "Loading data for " + fileName
         #velocities = loadtxt(fileName, skiprows=2, usecols=[4,5,6], unpack=True)
-        header, atoms = loadAtoms(fileName)
+        header = loadHeader(fileName)
     #    f = h5py.File(fileName, "r")
     #    atoms = f.get("ArrayOfStructures")
-        atomMass = 6.6353628e-26
-        velocityMagnitude = sqrt(atoms["velocity"][:,0]**2 + atoms["velocity"][:,1]**2 + atoms["velocity"][:,2]**2)
-        kineticEnergy = 0.5 * atomMass * sum(velocityMagnitude**2)
-        potentialEnergy = sum(atoms["potential"])
+#        atomMass = 6.6353628e-26
+#        velocityMagnitude = sqrt(atoms["velocity"][:,0]**2 + atoms["velocity"][:,1]**2 + atoms["velocity"][:,2]**2)
+        kineticEnergy = 0 #header["kineticEnergy"]
+        potentialEnergy = 0 # header["potentialEnergy"]
     
-        print "kineticEnergy: ", kineticEnergy
+#        print "kineticEnergy: ", kineticEnergy
         print "potentialEnergy: ", potentialEnergy
         kineticEnergies[i] = kineticEnergy
     #    kineticEnergies2[i] = header["kineticEnergy"][0]

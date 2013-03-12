@@ -90,16 +90,18 @@ void MoleculeSystem::deleteAtoms() {
 
 void MoleculeSystem::updateStatistics()
 {
-    // Calculate kinetic energy
-    double totalKineticEnergy = 0;
+    // Calculate kinetic and potential energy
+    m_totalKineticEnergy = 0;
+    m_totalPotentialEnergy = 0;
     int nAtomsTotal = 0;
     for(MoleculeSystemCell* cell : m_processor->cells()) {
         nAtomsTotal += cell->atoms().size();
         for(Atom* atom : cell->atoms()) {
-            totalKineticEnergy += 0.5 * atom->mass() * (atom->velocity() * atom->velocity());
+            m_totalKineticEnergy += 0.5 * atom->mass() * (atom->velocity() * atom->velocity());
+            m_totalPotentialEnergy += atom->potential();
         }
     }
-    m_temperature = totalKineticEnergy / (3./2. * nAtomsTotal);
+    m_temperature = m_totalKineticEnergy / (3./2. * nAtomsTotal);
     cout << "Temperature: " << setprecision(25) << m_temperature << endl;
 
     // Calculate potential energy

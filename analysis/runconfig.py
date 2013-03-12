@@ -12,6 +12,7 @@ import sqlite3
 import datetime
 import os
 import errno
+from glob import glob
 from os.path import expanduser, join, split
 from git import Repo
 from fys4460 import makedirsSilent, createSymlink
@@ -78,6 +79,7 @@ def parseAndRun(executable, configFile, runDir):
 def run(executable, configFile, dateDir, runDir):
     executable = os.path.realpath(executable)
     temp,configFileName = os.path.split(configFile)    
+    configName = configFileName.replace(".cfg", "")
     
     config = Config()
     config.readFile(configFile)
@@ -120,9 +122,10 @@ def run(executable, configFile, dateDir, runDir):
     createSymlink(saveDir, "/tmp/latestsavedir")
     
     runList = []
+    nProcesses = 1
     if config.exists("mpi"):
         nProcesses = config.value("mpi.nProcesses")[0]
-        runList = ["mpirun", "-n", str(nProcesses), executable, configFileName]
+        runList = ["mpirun", "-n", str(nProcesses), executable, configFileName]        
     else:
         runList = [executable, configFileName]
     
