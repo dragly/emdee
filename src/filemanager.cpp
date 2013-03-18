@@ -238,26 +238,9 @@ bool FileManager::loadBinary(string fileName) {
     return true;
 }
 
-bool FileManager::saveBinary(int step) {
-    mpi::communicator world;
-
-    stringstream outStepName;
-    outStepName << setw(6) << setfill('0') << step;
-    string headerFileName = m_outFileName;
-    unsigned found = m_outFileName.find_last_of("/\\");
-    string outPath = m_outFileName.substr(0,found);
-    boost::filesystem::create_directories(outPath);
-    size_t starPos = m_outFileName.find("*");
-    stringstream processorName;
-    processorName << "." << setw(4) << setfill('0') << m_moleculeSystem->processor()->rank();
-    if(m_moleculeSystem->processor()->rank() != 0) {
-        headerFileName.append(processorName.str());
-    }
-    ofstream headerFile;
-    ofstream lammpsFile;
-    headerFileName.replace(starPos, 1, outStepName.str());
-    string lammpsFileName = headerFileName;
-    lammpsFileName.replace(lammpsFileName.find(".bin"), 4, ".lmp");
+bool FileManager::setLatestSymlink(int step) {
+    string headerFileName = headerFileNameFromStep(step);
+    string lammpsFileName = lammpsFileNameFromStep(step);
 
     // Create symlink
     string headerSymlinkFileName = headerFileName.substr(0, headerFileName.find_last_of("/") + 1);
@@ -266,13 +249,64 @@ bool FileManager::saveBinary(int step) {
     string lammpsSymlinkFileName = headerSymlinkFileName;
     lammpsSymlinkFileName.replace(lammpsSymlinkFileName.find(".bin"), 4, ".lmp");
 
-    headerSymlinkFileName.append(processorName.str());
-    lammpsSymlinkFileName.append(processorName.str());
+    headerSymlinkFileName.append(processorName());
+    lammpsSymlinkFileName.append(processorName());
 
-    symlink(headerFileName.c_str(), headerSymlinkFileName.c_str());
-    symlink(lammpsFileName.c_str(), lammpsSymlinkFileName.c_str());
+    unlink(headerSymlinkFileName.c_str());
+    unlink(lammpsSymlinkFileName.c_str());
 
+    // Symlink returns 0 on success
+    if(symlink(headerFileName.c_str(), headerSymlinkFileName.c_str()) || symlink(lammpsFileName.c_str(), lammpsSymlinkFileName.c_str())) {
+        cerr << "Could not create symlink" << endl;
+        return false;
+    }
+    return true;
+}
 
+string FileManager::processorName() {
+    stringstream processorNameLocal;
+    if( m_moleculeSystem->processor()->rank() != 0) {
+        processorNameLocal << "." << setw(4) << setfill('0') << m_moleculeSystem->processor()->rank();
+    }
+    return processorNameLocal.str();
+}
+
+string FileManager::headerFileNameFromStep(int step) {
+    stringstream outStepName;
+    outStepName << setw(6) << setfill('0') << step;
+    string headerFileName = m_outFileName;
+    unsigned found = m_outFileName.find_last_of("/\\");
+    string outPath = m_outFileName.substr(0,found);
+    boost::filesystem::create_directories(outPath);
+    size_t starPos = m_outFileName.find("*");
+    headerFileName.append(processorName());
+    headerFileName.replace(starPos, 1, outStepName.str());
+    return headerFileName;
+}
+
+string FileManager::lammpsFileNameFromStep(int step) {
+    string headerFileName = headerFileNameFromStep(step);
+    string lammpsFileName = headerFileName;
+    lammpsFileName.replace(lammpsFileName.find(".bin"), 4, ".lmp");
+    return lammpsFileName;
+}
+
+bool FileManager::saveProgress(int step, int totalSteps) {
+    if(m_moleculeSystem->processor()->rank() == 0) {
+        ofstream progressFile;
+        progressFile.open("runprogress.txt");
+        progressFile << (double)step / (double)totalSteps << endl;
+        progressFile.close();
+    }
+    return true;
+}
+
+bool FileManager::saveBinary(int step) {
+    mpi::communicator world;
+    ofstream headerFile;
+    ofstream lammpsFile;
+    string headerFileName = headerFileNameFromStep(step);
+    string lammpsFileName = lammpsFileNameFromStep(step);
     // Open files for writing
     headerFile.open(headerFileName, ios::out | ios::binary);
     lammpsFile.open(lammpsFileName, ios::out | ios::binary);

@@ -52,7 +52,7 @@ def saveAtoms(header, lammpsHeader, atoms, fileName):
     header.tofile(headerFile)
     headerFile.close()
     lammpsFileName = fileName.replace(".bin", ".lmp")
-    print "Saving " + split(lammpsFileName)[1] 
+    print "Saving " +  str(len(atoms)) + " atoms to " + split(lammpsFileName)[1] 
     lammpsFile = open(lammpsFileName, "wb")
     lammpsHeader.tofile(lammpsFile)
     atoms.tofile(lammpsFile)

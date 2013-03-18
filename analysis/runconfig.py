@@ -12,6 +12,7 @@ import sqlite3
 import datetime
 import os
 import errno
+import time
 from glob import glob
 from os.path import expanduser, join, split
 from git import Repo
@@ -68,7 +69,7 @@ def parseAndRun(executable, configFile, runDir):
             subConfigRunDir = join(runDir, subConfigFileName).replace(".cfg", "")
             parseAndRun(executable, subConfigFile, subConfigRunDir)
         
-        config.writeFile(join(configFileDir, configFileName))
+        config.writeFile(join(runDir, configFileName))
     else:
         print "This is a singular config. Launching it alone..."
         runConfigFile = join(runDir, configFileName)
@@ -134,8 +135,12 @@ def run(executable, configFile, dateDir, runDir):
     print "RunList: " + str(runList) + "\nRunDir: " + runDir + "\nLogFile: " + logFilePath
     print "Starting..."
 #    try:
+    progressProcessList = ["python", "progressreporter.py", configName + " " + runDir, join(runDir, "runprogress.txt")]
+    progressProcess = subprocess.Popen(progressProcessList)
     process = subprocess.Popen(runList, cwd=runDir, stdout=f, stderr=subprocess.STDOUT)
     process.wait()
+    print "Waiting for progressreporter to finish..."
+    progressProcess.wait()
 #    except Exception:
 #        process.kill()
 #        f.close()

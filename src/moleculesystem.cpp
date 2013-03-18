@@ -217,6 +217,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
             m_fileManager->save(m_step);
         }
 
+        m_fileManager->saveProgress(iStep, nSimulationSteps);
         // Finalize step
         m_time += m_integrator->timeStep();
         iStep++;
@@ -238,10 +239,15 @@ void MoleculeSystem::simulate(int nSimulationSteps)
             m_fileManager->save(m_step);
         }
 
+        m_fileManager->saveProgress(iStep, nSimulationSteps);
         // Finalize step
         m_time += m_integrator->timeStep();
         m_step++;
     }
+    if(m_isSaveEnabled) {
+        m_fileManager->setLatestSymlink(m_step-1);
+    }
+    m_fileManager->saveProgress(iStep, nSimulationSteps);
 }
 
 void MoleculeSystem::obeyBoundaries() {

@@ -19,9 +19,11 @@ nFixed = 0
 for atom in atoms:
     diff = (atom["position"] - systemLengths / 2)
     if(sqrt(diff[0]**2 + diff[1]**2) < cylinderRadius):
-        atom["velocity"] *= 5
+        atom["velocity"][2] = 10*abs(atom["velocity"][2])
+#        atom["isPositionFixed"] = 0
     else:
-        atom["velocity"] *= 0.01
+        atom["velocity"] *= 0.001
+#        atom["isPositionFixed"] = 1
         nFixed += 1
     
 print "Fixed", nFixed, "of", len(atoms), "atoms"
