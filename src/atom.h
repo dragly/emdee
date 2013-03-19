@@ -59,8 +59,8 @@ public:
 
 protected:
     Vector3 m_position;
-    Vector3 m_velocity;
     Vector3 m_force;
+    Vector3 m_velocity;
     Vector3 m_displacement;
     double m_potential;
     double m_localPressure;
@@ -84,8 +84,8 @@ BOOST_CLASS_TRACKING(Atom,track_never)
 // Inlined constructors
 inline Atom::Atom()  :
     m_position(Vector3::createZeros()),
-    m_velocity(Vector3::createZeros()),
     m_force(Vector3::createZeros()),
+    m_velocity(Vector3::createZeros()),
     m_displacement(Vector3::createZeros()),
     m_potential(0.0),
     m_localPressure(0.0),
@@ -97,8 +97,8 @@ inline Atom::Atom()  :
 
 inline Atom::Atom(AtomType atomType) :
     m_position(Vector3::createZeros()),
-    m_velocity(Vector3::createZeros()),
     m_force(Vector3::createZeros()),
+    m_velocity(Vector3::createZeros()),
     m_displacement(Vector3::createZeros()),
     m_potential(0.0),
     m_localPressure(0.0),

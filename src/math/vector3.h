@@ -8,6 +8,8 @@
 
 class Vector3
 {
+protected:
+    double mem_local[3];
 public:
     Vector3();
     Vector3(double x, double y, double z);
@@ -50,8 +52,6 @@ public:
     // Statics
     static Vector3 ones();
     static Vector3 createZeros();
-protected:
-    double mem_local[3];
 
 private:
     friend class boost::serialization::access;

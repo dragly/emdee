@@ -237,9 +237,9 @@ void MoleculeSystem::simulate(int nSimulationSteps)
 
         if(m_isSaveEnabled) {
             m_fileManager->save(m_step);
+            m_fileManager->saveProgress(iStep, nSimulationSteps);
         }
 
-        m_fileManager->saveProgress(iStep, nSimulationSteps);
         // Finalize step
         m_time += m_integrator->timeStep();
         m_step++;
