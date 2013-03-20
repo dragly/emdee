@@ -6,7 +6,11 @@ LIBS += -larmadillo -llapack -lblas -lconfig++ -lhdf5_cpp -lhdf5 -lboost_filesys
 
 LIBS += -lboost_mpi -lboost_serialization
 
+LIBS += -lgcov
+
 COMMON_CXXFLAGS = -std=c++0x
+#COMMON_CXXFLAGS += -fprofile-generate
+#COMMON_CXXFLAGS += -fprofile-use
 QMAKE_CXXFLAGS += $$COMMON_CXXFLAGS
 QMAKE_CXXFLAGS_RELEASE += $$COMMON_CXXFLAGS
 QMAKE_CXXFLAGS_DEBUG += $$COMMON_CXXFLAGS
@@ -32,5 +36,6 @@ mpi {
     QMAKE_CXXFLAGS += $$system(mpicxx --showme:compile) -DMPICH_IGNORE_CXX_SEEK
     QMAKE_CXXFLAGS_RELEASE += $$system(mpicxx --showme:compile) -DMPICH_IGNORE_CXX_SEEK
 }
+
 
 # -ftree-parallelize-loops=4 -ftree-loop-optimize -floop-parallelize-all
