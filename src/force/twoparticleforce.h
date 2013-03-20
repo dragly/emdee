@@ -27,8 +27,14 @@ public:
 
     void setNewtonsThirdLawEnabled(bool enable);
     bool isNewtonsThirdLawEnabled();
+    void setCalculatePressureEnabled(bool enable);
+    bool isCalculatePressureEnabled();
+    void setCalculatePotentialEnabled(bool enable);
+    bool isCalculatePotentialEnabled();
 protected:
     bool m_isNewtonsThirdLawEnabled;
+    bool m_isCalculatePressureEnabled;
+    bool m_isCalculatePotentialEnabled;
 };
 
 inline void TwoParticleForce::setNewtonsThirdLawEnabled(bool enable) {
@@ -37,6 +43,22 @@ inline void TwoParticleForce::setNewtonsThirdLawEnabled(bool enable) {
 
 inline bool TwoParticleForce::isNewtonsThirdLawEnabled() {
     return m_isNewtonsThirdLawEnabled;
+}
+
+inline void TwoParticleForce::setCalculatePressureEnabled(bool enable) {
+    m_isCalculatePressureEnabled = enable;
+}
+
+inline bool TwoParticleForce::isCalculatePressureEnabled() {
+    return m_isCalculatePressureEnabled;
+}
+
+inline void TwoParticleForce::setCalculatePotentialEnabled(bool enable) {
+    m_isCalculatePotentialEnabled = enable;
+}
+
+inline bool TwoParticleForce::isCalculatePotentialEnabled() {
+    return m_isCalculatePotentialEnabled;
 }
 
 #endif // TWOPARTICLEFORCE_H

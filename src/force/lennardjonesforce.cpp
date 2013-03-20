@@ -58,20 +58,23 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const V
     atom1->addForce(1, -y * factor);
     atom1->addForce(2, -z * factor);
 
-    // Potential
-    double tmpPotential = eps4 * (sigmaOverR12 - sigmaOverR6);
-    if(m_isNewtonsThirdLawEnabled) {
-        atom2->addPotential(0.5 * tmpPotential);
+    if(m_isCalculatePotentialEnabled) {
+        // Potential
+        double tmpPotential = eps4 * (sigmaOverR12 - sigmaOverR6);
+        if(m_isNewtonsThirdLawEnabled) {
+            atom2->addPotential(0.5 * tmpPotential);
+        }
+        atom1->addPotential(0.5 * tmpPotential);
     }
-    atom1->addPotential(0.5 * tmpPotential);
 
-    // Pressure
-    double pressure = factor * rSquared; // dot product
-    if(m_isNewtonsThirdLawEnabled) {
-        atom2->addLocalPressure(0.5 * pressure);
+    if(m_isCalculatePressureEnabled) {
+        // Pressure
+        double pressure = factor * rSquared; // dot product
+        if(m_isNewtonsThirdLawEnabled) {
+            atom2->addLocalPressure(0.5 * pressure);
+        }
+        atom1->addLocalPressure(0.5 * pressure);
     }
-    atom1->addLocalPressure(0.5 * pressure);
-
 }
 
 void LennardJonesForce::setPotentialConstant(double potentialConstant)

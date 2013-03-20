@@ -42,6 +42,9 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     // File manager config
     string outFileName;
     config.lookupValue("simulation.saveFileName", outFileName);
+    bool isSaveEnabled = config.lookup("simulation.saveEnabled");
+    bool isCalcualatePressureEnabled = config.lookup("simulation.calculatePressure");
+    bool isCalcualatePotentialEnabled = config.lookup("simulation.calculatePotential");
 
     int nSimulationSteps = config.lookup("simulation.nSimulationSteps");
     double timeStep = config.lookup("integrator.timeStep");
@@ -69,6 +72,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     fileManager.setConfigurationName(configurationName);
 
     m_moleculeSystem->setFileManager(&fileManager);
+    m_moleculeSystem->setSaveEnabled(isSaveEnabled);
 
     Setting& initialization = config.lookup("initialization");
     for(uint i = 0; true; i++) {
@@ -109,6 +113,8 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     LennardJonesForce* force = new LennardJonesForce();
     force->setPotentialConstant(potentialConstant);
     force->setEnergyConstant(energyConstant);
+    force->setCalculatePotentialEnabled(isCalcualatePotentialEnabled);
+    force->setCalculatePressureEnabled(isCalcualatePressureEnabled);
 
     m_moleculeSystem->setInteratomicForce(force);
 
@@ -150,7 +156,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     m_moleculeSystem->setIntegrator(integrator);
 
     // Set up the rest of the system
-    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
+//    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
     cout << "addded" << endl;
     m_moleculeSystem->setupCells(potentialConstant * 3);
     cout << "Setup cells" << endl;

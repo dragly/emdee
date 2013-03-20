@@ -42,11 +42,6 @@ MoleculeSystem::MoleculeSystem() :
     m_boundaries = zeros(2,m_nDimensions);
 }
 
-void MoleculeSystem::loadConfiguration(Config *config)
-{
-    m_isSaveEnabled = config->lookup("simulation.saveEnabled");
-}
-
 bool MoleculeSystem::load(string fileName) {
     m_skipInitialize = true;
     return m_fileManager->load(fileName);
