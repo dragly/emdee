@@ -33,7 +33,11 @@ MoleculeSystem::MoleculeSystem() :
     m_step(0),
     m_time(0),
     m_skipInitialize(false),
-    m_processor(new Processor(this))
+    m_processor(new Processor(this)),
+    m_isCalculatePressureEnabled(true),
+    m_isCalculatePotentialEnabled(true),
+    m_saveEveryNSteps(1),
+    m_nSimulationSteps(0)
 {
     m_interatomicForce = new LennardJonesForce();
     m_integrator = new VelocityVerletIntegrator(this);
@@ -104,33 +108,35 @@ void MoleculeSystem::updateStatistics()
     cout << "Temperature: " << setprecision(25) << m_temperature << endl;
 
     // Calculate diffusion constant
-    m_averageDisplacement = 0;
-    m_averageSquareDisplacement = 0;
-    for(MoleculeSystemCell* cell : m_processor->cells()) {
-        for(Atom* atom : cell->atoms()) {
-            m_averageSquareDisplacement += (atom->displacement() * atom->displacement());
-            m_averageDisplacement += sqrt(m_averageSquareDisplacement);
+    if(shouldTimeStepBeSaved()) { // only do these calculations if the time step is saved - these are currently not used elsewhere
+        m_averageDisplacement = 0;
+        m_averageSquareDisplacement = 0;
+        for(MoleculeSystemCell* cell : m_processor->cells()) {
+            for(Atom* atom : cell->atoms()) {
+                m_averageSquareDisplacement += (atom->displacement() * atom->displacement());
+                m_averageDisplacement += sqrt(m_averageSquareDisplacement);
+            }
         }
-    }
-    m_averageSquareDisplacement /= nAtomsTotal;
-    m_averageDisplacement /= nAtomsTotal;
-    mpi::all_reduce(world, m_averageSquareDisplacement, m_averageSquareDisplacement, std::plus<double>());
-    mpi::all_reduce(world, m_averageDisplacement, m_averageDisplacement, std::plus<double>());
+        m_averageSquareDisplacement /= nAtomsTotal;
+        m_averageDisplacement /= nAtomsTotal;
+        mpi::all_reduce(world, m_averageSquareDisplacement, m_averageSquareDisplacement, std::plus<double>());
+        mpi::all_reduce(world, m_averageDisplacement, m_averageDisplacement, std::plus<double>());
 
-    // Calculate pressure
-    rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
-    double volume = (sideLengths(0) * sideLengths(1) * sideLengths(2));
-    double density = nAtomsTotal / volume;
-    double volumeThreeInverse = 1. / (3. * volume);
-    m_pressure = 0;
-    for(MoleculeSystemCell* cell : m_processor->cells()) {
-        for(Atom* atom : cell->atoms()) {
-            m_pressure += volumeThreeInverse * atom->localPressure();
+        // Calculate pressure
+        rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
+        double volume = (sideLengths(0) * sideLengths(1) * sideLengths(2));
+        double density = nAtomsTotal / volume;
+        double volumeThreeInverse = 1. / (3. * volume);
+        m_pressure = 0;
+        for(MoleculeSystemCell* cell : m_processor->cells()) {
+            for(Atom* atom : cell->atoms()) {
+                m_pressure += volumeThreeInverse * atom->localPressure();
+            }
         }
+        mpi::all_reduce(world, m_pressure, m_pressure, std::plus<double>());
+        m_pressure += density * m_temperature;
+        //    cout << "Pressure " << m_pressure << endl;
     }
-    mpi::all_reduce(world, m_pressure, m_pressure, std::plus<double>());
-    m_pressure += density * m_temperature;
-    //    cout << "Pressure " << m_pressure << endl;
 }
 
 void MoleculeSystem::addAtoms(const vector<Atom *>& atoms)
@@ -159,16 +165,17 @@ void MoleculeSystem::updateForces()
             atom->clearForcePotentialPressure();
         }
     }
-    //    for(MoleculeSystemCell* cell : m_cells) {
-    //        cell->clearAlreadyCalculatedNeighbors();
-    //    }
-    //    for(MoleculeSystemCell* cell : m_cells) {
-    //        cell->updateForces();
-    //    }
+
+    if(shouldTimeStepBeSaved()) {
+        m_interatomicForce->setCalculatePotentialEnabled(m_isCalculatePotentialEnabled);
+        m_interatomicForce->setCalculatePressureEnabled(m_isCalculatePressureEnabled);
+    } else {
+        m_interatomicForce->setCalculatePotentialEnabled(false);
+        m_interatomicForce->setCalculatePressureEnabled(false);
+    }
     for(MoleculeSystemCell* cell : m_processor->cells()) {
         cell->updateForces();
     }
-    //    m_processor->communicateForces();
 }
 
 MoleculeSystemCell* MoleculeSystem::cell(int i, int j, int k) {
@@ -178,7 +185,7 @@ MoleculeSystemCell* MoleculeSystem::cell(int i, int j, int k) {
     return m_cells.at(iPeriodic + jPeriodic * m_nCells(0) + kPeriodic * m_nCells(0) * m_nCells(1));
 }
 
-void MoleculeSystem::simulate(int nSimulationSteps)
+void MoleculeSystem::simulate()
 {
     //    cout << "Factor is " << m_unitLength / m_unitTime << endl;
 
@@ -212,7 +219,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
             m_fileManager->save(m_step);
         }
 
-        m_fileManager->saveProgress(iStep, nSimulationSteps);
+        m_fileManager->saveProgress(iStep, m_nSimulationSteps);
         // Finalize step
         m_time += m_integrator->timeStep();
         iStep++;
@@ -221,7 +228,7 @@ void MoleculeSystem::simulate(int nSimulationSteps)
     if(isOutputEnabled()) {
         cout << "Starting simulation " << endl;
     }
-    for(iStep = iStep; iStep < nSimulationSteps; iStep++) {
+    for(iStep = iStep; iStep < m_nSimulationSteps; iStep++) {
         if(isOutputEnabled()) {
             cout << "Step " << m_step << ".." << endl;
         }
@@ -230,9 +237,9 @@ void MoleculeSystem::simulate(int nSimulationSteps)
         m_integrator->stepForward();
         updateStatistics();
 
-        if(m_isSaveEnabled) {
+        if(shouldTimeStepBeSaved()) {
             m_fileManager->save(m_step);
-            m_fileManager->saveProgress(iStep, nSimulationSteps);
+            m_fileManager->saveProgress(iStep, m_nSimulationSteps);
         }
 
         // Finalize step
@@ -242,7 +249,18 @@ void MoleculeSystem::simulate(int nSimulationSteps)
     if(m_isSaveEnabled) {
         m_fileManager->setLatestSymlink(m_step-1);
     }
-    m_fileManager->saveProgress(iStep, nSimulationSteps);
+    m_fileManager->saveProgress(iStep, m_nSimulationSteps);
+}
+
+bool MoleculeSystem::shouldTimeStepBeSaved()
+{
+    if(m_isSaveEnabled && (m_step % m_saveEveryNSteps) == 0) {
+        return true;
+    }
+    if(m_isSaveEnabled && (m_step % m_saveEveryNSteps) == 0) {
+        return true;
+    }
+    return false;
 }
 
 void MoleculeSystem::obeyBoundaries() {

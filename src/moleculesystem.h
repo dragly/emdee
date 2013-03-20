@@ -38,7 +38,7 @@ public:
     const vector<Atom*> &atoms() const;
     const vector<MoleculeSystemCell*> &cells() const;
     void updateForces();
-    void simulate(int nSimulationSteps);
+    void simulate();
 
     void setBoundaries(double min, double max);
     void setBoundaries(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax);
@@ -115,6 +115,16 @@ public:
     MoleculeSystemCell *cell(int i, int j, int k);
 
     Processor* processor();
+
+    void setCalculatePressureEnabled(bool enable);
+    bool isCalculatePressureEnabled();
+    void setCalculatePotentialEnabled(bool enable);
+    bool isCalculatePotentialEnabled();
+    void setSaveEveryNSteps(int nSteps);
+    int saveEveryNSteps();
+    bool shouldTimeStepBeSaved();
+    void setNSimulationSteps(int nSteps);
+    int nSimulationSteps();
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
@@ -163,7 +173,44 @@ protected:
     double m_potentialEnergyTotal;
 
     mpi::communicator world;
+    bool m_isCalculatePressureEnabled;
+    bool m_isCalculatePotentialEnabled;
+
+    int m_saveEveryNSteps;
+    int m_nSimulationSteps;
 };
+
+inline void MoleculeSystem::setNSimulationSteps(int nSteps) {
+    m_nSimulationSteps = nSteps;
+}
+
+inline int MoleculeSystem::nSimulationSteps() {
+    return m_nSimulationSteps;
+}
+
+inline void MoleculeSystem::setCalculatePressureEnabled(bool enable) {
+    m_isCalculatePressureEnabled = enable;
+}
+
+inline bool MoleculeSystem::isCalculatePressureEnabled() {
+    return m_isCalculatePressureEnabled;
+}
+
+inline void MoleculeSystem::setCalculatePotentialEnabled(bool enable) {
+    m_isCalculatePotentialEnabled = enable;
+}
+
+inline bool MoleculeSystem::isCalculatePotentialEnabled() {
+    return m_isCalculatePotentialEnabled;
+}
+
+inline void MoleculeSystem::setSaveEveryNSteps(int nSteps) {
+    m_saveEveryNSteps = nSteps;
+}
+
+inline int MoleculeSystem::saveEveryNSteps() {
+    return m_saveEveryNSteps;
+}
 
 inline const irowvec &MoleculeSystem::nCells() const {
     return m_nCells;
