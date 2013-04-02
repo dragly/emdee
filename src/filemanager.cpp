@@ -369,7 +369,7 @@ bool FileManager::saveBinary(int step) {
             systemBoundaries[i] /= 1e-10; // LAMMPS wants lengths in Ångstrøm
         }
 
-        cout << "The total number of atoms written to file will be " << nAtomsTotal << endl;
+//        cout << "The total number of atoms written to file will be " << nAtomsTotal << endl;
         int chunkLength = nAtomsTotal * nColumns;
         lammpsFile.write((char*)&step, sizeof(int));
         lammpsFile.write((char*)&nAtomsTotal, sizeof(int));
@@ -388,8 +388,6 @@ bool FileManager::saveBinary(int step) {
     } else {
         world.send(0, 141, nAtoms);
     }
-
-    cout << "long long int " << sizeof(long long int) << endl;
 
     // Write atom data
     for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {

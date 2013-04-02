@@ -2,6 +2,7 @@
 #include <src/configurationparser.h>
 
 #include <iostream>
+#include <iomanip>
 #include <libconfig.h++>
 
 #include <boost/mpi.hpp>
@@ -27,7 +28,7 @@ int main(int argc, char** argv)
     MoleculeSystem system;
     ConfigurationParser parser(&system);
     parser.runConfiguration(configFileName);
-    cout << "Finished after " << timer.elapsed() << " seconds" << endl;
+    cout << "Finished after " << setprecision(5) << timer.elapsed() << " seconds" << endl;
     return 0;
 }
 

@@ -114,6 +114,9 @@ void MoleculeSystemCell::updateForces()
         const vector<Atom*>& neighborAtoms = neighbor->atoms();
         for(Atom* atom1 : m_atoms) {
             for(Atom* atom2 : neighborAtoms) {
+                if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
+                    continue;
+                }
                 interatomicForce->calculateAndApplyForce(atom1, atom2, neighborOffset);
             }
         }
@@ -134,6 +137,9 @@ void MoleculeSystemCell::updateForces()
                 }
             }
             Atom* atom2 = m_atoms[jAtom];
+            if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
+                continue;
+            }
             interatomicForce->calculateAndApplyForce(atom1, atom2);
         }
     }

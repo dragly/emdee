@@ -163,5 +163,6 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     m_moleculeSystem->setupCells(potentialConstant * 3);
     m_moleculeSystem->setNSimulationSteps(nSimulationSteps);
     cout << "Setup cells" << endl;
+
     m_moleculeSystem->simulate();
 }

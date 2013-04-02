@@ -37,7 +37,8 @@ MoleculeSystem::MoleculeSystem() :
     m_isCalculatePressureEnabled(true),
     m_isCalculatePotentialEnabled(true),
     m_saveEveryNSteps(1),
-    m_nSimulationSteps(0)
+    m_nSimulationSteps(0),
+    m_isFinalTimeStep(false)
 {
     m_interatomicForce = new LennardJonesForce();
     m_integrator = new VelocityVerletIntegrator(this);
@@ -100,12 +101,12 @@ void MoleculeSystem::updateStatistics()
             m_potentialEnergyTotal += atom->potential();
         }
     }
+    int nAtomsLocal = nAtomsTotal;
     mpi::all_reduce(world, nAtomsTotal, nAtomsTotal, std::plus<int>());
     mpi::all_reduce(world, m_kineticEnergyTotal, m_kineticEnergyTotal, std::plus<double>());
     mpi::all_reduce(world, m_potentialEnergyTotal, m_potentialEnergyTotal, std::plus<double>());
-    cout << "allNAtomsTotal " << nAtomsTotal << endl;
     m_temperature = m_kineticEnergyTotal / (3./2. * nAtomsTotal);
-    cout << "Temperature: " << setprecision(25) << m_temperature << endl;
+    cout << "Atoms: " << nAtomsLocal << " of " << nAtomsTotal << ". Temperature: " << setprecision(5) << m_temperature  << endl;
 
     // Calculate diffusion constant
     if(shouldTimeStepBeSaved()) { // only do these calculations if the time step is saved - these are currently not used elsewhere
@@ -209,6 +210,8 @@ void MoleculeSystem::simulate()
         addAtoms(cell->atoms());
     }
 
+    mpi::timer timer;
+    timer.restart();
     int iStep = 0;
     // Set up integrator if m_skipInitialize is not set (because file was loaded)
     if(!m_skipInitialize) {
@@ -217,9 +220,9 @@ void MoleculeSystem::simulate()
         updateStatistics();
         if(m_isSaveEnabled) {
             m_fileManager->save(m_step);
+            m_fileManager->saveProgress(iStep, m_nSimulationSteps);
         }
 
-        m_fileManager->saveProgress(iStep, m_nSimulationSteps);
         // Finalize step
         m_time += m_integrator->timeStep();
         iStep++;
@@ -232,6 +235,7 @@ void MoleculeSystem::simulate()
         if(isOutputEnabled()) {
             cout << "Step " << m_step << ".." << endl;
         }
+        m_isFinalTimeStep = (iStep == (m_nSimulationSteps - 1));
 
         applyModifiers();
         m_integrator->stepForward();
@@ -239,17 +243,20 @@ void MoleculeSystem::simulate()
 
         if(shouldTimeStepBeSaved()) {
             m_fileManager->save(m_step);
+        }
+        if(m_isSaveEnabled) {
             m_fileManager->saveProgress(iStep, m_nSimulationSteps);
         }
 
+        cout << "Time used so far: " << setprecision(5) << timer.elapsed() << endl;
         // Finalize step
         m_time += m_integrator->timeStep();
         m_step++;
     }
     if(m_isSaveEnabled) {
         m_fileManager->setLatestSymlink(m_step-1);
+        m_fileManager->saveProgress(iStep, m_nSimulationSteps);
     }
-    m_fileManager->saveProgress(iStep, m_nSimulationSteps);
 }
 
 bool MoleculeSystem::shouldTimeStepBeSaved()
@@ -257,7 +264,7 @@ bool MoleculeSystem::shouldTimeStepBeSaved()
     if(m_isSaveEnabled && (m_step % m_saveEveryNSteps) == 0) {
         return true;
     }
-    if(m_isSaveEnabled && (m_step % m_saveEveryNSteps) == 0) {
+    if(m_isSaveEnabled && m_isFinalTimeStep) {
         return true;
     }
     return false;
@@ -457,7 +464,7 @@ void MoleculeSystem::refreshCellContents() {
         allAtoms.insert(allAtoms.end(), cell->atoms().begin(), cell->atoms().end());
         cell->clearAtoms();
     }
-    cout << "Refreshing cell contents with " << allAtoms.size() << " atoms" << endl;
+//    cout << "Refreshing cell contents with " << allAtoms.size() << " atoms" << endl;
     addAtomsToCorrectCells(allAtoms);
 }
 

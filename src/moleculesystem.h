@@ -178,6 +178,7 @@ protected:
 
     int m_saveEveryNSteps;
     int m_nSimulationSteps;
+    bool m_isFinalTimeStep;
 };
 
 inline void MoleculeSystem::setNSimulationSteps(int nSteps) {

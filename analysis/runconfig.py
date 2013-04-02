@@ -116,11 +116,11 @@ def run(executable, configFile, dateDir, runDir):
     database.close()
     
     # Create symlinks
-    createSymlink(os.getcwd() + "/" + runDir, "/tmp/latest")
-    saveFile = config.value("simulation.saveFileName")[0]
-    saveFile = expanduser(saveFile)
-    saveDir = os.path.dirname(saveFile)
-    createSymlink(saveDir, "/tmp/latestsavedir")
+#    createSymlink(os.getcwd() + "/" + runDir, "/tmp/latest")
+#    saveFile = config.value("simulation.saveFileName")[0]
+#    saveFile = expanduser(saveFile)
+#    saveDir = os.path.dirname(saveFile)
+#    createSymlink(saveDir, "/tmp/latestsavedir")
     
     runList = []
     nProcesses = 1
@@ -144,6 +144,8 @@ def run(executable, configFile, dateDir, runDir):
 #    except Exception:
 #        process.kill()
 #        f.close()
+
+    subprocess.call(["python", "selectconfig.py", configFile])
         
     f.close()
 
