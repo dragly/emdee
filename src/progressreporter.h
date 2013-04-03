@@ -4,10 +4,12 @@
 #include <exception>
 
 #include <stdio.h>
+// The curl library must be installed, do something like sudo apt-get install libcurl4-openssl-dev
 #include <curl/curl.h>
 #include <time.h>
 #include <iostream>
 #include <string>
+// <thread> is a c++11 feature, you need to compile with -std=c++0x
 #include <thread>
 
 using namespace std;
