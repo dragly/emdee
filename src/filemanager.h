@@ -43,7 +43,6 @@ public:
     string headerFileNameFromStep(int step);
     string processorName();
     string lammpsFileNameFromStep(int step);
-    bool saveProgress(int step, int totalSteps);
 protected:
     string m_outFileName;
 

@@ -23,6 +23,9 @@ void AndersenThermostat::apply()
     double targetTemperature = m_targetTemperature;
     for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
         for(Atom* atom : cell->atoms()) {
+            if(atom->isPositionFixed()) {
+                continue;
+            }
             double randomNumber = random->ran2();
             if(randomNumber < dt / tau) {
                 Vector3 velocity(randn<rowvec>(m_nDimensions));

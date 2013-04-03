@@ -17,7 +17,7 @@ lammpsHeaderType = dtype([("step", 'int32'),("nAtoms", 'int32'),
                           ("bounds", float, (9,)),
                           ("nColumns", 'int32'),("nChunks", 'int32'),
                           ("chunkLength", 'int32')])
-dataType = dtype([("type", float),
+dataType = dtype([("id", float),("type", float),
                   ("position", float, (3,)),
                   ("velocity", float, (3,)),
                     ("force", float, (3,)),
@@ -45,6 +45,7 @@ def saveAtoms(header, lammpsHeader, atoms, fileName):
     header["nProcessors"] = 1
     header["nAtoms"] = len(atoms)
     lammpsHeader["nAtoms"] = len(atoms)
+    lammpsHeader["chunkLength"] = len(atoms) * lammpsHeader["nColumns"]
     atoms["position"] *= 1e10 # Convert to LAMMPS units
     
     headerFile = open(fileName, "wb")
@@ -109,4 +110,5 @@ def createSymlink(source, destination):
     os.symlink(source, destination)
     
 if __name__ == "__main__":
-    header, lammpsHeader, atoms = loadAtoms("frozen.bin")
+    from sys import argv
+    header, lammpsHeader, atoms = loadAtoms(argv[1])

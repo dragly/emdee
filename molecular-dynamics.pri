@@ -8,6 +8,8 @@ LIBS += -lboost_mpi -lboost_serialization
 
 LIBS += -lgcov
 
+LIBS += -lcurl
+
 COMMON_CXXFLAGS = -std=c++0x
 #COMMON_CXXFLAGS += -fprofile-generate
 #COMMON_CXXFLAGS += -fprofile-use

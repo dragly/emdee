@@ -38,7 +38,7 @@ public:
     Vector3& operator= (const Vector3 &vector2);
     Vector3& operator+= (const Vector3 &vector2);
     Vector3& operator-= (const Vector3 &vector2);
-    friend double operator* (const Vector3 &vector1, const Vector3 &vector2);
+    friend Vector3 operator* (const Vector3 &vector1, const Vector3 &vector2);
     friend bool operator== (const Vector3 &vector1, const Vector3 &vector2);
     friend bool operator!= (const Vector3 &vector1, const Vector3 &vector2);
 
@@ -53,11 +53,16 @@ public:
     static Vector3 ones();
     static Vector3 createZeros();
 
+    static double dot(const Vector3 &vector1, const Vector3 &vector2);
 private:
     friend class boost::serialization::access;
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version);
 };
+
+inline double dot(const Vector3 &vector1, const Vector3 &vector2) {
+    return Vector3::dot(vector1, vector2);
+}
 
 BOOST_CLASS_IMPLEMENTATION(Vector3,object_serializable)
 BOOST_IS_BITWISE_SERIALIZABLE(Vector3)
@@ -206,8 +211,12 @@ inline Vector3 operator-(const Vector3 &vector1)
  * \param vector2
  * \return
  */
-inline double operator* (const Vector3 &vector1, const Vector3 &vector2)
+inline Vector3 operator* (const Vector3 &vector1, const Vector3 &vector2)
 {
+    return Vector3(vector1.mem_local[0] * vector2.mem_local[0], vector1.mem_local[1] * vector2.mem_local[1], vector1.mem_local[2] * vector2.mem_local[2]);
+}
+
+inline double Vector3::dot(const Vector3 &vector1, const Vector3 &vector2) {
     return (vector1.mem_local[0] * vector2.mem_local[0] + vector1.mem_local[1] * vector2.mem_local[1] + vector1.mem_local[2] * vector2.mem_local[2]);
 }
 

@@ -26,12 +26,24 @@ public:
 
     void setNCells(int nCells);
     void setB(double b);
+    void setIdCounter(int idCounter);
+    int idCounter();
 protected:
     double m_unitLength;
 
     mat m_lastBoundaries;
 
     int m_nDimensions;
+    int m_idCounter;
 };
+
+inline void Generator::setIdCounter(int idCounter) {
+    m_idCounter = idCounter;
+}
+
+inline int Generator::idCounter()
+{
+    return m_idCounter;
+}
 
 #endif // GENERATOR_H

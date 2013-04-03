@@ -28,7 +28,8 @@ SOURCES += main.cpp \
     configurationparser.cpp \
     math/vector3.cpp \
     processor.cpp \
-    range.cpp
+    range.cpp \
+    modifier/constantforce.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -49,7 +50,9 @@ HEADERS += \
     configurationparser.h \
     math/vector3.h \
     processor.h \
-    range.h
+    range.h \
+    modifier/constantforce.h \
+    progressreporter.h
 
 #CURRENT_BRANCH = $$system(git rev-parse --abbrev-ref HEAD)
 

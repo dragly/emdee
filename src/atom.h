@@ -37,6 +37,7 @@ public:
     inline double potential() const;
     inline double localPressure() const;
     inline int cellID() const;
+    inline int id() const;
     inline double mass() const;
     inline void addLocalPressure(double pressure);
     inline void addForce(int component, double force);
@@ -57,6 +58,7 @@ public:
     inline bool isPositionFixed();
     inline void setPositionFixed(bool fixed);
 
+    void setID(int id);
 protected:
     Vector3 m_position;
     Vector3 m_force;
@@ -69,6 +71,7 @@ protected:
     AtomType m_type;
 
     bool m_isPositionFixed;
+    int m_id;
 
 private:
     friend class boost::serialization::access;
@@ -91,7 +94,8 @@ inline Atom::Atom()  :
     m_localPressure(0.0),
     m_cellID(-999),
     m_type(AtomType::argon()),
-    m_isPositionFixed(false)
+    m_isPositionFixed(false),
+    m_id(-1)
 {
 }
 
@@ -104,7 +108,8 @@ inline Atom::Atom(AtomType atomType) :
     m_localPressure(0.0),
     m_cellID(-999),
     m_type(atomType),
-    m_isPositionFixed(false)
+    m_isPositionFixed(false),
+    m_id(-1)
 {
 }
 
@@ -113,6 +118,7 @@ inline void Atom::serialize(Archive & ar, const unsigned int)
 {
     ar & m_position;
     ar & m_velocity;
+    ar & m_id;
     //        ar & m_force;
 //    ar & m_displacement;
     //        ar & m_mass;
@@ -150,6 +156,14 @@ inline void Atom::addForce(const Vector3 &force)
 
 inline void Atom::setForce(const Vector3 &force) {
     m_force = force;
+}
+
+inline void Atom::setID(int id) {
+    m_id = id;
+}
+
+inline int Atom::id() const {
+    return m_id;
 }
 
 inline void Atom::setVelocity(const Vector3 &velocity)
@@ -205,6 +219,7 @@ inline const AtomType& Atom::type() const
 
 inline void Atom::communicationClone(const Atom &other)
 {
+    this->m_id = other.m_id;
     this->m_position = other.m_position;
 //    this->m_displacement = other.m_displacement;
     this->m_velocity = other.m_velocity;

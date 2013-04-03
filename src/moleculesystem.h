@@ -9,6 +9,7 @@ class TwoParticleForce;
 class FileManager;
 class Modifier;
 class Processor;
+class ProgressReporter;
 
 #include <src/math/vector3.h>
 
@@ -125,6 +126,7 @@ public:
     bool shouldTimeStepBeSaved();
     void setNSimulationSteps(int nSteps);
     int nSimulationSteps();
+    void setProgressReporter(ProgressReporter* progressReporter);
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
@@ -179,6 +181,7 @@ protected:
     int m_saveEveryNSteps;
     int m_nSimulationSteps;
     bool m_isFinalTimeStep;
+    ProgressReporter *m_progressReporter;
 };
 
 inline void MoleculeSystem::setNSimulationSteps(int nSteps) {
@@ -187,6 +190,11 @@ inline void MoleculeSystem::setNSimulationSteps(int nSteps) {
 
 inline int MoleculeSystem::nSimulationSteps() {
     return m_nSimulationSteps;
+}
+
+inline void MoleculeSystem::setProgressReporter(ProgressReporter *progressReporter)
+{
+    m_progressReporter = progressReporter;
 }
 
 inline void MoleculeSystem::setCalculatePressureEnabled(bool enable) {

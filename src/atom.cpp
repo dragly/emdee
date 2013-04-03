@@ -7,6 +7,7 @@
 
 void Atom::clone(const Atom &other)
 {
+    this->m_id = other.m_id;
     this->m_position = other.m_position;
     this->m_cellID = other.m_cellID;
     this->m_displacement = other.m_displacement;

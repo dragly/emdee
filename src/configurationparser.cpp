@@ -10,6 +10,8 @@
 #include <src/filemanager.h>
 #include <src/modifier/berendsenthermostat.h>
 #include <src/modifier/andersenthermostat.h>
+#include <src/modifier/constantforce.h>
+#include <src/progressreporter.h>
 
 // System includes
 #include <boost/mpi.hpp>
@@ -38,6 +40,8 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     double unitTime = config.lookup("units.time");
     double unitMass = config.lookup("units.mass");
     double unitTemperature = config.lookup("units.temperature");
+    double unitForce = unitLength * unitMass / (unitTime * unitTime);
+    double unitEnergy = unitLength * unitLength * unitMass / (unitTime * unitTime);
 
     // File manager config
     string outFileName;
@@ -57,7 +61,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     double potentialConstant = config.lookup("system.potentialConstant");
     potentialConstant /= unitLength;
     double energyConstant = config.lookup("system.energyConstant");
-    energyConstant /= (unitMass * unitLength * unitLength / (unitTime * unitTime));
+    energyConstant /= unitEnergy;
 
     // Set up initial system
     // Set up molecule system
@@ -113,6 +117,10 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
         }
     }
 
+    // Set up progressreporter
+    ProgressReporter* reporter = new ProgressReporter("dragly", configurationFileName);
+    m_moleculeSystem->setProgressReporter(reporter);
+
     // Set up force
     LennardJonesForce* force = new LennardJonesForce();
     force->setPotentialConstant(potentialConstant);
@@ -132,23 +140,33 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
         }
         cout << "Found modifier " << modifierName << endl;
         if(modifierName == "berendsenThermostat") {
-            BerendsenThermostat thermostat(m_moleculeSystem);
+            BerendsenThermostat* thermostat = new BerendsenThermostat(m_moleculeSystem);
             double targetTemperature = modifiers[i]["targetTemperature"];
             targetTemperature /= unitTemperature;
             double relaxationTime = modifiers[i]["relaxationTime"];
             relaxationTime /= unitTime;
-            thermostat.setTargetTemperature(targetTemperature);
-            thermostat.setRelaxationTime(relaxationTime);
-            m_moleculeSystem->addModifier(&thermostat);
+            thermostat->setTargetTemperature(targetTemperature);
+            thermostat->setRelaxationTime(relaxationTime);
+            m_moleculeSystem->addModifier(thermostat);
         } else if(modifierName == "andersenThermostat") {
-            AndersenThermostat thermostat(m_moleculeSystem);
+            AndersenThermostat* thermostat = new AndersenThermostat(m_moleculeSystem);
             double targetTemperature = modifiers[i]["targetTemperature"];
             targetTemperature /= unitTemperature;
             double collisionTime = modifiers[i]["collisionTime"];
             collisionTime /= unitTime;
-            thermostat.setTargetTemperature(targetTemperature);
-            thermostat.setCollisionTime(collisionTime);
-            m_moleculeSystem->addModifier(&thermostat);
+            thermostat->setTargetTemperature(targetTemperature);
+            thermostat->setCollisionTime(collisionTime);
+            m_moleculeSystem->addModifier(thermostat);
+        } else if(modifierName == "constantForce") {
+            ConstantForce* constantForce = new ConstantForce(m_moleculeSystem);
+            Vector3 forceVector;
+            for(int j = 0; j < 3; j++) {
+                forceVector[j] = modifiers[i]["forceVector"][j];
+            }
+            forceVector /= unitForce;
+            cout << "Setting constant force to " << forceVector << endl;
+            constantForce->setForceVector(forceVector);
+            m_moleculeSystem->addModifier(constantForce);
         }
     }
 

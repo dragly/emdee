@@ -8,7 +8,8 @@
 
 Generator::Generator() :
     m_unitLength(1),
-    m_nDimensions(3)
+    m_nDimensions(3),
+    m_idCounter(1)
 {
 }
 
@@ -48,7 +49,9 @@ vector<Atom*> Generator::generateFcc(double sideLength, int nCells, AtomType ato
                     position = offset + face;
                     atom->setPosition(position);
                     atom->clearDisplacement();
+                    atom->setID(m_idCounter);
                     atomList.push_back(atom);
+                    m_idCounter++;
                 }
                 offset(2) += sideLength;
             }
@@ -94,7 +97,7 @@ void Generator::boltzmannDistributeVelocities(double temperature, const vector<A
     for(Atom* atom : atoms) {
         Vector3 newVelocity = atom->velocity() - velocityToRemove;
         atom->setVelocity(newVelocity);
-        averageVelocity += (newVelocity * newVelocity) / atoms.size();
+        averageVelocity += dot(newVelocity, newVelocity) / atoms.size();
         totalVelocity += newVelocity;
     }
     cout << "Boltzmann distributed velocities for " << atoms.size() << " atoms!" << endl;

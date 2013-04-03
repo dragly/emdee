@@ -21,6 +21,9 @@ void BerendsenThermostat::apply()
     double gamma = sqrt(1 + dt / tau * (m_targetTemperature / currentTemperature - 1));
     for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
         for(Atom* atom : cell->atoms()) {
+            if(atom->isPositionFixed()) {
+                continue;
+            }
             atom->setVelocity(gamma * atom->velocity());
         }
     }

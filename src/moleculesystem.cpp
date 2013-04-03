@@ -10,6 +10,7 @@
 #include <src/filemanager.h>
 #include <src/modifier/modifier.h>
 #include <src/processor.h>
+#include <src/progressreporter.h>
 
 // System headers
 #include <fstream>
@@ -40,6 +41,7 @@ MoleculeSystem::MoleculeSystem() :
     m_nSimulationSteps(0),
     m_isFinalTimeStep(false)
 {
+    m_progressReporter = new ProgressReporter("dragly", "somerun");
     m_interatomicForce = new LennardJonesForce();
     m_integrator = new VelocityVerletIntegrator(this);
     m_fileManager = new FileManager(this);
@@ -90,19 +92,31 @@ void MoleculeSystem::deleteAtoms() {
 
 void MoleculeSystem::updateStatistics()
 {
-    // Calculate kinetic and potential energy
-    m_kineticEnergyTotal = 0;
-    m_potentialEnergyTotal = 0;
+    // Calculate total drift
+    Vector3 totalDrift;
+    totalDrift.zeros();
     int nAtomsTotal = 0;
     for(MoleculeSystemCell* cell : m_processor->cells()) {
         nAtomsTotal += cell->atoms().size();
         for(Atom* atom : cell->atoms()) {
-            m_kineticEnergyTotal += 0.5 * atom->mass() * (atom->velocity() * atom->velocity());
-            m_potentialEnergyTotal += atom->potential();
+            totalDrift += atom->velocity();
         }
     }
     int nAtomsLocal = nAtomsTotal;
     mpi::all_reduce(world, nAtomsTotal, nAtomsTotal, std::plus<int>());
+
+    Vector3 averageDrift = totalDrift / nAtomsTotal;
+
+    // Calculate kinetic and potential energy
+    m_kineticEnergyTotal = 0;
+    m_potentialEnergyTotal = 0;
+    for(MoleculeSystemCell* cell : m_processor->cells()) {
+        for(Atom* atom : cell->atoms()) {
+            Vector3 nonDriftVelocity = atom->velocity() - averageDrift;
+            m_kineticEnergyTotal += 0.5 * atom->mass() * (dot(nonDriftVelocity, nonDriftVelocity));
+            m_potentialEnergyTotal += atom->potential();
+        }
+    }
     mpi::all_reduce(world, m_kineticEnergyTotal, m_kineticEnergyTotal, std::plus<double>());
     mpi::all_reduce(world, m_potentialEnergyTotal, m_potentialEnergyTotal, std::plus<double>());
     m_temperature = m_kineticEnergyTotal / (3./2. * nAtomsTotal);
@@ -114,7 +128,7 @@ void MoleculeSystem::updateStatistics()
         m_averageSquareDisplacement = 0;
         for(MoleculeSystemCell* cell : m_processor->cells()) {
             for(Atom* atom : cell->atoms()) {
-                m_averageSquareDisplacement += (atom->displacement() * atom->displacement());
+                m_averageSquareDisplacement += (dot(atom->displacement(), atom->displacement()));
                 m_averageDisplacement += sqrt(m_averageSquareDisplacement);
             }
         }
@@ -220,7 +234,9 @@ void MoleculeSystem::simulate()
         updateStatistics();
         if(m_isSaveEnabled) {
             m_fileManager->save(m_step);
-            m_fileManager->saveProgress(iStep, m_nSimulationSteps);
+            if(m_processor->rank() == 0) {
+                m_progressReporter->reportProgress(0);
+            }
         }
 
         // Finalize step
@@ -245,7 +261,9 @@ void MoleculeSystem::simulate()
             m_fileManager->save(m_step);
         }
         if(m_isSaveEnabled) {
-            m_fileManager->saveProgress(iStep, m_nSimulationSteps);
+            if(m_processor->rank() == 0) {
+                m_progressReporter->reportProgress((double)iStep / (double)m_nSimulationSteps);
+            }
         }
 
         cout << "Time used so far: " << setprecision(5) << timer.elapsed() << endl;
@@ -255,7 +273,9 @@ void MoleculeSystem::simulate()
     }
     if(m_isSaveEnabled) {
         m_fileManager->setLatestSymlink(m_step-1);
-        m_fileManager->saveProgress(iStep, m_nSimulationSteps);
+        if(m_processor->rank() == 0) {
+            m_progressReporter->reportProgress(1);
+        }
     }
 }
 

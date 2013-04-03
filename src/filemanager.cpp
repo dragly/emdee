@@ -188,16 +188,19 @@ bool FileManager::loadBinary(string fileName) {
         for(int i = 0; i < nAtoms; i++) {
             //        cout << "Reading atom " << i << endl;
             Atom* atom = new Atom(AtomType::argon());
+            double atomID = -1;
             Vector3 position;
             Vector3 velocity;
             Vector3 force;
             Vector3 displacement;
             double potential = 0;
             double isPositionFixed;
-            double id = 0;
+            double cellID = 0;
             double atomType = 0;
 
-            lammpsFile.read((char*)&atomType, sizeof(double)); // Why is the atomType a double? Because this is the standard in LAMMPS files, which are now used as output
+             // Why is the atomType a double? Because this is the standard in LAMMPS files, which are now used as output
+            lammpsFile.read((char*)&atomID, sizeof(double));
+            lammpsFile.read((char*)&atomType, sizeof(double));
             lammpsFile.read((char*)&position(0), sizeof(double));
             lammpsFile.read((char*)&position(1), sizeof(double));
             lammpsFile.read((char*)&position(2), sizeof(double));
@@ -212,7 +215,7 @@ bool FileManager::loadBinary(string fileName) {
             lammpsFile.read((char*)&displacement(2), sizeof(double));
             lammpsFile.read((char*)&potential, sizeof(double));
             lammpsFile.read((char*)&isPositionFixed, sizeof(double));
-            lammpsFile.read((char*)&id, sizeof(double));
+            lammpsFile.read((char*)&cellID, sizeof(double));
 
             //        cout << "Atom type is " << atomType << endl;
 
@@ -221,6 +224,7 @@ bool FileManager::loadBinary(string fileName) {
             velocity /= (m_unitLength / m_unitTime);
             force /= (m_unitLength * m_unitMass / (m_unitTime * m_unitTime));
 
+            atom->setID(atomID);
             atom->setPosition(position);
             atom->setVelocity(velocity);
             atom->addForce(force);
@@ -291,16 +295,6 @@ string FileManager::lammpsFileNameFromStep(int step) {
     return lammpsFileName;
 }
 
-bool FileManager::saveProgress(int step, int totalSteps) {
-    if(m_moleculeSystem->processor()->rank() == 0) {
-        ofstream progressFile;
-        progressFile.open("runprogress.txt");
-        progressFile << (double)step / (double)totalSteps << endl;
-        progressFile.close();
-    }
-    return true;
-}
-
 bool FileManager::saveBinary(int step) {
     mpi::communicator world;
     ofstream headerFile;
@@ -353,7 +347,7 @@ bool FileManager::saveBinary(int step) {
     headerFile.write((char*)&potentialEnergyTotal, sizeof(double));
 
     // Write to LAMMPS type file
-    int nColumns = 16;
+    int nColumns = 17;
     int nChunks = 1;
     double shear = 0.0;
 
@@ -392,17 +386,19 @@ bool FileManager::saveBinary(int step) {
     // Write atom data
     for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
         for(Atom* atom : cell->atoms()) {
+            double atomID = atom->id();
             Vector3 position = atom->position() * m_unitLength;
             Vector3 velocity = atom->velocity() * (m_unitLength / m_unitTime);
             Vector3 force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
             Vector3 displacement = atom->displacement() * m_unitLength;
             double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
             double isPositionFixed = (double)atom->isPositionFixed();
-            double id = (double)atom->cellID();
+            double cellID = (double)atom->cellID();
             double atomType = 18;
 
             position /= 1e-10; // LAMMPS wants lengths in Ångstrøm
 
+            lammpsFile.write((char*)&atomID, sizeof(double));
             lammpsFile.write((char*)&atomType, sizeof(double));
             lammpsFile.write((char*)&position(0), sizeof(double));
             lammpsFile.write((char*)&position(1), sizeof(double));
@@ -418,7 +414,7 @@ bool FileManager::saveBinary(int step) {
             lammpsFile.write((char*)&displacement(2), sizeof(double));
             lammpsFile.write((char*)&potential, sizeof(double));
             lammpsFile.write((char*)&isPositionFixed, sizeof(double));
-            lammpsFile.write((char*)&id, sizeof(double));
+            lammpsFile.write((char*)&cellID, sizeof(double));
         }
     }
     headerFile.close();

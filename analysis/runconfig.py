@@ -135,12 +135,12 @@ def run(executable, configFile, dateDir, runDir):
     print "RunList: " + str(runList) + "\nRunDir: " + runDir + "\nLogFile: " + logFilePath
     print "Starting..."
 #    try:
-    progressProcessList = ["python", "progressreporter.py", configName + " " + runDir, join(runDir, "runprogress.txt")]
-    progressProcess = subprocess.Popen(progressProcessList)
+#    progressProcessList = ["python", "progressreporter.py", configName + " " + runDir, join(runDir, "runprogress.txt")]
+#    progressProcess = subprocess.Popen(progressProcessList)
     process = subprocess.Popen(runList, cwd=runDir, stdout=f, stderr=subprocess.STDOUT)
     process.wait()
-    print "Waiting for progressreporter to finish..."
-    progressProcess.wait()
+#    print "Waiting for progressreporter to finish..."
+#    progressProcess.wait()
 #    except Exception:
 #        process.kill()
 #        f.close()
