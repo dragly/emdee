@@ -128,7 +128,7 @@ def run(executable, configFile, dateDir, runDir):
         nProcesses = config.value("mpi.nProcesses")[0]
         runList = ["mpirun", "-n", str(nProcesses), "nice", "-n", "19", executable, configFileName]        
     else:
-        runList = [executable, "nice", "-n", "19", configFileName]
+        runList = ["nice", "-n", "19", executable, configFileName]
     
     logFilePath = join(runDir, "run_" + configFileName.replace(".cfg", "") + ".log")
     f = open(logFilePath, "w")

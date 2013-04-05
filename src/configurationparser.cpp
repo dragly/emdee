@@ -31,7 +31,12 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     mpi::communicator world;
     for(int rank = 0; rank < world.size(); rank++) {
         if(world.rank() == rank) {
-            config.readFile(configurationFileName.c_str());
+            try {
+                config.readFile(configurationFileName.c_str());
+            } catch (libconfig::FileIOException) {
+                cerr << "Could not open config file " << configurationFileName << endl;
+                exit(3121);
+            }
         }
         world.barrier();
     }
