@@ -56,7 +56,7 @@ protected:
     int m_nDimensions;
     int pow3nDimensions;
     irowvec m_indices;
-    MoleculeSystem* moleculeSystem;
+    MoleculeSystem* m_moleculeSystem;
 //    bool m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
 
     mat m_boundaries;

@@ -1,14 +1,15 @@
 #ifndef CONSTANTFORCE_H
 #define CONSTANTFORCE_H
 
-#include <src/modifier/modifier.h>
 #include <src/math/vector3.h>
+#include <src/force/singleparticleforce.h>
 
-class ConstantForce : public Modifier
+class ConstantForce : public SingleParticleForce
 {
 public:
-    ConstantForce(MoleculeSystem *moleculeSystem);
-    void apply();
+    ConstantForce();
+
+    void apply(Atom *atom);
     void setForceVector(Vector3 forceVector);
 private:
     Vector3 m_forceVector;

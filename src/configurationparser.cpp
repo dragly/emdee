@@ -10,7 +10,7 @@
 #include <src/filemanager.h>
 #include <src/modifier/berendsenthermostat.h>
 #include <src/modifier/andersenthermostat.h>
-#include <src/modifier/constantforce.h>
+#include <src/force/constantforce.h>
 #include <src/progressreporter.h>
 
 // System includes
@@ -126,7 +126,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     force->setPotentialConstant(potentialConstant);
     force->setEnergyConstant(energyConstant);
 
-    m_moleculeSystem->setInteratomicForce(force);
+    m_moleculeSystem->addTwoParticleForce(force);
 
     // Set up modifiers
     Setting& modifiers = config.lookup("modifiers");
@@ -158,7 +158,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
             thermostat->setCollisionTime(collisionTime);
             m_moleculeSystem->addModifier(thermostat);
         } else if(modifierName == "constantForce") {
-            ConstantForce* constantForce = new ConstantForce(m_moleculeSystem);
+            ConstantForce* constantForce = new ConstantForce();
             Vector3 forceVector;
             for(int j = 0; j < 3; j++) {
                 forceVector[j] = modifiers[i]["forceVector"][j];
@@ -166,7 +166,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
             forceVector /= unitForce;
             cout << "Setting constant force to " << forceVector << endl;
             constantForce->setForceVector(forceVector);
-            m_moleculeSystem->addModifier(constantForce);
+            m_moleculeSystem->addSingleParticleForce(constantForce);
         }
     }
 

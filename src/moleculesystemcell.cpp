@@ -3,12 +3,13 @@
 #include <src/moleculesystemcell.h>
 #include <src/moleculesystem.h>
 #include <src/force/twoparticleforce.h>
+#include <src/force/singleparticleforce.h>
 
 MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     m_nDimensions(3),
     pow3nDimensions(pow(3, m_nDimensions)),
     //    m_indices(zeros<iVector3>(m_nDimensions)),
-    moleculeSystem(parent),
+    m_moleculeSystem(parent),
     //    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false),
     m_id(0),
     force(blankForce),
@@ -86,61 +87,68 @@ const irowvec &MoleculeSystemCell::indices() const
 
 void MoleculeSystemCell::updateForces()
 {
-    TwoParticleForce* interatomicForce = moleculeSystem->interatomicForce();
-
-    //    cout << "I have " << m_neighborCells.size() << " neighbors" << endl;
-    // Loop over neighbors and their atoms
-    for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
-        MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
-        if(m_isOnProcessorEdge || neighbor->isOnProcessorEdge()) {
-            interatomicForce->setNewtonsThirdLawEnabled(false);
-        } else {
-            interatomicForce->setNewtonsThirdLawEnabled(true);
-        }
-        const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
-        if(interatomicForce->isNewtonsThirdLawEnabled()) {
-            const irowvec& direction = m_neighborDirections[iNeighbor];
-            if(
-                    !( // if not one of ..
-                       ((direction(0) >= 0 && direction(1) >= 0) && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1)) // 2x2 in upper right (except right down)
-                       || (direction(0) == 1 && direction(1) == -1)) // 1x1 lower right
-                    ) // then continue ...
-                //                neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
-                //            )
-            {
-                continue;
-            }
-        }
-        const vector<Atom*>& neighborAtoms = neighbor->atoms();
-        for(Atom* atom1 : m_atoms) {
-            for(Atom* atom2 : neighborAtoms) {
-                if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
-                    continue;
-                }
-                interatomicForce->calculateAndApplyForce(atom1, atom2, neighborOffset);
-            }
+    // Single particle forces
+    for(SingleParticleForce* singleParticleForce : m_moleculeSystem->singleParticleForces()) {
+        for(Atom* atom : m_atoms) {
+            singleParticleForce->apply(atom);
         }
     }
 
-    // Loop over own atoms
-    interatomicForce->setNewtonsThirdLawEnabled(true);
-    for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
-        Atom* atom1 = m_atoms[iAtom];
-        int jAtomStart = 0;
-        if(interatomicForce->isNewtonsThirdLawEnabled()) {
-            jAtomStart = iAtom + 1;
-        }
-        for(uint jAtom = jAtomStart; jAtom < m_atoms.size(); jAtom++) {
-            if(!interatomicForce->isNewtonsThirdLawEnabled()) {
-                if(iAtom == jAtom) {
+    //    cout << "I have " << m_neighborCells.size() << " neighbors" << endl;
+    // Loop over neighbors and their atoms
+    for(TwoParticleForce* twoParticleForce : m_moleculeSystem->twoParticleForces()) {
+        for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
+            MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
+            if(m_isOnProcessorEdge || neighbor->isOnProcessorEdge()) {
+                twoParticleForce->setNewtonsThirdLawEnabled(false);
+            } else {
+                twoParticleForce->setNewtonsThirdLawEnabled(true);
+            }
+            const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
+            if(twoParticleForce->isNewtonsThirdLawEnabled()) {
+                const irowvec& direction = m_neighborDirections[iNeighbor];
+                if(
+                        !( // if not one of ..
+                           ((direction(0) >= 0 && direction(1) >= 0) && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1)) // 2x2 in upper right (except right down)
+                           || (direction(0) == 1 && direction(1) == -1)) // 1x1 lower right
+                        ) // then continue ...
+                    //                neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
+                    //            )
+                {
                     continue;
                 }
             }
-            Atom* atom2 = m_atoms[jAtom];
-            if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
-                continue;
+            const vector<Atom*>& neighborAtoms = neighbor->atoms();
+            for(Atom* atom1 : m_atoms) {
+                for(Atom* atom2 : neighborAtoms) {
+                    if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
+                        continue;
+                    }
+                    twoParticleForce->calculateAndApplyForce(atom1, atom2, neighborOffset);
+                }
             }
-            interatomicForce->calculateAndApplyForce(atom1, atom2);
+        }
+
+        // Loop over own atoms
+        twoParticleForce->setNewtonsThirdLawEnabled(true);
+        for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
+            Atom* atom1 = m_atoms[iAtom];
+            int jAtomStart = 0;
+            if(twoParticleForce->isNewtonsThirdLawEnabled()) {
+                jAtomStart = iAtom + 1;
+            }
+            for(uint jAtom = jAtomStart; jAtom < m_atoms.size(); jAtom++) {
+                if(!twoParticleForce->isNewtonsThirdLawEnabled()) {
+                    if(iAtom == jAtom) {
+                        continue;
+                    }
+                }
+                Atom* atom2 = m_atoms[jAtom];
+                if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
+                    continue;
+                }
+                twoParticleForce->calculateAndApplyForce(atom1, atom2);
+            }
         }
     }
 }
@@ -173,14 +181,14 @@ int MoleculeSystemCell::id()
 void MoleculeSystemCell::deleteAtomsFromCellAndSystem()
 {
     vector<Atom*> atomsExceptThisCell;
-    for(MoleculeSystemCell* cell : moleculeSystem->cells()) {
+    for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
         if(cell == this) {
             continue;
         }
         atomsExceptThisCell.insert(atomsExceptThisCell.end(), cell->atoms().begin(), cell->atoms().end());
     }
-    moleculeSystem->clearAtoms();
-    moleculeSystem->addAtoms(atomsExceptThisCell);
+    m_moleculeSystem->clearAtoms();
+    m_moleculeSystem->addAtoms(atomsExceptThisCell);
     for(Atom* atom : m_atoms) {
         delete atom;
     }

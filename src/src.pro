@@ -29,7 +29,8 @@ SOURCES += main.cpp \
     math/vector3.cpp \
     processor.cpp \
     range.cpp \
-    modifier/constantforce.cpp
+    force/singleparticleforce.cpp \
+    force/constantforce.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -51,8 +52,9 @@ HEADERS += \
     math/vector3.h \
     processor.h \
     range.h \
-    modifier/constantforce.h \
-    progressreporter.h
+    progressreporter.h \
+    force/singleparticleforce.h \
+    force/constantforce.h
 
 #CURRENT_BRANCH = $$system(git rev-parse --abbrev-ref HEAD)
 

@@ -10,6 +10,7 @@ class FileManager;
 class Modifier;
 class Processor;
 class ProgressReporter;
+class SingleParticleForce;
 
 #include <src/math/vector3.h>
 
@@ -56,8 +57,8 @@ public:
 
 //    void setPotentialConstant(double potentialConstant);
     void setIntegrator(Integrator *integrator);
-    void setInteratomicForce(TwoParticleForce* force);
-    TwoParticleForce* interatomicForce();
+    void addTwoParticleForce(TwoParticleForce* force);
+    const vector<TwoParticleForce*>& twoParticleForces() const;
     void updateStatistics();
 
     // I/O
@@ -127,6 +128,8 @@ public:
     void setNSimulationSteps(int nSteps);
     int nSimulationSteps();
     void setProgressReporter(ProgressReporter* progressReporter);
+    void addSingleParticleForce(SingleParticleForce* force);
+    const vector<SingleParticleForce*>& singleParticleForces() const;
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
@@ -148,7 +151,8 @@ protected:
 
     Config *m_config;
 
-    TwoParticleForce *m_interatomicForce;
+//    TwoParticleForce *m_interatomicForce;
+    vector<TwoParticleForce*> m_twoParticleForces;
     FileManager *m_fileManager;
 
     bool m_isSaveEnabled;
@@ -182,7 +186,17 @@ protected:
     int m_nSimulationSteps;
     bool m_isFinalTimeStep;
     ProgressReporter *m_progressReporter;
+    vector<SingleParticleForce*> m_singleParticleForces;
 };
+
+inline void MoleculeSystem::addSingleParticleForce(SingleParticleForce *force) {
+    m_singleParticleForces.push_back(force);
+}
+
+inline const vector<SingleParticleForce *> &MoleculeSystem::singleParticleForces() const
+{
+    return m_singleParticleForces;
+}
 
 inline void MoleculeSystem::setNSimulationSteps(int nSteps) {
     m_nSimulationSteps = nSteps;

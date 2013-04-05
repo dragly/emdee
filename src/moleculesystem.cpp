@@ -42,7 +42,6 @@ MoleculeSystem::MoleculeSystem() :
     m_isFinalTimeStep(false)
 {
     m_progressReporter = new ProgressReporter("dragly", "somerun");
-    m_interatomicForce = new LennardJonesForce();
     m_integrator = new VelocityVerletIntegrator(this);
     m_fileManager = new FileManager(this);
     m_cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
@@ -181,12 +180,14 @@ void MoleculeSystem::updateForces()
         }
     }
 
-    if(shouldTimeStepBeSaved()) {
-        m_interatomicForce->setCalculatePotentialEnabled(m_isCalculatePotentialEnabled);
-        m_interatomicForce->setCalculatePressureEnabled(m_isCalculatePressureEnabled);
-    } else {
-        m_interatomicForce->setCalculatePotentialEnabled(false);
-        m_interatomicForce->setCalculatePressureEnabled(false);
+    for(TwoParticleForce* twoParticleForce : m_twoParticleForces) {
+        if(shouldTimeStepBeSaved()) {
+            twoParticleForce->setCalculatePotentialEnabled(m_isCalculatePotentialEnabled);
+            twoParticleForce->setCalculatePressureEnabled(m_isCalculatePressureEnabled);
+        } else {
+            twoParticleForce->setCalculatePotentialEnabled(false);
+            twoParticleForce->setCalculatePressureEnabled(false);
+        }
     }
     for(MoleculeSystemCell* cell : m_processor->cells()) {
         cell->updateForces();
@@ -493,14 +494,14 @@ void MoleculeSystem::setIntegrator(Integrator *integrator)
     m_integrator = integrator;
 }
 
-void MoleculeSystem::setInteratomicForce(TwoParticleForce *force)
+void MoleculeSystem::addTwoParticleForce(TwoParticleForce *force)
 {
-    m_interatomicForce = force;
+    m_twoParticleForces.push_back(force);
 }
 
-TwoParticleForce *MoleculeSystem::interatomicForce()
+const vector<TwoParticleForce*>& MoleculeSystem::twoParticleForces() const
 {
-    return m_interatomicForce;
+    return m_twoParticleForces;
 }
 
 bool MoleculeSystem::isSaveEnabled() const
