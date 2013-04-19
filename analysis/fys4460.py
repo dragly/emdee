@@ -67,7 +67,6 @@ def loadHeader(fileName):
     headerFile.close()
     
     return header
-    
 
 def loadAtoms(fileName):
     fileName = expanduser(fileName)
@@ -109,6 +108,20 @@ def createSymlink(source, destination):
         os.unlink(destination)
     os.symlink(source, destination)
     
-if __name__ == "__main__":
-    from sys import argv
-    header, lammpsHeader, atoms = loadAtoms(argv[1])
+#if __name__ == "__main__":
+#    from sys import argv
+#    header, lammpsHeader, atoms = loadAtoms(argv[1])
+#    from glob import glob
+#    print argv[1]
+#    for fileName in glob(argv[1]):
+#        header = loadHeader(fileName)
+#        print header["nAtoms"]
+#        print header["nProcessors"]
+#        lammpsHeaderFile = open(fileName.replace(".bin",".lmp"), "r")
+#        lammpsHeader = fromfile(lammpsHeaderFile, dtype=lammpsHeaderType, count=1)
+#        lammpsHeaderFile.close()
+#        header["nAtoms"] = lammpsHeader["nAtoms"]
+#        header["nProcessors"] = 1
+#        headerFile = open(fileName, "wb")
+#        header.tofile(headerFile)
+#        headerFile.close()

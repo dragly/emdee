@@ -1,5 +1,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    auto \
-    manual
+    auto-old \
+    manual \
+    auto

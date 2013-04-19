@@ -68,5 +68,4 @@ myscript.commands = python $$PWD/../myscript.py $$PWD/../ $$CURRENT_BRANCH
 QMAKE_EXTRA_TARGETS += myscript
 PRE_TARGETDEPS += myscript
 
-OTHER_FILES += ../testconfig.cfg \
-    ../molecular-dynamics.pri
+OTHER_FILES += ../testconfig.cfg

@@ -23,15 +23,35 @@ for fileName in fileNames:
     header = loadHeader(fileName)
     
     nProcessors = header['nProcessors'][0]
-    print "Has", nProcessors, "processor(s)"
     
     lammpsFileName = fileName.replace(".bin", ".lmp")
     runList = "/bin/cat " + lammpsFileName + " "
-    if nProcessors > 1:
-        for i in range(1, nProcessors):
-            runList += (lammpsFileName + (".%04d " % i))
+    nAtomsTotal = header["nAtoms"]
+    if nProcessors < 2:
+        print "Skipped " + fileName
+        continue
+    
+    for i in range(1, nProcessors):
+        runList += (lammpsFileName + (".%04d " % i))
+        header2 = loadHeader(fileName)
+        nAtomsTotal += header2["nAtoms"]
+            
     runList += " > "
-    runList += lammpsFileName.replace(".lmp", ".lmp.merged")
+    mergedFileName = lammpsFileName.replace(".lmp", ".lmp.merged")
+    runList += mergedFileName
     print runList
     subprocess.check_output(runList, shell=True)
-    print "done"
+    
+    header["nProcessors"] = 1
+    header["nAtoms"] = nAtomsTotal
+    
+    for i in range(1, nProcessors):
+        os.remove(fileName  + (".%04d" % i))
+        os.remove(lammpsFileName  + (".%04d" % i))
+    os.rename(mergedFileName, lammpsFileName)
+    
+    headerFile = open(fileName, "wb")
+    header.tofile(headerFile)
+    headerFile.close()
+    
+print "Done"
