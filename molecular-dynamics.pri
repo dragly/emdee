@@ -1,5 +1,6 @@
 ROOT_DIR = $$PWD
 SRC_DIR = $$PWD/src
+INCLUDEPATH += $$ROOT_DIR
 QMAKE_CXX = ccache g++
 # Libraries
 LIBS += -larmadillo -llapack -lblas -lconfig++ -lhdf5_cpp -lhdf5 -lboost_filesystem -lboost_system

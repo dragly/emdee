@@ -9,20 +9,14 @@ LIBS += -lunittest++
 
 SOURCES += main.cpp \
     forcestest.cpp \
-    ../../src/force/twoparticleforce.cpp \
-    ../../src/force/singleparticleforce.cpp \
-    ../../src/force/lennardjonesforce.cpp \
-    ../../src/force/constantforce.cpp \
-    ../../src/integrator/velocityverletintegrator.cpp \
-    ../../src/integrator/integrator.cpp \
-    ../../src/integrator/eulercromerintegrator.cpp
+    generatortest.cpp \
+    systemtest.cpp
 
-HEADERS += \
-    ../../src/force/twoparticleforce.h \
-    ../../src/force/singleparticleforce.h \
-    ../../src/force/lennardjonesforce.h \
-    ../../src/force/constantforce.h \
-    ../../src/integrator/velocityverletintegrator.h \
-    ../../src/integrator/integrator.h \
-    ../../src/integrator/eulercromerintegrator.h
+SOURCES += $$SRC_DIR/*.cpp \
+            $$SRC_DIR/force/*.cpp \
+            $$SRC_DIR/integrator/*.cpp \
+            $$SRC_DIR/math/*.cpp \
+            $$SRC_DIR/modifier/*.cpp
 
+SOURCES = $$system(ls $$SOURCES)
+SOURCES = $$replace(SOURCES, $$SRC_DIR/main.cpp, )

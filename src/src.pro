@@ -5,8 +5,6 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-INCLUDEPATH += ../
-
 TARGET = molecular-dynamics
 
 SOURCES += main.cpp \

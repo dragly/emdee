@@ -66,8 +66,9 @@ void BenchmarkTest::benchmarkDifferentSizes()
     cout << "setbounds" << endl;
     system.setupCells(potentialConstant * 3);
     cout << "Setup cells" << endl;
+    system.setNSimulationSteps(nSimulationSteps);
     QBENCHMARK_ONCE {
-        system.simulate(nSimulationSteps);
+        system.simulate();
     }
     QVERIFY2(true, "Failure");
 }

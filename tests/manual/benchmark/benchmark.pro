@@ -31,7 +31,9 @@ SOURCES += tst_benchmarktest.cpp \
     ../../../src/integrator/eulercromerintegrator.cpp \
     ../../../src/filemanager.cpp \
     ../../../src/force/lennardjonesforce.cpp \
-    ../../../src/math/vector3.cpp
+    ../../../src/math/vector3.cpp \
+    ../../../src/processor.cpp \
+    ../../../src/range.cpp
 
 HEADERS += \
     ../../../src/moleculesystemcell.h \
@@ -45,4 +47,6 @@ HEADERS += \
     ../../../src/integrator/eulercromerintegrator.h \
     ../../../src/filemanager.h \
     ../../../src/force/lennardjonesforce.h \
-    ../../../src/math/vector3.h
+    ../../../src/math/vector3.h \
+    ../../../src/processor.h \
+    ../../../src/range.h
