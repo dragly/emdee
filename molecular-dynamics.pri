@@ -29,6 +29,7 @@ mpi {
     message(Using MPI)
     DEFINES += MD_USE_MPI
 
+#    QMAKE_CXX = mpicxx
     QMAKE_CXX = ccache mpicxx
     QMAKE_CXX_RELEASE = $$QMAKE_CXX
     QMAKE_CXX_DEBUG = $$QMAKE_CXX

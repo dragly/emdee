@@ -11,12 +11,8 @@ SOURCES += main.cpp \
     forcestest.cpp \
     generatortest.cpp \
     systemtest.cpp
-
-SOURCES += $$SRC_DIR/*.cpp \
-            $$SRC_DIR/force/*.cpp \
-            $$SRC_DIR/integrator/*.cpp \
-            $$SRC_DIR/math/*.cpp \
-            $$SRC_DIR/modifier/*.cpp
-
-SOURCES = $$system(ls $$SOURCES)
+message(find $$SRC_DIR -name '*.cpp')
+SOURCES += $$system(find $$SRC_DIR -name \'*.cpp\')
 SOURCES = $$replace(SOURCES, $$SRC_DIR/main.cpp, )
+
+message($$SOURCES)
