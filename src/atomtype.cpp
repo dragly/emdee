@@ -3,10 +3,10 @@
 #include <iostream>
 
 AtomType::AtomType() :
-    name(""),
-    abbreviation(""),
-    number(-1),
-    mass(-1)
+    m_name(""),
+    m_abbreviation(""),
+    m_id(-1),
+    m_mass(-1)
 {
 }
 
@@ -14,34 +14,34 @@ AtomType::AtomType(AtomType::AtomTypeEnum atomTypeEnum)
 {
     switch(atomTypeEnum) {
     case HYDROGEN:
-        name = "Hydrogen";
-        abbreviation = "H";
-        number = 1;
-        mass = -1;
+        m_name = "Hydrogen";
+        m_abbreviation = "H";
+        m_id = 1;
+        m_mass = -1;
         break;
     case HELIUM:
-        name = "Helium";
-        abbreviation = "He";
-        number = 2;
-        mass = -1;
+        m_name = "Helium";
+        m_abbreviation = "He";
+        m_id = 2;
+        m_mass = -1;
         break;
     case OXYGEN:
-        name = "Oxygen";
-        abbreviation = "O";
-        number = 16;
-        mass = -1;
+        m_name = "Oxygen";
+        m_abbreviation = "O";
+        m_id = 16;
+        m_mass = -1;
         break;
     case ARGON:
-        name = "Argon";
-        abbreviation = "Ar";
-        number = 18;
-        mass = 1; // TODO set to real mass and fix with unit mass
+        m_name = "Argon";
+        m_abbreviation = "Ar";
+        m_id = 18;
+        m_mass = 1; // TODO set to real mass and fix with unit mass
         break;
     default:
-        name = "Unknown";
-        abbreviation = "NNN";
-        number = -1;
-        mass = -1;
+        m_name = "Unknown";
+        m_abbreviation = "NNN";
+        m_id = -1;
+        m_mass = -1;
     }
 }
 

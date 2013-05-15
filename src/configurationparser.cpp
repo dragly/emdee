@@ -87,40 +87,89 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     m_moleculeSystem->setCalculatePressureEnabled(isCalcualatePressureEnabled);
     m_moleculeSystem->setSaveEveryNSteps(saveEveryNSteps);
 
+    unordered_map<int,AtomType> particleTypesByID;
+    vector<AtomType> particleTypes;
+    Setting& particleTypesSetting = config.lookup("particleTypes");
+    for(uint i = 0; true; i++) {
+        try {
+            AtomType atomType;
+            int id = -2;
+            particleTypesSetting[i].lookupValue("id", id);
+            atomType.setId(id);
+            if(particleTypesSetting[i].exists("name")) {
+                string name = "Noname";
+                particleTypesSetting[i].lookupValue("name", name);
+                atomType.setName(name);
+            }
+            if(particleTypesSetting[i].exists("abbreviation")) {
+                string abbreviation = "NA";
+                particleTypesSetting[i].lookupValue("abbreviation", abbreviation);
+                atomType.setAbbreviation(abbreviation);
+            }
+            if(particleTypesSetting[i].exists("mass")) {
+                double mass = 0;
+                particleTypesSetting[i].lookupValue("mass", mass);
+                atomType.setMass(mass);
+            }
+            if(particleTypesSetting[i].exists("effectiveCharge")) {
+                double effectiveCharge = 0;
+                particleTypesSetting[i].lookupValue("effectiveCharge", effectiveCharge);
+                atomType.setEffectiveCharge(effectiveCharge);
+            }
+            if(particleTypesSetting[i].exists("electronicPolarizability")) {
+                double electronicPolarizability = 0;
+                particleTypesSetting[i].lookupValue("electronicPolarizability", electronicPolarizability);
+                atomType.setElectronicPolarizability(electronicPolarizability);
+            }
+            particleTypes.push_back(atomType);
+            particleTypesByID[atomType.id()] = atomType;
+        } catch(exception) {
+            cout << "No more atom types found. Breaking." << endl;
+            break;
+        }
+    }
+
+    m_moleculeSystem->setParticleTypes(particleTypes);
+
+    cout << "Loading initialization steps" << endl;
     Setting& initialization = config.lookup("initialization");
     for(uint i = 0; true; i++) {
         string initializationType;
         try {
             initialization[i].lookupValue("type", initializationType);
+            cout << "Found initialization step " << initializationType << endl;
+            if(initializationType == "fcc") {
+                double b = initialization[i]["b"];
+                b /= unitLength;
+                int nCells = initialization[i]["nCells"];
+                int particleType = initialization[i]["particleType"];
+                AtomType atomType = particleTypesByID[particleType];
+                vector<Atom*> atoms = generator.generateFcc(b, nCells, atomType);
+                m_moleculeSystem->setBoundaries(generator.lastBoundaries());
+                m_moleculeSystem->addAtoms(atoms);
+                cout << "setbounds" << endl;
+            } else if(initializationType == "boltzmannVelocity") {
+                double initialTemperature = initialization[i]["initialTemperature"];
+                initialTemperature /= unitTemperature;
+                generator.boltzmannDistributeVelocities(initialTemperature, m_moleculeSystem->atoms());
+            } else if(initializationType == "uniformVelocity") {
+                double maxVelocity = initialization[i]["maxVelocity"];
+                maxVelocity /= (unitLength / unitTime);
+                generator.uniformDistributeVelocities(maxVelocity, m_moleculeSystem->atoms());
+            } else if(initializationType == "loadFile") {
+                string fileName = initialization[i]["fileName"];
+                if(!m_moleculeSystem->load(fileName)) {
+                    cerr << "Could not load file " << fileName << endl;
+                    throw(new exception);
+                }
+            }
         } catch(exception) {
             cout << "No more initialization steps found. Breaking." << endl;
             break;
         }
-        cout << "Found initialization step " << initializationType << endl;
-        if(initializationType == "fcc") {
-            double b = initialization[i]["b"];
-            b /= unitLength;
-            int nCells = initialization[i]["nCells"];
-            vector<Atom*> atoms = generator.generateFcc(b, nCells, AtomType::argon());
-            m_moleculeSystem->setBoundaries(generator.lastBoundaries());
-            m_moleculeSystem->addAtoms(atoms);
-            cout << "setbounds" << endl;
-        } else if(initializationType == "boltzmannVelocity") {
-            double initialTemperature = initialization[i]["initialTemperature"];
-            initialTemperature /= unitTemperature;
-            generator.boltzmannDistributeVelocities(initialTemperature, m_moleculeSystem->atoms());
-        } else if(initializationType == "uniformVelocity") {
-            double maxVelocity = initialization[i]["maxVelocity"];
-            maxVelocity /= (unitLength / unitTime);
-            generator.uniformDistributeVelocities(maxVelocity, m_moleculeSystem->atoms());
-        } else if(initializationType == "loadFile") {
-            string fileName = initialization[i]["fileName"];
-            if(!m_moleculeSystem->load(fileName)) {
-                cerr << "Could not load file " << fileName << endl;
-                throw(new exception);
-            }
-        }
     }
+
+    cout << "Setting up progress reporter" << endl;
 
     // Set up progressreporter
     ProgressReporter* reporter = new ProgressReporter("dragly", configurationFileName);
@@ -181,7 +230,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     m_moleculeSystem->setIntegrator(integrator);
 
     // Set up the rest of the system
-//    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
+    //    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
     cout << "addded" << endl;
     m_moleculeSystem->setupCells(potentialConstant * 3);
     m_moleculeSystem->setNSimulationSteps(nSimulationSteps);

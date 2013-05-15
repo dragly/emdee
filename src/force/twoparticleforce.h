@@ -22,7 +22,7 @@ class TwoParticleForce
 public:
     TwoParticleForce();
 
-    virtual void calculateAndApplyForce(Atom *atom1, Atom *atom2) = 0;
+    virtual void calculateAndApplyForce(Atom *atom1, Atom *atom2);
     virtual void calculateAndApplyForce(Atom* atom1, Atom* atom2, const Vector3 &atom2Offset) = 0;
 
     void setNewtonsThirdLawEnabled(bool enable);
@@ -35,6 +35,7 @@ protected:
     bool m_isNewtonsThirdLawEnabled;
     bool m_isCalculatePressureEnabled;
     bool m_isCalculatePotentialEnabled;
+    Vector3 m_zeroVector;
 };
 
 inline void TwoParticleForce::setNewtonsThirdLawEnabled(bool enable) {

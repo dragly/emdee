@@ -223,10 +223,11 @@ void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
 
         uint nAtomsAvailable = cellToReceive->atoms().size();
 
+        // Allocate space for new atoms if not enough atoms are available on this processor
         if(atomsToReceive.size() > nAtomsAvailable) {
             vector<Atom*> locallyAllocatedAtoms;
             for(uint i = nAtomsAvailable; i < atomsToReceive.size(); i++) {
-                Atom* localAtom = new Atom(AtomType::argon());
+                Atom* localAtom = new Atom();
                 locallyAllocatedAtoms.push_back(localAtom);
             }
             cellToReceive->addAtoms(locallyAllocatedAtoms);
@@ -237,10 +238,11 @@ void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
             }
             cellToReceive->deleteAtoms(nAtomsAvailable - atomsToReceive.size());
         }
+        // For each received atom, make a clone to the local atom
         for(uint i = 0; i < atomsToReceive.size(); i++) {
             Atom* atom = atomsToReceive.at(i);
             Atom* localAtom = cellToReceive->atoms().at(i);
-            localAtom->communicationClone(*atom);
+            localAtom->communicationClone(*atom, m_moleculeSystem->particleTypes());
         }
 
         // Need to explicitly free the memory used by MPI::Boost when allocating a received list of atoms

@@ -14,7 +14,7 @@ void Atom::clone(const Atom &other)
     this->m_force = other.m_force;
     this->m_localPressure = other.m_localPressure;
     this->m_potential = other.m_potential;
-    this->m_type = other.m_type;
+    this->m_atomType = other.m_atomType;
     this->m_velocity = other.m_velocity;
 }
 

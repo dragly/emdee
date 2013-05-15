@@ -13,10 +13,12 @@ class ProgressReporter;
 class SingleParticleForce;
 
 #include <src/math/vector3.h>
+#include <src/atomtype.h>
 
 // System includes
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 #include <armadillo>
 #include <libconfig.h++>
 #include <H5Cpp.h>
@@ -39,6 +41,7 @@ public:
     void addAtoms(const vector<Atom *> &atoms);
     const vector<Atom*> &atoms() const;
     const vector<MoleculeSystemCell*> &cells() const;
+    const vector<AtomType> &particleTypes() const;
     void updateForces();
     void simulate();
 
@@ -130,6 +133,8 @@ public:
     void setProgressReporter(ProgressReporter* progressReporter);
     void addSingleParticleForce(SingleParticleForce* force);
     const vector<SingleParticleForce*>& singleParticleForces() const;
+    void setParticleTypes(const vector<AtomType> &particleTypes);
+    inline const unordered_map<int, AtomType>& particleTypesById();
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
@@ -187,6 +192,9 @@ protected:
     bool m_isFinalTimeStep;
     ProgressReporter *m_progressReporter;
     vector<SingleParticleForce*> m_singleParticleForces;
+    vector<AtomType> m_particleTypes;
+    unordered_map<int,AtomType> m_particleTypesByID;
+
 };
 
 inline void MoleculeSystem::addSingleParticleForce(SingleParticleForce *force) {
@@ -251,6 +259,15 @@ inline double MoleculeSystem::kineticEnergyTotal()
 inline double MoleculeSystem::potentialEnergyTotal()
 {
     return m_potentialEnergyTotal;
+}
+
+inline const vector<AtomType>& MoleculeSystem::particleTypes() const {
+    return m_particleTypes;
+}
+
+inline const unordered_map<int, AtomType> &MoleculeSystem::particleTypesById()
+{
+    return m_particleTypesByID;
 }
 
 #endif // MOLECULESYSTEM_H

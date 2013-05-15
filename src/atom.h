@@ -2,7 +2,6 @@
 #define ATOM_H
 
 // Local includes
-class TwoParticleForce;
 #include <src/atomtype.h>
 #include <src/math/vector3.h>
 
@@ -14,6 +13,8 @@ class TwoParticleForce;
 //using namespace arma;
 using namespace std;
 
+class TwoParticleForce;
+
 /*!
  * \brief The Molecule class contains a list of atoms which are positioned
  * relatively to the molecule's position.
@@ -23,7 +24,7 @@ class Atom
     friend class TwoParticleForce;
 public:
     inline Atom();
-    inline Atom(AtomType atomType);
+    inline Atom(const AtomType &atomType);
 
     inline void clearForcePotentialPressure();
 
@@ -34,6 +35,7 @@ public:
     inline const Vector3 &force() const;
     inline const Vector3& displacement() const;
     inline const AtomType &type() const;
+//    inline const int atomTypeId() const;
     inline double potential() const;
     inline double localPressure() const;
     inline int cellID() const;
@@ -42,6 +44,7 @@ public:
     inline void addLocalPressure(double pressure);
     inline void addForce(int component, double force);
 
+//    inline void setAtomTypeId(int atomTypeId);
     inline void setPosition(const Vector3 &position);
     inline void setVelocity(const Vector3 &velocity);
     inline void addForce(const Vector3 &force);
@@ -53,7 +56,7 @@ public:
     inline void setForce(const Vector3 &force);
 
     void clone(const Atom &other);
-    inline void communicationClone(const Atom &other);
+    inline void communicationClone(const Atom &other, const vector<AtomType>& moleculeSystem);
 
     inline bool isPositionFixed();
     inline void setPositionFixed(bool fixed);
@@ -68,10 +71,11 @@ protected:
     double m_localPressure;
 
     int m_cellID;
-    AtomType m_type;
+    AtomType m_atomType;
 
     bool m_isPositionFixed;
     int m_id;
+    int m_atomTypeId;
 
 private:
     friend class boost::serialization::access;
@@ -93,13 +97,14 @@ inline Atom::Atom()  :
     m_potential(0.0),
     m_localPressure(0.0),
     m_cellID(-999),
-    m_type(AtomType::argon()),
+//    m_type(AtomType::argon()),
     m_isPositionFixed(false),
-    m_id(-1)
+    m_id(-1),
+    m_atomTypeId(-1)
 {
 }
 
-inline Atom::Atom(AtomType atomType) :
+inline Atom::Atom(const AtomType &atomType) :
     m_position(Vector3::createZeros()),
     m_force(Vector3::createZeros()),
     m_velocity(Vector3::createZeros()),
@@ -107,9 +112,10 @@ inline Atom::Atom(AtomType atomType) :
     m_potential(0.0),
     m_localPressure(0.0),
     m_cellID(-999),
-    m_type(atomType),
+    m_atomType(atomType),
     m_isPositionFixed(false),
-    m_id(-1)
+    m_id(-1),
+    m_atomTypeId(atomType.id())
 {
 }
 
@@ -119,6 +125,7 @@ inline void Atom::serialize(Archive & ar, const unsigned int)
     ar & m_position;
     ar & m_velocity;
     ar & m_id;
+    ar & m_atomTypeId;
     //        ar & m_force;
 //    ar & m_displacement;
     //        ar & m_mass;
@@ -133,6 +140,11 @@ inline void Atom::addForce(int component, double force)
 {
     m_force(component) += force;
 }
+
+//inline void Atom::setAtomTypeId(int atomTypeId)
+//{
+//    m_atomTypeId = atomTypeId;
+//}
 
 inline void Atom::addDisplacement(double displacement, uint component) {
     m_displacement(component) += displacement;
@@ -170,17 +182,20 @@ inline void Atom::setVelocity(const Vector3 &velocity)
 {
     m_velocity = velocity;
 }
+
 inline void Atom::setPosition(const Vector3 &position)
 {
     m_displacement += (position - m_position);
     m_position = position;
 }
+
 inline void Atom::addLocalPressure(double pressure) {
     m_localPressure += pressure;
 }
+
 inline double Atom::mass() const
 {
-    return type().mass;
+    return type().mass();
 }
 
 inline int Atom::cellID() const
@@ -214,15 +229,22 @@ inline const Vector3& Atom::displacement() const
 }
 inline const AtomType& Atom::type() const
 {
-    return m_type;
+    return m_atomType;
 }
 
-inline void Atom::communicationClone(const Atom &other)
+//inline const int Atom::atomTypeId() const
+//{
+//    return m_atomTypeId;
+//}
+
+inline void Atom::communicationClone(const Atom &other, const vector<AtomType>& particleTypes)
 {
     this->m_id = other.m_id;
     this->m_position = other.m_position;
 //    this->m_displacement = other.m_displacement;
     this->m_velocity = other.m_velocity;
+    this->m_atomTypeId = other.m_atomTypeId;
+    this->m_atomType = particleTypes[other.m_atomTypeId];
     //    this->m_cellID = other.m_cellID;
     //    this->m_force = other.m_force;
     //    this->m_localPressure = other.m_localPressure;

@@ -185,9 +185,9 @@ bool FileManager::loadBinary(string fileName) {
         //        cout << "Too many atoms, "
         //        exit(9999);
         //    }
+        const unordered_map<int,AtomType>& particleTypes = m_moleculeSystem->particleTypesById();
         for(int i = 0; i < nAtoms; i++) {
             //        cout << "Reading atom " << i << endl;
-            Atom* atom = new Atom(AtomType::argon());
             double atomID = -1;
             Vector3 position;
             Vector3 velocity;
@@ -196,11 +196,11 @@ bool FileManager::loadBinary(string fileName) {
             double potential = 0;
             double isPositionFixed;
             double cellID = 0;
-            double atomType = 0;
+            double atomTypeId = 0;
 
              // Why is the atomType a double? Because this is the standard in LAMMPS files, which are now used as output
             lammpsFile.read((char*)&atomID, sizeof(double));
-            lammpsFile.read((char*)&atomType, sizeof(double));
+            lammpsFile.read((char*)&atomTypeId, sizeof(double));
             lammpsFile.read((char*)&position(0), sizeof(double));
             lammpsFile.read((char*)&position(1), sizeof(double));
             lammpsFile.read((char*)&position(2), sizeof(double));
@@ -224,6 +224,9 @@ bool FileManager::loadBinary(string fileName) {
             velocity /= (m_unitLength / m_unitTime);
             force /= (m_unitLength * m_unitMass / (m_unitTime * m_unitTime));
 
+            AtomType atomType = particleTypes.at(static_cast<int>(atomTypeId));
+
+            Atom* atom = new Atom(atomType);
             atom->setID(atomID);
             atom->setPosition(position);
             atom->setVelocity(velocity);
@@ -394,7 +397,7 @@ bool FileManager::saveBinary(int step) {
             double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
             double isPositionFixed = (double)atom->isPositionFixed();
             double cellID = (double)atom->cellID();
-            double atomType = 18;
+            double atomType = atom->type().id();
 
             position /= 1e-10; // LAMMPS wants lengths in Ångstrøm
 
@@ -460,7 +463,7 @@ bool FileManager::saveXyz(int step) {
                     velocity(0), velocity(1), velocity(2),
                     force(0), force(1), force(2),
                     atom->cellID());
-            outFile << atom->type().abbreviation
+            outFile << atom->type().abbreviation()
                     << line;
         }
     }
