@@ -29,7 +29,9 @@ SOURCES += main.cpp \
     range.cpp \
     force/singleparticleforce.cpp \
     force/constantforce.cpp \
-    force/vashishtatwoparticleforce.cpp
+    force/vashishtatwoparticleforce.cpp \
+    force/vashishtathreeparticleforce.cpp \
+    force/threeparticleforce.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -54,7 +56,9 @@ HEADERS += \
     progressreporter.h \
     force/singleparticleforce.h \
     force/constantforce.h \
-    force/vashishtatwoparticleforce.h
+    force/vashishtatwoparticleforce.h \
+    force/vashishtathreeparticleforce.h \
+    force/threeparticleforce.h
 
 #CURRENT_BRANCH = $$system(git rev-parse --abbrev-ref HEAD)
 

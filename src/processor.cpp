@@ -60,28 +60,28 @@ Processor::Processor(MoleculeSystem *moleculeSystem) :
 void Processor::setupProcessors()
 {
     m_nProcessors = world.size();
-    cout << "Setting up " << m_nProcessors << " processors" << endl;
+//    cout << "Setting up " << m_nProcessors << " processors" << endl;
     m_nProcessorsZ = int( pow(m_nProcessors, 1./3.) + 1e-9);
     m_nProcessorsY = int( sqrt((double)m_nProcessors / (double)m_nProcessorsZ) + 1e-9);
     m_nProcessorsX = int( (double)m_nProcessors / ((double)m_nProcessorsZ * (double) m_nProcessorsY) + 1e-9);
-    cout << "Dividing processor space into " << m_nProcessorsX << " * " << m_nProcessorsY << " * " << m_nProcessorsZ << " processors.";
-    cout << "This gives " << m_moleculeSystem->nCells()(0) / (double)m_nProcessorsX << " * " << m_moleculeSystem->nCells()(1) / (double)m_nProcessorsY << " * " << m_moleculeSystem->nCells()(2) / (double)m_nProcessorsZ << " cells per processor" << endl;
+//    cout << "Dividing processor space into " << m_nProcessorsX << " * " << m_nProcessorsY << " * " << m_nProcessorsZ << " processors.";
+//    cout << "This gives " << m_moleculeSystem->nCells()(0) / (double)m_nProcessorsX << " * " << m_moleculeSystem->nCells()(1) / (double)m_nProcessorsY << " * " << m_moleculeSystem->nCells()(2) / (double)m_nProcessorsZ << " cells per processor" << endl;
 
     // Find own processor coordinates
     m_coordinateX = world.rank() / (m_nProcessorsZ * m_nProcessorsY);
     m_coordinateY = (world.rank() / m_nProcessorsZ) % m_nProcessorsY;
     m_coordinateZ = world.rank() % m_nProcessorsZ;
 
-    cout << "My coordinate is " << m_coordinateX << " " << m_coordinateY << " " << m_coordinateZ << endl;
+//    cout << "My coordinate is " << m_coordinateX << " " << m_coordinateY << " " << m_coordinateZ << endl;
 
     // Find my cells
     m_cellRangeX = Range(m_coordinateX, m_nProcessorsX, m_moleculeSystem->nCells()(0));
     m_cellRangeY = Range(m_coordinateY, m_nProcessorsY, m_moleculeSystem->nCells()(1));
     m_cellRangeZ = Range(m_coordinateZ, m_nProcessorsZ, m_moleculeSystem->nCells()(2));
 
-    cout << "X Range: " << m_cellRangeX << endl;
-    cout << "Y Range: " << m_cellRangeY << endl;
-    cout << "Z Range: " << m_cellRangeZ << endl;
+//    cout << "X Range: " << m_cellRangeX << endl;
+//    cout << "Y Range: " << m_cellRangeY << endl;
+//    cout << "Z Range: " << m_cellRangeZ << endl;
 
     for(int i = m_cellRangeX.firstElement(); i <= m_cellRangeX.lastElement(); i++) {
         for(int j = m_cellRangeY.firstElement(); j <= m_cellRangeY.lastElement(); j++) {
@@ -119,7 +119,7 @@ void Processor::setupProcessors()
         receiveNeighbor.rank = sendNeighbor.coordinates(0) * m_nProcessorsY * m_nProcessorsZ + sendNeighbor.coordinates(1) * m_nProcessorsZ + sendNeighbor.coordinates(2);
 
         if(sendNeighbor.rank == world.rank()) {
-            cout << "No need to communicate with self..." << endl;
+//            cout << "No need to communicate with self..." << endl;
             sendNeighbors.push_back(sendNeighbor);
             receiveNeighbors.push_back(receiveNeighbor);
             continue;

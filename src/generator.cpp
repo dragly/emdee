@@ -64,8 +64,8 @@ vector<Atom*> Generator::generateFcc(double sideLength, int nCells, AtomType ato
     m_lastBoundaries << 0 << 0 << 0 << endr
                         << nCells * sideLength << nCells * sideLength << nCells * sideLength;
 
-    cout << "Generated " << atomList.size() << " atoms in FCC structure with side length " << sideLength << endl;
-    cout << "Boundaries are " << m_lastBoundaries << endl;
+//    cout << "Generated " << atomList.size() << " atoms in FCC structure with side length " << sideLength << endl;
+//    cout << "Boundaries are " << m_lastBoundaries << endl;
     return atomList;
 }
 
@@ -90,7 +90,7 @@ void Generator::boltzmannDistributeVelocities(double temperature, const vector<A
         totalVelocity += velocity;
         atom->setVelocity(velocity);
     }
-    cout << totalVelocity << endl;
+//    cout << totalVelocity << endl;
     // Remove total linear momentum
     Vector3 velocityToRemove = totalVelocity / atoms.size();
     averageVelocity = 0;
@@ -100,8 +100,8 @@ void Generator::boltzmannDistributeVelocities(double temperature, const vector<A
         averageVelocity += dot(newVelocity, newVelocity) / atoms.size();
         totalVelocity += newVelocity;
     }
-    cout << "Boltzmann distributed velocities for " << atoms.size() << " atoms!" << endl;
-    cout << "Average velocity is " << averageVelocity << " for the temperature " << temperature << endl;
+//    cout << "Boltzmann distributed velocities for " << atoms.size() << " atoms!" << endl;
+//    cout << "Average velocity is " << averageVelocity << " for the temperature " << temperature << endl;
 }
 
 void Generator::uniformDistributeVelocities(double maxVelocity, vector<Atom*> atoms) {

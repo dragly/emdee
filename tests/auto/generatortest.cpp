@@ -9,6 +9,7 @@
 TEST(BoltzmannDistributeVelocitiesTest)
 {
     Generator generator;
+
     vector<Atom*> atoms = generator.generateFcc(2,8,AtomType::argon());
     generator.boltzmannDistributeVelocities(100, atoms);
 

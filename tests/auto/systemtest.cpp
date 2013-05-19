@@ -13,6 +13,7 @@ TEST(CellSetup)
     double potentialConstant = 1;
     double bUnit = 5.620 / 3.405;
     MoleculeSystem system;
+    system.setOutputEnabled(false);
     system.setSaveEnabled(false);
     Generator generator;
 //    generator.setUnitLength(unitLength);
