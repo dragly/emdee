@@ -2,11 +2,54 @@
 
 #include <iostream>
 #include <src/atom.h>
+#include <stdio.h>
 
 using namespace std;
 
 VashishtaThreeParticleForce::VashishtaThreeParticleForce()
 {
+    vector<int> SiOSi({8,14,14});
+    vector<int> OSiO({8,8,14});
+//    B[SiOSi] = 1.4;
+//    B[OSiO] = 0.35;
+    setMapForAllPermutations(m_B, SiOSi, 1.4);
+    setMapForAllPermutations(m_B, OSiO, 0.35);
+    setMapForAllPermutations(m_thetaBar, SiOSi, 141.0 / 360. * 2*M_PI);
+    setMapForAllPermutations(m_thetaBar, OSiO, 109.47 / 360. * 2*M_PI);
+    setMapForAllPermutations(m_r0, SiOSi, 2.6);
+    setMapForAllPermutations(m_r0, OSiO, 2.6);
+
+//    for(auto item : m_thetaBar) {
+//        for(int key : item.first) {
+//            cout << key << " ";
+//        }
+//        cout << item.second  << endl;
+//    }
+}
+
+/*
+ * From example found on http://www.bearcave.com/random_hacks/permute.html
+ */
+void VashishtaThreeParticleForce::setMapForAllPermutationsStep2(map<vector<int>, double> &theMap, const vector<int> &v, const int start, const int n, double value)
+{
+    vector<int> v2 = v;
+    if (start == n-1) {
+        theMap[v2] = value;
+    } else {
+        for (int i = start; i < n; i++) {
+            int tmp = v2[i];
+
+            v2[i] = v2[start];
+            v2[start] = tmp;
+            setMapForAllPermutationsStep2(theMap, v2, start+1, n, value);
+            v2[start] = v2[i];
+            v2[i] = tmp;
+        }
+    }
+}
+
+void VashishtaThreeParticleForce::setMapForAllPermutations(map<vector<int>, double> &theMap, const vector<int> values, double value) {
+    setMapForAllPermutationsStep2(theMap, values, 0, values.size(), value);
 }
 
 void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3)
@@ -16,35 +59,52 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
 
 void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atomi, Atom *atomj, Atom *atomk, const Vector3 &atomjOffset, const Vector3 &atomkOffset)
 {
+    vector<int> combo({atomi->type().id(), atomj->type().id(), atomk->type().id()});
+    if(m_B.find(combo) == m_B.end()) {
+        return;
+    }
+
     Vector3 rij = atomj->position() + atomjOffset - atomi->position();
-    Vector3 rik = atomk->position() + atomkOffset - atomk->position();
+    Vector3 rik = atomk->position() + atomkOffset - atomi->position();
     double dotrijrik = dot(rij,rik);
     double lij2 = dot(rij, rij);
     double lik2 = dot(rik, rik);
     double lij = sqrt(lij2);
     double lik = sqrt(lik2);
     double l = 1.0;
-    double Bijk = 1.0;
-    double thetabar = 109;
-    double r0 = 2.6;
+    double Bijk = m_B[combo];
+    double thetabar = m_thetaBar[combo];
+    double r0 = m_r0[combo];
 
     double theta = acos(dotrijrik / (lij * lik));
 
-    double f;
+    //    cout << "theta " << theta << endl;
+
+    //    cout << rij << " " << rik << endl;
+    //    cout << "dotrijrik " << dotrijrik << endl;
+    //    cout << "theta " << theta << endl;
+    //    cout << "acos(dotrijrik / (lij * lik)) =" << "acos(" << dotrijrik << "/" << "(" << lij << "*" << lik << "))";
+
+    double f = 0;
+    double dfdrij = 0;
+    double dfdrik = 0;
     if(lij < r0 || lik < r0) {
         f = exp(l / (lij - r0) + l / (lik - r0));
-    } else {
-        f = 0;
+        dfdrij = -l*exp(l/(-r0 + lik) + l/(-r0 + lij))/pow(-r0 + lij, 2);
+        dfdrik = -l*exp(l/(-r0 + lik) + l/(-r0 + lij))/pow(-r0 + lik, 2);
     }
+
     double p1 = (cos(theta) - cos(thetabar)); // TODO: Rewrite without cos and acos ;)
     double p = p1*p1;
 
-    double dfdrij = -2*l*exp(2*l/(-r0 + lij))/pow(-r0 + lij, 2);
-    double dfdrik = -l*exp(l/(-r0 + lik) + l/(-r0 + lij))/pow(-r0 + lik, 2);
-//    double dfdtheta = 0;
+    //    cout << "p " << p << endl;
+    //    cout << "f " << f << endl;
 
-//    double dpdrij = 0;
-//    double dpdrik = 0;
+
+    //    double dfdtheta = 0;
+
+    //    double dpdrij = 0;
+    //    double dpdrik = 0;
     double dpdtheta = -2*(-cos(thetabar) + cos(theta)) * sin(theta);
 
     for(int iAtom = 0; iAtom < 3; iAtom++) {
@@ -54,7 +114,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atomi, Atom *atom
 
             switch(iAtom) {
             case 0:
-                dtheta = (
+                dtheta = -(
                             ((dotrijrik * rik[a]) / (lij * lik * lik * lik))
                             + ((dotrijrik * rij[a]) / (lij * lij * lij * lik))
                             + ((-rij[a] - rik[a]) / (lij * lik))
@@ -65,8 +125,8 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atomi, Atom *atom
                             );
                 break;
             case 1:
-                dtheta = (
-                            ((dotrijrik * (-rij[a])) / (lij * lik * lik * lik))
+                dtheta = -(
+                            ((dotrijrik * (-rij[a])) / (lij * lij * lij * lik))
                             + ((rik[a]) / (lij * lik))
                             ) / (
                             sqrt(
@@ -76,7 +136,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atomi, Atom *atom
 
                 break;
             case 2:
-                dtheta = (
+                dtheta = -(
                             ((dotrijrik * (-rik[a])) / (lij * lik * lik * lik))
                             + ((rij[a]) / (lij * lik))
                             ) / (
@@ -97,11 +157,13 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atomi, Atom *atom
             double drik = 0;
             if(iAtom == 0) {
                 drik = -rik[a] / lik;
-            } else if(iAtom == 1) {
+            } else if(iAtom == 2) {
                 drik = rik[a] / lik;
             }
 
             force[a] = Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
+            //            force[a] = Bijk * (drij * dfdrij + drik * dfdrik);
+            //            force[a] = Bijk * dtheta * dpdtheta;
         }
         switch(iAtom) {
         case 0:
@@ -115,4 +177,11 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atomi, Atom *atom
             break;
         }
     }
+
+    double potential = Bijk * f * p;
+    //    double potential = Bijk * f;
+    //    double potential = Bijk * p;
+    atomi->addPotential(potential / 3);
+    atomj->addPotential(potential / 3);
+    atomk->addPotential(potential / 3);
 }

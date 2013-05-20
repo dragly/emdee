@@ -101,9 +101,9 @@ TEST(VashishtaThreeForceTest) {
     oxygen.setElectronicPolarizability(2.40);
 
 
-    Atom atom1; // = new Atom(silicon);
-    Atom atom2; // = new Atom(oxygen);
-    Atom atom3; // = new Atom(oxygen);
+    Atom atom1(silicon); // = new Atom(silicon);
+    Atom atom2(silicon); // = new Atom(oxygen);
+    Atom atom3(oxygen); // = new Atom(oxygen);
     uint nSteps = 10000;
     vec positionX = linspace(100,1.15,nSteps);
     vec forceX = zeros(nSteps);
@@ -112,11 +112,73 @@ TEST(VashishtaThreeForceTest) {
     VashishtaThreeParticleForce force;
     force.setNewtonsThirdLawEnabled(true);
 
-    atom1.setPosition(Vector3(0,0,0));
-    atom2.setPosition(Vector3(2,0,0));
-    atom3.setPosition(Vector3(0,3,0));
+    for(int test = 0; test < 10; test++) {
 
-    force.calculateAndApplyForce(&atom1, &atom2, &atom3);
+        vec3 randomPosition1 = randn(3) * 0.1;
+        vec3 randomPosition2 = randn(3) * 0.1;
+        vec3 randomPosition3 = randn(3) * 0.1;
 
+        atom1.setPosition(Vector3(randomPosition1));
+        atom2.setPosition(Vector3(randomPosition2));
+        atom3.setPosition(Vector3(randomPosition3));
+
+        atom1.clearForcePotentialPressure();
+        atom2.clearForcePotentialPressure();
+        atom3.clearForcePotentialPressure();
+
+        force.calculateAndApplyForce(&atom1, &atom2, &atom3);
+
+//        cout << "Atom1: " << atom1.position() << "; " << atom1.force() << endl;
+//        cout << "Atom2: " << atom2.position() << "; " << atom2.force() << endl;
+//        cout << "Atom3: " << atom3.position() << "; " << atom3.force() << endl;
+
+        Vector3 forceResults[3];
+        forceResults[0] = atom1.force();
+        forceResults[1] = atom2.force();
+        forceResults[2] = atom3.force();
+
+        for(int iAtom = 0; iAtom < 3; iAtom++) {
+    //        cout << "iAtom: " << iAtom << endl;
+            Atom *atom;
+            switch(iAtom) {
+            case 0:
+                atom = &atom1;
+                break;
+            case 1:
+                atom = &atom2;
+                break;
+            case 2:
+                atom = &atom3;
+                break;
+            }
+
+            double h = 0.00001;
+            Vector3 derivativeResult;
+            derivativeResult.zeros();
+            Vector3 forceResult = forceResults[iAtom];
+            Vector3 initialPosition = atom->position();
+            for(int i = 0; i < 3; i++) {
+                Vector3 minusPosition = initialPosition;
+                Vector3 plusPosition = initialPosition;
+                minusPosition[i] -= h;
+                plusPosition[i] += h;
+                atom->clearForcePotentialPressure();
+                atom->setPosition(plusPosition);
+                force.calculateAndApplyForce(&atom1,&atom2,&atom3);
+                double plusPotential = atom->potential() * 3;
+                atom->clearForcePotentialPressure();
+                atom->setPosition(minusPosition);
+                force.calculateAndApplyForce(&atom1,&atom2,&atom3);
+                double minusPotential = atom->potential() * 3;
+
+                double derivative = (plusPotential - minusPotential) / (2*h);
+    //            cout << "derivative: " << derivative << endl;
+    //            cout << "from " << "(" << plusPotential << "-" << minusPotential << ") / (2*" << h<< ")" << endl;
+                derivativeResult[i] = derivative;
+            }
+            atom->setPosition(initialPosition);
+            CHECK_ARRAY_CLOSE(derivativeResult, forceResult, 3, 0.005);
+        }
+    }
 //    CHECK_ARRAY_CLOSE(atom1.force(), newForce, 3, 0.005);
 }
