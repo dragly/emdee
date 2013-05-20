@@ -174,7 +174,7 @@ TEST(VashishtaThreeForceTest) {
                 double derivative = (plusPotential - minusPotential) / (2*h);
     //            cout << "derivative: " << derivative << endl;
     //            cout << "from " << "(" << plusPotential << "-" << minusPotential << ") / (2*" << h<< ")" << endl;
-                derivativeResult[i] = derivative;
+                derivativeResult[i] = -derivative;
             }
             atom->setPosition(initialPosition);
             CHECK_ARRAY_CLOSE(derivativeResult, forceResult, 3, 0.005);

@@ -6,6 +6,7 @@ class Atom;
 class Integrator;
 class MoleculeSystemCell;
 class TwoParticleForce;
+class ThreeParticleForce;
 class FileManager;
 class Modifier;
 class Processor;
@@ -135,6 +136,7 @@ public:
     const vector<SingleParticleForce*>& singleParticleForces() const;
     void setParticleTypes(const vector<AtomType> &particleTypes);
     inline const unordered_map<int, AtomType>& particleTypesById();
+    void addThreeParticleForce(ThreeParticleForce *force);
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
@@ -158,6 +160,7 @@ protected:
 
 //    TwoParticleForce *m_interatomicForce;
     vector<TwoParticleForce*> m_twoParticleForces;
+    vector<ThreeParticleForce*> m_threeParticleForces;
     FileManager *m_fileManager;
 
     bool m_isSaveEnabled;

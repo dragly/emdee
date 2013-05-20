@@ -4,6 +4,8 @@
 #include <src/moleculesystem.h>
 #include <src/generator.h>
 #include <src/force/lennardjonesforce.h>
+#include <src/force/vashishtatwoparticleforce.h>
+#include <src/force/vashishtathreeparticleforce.h>
 #include <src/integrator/integrator.h>
 #include <src/integrator/velocityverletintegrator.h>
 #include <src/integrator/eulercromerintegrator.h>
@@ -12,6 +14,7 @@
 #include <src/modifier/andersenthermostat.h>
 #include <src/force/constantforce.h>
 #include <src/progressreporter.h>
+#include <src/atom.h>
 
 // System includes
 #include <boost/mpi.hpp>
@@ -148,6 +151,21 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
                 m_moleculeSystem->setBoundaries(generator.lastBoundaries());
                 m_moleculeSystem->addAtoms(atoms);
                 cout << "setbounds" << endl;
+            } else if(initializationType == "moleculeTest") {
+                m_moleculeSystem->setBoundaries(0,20,0,20,0,20);
+                for(int i = 0; i < 1; i++) {
+                    Atom *atom1 = new Atom(particleTypesByID[8]);
+                    atom1->setID(1 + i * 3);
+                    Atom *atom2 = new Atom(particleTypesByID[8]);
+                    atom2->setID(2 + i * 3);
+                    Atom *atom3 = new Atom(particleTypesByID[14]);
+                    atom3->setID(3 + i * 3);
+                    atom1->setPosition(Vector3(1,1,1 + i * 2));
+                    atom2->setPosition(Vector3(4,1,1 + i * 2));
+                    atom3->setPosition(Vector3(2.5,4,1 + i * 2));
+                    vector<Atom*> atoms({atom1, atom2, atom3});
+                    m_moleculeSystem->addAtoms(atoms);
+                }
             } else if(initializationType == "boltzmannVelocity") {
                 double initialTemperature = initialization[i]["initialTemperature"];
                 initialTemperature /= unitTemperature;
@@ -176,11 +194,13 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     m_moleculeSystem->setProgressReporter(reporter);
 
     // Set up force
-    LennardJonesForce* force = new LennardJonesForce();
-    force->setPotentialConstant(potentialConstant);
-    force->setEnergyConstant(energyConstant);
-
-    m_moleculeSystem->addTwoParticleForce(force);
+//    LennardJonesForce* force = new LennardJonesForce();
+//    force->setPotentialConstant(potentialConstant);
+//    force->setEnergyConstant(energyConstant);
+    VashishtaTwoParticleForce* twoParticleForce = new VashishtaTwoParticleForce();
+    m_moleculeSystem->addTwoParticleForce(twoParticleForce);
+    VashishtaThreeParticleForce* threeParticleForce = new VashishtaThreeParticleForce();
+    m_moleculeSystem->addThreeParticleForce(threeParticleForce);
 
     // Set up modifiers
     Setting& modifiers = config.lookup("modifiers");

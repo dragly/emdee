@@ -44,7 +44,7 @@ void VashishtaTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2,
 //    double r5 = r2 * r2 * r;
 //    double r6 = r5 * r;
 
-    Vector3 force =rVec*(-Hij*etaij*pow(r, -etaij)/pow(r, 2) - Zi*Zj/pow(r, 3) + (0.5*pow(Zi, 2)*alphaj + 0.5*pow(Zj, 2)*alphai)*exp(-r/r4s)/(pow(r, 5)*r4s) + 4*(0.5*pow(Zi, 2)*alphaj + 0.5*pow(Zj, 2)*alphai)*exp(-r/r4s)/pow(r, 6));
+    Vector3 force = -rVec*(-Hij*etaij*pow(r, -etaij)/pow(r, 2) - Zi*Zj/pow(r, 3) + (0.5*pow(Zi, 2)*alphaj + 0.5*pow(Zj, 2)*alphai)*exp(-r/r4s)/(pow(r, 5)*r4s) + 4*(0.5*pow(Zi, 2)*alphaj + 0.5*pow(Zj, 2)*alphai)*exp(-r/r4s)/pow(r, 6));
 
     double potential = Hij / pow(r, etaij)
             + (Zi * Zj) / r

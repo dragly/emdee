@@ -161,7 +161,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atomi, Atom *atom
                 drik = rik[a] / lik;
             }
 
-            force[a] = Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
+            force[a] = -Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
             //            force[a] = Bijk * (drij * dfdrij + drik * dfdrik);
             //            force[a] = Bijk * dtheta * dpdtheta;
         }

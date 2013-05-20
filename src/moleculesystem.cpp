@@ -11,6 +11,7 @@
 #include <src/modifier/modifier.h>
 #include <src/processor.h>
 #include <src/progressreporter.h>
+#include <src/force/threeparticleforce.h>
 
 // System headers
 #include <fstream>
@@ -497,6 +498,10 @@ void MoleculeSystem::setIntegrator(Integrator *integrator)
 void MoleculeSystem::addTwoParticleForce(TwoParticleForce *force)
 {
     m_twoParticleForces.push_back(force);
+}
+
+void MoleculeSystem::addThreeParticleForce(ThreeParticleForce *force) {
+    m_threeParticleForces.push_back(force);
 }
 
 const vector<TwoParticleForce*>& MoleculeSystem::twoParticleForces() const
