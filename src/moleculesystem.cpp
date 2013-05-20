@@ -157,6 +157,12 @@ void MoleculeSystem::updateStatistics()
 void MoleculeSystem::addAtoms(const vector<Atom *>& atoms)
 {
     m_atoms.insert(m_atoms.end(), atoms.begin(), atoms.end());
+    obeyBoundaries();
+
+    cout << "Positions:" << endl;
+    for(Atom* atom : m_atoms) {
+        cout << atom->position() << endl;
+    }
 }
 
 const vector<Atom *> &MoleculeSystem::atoms() const
@@ -502,6 +508,11 @@ void MoleculeSystem::addTwoParticleForce(TwoParticleForce *force)
 
 void MoleculeSystem::addThreeParticleForce(ThreeParticleForce *force) {
     m_threeParticleForces.push_back(force);
+}
+
+const vector<ThreeParticleForce *> &MoleculeSystem::threeParticleForces() const
+{
+    return m_threeParticleForces;
 }
 
 const vector<TwoParticleForce*>& MoleculeSystem::twoParticleForces() const

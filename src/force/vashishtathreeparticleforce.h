@@ -16,10 +16,13 @@ public:
 
     void setMapForAllPermutations(map<vector<int>, double> &theMap, const vector<int> values, double value);
     void setMapForAllPermutationsStep2(map<vector<int>, double> &theMap, const vector<int> &v, const int start, const int n, double value);
+    void setMapForAllPermutationsStep2(map<vector<int>, int> &theMap, const vector<int> &v, const int start, const int n, double value);
+    void setMapForAllPermutations(map<vector<int>, int> &theMap, const vector<int> values, double value);
 protected:
     map<vector<int>,double> m_B;
     map<vector<int>,double> m_thetaBar;
     map<vector<int>,double> m_r0;
+    map<vector<int>,int> m_centerAtom;
 //    map<vector<int>,double> l;
 };
 

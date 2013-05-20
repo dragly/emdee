@@ -1,6 +1,9 @@
 #include "threeparticleforce.h"
 
-ThreeParticleForce::ThreeParticleForce()
+ThreeParticleForce::ThreeParticleForce() :
+    m_isCalculatePotentialEnabled(false),
+    m_isCalculatePressureEnabled(false),
+    m_isNewtonsThirdLawEnabled(false)
 {
 }
 

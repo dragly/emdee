@@ -137,6 +137,7 @@ public:
     void setParticleTypes(const vector<AtomType> &particleTypes);
     inline const unordered_map<int, AtomType>& particleTypesById();
     void addThreeParticleForce(ThreeParticleForce *force);
+    const vector<ThreeParticleForce*>& threeParticleForces() const;
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;

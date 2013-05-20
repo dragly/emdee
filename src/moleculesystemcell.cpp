@@ -3,6 +3,7 @@
 #include <src/moleculesystemcell.h>
 #include <src/moleculesystem.h>
 #include <src/force/twoparticleforce.h>
+#include <src/force/threeparticleforce.h>
 #include <src/force/singleparticleforce.h>
 
 MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
@@ -153,6 +154,106 @@ void MoleculeSystemCell::updateForces()
     }
 
     // Three particle forces
+    Vector3 zeroVector;
+    zeroVector.zeros();
+    for(ThreeParticleForce* threeParticleForce : m_moleculeSystem->threeParticleForces()) {
+
+        // Two neighbor atoms
+        threeParticleForce->setNewtonsThirdLawEnabled(false);
+        for(uint iNeighbor1 = 0; iNeighbor1 < m_neighborCells.size(); iNeighbor1++) {
+            MoleculeSystemCell* neighbor1 = m_neighborCells[iNeighbor1];
+            const Vector3& neighborOffset1 = m_neighborOffsets[iNeighbor1];
+            const vector<Atom*>& neighborAtoms1 = neighbor1->atoms();
+            for(uint iNeighbor2 = iNeighbor1; iNeighbor2 < m_neighborCells.size(); iNeighbor2++) {
+                MoleculeSystemCell* neighbor2 = m_neighborCells[iNeighbor2];
+                const Vector3& neighborOffset2 = m_neighborOffsets[iNeighbor2];
+                const vector<Atom*>& neighborAtoms2 = neighbor2->atoms();
+                for(Atom* atom1 : m_atoms) {
+                    for(uint jAtom = 0; jAtom < neighborAtoms1.size(); jAtom++) {
+                        Atom* atom2 = neighborAtoms1[jAtom];
+                        uint kAtomStart = 0;
+                        if(iNeighbor1 == iNeighbor2) {
+                            kAtomStart = jAtom + 1;
+                        }
+                        for(uint kAtom = kAtomStart; kAtom < neighborAtoms2.size(); kAtom++) {
+                            Atom* atom3 = neighborAtoms2[kAtom];
+                            if(atom1->isPositionFixed() && atom2->isPositionFixed() && atom3->isPositionFixed()) {
+                                continue;
+                            }
+                            threeParticleForce->calculateAndApplyForce(atom1, atom2, atom3, neighborOffset1, neighborOffset2);
+                            cout << m_id << endl;
+                            cout << "Two in neighbor!" << endl << endl << endl;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Two local atoms
+        threeParticleForce->setNewtonsThirdLawEnabled(false);
+        for(uint iNeighbor1 = 0; iNeighbor1 < m_neighborCells.size(); iNeighbor1++) {
+            MoleculeSystemCell* neighbor1 = m_neighborCells[iNeighbor1];
+            const Vector3& neighborOffset1 = m_neighborOffsets[iNeighbor1];
+            const vector<Atom*>& neighborAtoms1 = neighbor1->atoms();
+            for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
+                Atom* atom1 = m_atoms[iAtom];
+                for(uint jAtom = 0; jAtom < m_atoms.size(); jAtom++) {
+                    Atom* atom2 = m_atoms[jAtom];
+                    if(atom1 == atom2) {
+                        continue;
+                    }
+                    for(Atom* atom3 : neighborAtoms1) {
+                        if(atom1->isPositionFixed() && atom2->isPositionFixed() && atom3->isPositionFixed()) {
+                            continue;
+                        }
+                        threeParticleForce->calculateAndApplyForce(atom1, atom2, atom3, zeroVector, neighborOffset1);
+//                        threeParticleForce->calculateAndApplyForce(atom2, atom1, atom3, zeroVector, neighborOffset1);
+                        cout << m_id << endl;
+                        cout << iAtom << " " << jAtom << endl;
+                        cout << "Two in own!" << endl << endl << endl;
+                    }
+                }
+            }
+        }
+
+        // Loop over own atoms
+        threeParticleForce->setNewtonsThirdLawEnabled(true);
+        for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
+            Atom* atom1 = m_atoms[iAtom];
+            int jAtomStart = 0;
+            if(threeParticleForce->isNewtonsThirdLawEnabled()) {
+                jAtomStart = iAtom + 1;
+            }
+            for(uint jAtom = jAtomStart; jAtom < m_atoms.size(); jAtom++) {
+                if(!threeParticleForce->isNewtonsThirdLawEnabled()) {
+                    if(iAtom == jAtom) {
+                        continue;
+                    }
+                }
+                Atom* atom2 = m_atoms[jAtom];
+                int kAtomStart = 0;
+                if(threeParticleForce->isNewtonsThirdLawEnabled()) {
+                    kAtomStart = jAtom + 1;
+                }
+                for(uint kAtom = kAtomStart; kAtom < m_atoms.size(); kAtom++) {
+                    if(!threeParticleForce->isNewtonsThirdLawEnabled()) {
+                        if(iAtom == jAtom || jAtom == kAtom || iAtom == kAtom) {
+                            continue;
+                        }
+                    }
+                    Atom* atom3 = m_atoms[kAtom];
+                    if(atom1->isPositionFixed() && atom2->isPositionFixed() && atom3->isPositionFixed()) {
+                        continue;
+                    }
+                    //                    cout << iAtom << " " << jAtom << " " << kAtom << endl;
+                    threeParticleForce->calculateAndApplyForce(atom1, atom2, atom3);
+                    //                    cout << "Force " << atom1->force() << "; " << atom2->force() << "; " << atom3->force() << endl;
+                    cout << m_id << endl;
+                    cout << "All in own!" << endl << endl << endl;
+                }
+            }
+        }
+    }
 }
 
 void MoleculeSystemCell::clearAtoms()
