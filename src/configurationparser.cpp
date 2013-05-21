@@ -169,10 +169,10 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
                     atom1->setID(1 + i * 3);
                     atom2->setID(2 + i * 3);
                     atom3->setID(3 + i * 3);
-                    double scale = 1.7;
-                    atom1->setPosition(Vector3(1.0, -0.2, 1.0 + i * 2.5) * scale);
-                    atom2->setPosition(Vector3(3.0, -0.2, 1.0 + i * 2.5) * scale);
-                    atom3->setPosition(Vector3(2.0, 1.5, 1.0 + i * 2.5) * scale);
+                    double scale = 1.0;
+                    atom1->setPosition(Vector3(1.0, -0.2, 1.0 + i * 2) * scale);
+                    atom2->setPosition(Vector3(3.0, -0.2, 1.0 + i * 2) * scale);
+                    atom3->setPosition(Vector3(2.0, 1.5, 1.0 + i * 2) * scale);
 //                    atom1->setPosition(Vector3(1.0, 1.0, 1.0 + i * 2.5) * scale);
 //                    atom2->setPosition(Vector3(3.0, 1.0, 1.0 + i * 2.5) * scale);
 //                    atom3->setPosition(Vector3(2.0, 2.7, 1.0 + i * 2.5) * scale);

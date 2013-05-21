@@ -145,7 +145,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
     double f = 0;
     double dfdrij = 0;
     double dfdrik = 0;
-    if(lij < r0 || lik < r0) {
+    if(lij < r0 && lik < r0) {
         f = exp(l / (lij - r0) + l / (lik - r0));
         dfdrij = -l*exp(l/(-r0 + lik) + l/(-r0 + lij))/pow(-r0 + lij, 2);
         dfdrik = -l*exp(l/(-r0 + lik) + l/(-r0 + lij))/pow(-r0 + lik, 2);
@@ -215,7 +215,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
                             + ((rij[a]) / (lij * lik))
                             ) / (
                             sqrt(
-                                1 - (dotrijrik * dotrijrik / (lij * lij * lik * lik) + shield)
+                                1 - (dotrijrik * dotrijrik / (lij * lij * lik * lik)) + shield
                                 )
                             );
                 break;

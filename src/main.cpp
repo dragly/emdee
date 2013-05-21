@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <libconfig.h++>
+#include <fenv.h>
 
 #include <boost/mpi.hpp>
 
@@ -18,6 +19,7 @@ int main(int argc, char** argv)
     mpi::environment env(argc, argv);
     mpi::communicator world;
     mpi::timer timer;
+    feenableexcept(FE_INVALID | FE_OVERFLOW);
     timer.restart();
     cout << "Starting molecular-dynamics" << endl;
     cout << "I am processor number " << world.rank() << " of " << world.size() << endl;
