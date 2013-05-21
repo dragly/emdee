@@ -127,8 +127,8 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
     }
     double shield = 1e-12; // just to avoid nan from 0 / 0 in dtheta and acos
 
-    Vector3 rij = atomjPosition - atomiPosition;
-    Vector3 rik = atomkPosition - atomiPosition;
+    rij = atomjPosition - atomiPosition;
+    rik = atomkPosition - atomiPosition;
     double dotrijrik = dot(rij,rik);
     double lij2 = dot(rij, rij);
     double lik2 = dot(rik, rik);
@@ -160,7 +160,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
         dfdrij = -l*exp(lOverLikMinusR0 + lOverLijMinusR0)/(lijMinusR0*lijMinusR0);
         dfdrik = -l*exp(lOverLikMinusR0 + lOverLijMinusR0)/(likMinusR0*likMinusR0);
     }
-    double costheta = cos(theta);
+    double costheta = dotrijrik / (lij * lik + shield);
     double p1 = (costheta - cosThetaBar); // TODO: Rewrite without cos and acos ;)
     double p = p1*p1;
 
@@ -172,7 +172,8 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
 
     //    double dpdrij = 0;
     //    double dpdrik = 0;
-    double dpdtheta = -2*(-cosThetaBar + costheta) * sin(theta);
+    double sintheta = sqrt(1 - costheta*costheta);
+    double dpdtheta = -2*(-cosThetaBar + costheta) * sintheta;
 
     for(int iAtom = 0; iAtom < 3; iAtom++) {
         Atom* currentAtom;
@@ -191,7 +192,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
         if(!m_isNewtonsThirdLawEnabled && currentAtom != atom1) {
             continue;
         }
-        Vector3 force;
+//        Vector3 force;
         for(int a = 0; a < 3; a++) {
             double dtheta = 0;
 

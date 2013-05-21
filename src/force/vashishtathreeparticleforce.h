@@ -24,6 +24,10 @@ protected:
     map<vector<int>,double> m_r0;
     map<vector<int>,int> m_centerAtom;
     vector<int> m_combo;
+
+    Vector3 force;
+    Vector3 rij;
+    Vector3 rik;
 //    map<vector<int>,double> l;
 };
 
