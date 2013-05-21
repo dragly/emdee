@@ -153,12 +153,21 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
                 cout << "setbounds" << endl;
             } else if(initializationType == "moleculeTest") {
                 m_moleculeSystem->setBoundaries(0,20,0,20,0,20);
-                for(int i = 0; i < 5; i++) {
-                    Atom *atom1 = new Atom(particleTypesByID[14]);
+                for(int i = 0; i < 4; i++) {
+                    Atom* atom1;
+                    Atom* atom2;
+                    Atom* atom3;
+                    if(i % 2) {
+                        atom1 = new Atom(particleTypesByID[14]);
+                        atom2 = new Atom(particleTypesByID[14]);
+                        atom3 = new Atom(particleTypesByID[8 ]);
+                    } else {
+                        atom1 = new Atom(particleTypesByID[8]);
+                        atom2 = new Atom(particleTypesByID[8]);
+                        atom3 = new Atom(particleTypesByID[14]);
+                    }
                     atom1->setID(1 + i * 3);
-                    Atom *atom2 = new Atom(particleTypesByID[14]);
                     atom2->setID(2 + i * 3);
-                    Atom *atom3 = new Atom(particleTypesByID[8 ]);
                     atom3->setID(3 + i * 3);
                     double scale = 1.7;
 //                    atom1->setPosition(Vector3(1.0, -0.2, 1.0 + i * 2) * scale);

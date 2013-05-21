@@ -185,6 +185,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
         for(int a = 0; a < 3; a++) {
             double dtheta = 0;
 
+            double shield = 1e-12; // just to avoid nan from 0 / 0 in dtheta
             switch(iAtom) {
             case 0:
                 dtheta = -(
@@ -193,7 +194,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
                             + ((-rij[a] - rik[a]) / (lij * lik))
                             ) / (
                             sqrt(
-                                1 - (dotrijrik * dotrijrik / (lij * lij * lik * lik))
+                                1 - (dotrijrik * dotrijrik / (lij * lij * lik * lik)) + shield
                                 )
                             );
                 break;
@@ -203,7 +204,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
                             + ((rik[a]) / (lij * lik))
                             ) / (
                             sqrt(
-                                1 - (dotrijrik * dotrijrik / (lij * lij * lik * lik))
+                                1 - (dotrijrik * dotrijrik / (lij * lij * lik * lik)) + shield
                                 )
                             );
 
@@ -214,7 +215,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
                             + ((rij[a]) / (lij * lik))
                             ) / (
                             sqrt(
-                                1 - (dotrijrik * dotrijrik / (lij * lij * lik * lik))
+                                1 - (dotrijrik * dotrijrik / (lij * lij * lik * lik) + shield)
                                 )
                             );
                 break;
@@ -235,6 +236,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
             }
 
             force[a] = -Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
+            a;
             //            force[a] = Bijk * (drij * dfdrij + drik * dfdrik);
             //            force[a] = Bijk * dtheta * dpdtheta;
         }
