@@ -153,7 +153,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
                 cout << "setbounds" << endl;
             } else if(initializationType == "moleculeTest") {
                 m_moleculeSystem->setBoundaries(0,20,0,20,0,20);
-                for(int i = 0; i < 1; i++) {
+                for(int i = 0; i < 5; i++) {
                     Atom *atom1 = new Atom(particleTypesByID[14]);
                     atom1->setID(1 + i * 3);
                     Atom *atom2 = new Atom(particleTypesByID[14]);
@@ -161,12 +161,12 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
                     Atom *atom3 = new Atom(particleTypesByID[8 ]);
                     atom3->setID(3 + i * 3);
                     double scale = 1.7;
-                    atom1->setPosition(Vector3(1.0, -0.2, 1.0 + i * 2) * scale);
-                    atom2->setPosition(Vector3(3.0, -0.2, 1.0 + i * 2) * scale);
-                    atom3->setPosition(Vector3(2.0, 0.5, 1.0 + i * 2) * scale);
-//                    atom1->setPosition(Vector3(1.0, 1.0, 1.0 + i * 2) * scale);
-//                    atom2->setPosition(Vector3(3.0, 1.0, 1.0 + i * 2) * scale);
-//                    atom3->setPosition(Vector3(2.0, 1.7, 1.0 + i * 2) * scale);
+//                    atom1->setPosition(Vector3(1.0, -0.2, 1.0 + i * 2) * scale);
+//                    atom2->setPosition(Vector3(3.0, -0.2, 1.0 + i * 2) * scale);
+//                    atom3->setPosition(Vector3(2.0, 0.5, 1.0 + i * 2) * scale);
+                    atom1->setPosition(Vector3(1.0, 1.0, 1.0 + i * 2) * scale);
+                    atom2->setPosition(Vector3(3.0, 1.0, 1.0 + i * 2) * scale);
+                    atom3->setPosition(Vector3(2.0, 1.7, 1.0 + i * 2) * scale);
                     vector<Atom*> atoms({atom1, atom2, atom3});
                     m_moleculeSystem->addAtoms(atoms);
                 }

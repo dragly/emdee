@@ -181,8 +181,8 @@ void MoleculeSystemCell::updateForces()
                                 continue;
                             }
                             threeParticleForce->calculateAndApplyForce(atom1, atom2, atom3, neighborOffset1, neighborOffset2);
-                            cout << m_id << endl;
-                            cout << "Two in neighbor!" << endl << endl << endl;
+//                            cout << m_id << endl;
+//                            cout << "Two in neighbor!" << endl << endl << endl;
                         }
                     }
                 }
@@ -208,9 +208,9 @@ void MoleculeSystemCell::updateForces()
                         }
                         threeParticleForce->calculateAndApplyForce(atom1, atom2, atom3, zeroVector, neighborOffset1);
 //                        threeParticleForce->calculateAndApplyForce(atom2, atom1, atom3, zeroVector, neighborOffset1);
-                        cout << m_id << endl;
-                        cout << iAtom << " " << jAtom << endl;
-                        cout << "Two in own!" << endl << endl << endl;
+//                        cout << m_id << endl;
+//                        cout << iAtom << " " << jAtom << endl;
+//                        cout << "Two in own!" << endl << endl << endl;
                     }
                 }
             }
@@ -248,8 +248,8 @@ void MoleculeSystemCell::updateForces()
                     //                    cout << iAtom << " " << jAtom << " " << kAtom << endl;
                     threeParticleForce->calculateAndApplyForce(atom1, atom2, atom3);
                     //                    cout << "Force " << atom1->force() << "; " << atom2->force() << "; " << atom3->force() << endl;
-                    cout << m_id << endl;
-                    cout << "All in own!" << endl << endl << endl;
+//                    cout << m_id << endl;
+//                    cout << "All in own!" << endl << endl << endl;
                 }
             }
         }

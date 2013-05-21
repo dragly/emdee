@@ -183,6 +183,53 @@ TEST(VashishtaThreeForceTest) {
 //    CHECK_ARRAY_CLOSE(atom1.force(), newForce, 3, 0.005);
 }
 
+TEST(VashishtaTwoNewton) {
+    AtomType silicon;
+    silicon.setMass(28.0855);
+    silicon.setId(14);
+    silicon.setEffectiveCharge(1.6);
+    silicon.setElectronicPolarizability(0.0);
+    AtomType oxygen;
+    oxygen.setMass(15.9994);
+    oxygen.setId(8);
+    oxygen.setEffectiveCharge(-0.8);
+    oxygen.setElectronicPolarizability(2.40);
+
+
+    Atom atom1(silicon); // = new Atom(silicon);
+    Atom atom2(silicon); // = new Atom(oxygen);
+//    Atom atom3(oxygen); // = new Atom(oxygen);
+
+    atom1.setPosition(Vector3(1,0,1));
+    atom2.setPosition(Vector3(1,2,1));
+//    atom3.setPosition(Vector3(2,1,1));
+
+    VashishtaTwoParticleForce force;
+    force.setNewtonsThirdLawEnabled(true);
+    force.calculateAndApplyForce(&atom1, &atom2);
+
+    Vector3 newton1 = atom1.force();
+    Vector3 newton2 = atom2.force();
+//    Vector3 newton3 = atom3.force();
+
+    atom1.clearForcePotentialPressure();
+    atom2.clearForcePotentialPressure();
+//    atom3.clearForcePotentialPressure();
+
+    force.setNewtonsThirdLawEnabled(false);
+    force.calculateAndApplyForce(&atom1, &atom2);
+    force.calculateAndApplyForce(&atom2, &atom1);
+//    force.calculateAndApplyForce(&atom3, &atom2, &atom1);
+
+    Vector3 noNewton1 = atom1.force();
+    Vector3 noNewton2 = atom2.force();
+//    Vector3 noNewton3 = atom3.force();
+
+    CHECK_ARRAY_CLOSE(newton1, noNewton1, 3, 0.0005);
+    CHECK_ARRAY_CLOSE(newton2, noNewton2, 3, 0.0005);
+//    CHECK_ARRAY_CLOSE(newton3, noNewton3, 3, 0.0005);
+}
+
 TEST(VashishtaThreeNewton) {
     AtomType silicon;
     silicon.setMass(28.0855);

@@ -16,7 +16,7 @@ VashishtaTwoParticleForce::VashishtaTwoParticleForce() :
     H[O_O] = 51.692;
     eta[Si_Si] = 11;
     eta[Si_O] = 9;
-    eta[O_Si] = H[Si_O];
+    eta[O_Si] = eta[Si_O];
     eta[O_O] = 7;
 }
 
