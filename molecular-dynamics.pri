@@ -41,5 +41,6 @@ mpi {
     QMAKE_CXXFLAGS_RELEASE += $$system(mpicxx --showme:compile) -DMPICH_IGNORE_CXX_SEEK
 }
 
-
+QMAKE_CXXFLAGS += -g
+QMAKE_CXXFLAGS_RELEASE += -g
 # -ftree-parallelize-loops=4 -ftree-loop-optimize -floop-parallelize-all

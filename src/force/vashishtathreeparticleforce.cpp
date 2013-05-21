@@ -10,12 +10,14 @@ VashishtaThreeParticleForce::VashishtaThreeParticleForce()
 {
     vector<int> SiOSi({8,14,14});
     vector<int> OSiO({8,8,14});
+
+    m_combo = vector<int>({0,0,0});
 //    B[SiOSi] = 1.4;
 //    B[OSiO] = 0.35;
     setMapForAllPermutations(m_B, SiOSi, 1.4);
     setMapForAllPermutations(m_B, OSiO, 0.35);
-    setMapForAllPermutations(m_thetaBar, SiOSi, 141.0 / 360. * 2*M_PI);
-    setMapForAllPermutations(m_thetaBar, OSiO, 109.47 / 360. * 2*M_PI);
+    setMapForAllPermutations(m_cosThetaBar, SiOSi, cos(141.0 / 360. * 2*M_PI));
+    setMapForAllPermutations(m_cosThetaBar, OSiO, cos(109.47 / 360. * 2*M_PI));
     setMapForAllPermutations(m_r0, SiOSi, 2.6);
     setMapForAllPermutations(m_r0, OSiO, 2.6);
     setMapForAllPermutations(m_centerAtom, SiOSi, 8);
@@ -83,12 +85,15 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
 
 void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3, const Vector3 &atom2Offset, const Vector3 &atom3Offset)
 {
-    vector<int> combo({atom1->type().id(), atom2->type().id(), atom3->type().id()});
-    if(m_centerAtom.find(combo) == m_centerAtom.end()) {
+    m_combo[0] = atom1->type().id();
+    m_combo[1] = atom2->type().id();
+    m_combo[2] = atom3->type().id();
+
+    if(m_centerAtom.find(m_combo) == m_centerAtom.end()) {
         return;
     }
 
-    int centralAtom = m_centerAtom[combo];
+    int centralAtom = m_centerAtom[m_combo];
 
     Atom* atomi;
     Atom* atomj;
@@ -130,9 +135,9 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
     double lij = sqrt(lij2);
     double lik = sqrt(lik2);
     double l = 1.0;
-    double Bijk = m_B[combo];
-    double thetabar = m_thetaBar[combo];
-    double r0 = m_r0[combo];
+    double Bijk = m_B[m_combo];
+    double cosThetaBar = m_cosThetaBar[m_combo];
+    double r0 = m_r0[m_combo];
 
     double theta = acos(dotrijrik / (lij * lik + shield));
 
@@ -151,8 +156,8 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
         dfdrij = -l*exp(l/(-r0 + lik) + l/(-r0 + lij))/pow(-r0 + lij, 2);
         dfdrik = -l*exp(l/(-r0 + lik) + l/(-r0 + lij))/pow(-r0 + lik, 2);
     }
-
-    double p1 = (cos(theta) - cos(thetabar)); // TODO: Rewrite without cos and acos ;)
+    double costheta = cos(theta);
+    double p1 = (costheta - cosThetaBar); // TODO: Rewrite without cos and acos ;)
     double p = p1*p1;
 
     //    cout << "p " << p << endl;
@@ -163,7 +168,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
 
     //    double dpdrij = 0;
     //    double dpdrik = 0;
-    double dpdtheta = -2*(-cos(thetabar) + cos(theta)) * sin(theta);
+    double dpdtheta = -2*(-cosThetaBar + costheta) * sin(theta);
 
     for(int iAtom = 0; iAtom < 3; iAtom++) {
         Atom* currentAtom;

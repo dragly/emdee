@@ -20,9 +20,10 @@ public:
     void setMapForAllPermutations(map<vector<int>, int> &theMap, const vector<int> values, double value);
 protected:
     map<vector<int>,double> m_B;
-    map<vector<int>,double> m_thetaBar;
+    map<vector<int>,double> m_cosThetaBar;
     map<vector<int>,double> m_r0;
     map<vector<int>,int> m_centerAtom;
+    vector<int> m_combo;
 //    map<vector<int>,double> l;
 };
 
