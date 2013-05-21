@@ -159,10 +159,10 @@ void MoleculeSystem::addAtoms(const vector<Atom *>& atoms)
     m_atoms.insert(m_atoms.end(), atoms.begin(), atoms.end());
     obeyBoundaries();
 
-    cout << "Positions:" << endl;
-    for(Atom* atom : m_atoms) {
-        cout << atom->position() << endl;
-    }
+//    cout << "Positions:" << endl;
+//    for(Atom* atom : m_atoms) {
+//        cout << atom->position() << endl;
+//    }
 }
 
 const vector<Atom *> &MoleculeSystem::atoms() const
@@ -251,6 +251,8 @@ void MoleculeSystem::simulate()
         m_time += m_integrator->timeStep();
         iStep++;
         m_step++;
+    } else {
+        updateStatistics(); // We will in any case have to update the statistics
     }
     if(isOutputEnabled()) {
         cout << "Starting simulation " << endl;

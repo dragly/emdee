@@ -152,33 +152,60 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
                 m_moleculeSystem->addAtoms(atoms);
                 cout << "setbounds" << endl;
             } else if(initializationType == "moleculeTest") {
-                m_moleculeSystem->setBoundaries(0,20,0,20,0,20);
-                for(int i = 0; i < 4; i++) {
-                    Atom* atom1;
-                    Atom* atom2;
-                    Atom* atom3;
-                    if(i % 2) {
-                        atom1 = new Atom(particleTypesByID[14]);
-                        atom2 = new Atom(particleTypesByID[14]);
-                        atom3 = new Atom(particleTypesByID[8 ]);
-                    } else {
-                        atom1 = new Atom(particleTypesByID[8]);
-                        atom2 = new Atom(particleTypesByID[8]);
-                        atom3 = new Atom(particleTypesByID[14]);
+                m_moleculeSystem->setBoundaries(0,26,0,26,0,26);
+                vector<Atom*> atoms;
+                int idCounter = 1;
+                int type = 0;
+                for(int i = 0; i < 3; i++) {
+                    for(int j = 0; j < 3; j++) {
+                        type = ((i+j)%2);
+                        for(int k = 0; k < 4; k++) {
+                            Atom* atom;
+                            if(type % 2) {
+                                atom = new Atom(particleTypesByID[14]);
+                            } else {
+                                atom = new Atom(particleTypesByID[8]);
+                            }
+                            atom->setID(idCounter);
+                            Vector3 position(i - 1,j,k);
+                            position *= 3.0;
+                            cout << position << endl;
+                            atom->setPosition(position);
+                            atoms.push_back(atom);
+                            idCounter++;
+                            type++;
+                        }
                     }
-                    atom1->setID(1 + i * 3);
-                    atom2->setID(2 + i * 3);
-                    atom3->setID(3 + i * 3);
-                    double scale = 1.0;
-                    atom1->setPosition(Vector3(1.0, -0.2, 1.0 + i * 2) * scale);
-                    atom2->setPosition(Vector3(3.0, -0.2, 1.0 + i * 2) * scale);
-                    atom3->setPosition(Vector3(2.0, 1.5, 1.0 + i * 2) * scale);
-//                    atom1->setPosition(Vector3(1.0, 1.0, 1.0 + i * 2.5) * scale);
-//                    atom2->setPosition(Vector3(3.0, 1.0, 1.0 + i * 2.5) * scale);
-//                    atom3->setPosition(Vector3(2.0, 2.7, 1.0 + i * 2.5) * scale);
-                    vector<Atom*> atoms({atom1, atom2, atom3});
-                    m_moleculeSystem->addAtoms(atoms);
                 }
+                m_moleculeSystem->addAtoms(atoms);
+//                for(int i = 0; i < 3; i++) {
+//                    for(int j = 0; j < 2; j++) {
+//                        Atom* atom1;
+//                        Atom* atom2;
+//                        Atom* atom3;
+//                        if(i % 2) {
+//                            atom1 = new Atom(particleTypesByID[14]);
+//                            atom2 = new Atom(particleTypesByID[14]);
+//                            atom3 = new Atom(particleTypesByID[8 ]);
+//                        } else {
+//                            atom1 = new Atom(particleTypesByID[8]);
+//                            atom2 = new Atom(particleTypesByID[8]);
+//                            atom3 = new Atom(particleTypesByID[14]);
+//                        }
+//                        atom1->setID(1 + j * 3 + i * 2 * 3);
+//                        atom2->setID(2 + j * 3 + i * 2 * 3);
+//                        atom3->setID(3 + j * 3 + i * 2 * 3);
+//                        double scale = 1.3;
+//                        atom1->setPosition(Vector3(1.0, -0.2 + j*3, 1.0 + i * 2) * scale);
+//                        atom2->setPosition(Vector3(3.0, -0.2 + j*3, 1.0 + i * 2) * scale);
+//                        atom3->setPosition(Vector3(2.0, 1.5 + j*3, 1.0 + i * 2) * scale);
+//    //                    atom1->setPosition(Vector3(1.0, 1.0, 1.0 + i * 2.5) * scale);
+//    //                    atom2->setPosition(Vector3(3.0, 1.0, 1.0 + i * 2.5) * scale);
+//    //                    atom3->setPosition(Vector3(2.0, 2.7, 1.0 + i * 2.5) * scale);
+//                        vector<Atom*> atoms({atom1, atom2, atom3});
+//                        m_moleculeSystem->addAtoms(atoms);
+//                    }
+//                }
             } else if(initializationType == "boltzmannVelocity") {
                 double initialTemperature = initialization[i]["initialTemperature"];
                 initialTemperature /= unitTemperature;
@@ -266,7 +293,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     //    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
     cout << "addded" << endl;
 //    m_moleculeSystem->setupCells(potentialConstant * 3);
-    m_moleculeSystem->setupCells(20. / 3.);
+    m_moleculeSystem->setupCells(16. / 3.);
     m_moleculeSystem->setNSimulationSteps(nSimulationSteps);
     cout << "Setup cells" << endl;
 

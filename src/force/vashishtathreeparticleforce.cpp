@@ -120,6 +120,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
         atomk = atom2;
         atomkPosition = atom2->position() + atom2Offset;
     }
+    double shield = 1e-12; // just to avoid nan from 0 / 0 in dtheta and acos
 
     Vector3 rij = atomjPosition - atomiPosition;
     Vector3 rik = atomkPosition - atomiPosition;
@@ -133,7 +134,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
     double thetabar = m_thetaBar[combo];
     double r0 = m_r0[combo];
 
-    double theta = acos(dotrijrik / (lij * lik));
+    double theta = acos(dotrijrik / (lij * lik + shield));
 
     //    cout << "theta " << theta << endl;
 
@@ -185,7 +186,6 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
         for(int a = 0; a < 3; a++) {
             double dtheta = 0;
 
-            double shield = 1e-12; // just to avoid nan from 0 / 0 in dtheta
             switch(iAtom) {
             case 0:
                 dtheta = -(
