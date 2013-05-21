@@ -151,10 +151,14 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
     double f = 0;
     double dfdrij = 0;
     double dfdrik = 0;
+    double lijMinusR0 = lij - r0;
+    double likMinusR0 = lik - r0;
+    double lOverLijMinusR0 = l / lijMinusR0;
+    double lOverLikMinusR0 = l / likMinusR0;
     if(lij < r0 && lik < r0) {
-        f = exp(l / (lij - r0) + l / (lik - r0));
-        dfdrij = -l*exp(l/(-r0 + lik) + l/(-r0 + lij))/pow(-r0 + lij, 2);
-        dfdrik = -l*exp(l/(-r0 + lik) + l/(-r0 + lij))/pow(-r0 + lik, 2);
+        f = exp(lOverLijMinusR0 + lOverLikMinusR0);
+        dfdrij = -l*exp(lOverLikMinusR0 + lOverLijMinusR0)/(lijMinusR0*lijMinusR0);
+        dfdrik = -l*exp(lOverLikMinusR0 + lOverLijMinusR0)/(likMinusR0*likMinusR0);
     }
     double costheta = cos(theta);
     double p1 = (costheta - cosThetaBar); // TODO: Rewrite without cos and acos ;)
