@@ -28,6 +28,9 @@ protected:
     Vector3 force;
     Vector3 rij;
     Vector3 rik;
+
+    Atom* atoms[3];
+    Vector3 atomPosition[3];
 //    map<vector<int>,double> l;
 };
 
