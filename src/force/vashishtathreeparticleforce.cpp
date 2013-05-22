@@ -97,22 +97,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
 
     int centralAtom = m_centerAtom[m_combo];
 
-    //    Atom* atomi;
-    //    Atom* atomj;
-    //    Atom* atomk;
-
-    //    Vector3 atomiPosition;
-    //    Vector3 atomjPosition;
-    //    Vector3 atomkPosition;
-
     if(atom1->type().id() == centralAtom) {
-        //        atomi = atom1;
-        //        atomiPosition = atom1->position();
-        //        atomj = atom2;
-        //        atomjPosition = atom2->position() + atom2Offset;
-        //        atomk = atom3;
-        //        atomkPosition = atom3->position() + atom3Offset;
-
         atoms[0] = atom1;
         atomPosition[0] = atom1->position();
         atoms[1] = atom2;
@@ -120,13 +105,6 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
         atoms[2] = atom3;
         atomPosition[2] = atom3->position() + atom3Offset;
     } else if(atom2->type().id() == centralAtom) {
-        //        atomi = atom2;
-        //        atomiPosition = atom2->position() + atom2Offset;
-        //        atomj = atom1;
-        //        atomjPosition = atom1->position();
-        //        atomk = atom3;
-        //        atomkPosition = atom3->position() + atom3Offset;
-
         atoms[0] = atom2;
         atomPosition[0] = atom2->position() + atom2Offset;
         atoms[1] = atom1;
@@ -134,13 +112,6 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
         atoms[2] = atom3;
         atomPosition[2] = atom3->position() + atom3Offset;
     } else if(atom3->type().id() == centralAtom) {
-        //        atomi = atom3;
-        //        atomiPosition = atom3->position() + atom3Offset;
-        //        atomj = atom1;
-        //        atomjPosition = atom1->position();
-        //        atomk = atom2;
-        //        atomkPosition = atom2->position() + atom2Offset;
-
         atoms[0] = atom3;
         atomPosition[0] = atom3->position() + atom3Offset;
         atoms[1] = atom1;
@@ -162,15 +133,6 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
     double cosThetaBar = m_cosThetaBar[m_combo];
     double r0 = m_r0[m_combo];
 
-    //    double theta = acos(dotrijrik / (lij * lik + shield));
-
-    //    cout << "theta " << theta << endl;
-
-    //    cout << rij << " " << rik << endl;
-    //    cout << "dotrijrik " << dotrijrik << endl;
-    //    cout << "theta " << theta << endl;
-    //    cout << "acos(dotrijrik / (lij * lik)) =" << "acos(" << dotrijrik << "/" << "(" << lij << "*" << lik << "))";
-
     double f = 0;
     double dfdrij = 0;
     double dfdrik = 0;
@@ -187,14 +149,6 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
     double p1 = (costheta - cosThetaBar); // TODO: Rewrite without cos and acos ;)
     double p = p1*p1;
 
-    //    cout << "p " << p << endl;
-    //    cout << "f " << f << endl;
-
-
-    //    double dfdtheta = 0;
-
-    //    double dpdrij = 0;
-    //    double dpdrik = 0;
     double sintheta = sqrt(1 - costheta*costheta);
     double dpdtheta = -2*(-cosThetaBar + costheta) * sintheta;
 
@@ -222,7 +176,6 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
             double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
             atoms[0]->addForce(a, forceComp);
         }
-        //        atoms[0]->addForce(force);
     }
 
     if(atom1 == atoms[1] || m_isNewtonsThirdLawEnabled) {
@@ -241,10 +194,8 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
             drij = rij[a] / lij;
             double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
             atoms[1]->addForce(a, forceComp);
-            //            force[a] = -Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
 
         }
-        //        atoms[1]->addForce(force);
     }
 
     if(atom1 == atoms[2] || m_isNewtonsThirdLawEnabled) {
@@ -263,14 +214,10 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
             drik = rik[a] / lik;
             double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
             atoms[2]->addForce(a,forceComp);
-            //            force[a] = -Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
         }
-        //        atoms[2]->addForce(force);
     }
 
     double potential = Bijk * f * p;
-    //    double potential = Bijk * f;
-    //    double potential = Bijk * p;
     atom1->addPotential(potential / 3);
     if(m_isNewtonsThirdLawEnabled) {
         atom2->addPotential(potential / 3);
