@@ -293,7 +293,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     //    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
     cout << "addded" << endl;
 //    m_moleculeSystem->setupCells(potentialConstant * 3);
-    m_moleculeSystem->setupCells(16. / 3.);
+    m_moleculeSystem->setupCells(26. / 3.);
     m_moleculeSystem->setNSimulationSteps(nSimulationSteps);
     cout << "Setup cells" << endl;
 

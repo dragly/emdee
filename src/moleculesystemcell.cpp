@@ -116,10 +116,12 @@ void MoleculeSystemCell::updateForces()
         for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
             MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
             const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
+
             twoParticleForce->setNewtonsThirdLawEnabled(shouldNewtonsThirdBeEnabled(neighbor));
             if(twoParticleForce->isNewtonsThirdLawEnabled() && !checkDirection(iNeighbor)) {
                 continue;
             }
+
             const vector<Atom*>& neighborAtoms = neighbor->atoms();
             for(Atom* atom1 : m_atoms) {
                 for(Atom* atom2 : neighborAtoms) {
@@ -165,10 +167,20 @@ void MoleculeSystemCell::updateForces()
             MoleculeSystemCell* neighbor1 = m_neighborCells[iNeighbor1];
             const Vector3& neighborOffset1 = m_neighborOffsets[iNeighbor1];
             const vector<Atom*>& neighborAtoms1 = neighbor1->atoms();
+
+//            threeParticleForce->setNewtonsThirdLawEnabled(shouldNewtonsThirdBeEnabled(neighbor1));
+//            if(threeParticleForce->isNewtonsThirdLawEnabled() && !checkDirection(iNeighbor1)) {
+//                continue;
+//            }
             for(uint iNeighbor2 = iNeighbor1; iNeighbor2 < m_neighborCells.size(); iNeighbor2++) {
                 MoleculeSystemCell* neighbor2 = m_neighborCells[iNeighbor2];
                 const Vector3& neighborOffset2 = m_neighborOffsets[iNeighbor2];
                 const vector<Atom*>& neighborAtoms2 = neighbor2->atoms();
+
+//                threeParticleForce->setNewtonsThirdLawEnabled(shouldNewtonsThirdBeEnabled(neighbor2));
+//                if(threeParticleForce->isNewtonsThirdLawEnabled() && !checkDirection(iNeighbor2)) {
+//                    continue;
+//                }
                 for(Atom* atom1 : m_atoms) {
                     for(uint jAtom = 0; jAtom < neighborAtoms1.size(); jAtom++) {
                         Atom* atom2 = neighborAtoms1[jAtom];
@@ -196,6 +208,11 @@ void MoleculeSystemCell::updateForces()
             MoleculeSystemCell* neighbor1 = m_neighborCells[iNeighbor1];
             const Vector3& neighborOffset1 = m_neighborOffsets[iNeighbor1];
             const vector<Atom*>& neighborAtoms1 = neighbor1->atoms();
+
+//            threeParticleForce->setNewtonsThirdLawEnabled(shouldNewtonsThirdBeEnabled(neighbor1));
+//            if(threeParticleForce->isNewtonsThirdLawEnabled() && !checkDirection(iNeighbor1)) {
+//                continue;
+//            }
             for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
                 Atom* atom1 = m_atoms[iAtom];
                 for(uint jAtom = 0; jAtom < m_atoms.size(); jAtom++) {
