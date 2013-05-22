@@ -119,32 +119,30 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
         atoms[2] = atom2;
         atomPosition[2] = atom2->position() + atom2Offset;
     }
-    double shield = 1e-12; // just to avoid nan from 0 / 0 in dtheta and acos
 
     rij = atomPosition[1] - atomPosition[0];
     rik = atomPosition[2] - atomPosition[0];
+
     double dotrijrik = dot(rij,rik);
     double lij2 = dot(rij, rij);
     double lik2 = dot(rik, rik);
     double lij = sqrt(lij2);
     double lik = sqrt(lik2);
+    double r0 = m_r0[m_combo];
+    if(lij > r0 || lik > r0) {
+        return;
+    }
+    double shield = 1e-12; // just to avoid nan from 0 / 0 in dtheta and acos
     double l = 1.0;
     double Bijk = m_B[m_combo];
     double cosThetaBar = m_cosThetaBar[m_combo];
-    double r0 = m_r0[m_combo];
-
-    double f = 0;
-    double dfdrij = 0;
-    double dfdrik = 0;
     double lijMinusR0 = lij - r0;
     double likMinusR0 = lik - r0;
     double lOverLijMinusR0 = l / lijMinusR0;
     double lOverLikMinusR0 = l / likMinusR0;
-    if(lij < r0 && lik < r0) {
-        f = exp(lOverLijMinusR0 + lOverLikMinusR0);
-        dfdrij = -l*exp(lOverLikMinusR0 + lOverLijMinusR0)/(lijMinusR0*lijMinusR0);
-        dfdrik = -l*exp(lOverLikMinusR0 + lOverLijMinusR0)/(likMinusR0*likMinusR0);
-    }
+    double f = exp(lOverLijMinusR0 + lOverLikMinusR0);
+    double dfdrij = -l*exp(lOverLikMinusR0 + lOverLijMinusR0)/(lijMinusR0*lijMinusR0);
+    double dfdrik = -l*exp(lOverLikMinusR0 + lOverLijMinusR0)/(likMinusR0*likMinusR0);
     double costheta = dotrijrik / (lij * lik + shield);
     double p1 = (costheta - cosThetaBar); // TODO: Rewrite without cos and acos ;)
     double p = p1*p1;
