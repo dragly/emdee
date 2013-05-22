@@ -47,6 +47,8 @@ public:
     void setOnProcessorEdge(bool enable);
     bool isOnProcessorEdge();
     void deleteAtoms(int nAtoms);
+    bool shouldNewtonsThirdBeEnabled(MoleculeSystemCell *neighbor);
+    bool checkDirection(int neighborID);
 protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;

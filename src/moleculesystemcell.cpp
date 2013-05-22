@@ -85,6 +85,21 @@ const irowvec &MoleculeSystemCell::indices() const
     return m_indices;
 }
 
+bool MoleculeSystemCell::shouldNewtonsThirdBeEnabled(MoleculeSystemCell* neighbor) {
+    if(m_isOnProcessorEdge || neighbor->isOnProcessorEdge()) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+bool MoleculeSystemCell::checkDirection(int neighborID) {
+    const irowvec& direction = m_neighborDirections[neighborID];
+    return ( // if one of ..
+       ((direction(0) >= 0 && direction(1) >= 0) && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1)) // 2x2 in upper right (except right down)
+       || (direction(0) == 1 && direction(1) == -1)) // 1x1 lower right
+    ;
+}
 
 void MoleculeSystemCell::updateForces()
 {
@@ -100,24 +115,10 @@ void MoleculeSystemCell::updateForces()
     for(TwoParticleForce* twoParticleForce : m_moleculeSystem->twoParticleForces()) {
         for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
             MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
-            if(m_isOnProcessorEdge || neighbor->isOnProcessorEdge()) {
-                twoParticleForce->setNewtonsThirdLawEnabled(false);
-            } else {
-                twoParticleForce->setNewtonsThirdLawEnabled(true);
-            }
             const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
-            if(twoParticleForce->isNewtonsThirdLawEnabled()) {
-                const irowvec& direction = m_neighborDirections[iNeighbor];
-                if(
-                        !( // if not one of ..
-                           ((direction(0) >= 0 && direction(1) >= 0) && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1)) // 2x2 in upper right (except right down)
-                           || (direction(0) == 1 && direction(1) == -1)) // 1x1 lower right
-                        ) // then continue ...
-                    //                neighbor->hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
-                    //            )
-                {
-                    continue;
-                }
+            twoParticleForce->setNewtonsThirdLawEnabled(shouldNewtonsThirdBeEnabled(neighbor));
+            if(twoParticleForce->isNewtonsThirdLawEnabled() && !checkDirection(iNeighbor)) {
+                continue;
             }
             const vector<Atom*>& neighborAtoms = neighbor->atoms();
             for(Atom* atom1 : m_atoms) {
