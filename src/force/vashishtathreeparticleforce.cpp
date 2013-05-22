@@ -78,6 +78,8 @@ void VashishtaThreeParticleForce::setMapForAllPermutations(map<vector<int>, int>
     setMapForAllPermutationsStep2(theMap, values, 0, values.size(), value);
 }
 
+
+
 void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3)
 {
     calculateAndApplyForce(atom1, atom2, atom3, m_zeroVector, m_zeroVector);
@@ -217,9 +219,10 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
                         );
             drij = -rij[a] / lij;
             drik = -rik[a] / lik;
-            force[a] = -Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
+            double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
+            atoms[0]->addForce(a, forceComp);
         }
-        atoms[0]->addForce(force);
+        //        atoms[0]->addForce(force);
     }
 
     if(atom1 == atoms[1] || m_isNewtonsThirdLawEnabled) {
@@ -236,10 +239,12 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
                             )
                         );
             drij = rij[a] / lij;
-            force[a] = -Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
+            double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
+            atoms[1]->addForce(a, forceComp);
+            //            force[a] = -Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
 
         }
-        atoms[1]->addForce(force);
+        //        atoms[1]->addForce(force);
     }
 
     if(atom1 == atoms[2] || m_isNewtonsThirdLawEnabled) {
@@ -256,9 +261,11 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
                             )
                         );
             drik = rik[a] / lik;
-            force[a] = -Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
+            double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
+            atoms[2]->addForce(a,forceComp);
+            //            force[a] = -Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
         }
-        atoms[2]->addForce(force);
+        //        atoms[2]->addForce(force);
     }
 
     double potential = Bijk * f * p;
@@ -269,4 +276,9 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
         atom2->addPotential(potential / 3);
         atom3->addPotential(potential / 3);
     }
+}
+
+double VashishtaThreeParticleForce::force(double Bijk, double drij, double dfdrij, double drik, double dfdrik, double p, double f, double dtheta, double dpdtheta)
+{
+    return -Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
 }

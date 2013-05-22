@@ -25,12 +25,14 @@ protected:
     map<vector<int>,int> m_centerAtom;
     vector<int> m_combo;
 
-    Vector3 force;
+//    Vector3 force;
     Vector3 rij;
     Vector3 rik;
 
     Atom* atoms[3];
     Vector3 atomPosition[3];
+
+    double force(double Bijk, double drij, double dfdrij, double drik, double dfdrik, double p, double f, double dtheta, double dpdtheta);
 //    map<vector<int>,double> l;
 };
 
