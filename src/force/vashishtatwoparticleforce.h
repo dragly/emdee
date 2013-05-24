@@ -15,9 +15,16 @@ public:
     void calculateAndApplyForce(Atom *atom1, Atom *atom2);
     void calculateAndApplyForce(Atom *atom1, Atom *atom2, const Vector3 &atomOffset);
 
-    map<pair<int,int>, double> H;
-    map<pair<int,int>, double> eta;
+//    map<pair<int,int>, double> H;
+//    map<pair<int,int>, double> eta;
 
+    vec H;
+    vec eta;
+
+    int nParticleTypes;
+    int comboHash(int v[]);
+    Vector3 rVec;
+    Vector3 force;
 };
 
 #endif // VASHISHTATWOPARTICLEFORCE_H

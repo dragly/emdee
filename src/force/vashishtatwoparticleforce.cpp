@@ -3,21 +3,34 @@
 #include <src/atom.h>
 
 VashishtaTwoParticleForce::VashishtaTwoParticleForce() :
+    nParticleTypes(2),
     TwoParticleForce()
 {
-    pair<int,int> Si_Si(14,14);
-    pair<int,int> Si_O(14,8);
-    pair<int,int> O_Si(Si_O.second, Si_O.first);
-    pair<int,int> O_O(8,8);
+//    pair<int,int> Si_Si(14,14);
+//    pair<int,int> Si_O(14,8);
+//    pair<int,int> O_Si(Si_O.second, Si_O.first);
+//    pair<int,int> O_O(8,8);
+    int nPermutations = nParticleTypes*nParticleTypes;
+    H = zeros(nPermutations);
+    eta = zeros(nPermutations);
 
-    H[Si_Si] = 0.057;
-    H[Si_O] = 11.387;
-    H[O_Si] = H[Si_O];
-    H[O_O] = 51.692;
-    eta[Si_Si] = 11;
-    eta[Si_O] = 9;
-    eta[O_Si] = eta[Si_O];
-    eta[O_O] = 7;
+    int Si_Si[2] = {0,0};
+    int Si_O[2] = {0,1};
+    int O_Si[2] = {1,0};
+    int O_O[2] = {1,1};
+
+    H[comboHash(Si_Si)] = 0.057;
+    H[comboHash(Si_O)] = 11.387;
+    H[comboHash(O_Si)] = H[comboHash(Si_O)];
+    H[comboHash(O_O)] = 51.692;
+    eta[comboHash(Si_Si)] = 11;
+    eta[comboHash(Si_O)] = 9;
+    eta[comboHash(O_Si)] = eta[comboHash(Si_O)];
+    eta[comboHash(O_O)] = 7;
+}
+
+int VashishtaTwoParticleForce::comboHash(int v[2]) {
+    return v[0] + v[1] * nParticleTypes;
 }
 
 void VashishtaTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2)
@@ -28,8 +41,12 @@ void VashishtaTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2)
 
 void VashishtaTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const Vector3 &atomOffset)
 {
-    Vector3 rVec = atom2->position() + atomOffset - atom1->position();
-    pair<int,int> combo(atom1->type().number(), atom2->type().number());
+    rVec = atom2->position() + atomOffset - atom1->position();
+//    pair<int,int> combo(atom1->type().number(), atom2->type().number());
+    int v[2];
+    v[0] = atom1->type().index();
+    v[1] = atom2->type().index();
+    int combo = comboHash(v);
     //    cout << "Looking for " << combo.first << " " << combo.second << endl;
     double Hij = H[combo];
     double etaij = eta[combo];
@@ -55,7 +72,7 @@ void VashishtaTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2,
     double invr4s = 1 / r4s;
     double expR4OverR4s = exp(-r/r4s);
 
-    Vector3 force = -rVec*(-Hij*etaij*pow(r, -etaij) * invr2 - Zi*Zj * invr3 + (0.5*Zi2*alphaj + 0.5*Zj2*alphai)*expR4OverR4s*invr5*invr4s + 4*(0.5*Zi2*alphaj + 0.5*Zj2*alphai)*expR4OverR4s * invr6);
+    force = -rVec*(-Hij*etaij*pow(r, -etaij) * invr2 - Zi*Zj * invr3 + (0.5*Zi2*alphaj + 0.5*Zj2*alphai)*expR4OverR4s*invr5*invr4s + 4*(0.5*Zi2*alphaj + 0.5*Zj2*alphai)*expR4OverR4s * invr6);
 
     double potential = Hij * pow(invr, etaij)
             + (Zi * Zj) * invr
