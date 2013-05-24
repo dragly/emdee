@@ -3,15 +3,27 @@
 #include <iostream>
 #include <src/atom.h>
 #include <stdio.h>
+#include <armadillo>
 
+using namespace arma;
 using namespace std;
 
-VashishtaThreeParticleForce::VashishtaThreeParticleForce()
+VashishtaThreeParticleForce::VashishtaThreeParticleForce() :
+    nParticleTypes(2)
 {
-    vector<int> SiOSi({8,14,14});
-    vector<int> OSiO({8,8,14});
+    int nPermutations = nParticleTypes*nParticleTypes*nParticleTypes;
+    m_B = zeros(nPermutations);
+    m_cosThetaBar = zeros(nPermutations);
+    m_r0 = zeros(nPermutations);
+    m_centerAtom = -1 * ones(nPermutations);
 
-    m_combo = vector<int>({0,0,0});
+    int SiOSi[3] = {1,0,0};
+    int OSiO[3] = {1,1,0};
+
+//    vector<int> SiOSi({8,14,14});
+//    vector<int> OSiO({8,8,14});
+
+//    m_combo = vector<int>({0,0,0});
     //    B[SiOSi] = 1.4;
     //    B[OSiO] = 0.35;
     setMapForAllPermutations(m_B, SiOSi, 1.4);
@@ -20,8 +32,9 @@ VashishtaThreeParticleForce::VashishtaThreeParticleForce()
     setMapForAllPermutations(m_cosThetaBar, OSiO, cos(109.47 / 360. * 2*M_PI));
     setMapForAllPermutations(m_r0, SiOSi, 2.6);
     setMapForAllPermutations(m_r0, OSiO, 2.6);
-    setMapForAllPermutations(m_centerAtom, SiOSi, 8);
-    setMapForAllPermutations(m_centerAtom, OSiO, 14);
+    setMapForAllPermutations(m_centerAtom, SiOSi, 1);
+    setMapForAllPermutations(m_centerAtom, OSiO, 0);
+    exit(0);
 
     //    for(auto item : m_thetaBar) {
     //        for(int key : item.first) {
@@ -31,52 +44,86 @@ VashishtaThreeParticleForce::VashishtaThreeParticleForce()
     //    }
 }
 
+int VashishtaThreeParticleForce::comboHash(int v[3]) {
+    return v[0] + v[1] * nParticleTypes + v[2] * nParticleTypes * nParticleTypes;
+}
+
 /*
  * From example found on http://www.bearcave.com/random_hacks/permute.html
  */
-void VashishtaThreeParticleForce::setMapForAllPermutationsStep2(map<vector<int>, double> &theMap, const vector<int> &v, const int start, const int n, double value)
+void VashishtaThreeParticleForce::setMapForAllPermutationsStep2(vec &theMap, int v[3], const int start, double value)
 {
-    vector<int> v2 = v;
+    int n = 3;
+    int v2[3];
+    for(int i = 0; i < 3; i++) {
+        v2[i] = v[i];
+    }
     if (start == n-1) {
-        theMap[v2] = value;
+        cout << "Hash: " << v[0]  << " " << v[1] << " " << v[2] << " = " << value << endl;
+        theMap[comboHash(v)] = value;
     } else {
         for (int i = start; i < n; i++) {
             int tmp = v2[i];
 
             v2[i] = v2[start];
             v2[start] = tmp;
-            setMapForAllPermutationsStep2(theMap, v2, start+1, n, value);
+            setMapForAllPermutationsStep2(theMap, v2, start+1, value);
             v2[start] = v2[i];
             v2[i] = tmp;
         }
     }
 }
 
-void VashishtaThreeParticleForce::setMapForAllPermutations(map<vector<int>, double> &theMap, const vector<int> values, double value) {
-    setMapForAllPermutationsStep2(theMap, values, 0, values.size(), value);
+void VashishtaThreeParticleForce::setMapForAllPermutations(vec &theMap, int values[3], double value) {
+    setMapForAllPermutationsStep2(theMap, values, 0, value);
 }
 
-void VashishtaThreeParticleForce::setMapForAllPermutationsStep2(map<vector<int>, int> &theMap, const vector<int> &v, const int start, const int n, double value)
-{
-    vector<int> v2 = v;
-    if (start == n-1) {
-        theMap[v2] = value;
-    } else {
-        for (int i = start; i < n; i++) {
-            int tmp = v2[i];
+/*
+ * From example found on http://www.bearcave.com/random_hacks/permute.html
+ */
+//void VashishtaThreeParticleForce::setMapForAllPermutationsStep2(map<vector<int>, double> &theMap, const vector<int> &v, const int start, const int n, double value)
+//{
+//    vector<int> v2 = v;
+//    if (start == n-1) {
+//        theMap[v2] = value;
+//    } else {
+//        for (int i = start; i < n; i++) {
+//            int tmp = v2[i];
 
-            v2[i] = v2[start];
-            v2[start] = tmp;
-            setMapForAllPermutationsStep2(theMap, v2, start+1, n, value);
-            v2[start] = v2[i];
-            v2[i] = tmp;
-        }
-    }
-}
+//            v2[i] = v2[start];
+//            v2[start] = tmp;
+//            setMapForAllPermutationsStep2(theMap, v2, start+1, n, value);
+//            v2[start] = v2[i];
+//            v2[i] = tmp;
+//        }
+//    }
+//}
 
-void VashishtaThreeParticleForce::setMapForAllPermutations(map<vector<int>, int> &theMap, const vector<int> values, double value) {
-    setMapForAllPermutationsStep2(theMap, values, 0, values.size(), value);
-}
+//void VashishtaThreeParticleForce::setMapForAllPermutations(map<vector<int>, double> &theMap, const vector<int> values, double value) {
+//    setMapForAllPermutationsStep2(theMap, values, 0, values.size(), value);
+//}
+
+//void VashishtaThreeParticleForce::setMapForAllPermutationsStep2(map<vector<int>, int> &theMap, const vector<int> &v, const int start, const int n, double value)
+//{
+//    vector<int> v2 = v;
+//    if (start == n-1) {
+//        theMap[v2] = value;
+//    } else {
+//        for (int i = start; i < n; i++) {
+//            int tmp = v2[i];
+
+//            v2[i] = v2[start];
+//            v2[start] = tmp;
+//            setMapForAllPermutationsStep2(theMap, v2, start+1, n, value);
+//            v2[start] = v2[i];
+//            v2[i] = tmp;
+//        }
+//    }
+//}
+
+//void VashishtaThreeParticleForce::setMapForAllPermutations(map<vector<int>, int> &theMap, const vector<int> values, double value) {
+//    setMapForAllPermutationsStep2(theMap, values, 0, values.size(), value);
+//}
 
 
 
@@ -87,31 +134,32 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
 
 void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3, const Vector3 &atom2Offset, const Vector3 &atom3Offset)
 {
-    m_combo[0] = atom1->type().number();
-    m_combo[1] = atom2->type().number();
-    m_combo[2] = atom3->type().number();
+    int particleCombo[3];
+    particleCombo[0] = atom1->type().index();
+    particleCombo[1] = atom2->type().index();
+    particleCombo[2] = atom3->type().index();
+    int combo = comboHash(particleCombo);
 
-    if(m_centerAtom.find(m_combo) == m_centerAtom.end()) {
+    int centralAtom = m_centerAtom[combo];
+    if(centralAtom == -1) {
         return;
     }
 
-    int centralAtom = m_centerAtom[m_combo];
-
-    if(atom1->type().number() == centralAtom) {
+    if(atom1->type().index() == centralAtom) {
         atoms[0] = atom1;
         atomPosition[0] = atom1->position();
         atoms[1] = atom2;
         atomPosition[1] = atom2->position() + atom2Offset;
         atoms[2] = atom3;
         atomPosition[2] = atom3->position() + atom3Offset;
-    } else if(atom2->type().number() == centralAtom) {
+    } else if(atom2->type().index() == centralAtom) {
         atoms[0] = atom2;
         atomPosition[0] = atom2->position() + atom2Offset;
         atoms[1] = atom1;
         atomPosition[1] = atom1->position();
         atoms[2] = atom3;
         atomPosition[2] = atom3->position() + atom3Offset;
-    } else if(atom3->type().number() == centralAtom) {
+    } else if(atom3->type().index() == centralAtom) {
         atoms[0] = atom3;
         atomPosition[0] = atom3->position() + atom3Offset;
         atoms[1] = atom1;
@@ -123,7 +171,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
     rij = atomPosition[1] - atomPosition[0];
     rik = atomPosition[2] - atomPosition[0];
 
-    double r0 = m_r0[m_combo];
+    double r0 = m_r0[combo];
     double r0Squared = r0*r0;
     double dotrijrik = dot(rij,rik);
     double lij2 = dot(rij, rij);
@@ -135,8 +183,8 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
     double lik = sqrt(lik2);
     double shield = 1e-12; // just to avoid nan from 0 / 0 in dtheta and acos
     double l = 1.0;
-    double Bijk = m_B[m_combo];
-    double cosThetaBar = m_cosThetaBar[m_combo];
+    double Bijk = m_B[combo];
+    double cosThetaBar = m_cosThetaBar[combo];
     double lijMinusR0 = lij - r0;
     double likMinusR0 = lik - r0;
     double lOverLijMinusR0 = l / lijMinusR0;

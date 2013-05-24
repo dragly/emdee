@@ -137,6 +137,10 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
             break;
         }
     }
+    cout << "Particle types set:" << endl;
+    for(AtomType type : particleTypes) {
+        cout << type.name() << endl;
+    }
 
     m_moleculeSystem->setParticleTypes(particleTypes);
 
