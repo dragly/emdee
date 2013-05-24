@@ -47,7 +47,10 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     double unitLength = config.lookup("units.length");
     double unitTime = config.lookup("units.time");
     double unitMass = config.lookup("units.mass");
-    double unitTemperature = config.lookup("units.temperature");
+    double boltzmannConstant = config.lookup("units.boltzmannConstant");
+    double unitVelocity = unitLength / unitTime;
+    double unitTemperature = (unitVelocity * unitVelocity * unitMass) / (boltzmannConstant);
+//    double unitTemperature = config.lookup("units.temperature");
     double unitForce = unitLength * unitMass / (unitTime * unitTime);
     double unitEnergy = unitLength * unitLength * unitMass / (unitTime * unitTime);
 
