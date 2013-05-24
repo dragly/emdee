@@ -96,8 +96,8 @@ bool MoleculeSystemCell::shouldNewtonsThirdBeEnabled(MoleculeSystemCell* neighbo
 bool MoleculeSystemCell::checkDirection(int neighborID) {
     const irowvec& direction = m_neighborDirections[neighborID];
     return ( // if one of ..
-       ((direction(0) >= 0 && direction(1) >= 0) && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1)) // 2x2 in upper right (except right down)
-       || (direction(0) == 1 && direction(1) == -1)) // 1x1 lower right
+       ((direction(0) >= 0 && direction(1) >= 0) && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1)) // 2x2x3 in upper right (except inwards)
+       || (direction(0) == 1 && direction(1) == -1)) // 1x1x3 lower right
     ;
 }
 
