@@ -157,6 +157,12 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
 
     double invLij = 1 / lij;
     double invLik = 1 / lik;
+    double invSqrtDotOverLenghtSquared = 1. /
+                (
+                sqrt(
+                    1 - (dotrijrik * dotrijrik * (invLij * invLij * invLik * invLik)) + shield
+                    )
+                );
 
     if(atom1 == atoms[0] || m_isNewtonsThirdLawEnabled) {
         dtheta = 0;
@@ -167,11 +173,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
                         ((dotrijrik * rik[a]) * (invLij * invLik * invLik * invLik))
                         + ((dotrijrik * rij[a]) * (invLij * invLij * invLij * invLik))
                         + ((-rij[a] - rik[a]) * (invLij * invLik))
-                        ) / (
-                        sqrt(
-                            1 - (dotrijrik * dotrijrik * (invLij * invLij * invLik * invLik)) + shield
-                            )
-                        );
+                        ) * invSqrtDotOverLenghtSquared;
             drij = -rij[a] * invLij;
             drik = -rik[a] * invLik;
             double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
@@ -187,11 +189,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
             dtheta = -(
                         ((dotrijrik * (-rij[a])) * (invLij * invLij * invLij * invLik))
                         + ((rik[a]) * (invLij * invLik))
-                        ) / (
-                        sqrt(
-                            1 - (dotrijrik * dotrijrik * (invLij * invLij * invLik * invLik)) + shield
-                            )
-                        );
+                        ) * invSqrtDotOverLenghtSquared;
             drij = rij[a] * invLij;
             double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
             atoms[1]->addForce(a, forceComp);
@@ -207,11 +205,7 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
             dtheta = -(
                         ((dotrijrik * (-rik[a])) * (invLij * invLik * invLik * invLik))
                         + ((rij[a]) * (invLij * invLik))
-                        ) / (
-                        sqrt(
-                            1 - (dotrijrik * dotrijrik * (invLij * invLij * invLik * invLik)) + shield
-                            )
-                        );
+                        ) * invSqrtDotOverLenghtSquared;
             drik = rik[a] * invLik;
             double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
             atoms[2]->addForce(a,forceComp);
