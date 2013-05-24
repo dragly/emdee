@@ -145,21 +145,21 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
         return;
     }
 
-    if(atom1->type().index() == centralAtom) {
+    if(particleCombo[0] == centralAtom) {
         atoms[0] = atom1;
         atomPosition[0] = atom1->position();
         atoms[1] = atom2;
         atomPosition[1] = atom2->position() + atom2Offset;
         atoms[2] = atom3;
         atomPosition[2] = atom3->position() + atom3Offset;
-    } else if(atom2->type().index() == centralAtom) {
+    } else if(particleCombo[1] == centralAtom) {
         atoms[0] = atom2;
         atomPosition[0] = atom2->position() + atom2Offset;
         atoms[1] = atom1;
         atomPosition[1] = atom1->position();
         atoms[2] = atom3;
         atomPosition[2] = atom3->position() + atom3Offset;
-    } else if(atom3->type().index() == centralAtom) {
+    } else if(particleCombo[2] == centralAtom) {
         atoms[0] = atom3;
         atomPosition[0] = atom3->position() + atom3Offset;
         atoms[1] = atom1;
