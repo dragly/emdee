@@ -34,7 +34,7 @@ VashishtaThreeParticleForce::VashishtaThreeParticleForce() :
     setMapForAllPermutations(m_r0, OSiO, 2.6);
     setMapForAllPermutations(m_centerAtom, SiOSi, 1);
     setMapForAllPermutations(m_centerAtom, OSiO, 0);
-    exit(0);
+//    exit(0);
 
     //    for(auto item : m_thetaBar) {
     //        for(int key : item.first) {
@@ -59,7 +59,7 @@ void VashishtaThreeParticleForce::setMapForAllPermutationsStep2(vec &theMap, int
         v2[i] = v[i];
     }
     if (start == n-1) {
-        cout << "Hash: " << v[0]  << " " << v[1] << " " << v[2] << " = " << value << endl;
+//        cout << "Hash: " << v[0]  << " " << v[1] << " " << v[2] << " = " << value << endl;
         theMap[comboHash(v)] = value;
     } else {
         for (int i = start; i < n; i++) {
