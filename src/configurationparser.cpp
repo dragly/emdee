@@ -96,12 +96,13 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     unordered_map<int,AtomType> particleTypesByID;
     vector<AtomType> particleTypes;
     Setting& particleTypesSetting = config.lookup("particleTypes");
+    int atomTypeIndex = 0;
     for(uint i = 0; true; i++) {
         try {
-            AtomType atomType;
+            AtomType atomType(atomTypeIndex);
             int id = -2;
             particleTypesSetting[i].lookupValue("id", id);
-            atomType.setId(id);
+            atomType.setNumber(id);
             if(particleTypesSetting[i].exists("name")) {
                 string name = "Noname";
                 particleTypesSetting[i].lookupValue("name", name);
@@ -129,7 +130,8 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
                 atomType.setElectronicPolarizability(electronicPolarizability);
             }
             particleTypes.push_back(atomType);
-            particleTypesByID[atomType.id()] = atomType;
+            particleTypesByID[atomType.number()] = atomType;
+            atomTypeIndex += 1;
         } catch(exception) {
             cout << "No more atom types found. Breaking." << endl;
             break;
@@ -297,7 +299,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     //    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
     cout << "addded" << endl;
 //    m_moleculeSystem->setupCells(potentialConstant * 3);
-    m_moleculeSystem->setupCells(10. / 3.);
+    m_moleculeSystem->setupCells(4.43);
     m_moleculeSystem->setNSimulationSteps(nSimulationSteps);
     cout << "Setup cells" << endl;
 

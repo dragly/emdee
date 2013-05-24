@@ -75,7 +75,7 @@ protected:
 
     bool m_isPositionFixed;
     int m_id;
-    int m_atomTypeId;
+    int m_atomTypeIndex;
 
 private:
     friend class boost::serialization::access;
@@ -100,7 +100,7 @@ inline Atom::Atom()  :
 //    m_type(AtomType::argon()),
     m_isPositionFixed(false),
     m_id(-1),
-    m_atomTypeId(-1)
+    m_atomTypeIndex(-1)
 {
 }
 
@@ -115,7 +115,7 @@ inline Atom::Atom(const AtomType &atomType) :
     m_atomType(atomType),
     m_isPositionFixed(false),
     m_id(-1),
-    m_atomTypeId(atomType.id())
+    m_atomTypeIndex(atomType.index())
 {
 }
 
@@ -125,7 +125,7 @@ inline void Atom::serialize(Archive & ar, const unsigned int)
     ar & m_position;
     ar & m_velocity;
     ar & m_id;
-    ar & m_atomTypeId;
+    ar & m_atomTypeIndex;
     //        ar & m_force;
 //    ar & m_displacement;
     //        ar & m_mass;
@@ -239,12 +239,23 @@ inline const AtomType& Atom::type() const
 
 inline void Atom::communicationClone(const Atom &other, const vector<AtomType>& particleTypes)
 {
+//    cout << "Cloning!" << endl;
     this->m_id = other.m_id;
+//    cout << "a" << endl;
     this->m_position = other.m_position;
+//    cout << "b" << endl;
 //    this->m_displacement = other.m_displacement;
     this->m_velocity = other.m_velocity;
-    this->m_atomTypeId = other.m_atomTypeId;
-    this->m_atomType = particleTypes[other.m_atomTypeId];
+//    cout << "c" << endl;
+    this->m_atomTypeIndex = other.m_atomTypeIndex;
+//    cout << "d" << endl;
+//    cout << "Other type id: " << other.m_atomTypeIndex << endl;
+//    for(const AtomType& type : particleTypes) {
+//        cout << type.abbreviation() << endl;
+//        cout << type.number() << endl;
+//    }
+    this->m_atomType = particleTypes[other.m_atomTypeIndex];
+//    cout << "e" << endl;
     //    this->m_cellID = other.m_cellID;
     //    this->m_force = other.m_force;
     //    this->m_localPressure = other.m_localPressure;

@@ -29,7 +29,7 @@ void VashishtaTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2)
 void VashishtaTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const Vector3 &atomOffset)
 {
     Vector3 rVec = atom2->position() + atomOffset - atom1->position();
-    pair<int,int> combo(atom1->type().id(), atom2->type().id());
+    pair<int,int> combo(atom1->type().number(), atom2->type().number());
     //    cout << "Looking for " << combo.first << " " << combo.second << endl;
     double Hij = H[combo];
     double etaij = eta[combo];

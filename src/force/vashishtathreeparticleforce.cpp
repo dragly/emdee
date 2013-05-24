@@ -87,9 +87,9 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
 
 void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3, const Vector3 &atom2Offset, const Vector3 &atom3Offset)
 {
-    m_combo[0] = atom1->type().id();
-    m_combo[1] = atom2->type().id();
-    m_combo[2] = atom3->type().id();
+    m_combo[0] = atom1->type().number();
+    m_combo[1] = atom2->type().number();
+    m_combo[2] = atom3->type().number();
 
     if(m_centerAtom.find(m_combo) == m_centerAtom.end()) {
         return;
@@ -97,21 +97,21 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
 
     int centralAtom = m_centerAtom[m_combo];
 
-    if(atom1->type().id() == centralAtom) {
+    if(atom1->type().number() == centralAtom) {
         atoms[0] = atom1;
         atomPosition[0] = atom1->position();
         atoms[1] = atom2;
         atomPosition[1] = atom2->position() + atom2Offset;
         atoms[2] = atom3;
         atomPosition[2] = atom3->position() + atom3Offset;
-    } else if(atom2->type().id() == centralAtom) {
+    } else if(atom2->type().number() == centralAtom) {
         atoms[0] = atom2;
         atomPosition[0] = atom2->position() + atom2Offset;
         atoms[1] = atom1;
         atomPosition[1] = atom1->position();
         atoms[2] = atom3;
         atomPosition[2] = atom3->position() + atom3Offset;
-    } else if(atom3->type().id() == centralAtom) {
+    } else if(atom3->type().number() == centralAtom) {
         atoms[0] = atom3;
         atomPosition[0] = atom3->position() + atom3Offset;
         atoms[1] = atom1;

@@ -202,7 +202,6 @@ void Processor::setupProcessors()
                 }
             }
         }
-        cout << endl;
         sendNeighbors.push_back(sendNeighbor);
         receiveNeighbors.push_back(receiveNeighbor);
     }
@@ -215,14 +214,15 @@ int Processor::rank()
 
 void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
 //    int atomsRemoved = 0;
+    cout << "About to receive atoms" << endl;
     for(MoleculeSystemCell* cellToReceive : neighbor.cells) {
+        cout << "Receiving from cell" << endl;
         vector<Atom*> atomsToReceive; // IMPORTANT: This list must be freed manually! (Should be done below in this scope)
         pureCommunicationTimer.restart();
         world.recv(neighbor.rank, 0, atomsToReceive); // IMPORTANT: This list must be freed manually! (Should be done below in this scope)
         m_pureCommunicationTime += pureCommunicationTimer.elapsed();
 
         uint nAtomsAvailable = cellToReceive->atoms().size();
-
         // Allocate space for new atoms if not enough atoms are available on this processor
         if(atomsToReceive.size() > nAtomsAvailable) {
             vector<Atom*> locallyAllocatedAtoms;
@@ -245,7 +245,7 @@ void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
             localAtom->communicationClone(*atom, m_moleculeSystem->particleTypes());
         }
 
-        // Need to explicitly free the memory used by MPI::Boost when allocating a received list of atoms
+        //  IMPORTANT: Need to explicitly free the memory used by MPI::Boost when allocating a received list of atoms
         for(Atom* atom : atomsToReceive) {
             delete atom;
         }

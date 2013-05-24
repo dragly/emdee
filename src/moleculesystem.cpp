@@ -575,6 +575,6 @@ void MoleculeSystem::setAverageSquareDisplacement(double averageSquareDisplaceme
 void MoleculeSystem::setParticleTypes(const vector<AtomType>& particleTypes) {
     m_particleTypes = particleTypes;
     for(const AtomType& atomType : particleTypes) {
-        m_particleTypesByID[atomType.id()] = atomType;
+        m_particleTypesByID[atomType.number()] = atomType;
     }
 }

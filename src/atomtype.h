@@ -19,15 +19,16 @@ public:
     };
 
     AtomType();
-    AtomType(AtomTypeEnum atomTypeEnum);
+    AtomType(int index);
+    AtomType(AtomTypeEnum atomTypeEnum, int index);
     static AtomType argon();
 
     void setName(string name);
     void setAbbreviation(string abbreviation);
-    void setId(int id);
+    void setNumber(int number);
     void setMass(double mass);
 
-    int id() const;
+    int number() const;
 
     string name() const;
 
@@ -42,25 +43,27 @@ public:
 
     double mass() const;
 
+    int index() const;
 protected:
     string m_name;
     string m_abbreviation;
-    int m_id;
+    int m_number;
     double m_mass;
     double m_effectiveCharge;
     double m_electronicPolarizability;
+    int m_index;
 
-private:
-    friend class boost::serialization::access;
+//private:
+//    friend class boost::serialization::access;
 
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int )
-    {
-        ar & m_name;
-        ar & m_abbreviation;
-        ar & m_id;
-        ar & m_mass;
-    }
+//    template<class Archive>
+//    void serialize(Archive & ar, const unsigned int )
+//    {
+//        ar & m_name;
+//        ar & m_abbreviation;
+//        ar & m_index;
+//        ar & m_mass;
+//    }
 };
 
 inline void AtomType::setName(string name) {
@@ -71,15 +74,15 @@ inline void AtomType::setAbbreviation(string abbreviation) {
     m_abbreviation = abbreviation;
 }
 
-inline void AtomType::setId(int id) {
-    m_id = id;
+inline void AtomType::setNumber(int id) {
+    m_number = id;
 }
 inline void AtomType::setMass(double mass) {
     m_mass = mass;
 }
-inline int AtomType::id() const
+inline int AtomType::number() const
 {
-    return m_id;
+    return m_number;
 }
 inline string AtomType::name() const
 {
@@ -109,4 +112,8 @@ inline double AtomType::mass() const
 {
     return m_mass;
 }
+inline int AtomType::index() const {
+    return m_index;
+}
+
 #endif // ATOMICTYPE_H

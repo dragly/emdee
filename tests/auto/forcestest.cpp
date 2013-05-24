@@ -24,12 +24,12 @@ TEST(ArgonForceTest) {
 TEST(VashishtaForceTest) {
     AtomType silicon;
     silicon.setMass(28.0855);
-    silicon.setId(14);
+    silicon.setNumber(14);
     silicon.setEffectiveCharge(1.6);
     silicon.setElectronicPolarizability(0.0);
     AtomType oxygen;
     oxygen.setMass(15.9994);
-    oxygen.setId(8);
+    oxygen.setNumber(8);
     oxygen.setEffectiveCharge(-0.8);
     oxygen.setElectronicPolarizability(2.40);
 
@@ -91,12 +91,12 @@ TEST(VashishtaForceTest) {
 TEST(VashishtaThreeForceTest) {
     AtomType silicon;
     silicon.setMass(28.0855);
-    silicon.setId(14);
+    silicon.setNumber(14);
     silicon.setEffectiveCharge(1.6);
     silicon.setElectronicPolarizability(0.0);
     AtomType oxygen;
     oxygen.setMass(15.9994);
-    oxygen.setId(8);
+    oxygen.setNumber(8);
     oxygen.setEffectiveCharge(-0.8);
     oxygen.setElectronicPolarizability(2.40);
 
@@ -186,12 +186,12 @@ TEST(VashishtaThreeForceTest) {
 TEST(VashishtaTwoNewton) {
     AtomType silicon;
     silicon.setMass(28.0855);
-    silicon.setId(14);
+    silicon.setNumber(14);
     silicon.setEffectiveCharge(1.6);
     silicon.setElectronicPolarizability(0.0);
     AtomType oxygen;
     oxygen.setMass(15.9994);
-    oxygen.setId(8);
+    oxygen.setNumber(8);
     oxygen.setEffectiveCharge(-0.8);
     oxygen.setElectronicPolarizability(2.40);
 
@@ -233,12 +233,12 @@ TEST(VashishtaTwoNewton) {
 TEST(VashishtaThreeNewton) {
     AtomType silicon;
     silicon.setMass(28.0855);
-    silicon.setId(14);
+    silicon.setNumber(14);
     silicon.setEffectiveCharge(1.6);
     silicon.setElectronicPolarizability(0.0);
     AtomType oxygen;
     oxygen.setMass(15.9994);
-    oxygen.setId(8);
+    oxygen.setNumber(8);
     oxygen.setEffectiveCharge(-0.8);
     oxygen.setElectronicPolarizability(2.40);
 

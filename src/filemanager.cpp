@@ -397,7 +397,7 @@ bool FileManager::saveBinary(int step) {
             double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
             double isPositionFixed = (double)atom->isPositionFixed();
             double cellID = (double)atom->cellID();
-            double atomType = atom->type().id();
+            double atomType = atom->type().number();
 
             position /= 1e-10; // LAMMPS wants lengths in Ångstrøm
 
