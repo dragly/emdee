@@ -123,15 +123,16 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
     rij = atomPosition[1] - atomPosition[0];
     rik = atomPosition[2] - atomPosition[0];
 
+    double r0 = m_r0[m_combo];
+    double r0Squared = r0*r0;
     double dotrijrik = dot(rij,rik);
     double lij2 = dot(rij, rij);
     double lik2 = dot(rik, rik);
-    double lij = sqrt(lij2);
-    double lik = sqrt(lik2);
-    double r0 = m_r0[m_combo];
-    if(lij > r0 || lik > r0) {
+    if(lij2 > r0Squared || lik2 > r0Squared) {
         return;
     }
+    double lij = sqrt(lij2);
+    double lik = sqrt(lik2);
     double shield = 1e-12; // just to avoid nan from 0 / 0 in dtheta and acos
     double l = 1.0;
     double Bijk = m_B[m_combo];
