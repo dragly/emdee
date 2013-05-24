@@ -112,6 +112,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
             if(particleTypesSetting[i].exists("mass")) {
                 double mass = 0;
                 particleTypesSetting[i].lookupValue("mass", mass);
+                mass /= unitMass;
                 atomType.setMass(mass);
             }
             if(particleTypesSetting[i].exists("effectiveCharge")) {
@@ -293,7 +294,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     //    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
     cout << "addded" << endl;
 //    m_moleculeSystem->setupCells(potentialConstant * 3);
-    m_moleculeSystem->setupCells(26. / 3.);
+    m_moleculeSystem->setupCells(10. / 3.);
     m_moleculeSystem->setNSimulationSteps(nSimulationSteps);
     cout << "Setup cells" << endl;
 

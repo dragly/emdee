@@ -44,7 +44,10 @@ def saveAtoms(header, lammpsHeader, atoms, fileName):
     fileName = expanduser(fileName)
     header["nProcessors"] = 1
     header["nAtoms"] = len(atoms)
+    lammpsHeader["bounds"][0][:] = array([header["lowerBounds"][0][0]*1e10, header["upperBounds"][0][0]*1e10, header["lowerBounds"][0][1]*1e10, header["upperBounds"][0][1]*1e10, header["lowerBounds"][0][2]*1e10, header["upperBounds"][0][2]*1e10, 0, 0, 0])
+    lammpsHeader["nColumns"] = dataType.itemsize / dtype('float64').itemsize
     lammpsHeader["nAtoms"] = len(atoms)
+    lammpsHeader["nChunks"] = 1
     lammpsHeader["chunkLength"] = len(atoms) * lammpsHeader["nColumns"]
     atoms["position"] *= 1e10 # Convert to LAMMPS units
     
@@ -93,6 +96,11 @@ def loadAtoms(fileName):
     
     atoms["position"] *= 1e-10
     return header, lammpsHeader, atoms
+    
+def obeyBoundaries(header, atoms):
+    atoms["position"] = atoms["position"] \
+                        + (header["upperBounds"] - header["lowerBounds"]) * (atoms["position"] < header["lowerBounds"]) \
+                        - (header["upperBounds"] - header["lowerBounds"]) * (atoms["position"] >= header["upperBounds"])
     
 def makedirsSilent(directory):
     try:
