@@ -214,9 +214,9 @@ int Processor::rank()
 
 void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
 //    int atomsRemoved = 0;
-    cout << "About to receive atoms" << endl;
+//    cout << "About to receive atoms" << endl;
     for(MoleculeSystemCell* cellToReceive : neighbor.cells) {
-        cout << "Receiving from cell" << endl;
+//        cout << "Receiving from cell" << endl;
         vector<Atom*> atomsToReceive; // IMPORTANT: This list must be freed manually! (Should be done below in this scope)
         pureCommunicationTimer.restart();
         world.recv(neighbor.rank, 0, atomsToReceive); // IMPORTANT: This list must be freed manually! (Should be done below in this scope)
