@@ -33,7 +33,7 @@ for fileName in fileNames:
     
     for i in range(1, nProcessors):
         runList += (lammpsFileName + (".%04d " % i))
-        header2 = loadHeader(fileName)
+        header2 = loadHeader(fileName + (".%04d" % i))
         nAtomsTotal += header2["nAtoms"]
             
     runList += " > "

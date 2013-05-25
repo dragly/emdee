@@ -92,6 +92,14 @@ void MoleculeSystem::deleteAtoms() {
 
 void MoleculeSystem::updateStatistics()
 {
+    if(m_atoms.size() < 1) {
+        m_kineticEnergyTotal = 0;
+        m_potentialEnergyTotal = 0;
+        m_averageDisplacement = 0;
+        m_averageSquareDisplacement = 0;
+        m_pressure = 0;
+        return;
+    }
     // Calculate total drift
     Vector3 totalDrift;
     totalDrift.zeros();
@@ -252,7 +260,7 @@ void MoleculeSystem::simulate()
         iStep++;
         m_step++;
     } else {
-        updateStatistics(); // We will in any case have to update the statistics
+            updateStatistics(); // We will in any case have to update the statistics
     }
     if(isOutputEnabled()) {
         cout << "Starting simulation " << endl;
