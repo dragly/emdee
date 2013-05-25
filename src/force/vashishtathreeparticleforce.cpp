@@ -226,6 +226,9 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
             drij = -rij[a] * invLij;
             drik = -rik[a] * invLik;
             double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
+            if(!m_isNewtonsThirdLawEnabled) {
+                forceComp *= 0.5; // We count twice if Newton's third is not enabled
+            }
             atoms[0]->addForce(a, forceComp);
         }
     }
@@ -241,6 +244,9 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
                         ) * invSqrtDotOverLenghtSquared;
             drij = rij[a] * invLij;
             double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
+            if(!m_isNewtonsThirdLawEnabled) {
+                forceComp *= 0.5; // We count twice if Newton's third is not enabled
+            }
             atoms[1]->addForce(a, forceComp);
 
         }
@@ -257,15 +263,20 @@ void VashishtaThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom
                         ) * invSqrtDotOverLenghtSquared;
             drik = rik[a] * invLik;
             double forceComp = force(Bijk, drij, dfdrij, drik, dfdrik, p, f, dtheta, dpdtheta);
+            if(!m_isNewtonsThirdLawEnabled) {
+                forceComp *= 0.5; // We count twice if Newton's third is not enabled
+            }
             atoms[2]->addForce(a,forceComp);
         }
     }
 
     double potential = Bijk * f * p;
-    atom1->addPotential(potential / 3);
     if(m_isNewtonsThirdLawEnabled) {
+        atom1->addPotential(potential / 3);
         atom2->addPotential(potential / 3);
         atom3->addPotential(potential / 3);
+    } else {
+        atom1->addPotential(potential / 6);
     }
 }
 
