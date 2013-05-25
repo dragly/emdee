@@ -156,13 +156,15 @@ void MoleculeSystemCell::updateForces()
         }
     }
 
+    // TODO Ensure the three-particle forces work properly by creating a test that checks the potential for a run with one big cell and one with 3x3x3 cells
+
     // Three particle forces
     Vector3 zeroVector;
     zeroVector.zeros();
     for(ThreeParticleForce* threeParticleForce : m_moleculeSystem->threeParticleForces()) {
 
         // Two neighbor atoms
-        threeParticleForce->setNewtonsThirdLawEnabled(false);
+//        threeParticleForce->setNewtonsThirdLawEnabled(false);
         for(uint iNeighbor1 = 0; iNeighbor1 < m_neighborCells.size(); iNeighbor1++) {
             MoleculeSystemCell* neighbor1 = m_neighborCells[iNeighbor1];
             const Vector3& neighborOffset1 = m_neighborOffsets[iNeighbor1];
@@ -207,7 +209,7 @@ void MoleculeSystemCell::updateForces()
         }
 
         // Two local atoms
-        threeParticleForce->setNewtonsThirdLawEnabled(false);
+//        threeParticleForce->setNewtonsThirdLawEnabled(false);
         for(uint iNeighbor1 = 0; iNeighbor1 < m_neighborCells.size(); iNeighbor1++) {
             MoleculeSystemCell* neighbor1 = m_neighborCells[iNeighbor1];
             const Vector3& neighborOffset1 = m_neighborOffsets[iNeighbor1];
