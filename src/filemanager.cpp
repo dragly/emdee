@@ -224,9 +224,16 @@ bool FileManager::loadBinary(string fileName) {
             velocity /= (m_unitLength / m_unitTime);
             force /= (m_unitLength * m_unitMass / (m_unitTime * m_unitTime));
 
-            AtomType atomType = particleTypes.at(static_cast<int>(atomTypeId));
+            Atom* atom;
+            if(particleTypes.find(atomTypeId) == particleTypes.end()) {
+                AtomType atomType;
+                atomType.setNumber(atomTypeId);
+                atom = new Atom(atomType);
+            } else {
+                const AtomType& atomType = particleTypes.at(static_cast<int>(atomTypeId));
+                atom = new Atom(atomType);
+            }
 
-            Atom* atom = new Atom(atomType);
             atom->setID(atomID);
             atom->setPosition(position);
             atom->setVelocity(velocity);

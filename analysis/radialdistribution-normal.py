@@ -33,8 +33,8 @@ for configFilePath in configFilePaths:
     totalBins = zeros(distBins[1])
     iFiles = 0
     temperature = 0
-    for fileName in fileNames[400:1400:100]:
-        header, atoms = loadAtoms(fileName)
+    for fileName in fileNames[400:700:100]:
+        header, lammps, atoms = loadAtoms(fileName)
         temperature += header["temperature"]
         outFileName = fileName.replace("data", "distances")
         process = subprocess.call(["../tools/radial-distribution-build-Desktop_Qt_5_0_1_GCC_64bit-Release/radial-distribution", fileName, outFileName])

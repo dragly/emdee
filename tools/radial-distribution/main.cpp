@@ -3,7 +3,8 @@
 using namespace std;
 
 #include <src/moleculesystem.h>
-#include <src/atom.h>
+#include <src/atom.h>>
+#include <src/math/vector3.h>
 #include <fstream>
 #include <armadillo>
 
@@ -16,13 +17,13 @@ int main(int argc, char* argv[])
         cout << "EROR! Too few arguments, needs input and output file..." << endl;
         exit(0);
     }
-    cout << "Calculating distances" << endl;
 
     MoleculeSystem system;
     system.load(argv[1]);
+    cout << "Calculating distances" << endl;
 
     rowvec sideLengths = system.boundaries().row(1) - system.boundaries().row(0);
-    rowvec distance = zeros<rowvec>(3);
+    Vector3 distance;
     rowvec distances = zeros<rowvec>(int(system.atoms().size() * (system.atoms().size() - 1) / 2.0));
     int counter = 0;
     for(uint i = 0; i < system.atoms().size(); i++) {
@@ -40,10 +41,11 @@ int main(int argc, char* argv[])
                     distance(k) = distance(k) - sideLengths(k);
                 }
             }
-            distances(counter) = norm(distance, 2);
+            distances(counter) = sqrt(dot(distance, distance));
             counter += 1;
         }
     }
+    cout << "Writing distances to file" << endl;
     ofstream distancesFile;
     distancesFile.open(argv[2], ios::binary);
     for(uint i = 0; i < distances.n_elem; i++) {
