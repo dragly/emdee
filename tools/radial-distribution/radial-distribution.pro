@@ -11,3 +11,5 @@ SOURCES += $$system(find $$SRC_DIR -name \'*.cpp\')
 SOURCES = $$replace(SOURCES, $$SRC_DIR/main.cpp, )
 
 SOURCES += main.cpp
+
+DEFINES += ARMA_NO_DEBUG

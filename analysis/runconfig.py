@@ -5,6 +5,9 @@ Created on Fri Feb 15 21:52:16 2013
 @author: svenni
 """
 
+from fys4460 import makedirsSilent, createSymlink
+from selectconfig import selectConfig
+
 from pylibconfig import Config
 from sys import argv
 import subprocess
@@ -16,16 +19,17 @@ import time
 from glob import glob
 from os.path import expanduser, join, split
 from git import Repo
-from fys4460 import makedirsSilent, createSymlink
 import socket
+import argparse
 
 def printChildren(database, lastrowid, config, name):
-    for child in config.children(name):
-        if len(config.children(child)) > 0:
-            printChildren(database, lastrowid, config, child)
-        else:
-            values = [lastrowid, child, config.value(child)[0]]
-            database.execute("INSERT INTO runconfig (runid, name, value) VALUES (?, ?, ?)", values)
+    return
+#    for child in config.children(name):
+#        if len(config.children(child)) > 0:
+#            printChildren(database, lastrowid, config, child)
+#        else:
+#            values = [lastrowid, child, config.value(child)[0]]
+#            database.execute("INSERT INTO runconfig (runid, name, value) VALUES (?, ?, ?)", values)
 
 def replaceDateDir(config, dateDir, parent = ""):
     for child in config.children(parent):
@@ -48,7 +52,7 @@ def parseSaveFile(saveFile, dateDir):
             
 dateDir = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
 
-def parseAndRun(executable, configFile, runDir):
+def parseAndRun(executable, configFile, runDir, args=None):
     # Build run dir name
     
     print "Parsing configuration...\nConfigFile: " + configFile + "\nRunDir: " + runDir
@@ -67,17 +71,17 @@ def parseAndRun(executable, configFile, runDir):
             subConfigFile = join(configFileDir, config.value(subConfigValue)[0])
             subConfigFileDir, subConfigFileName = split(subConfigFile)
             subConfigRunDir = join(runDir, subConfigFileName).replace(".cfg", "")
-            parseAndRun(executable, subConfigFile, subConfigRunDir)
+            parseAndRun(executable, subConfigFile, subConfigRunDir, args)
         
         config.writeFile(join(runDir, configFileName))
     else:
         print "This is a singular config. Launching it alone..."
         runConfigFile = join(runDir, configFileName)
         config.writeFile(runConfigFile)
-        run(executable, runConfigFile, dateDir, runDir)
+        run(executable, runConfigFile, dateDir, runDir, args)
     
 
-def run(executable, configFile, dateDir, runDir):
+def run(executable, configFile, dateDir, runDir, args=None):
     executable = os.path.realpath(executable)
     temp,configFileName = os.path.split(configFile)    
     configName = configFileName.replace(".cfg", "")
@@ -88,13 +92,17 @@ def run(executable, configFile, dateDir, runDir):
     replaceDateDir(config, dateDir)
     
     if(config.exists("runInformation")):
-        print "Config cannot contain section runInformation already. It would be overwritten."
-        raise Exception
+        if args.force:
+                config.remove("", "runInformation")
+        else:
+            print "Config cannot contain section runInformation already. It would be overwritten."
+            raise Exception
     
     ### Git info ###
-    repo = Repo(".")
-    head = repo.heads[0]
-    commitSHA = getattr(head.commit, "id")
+#    repo = Repo(".")
+#    head = repo.heads[0]
+#    commitSHA = getattr(head.commit, "id")
+    commitSHA = "N/A"
     
     ### Run information ###
     config.addGroup("", "runInformation")
@@ -107,13 +115,15 @@ def run(executable, configFile, dateDir, runDir):
     
     config.writeFile(configFile)
 
+    selectConfig(os.path.abspath(configFile))
+
     # Input stuff to database
-    database = sqlite3.connect("test.db")
-    values = [executable, runDir]
-    insertID = database.execute("INSERT INTO run (executable, dir) VALUES (?, ?)", values)
-    printChildren(database, insertID.lastrowid, config, "")
-    database.commit()
-    database.close()
+#    database = sqlite3.connect("test.db")
+#    values = [executable, runDir]
+#    insertID = database.execute("INSERT INTO run (executable, dir) VALUES (?, ?)", values)
+#    printChildren(database, insertID.lastrowid, config, "")
+#    database.commit()
+#    database.close()
     
     # Create symlinks
 #    createSymlink(os.getcwd() + "/" + runDir, "/tmp/latest")
@@ -144,8 +154,6 @@ def run(executable, configFile, dateDir, runDir):
 #    except Exception:
 #        process.kill()
 #        f.close()
-
-    subprocess.call(["python", "selectconfig.py", configFile])
         
     f.close()
 
@@ -156,9 +164,20 @@ def signal_handler(signal, frame):
 if __name__ == "__main__":
 #    import signal
 #    signal.signal(signal.SIGINT, signal_handler)
-    executable = argv[1]
-    configFiles = argv[2]
+
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('executable')
+    parser.add_argument('configFiles')
+    parser.add_argument('--force', action='store_true', help='Force even if runInformation exists.')
     
-    parseAndRun(executable, configFiles, "")
+    args = parser.parse_args()
+    
+    executable = args.executable
+    configFiles = args.configFiles
+    force = args.force
+    
+    print args
+    
+    parseAndRun(executable, configFiles, "", args)
     #print 'Press Ctrl+C'
    # signal.pause()

@@ -75,7 +75,7 @@ for configFilePath in configFilePaths:
         i += 1
     #    f.close()
     
-    for percentage in array([0.9, 1.0]):
+    for percentage in array([1.0]):
         cutoff = int(percentage * len(times))
         cutoffString = ("%.2f" % percentage).replace(".", "_")
         # Energy plot
@@ -88,8 +88,8 @@ for configFilePath in configFilePaths:
         
         
         electronVolt = 1 #1.6e-19 # J
-        plot(picoTimes, kineticEnergiesCutoff / electronVolt, label="Kinetic")
-        plot(picoTimes, potentialEnergiesCutoff / electronVolt, label="Potential")
+#        plot(picoTimes, kineticEnergiesCutoff / electronVolt, label="Kinetic")
+#        plot(picoTimes, potentialEnergiesCutoff / electronVolt, label="Potential")
         plot(picoTimes, (kineticEnergiesCutoff + potentialEnergiesCutoff) / electronVolt, label="Sum")
         xlabel("t [ps]")
         ylabel(r"energy [eV]")
@@ -98,7 +98,7 @@ for configFilePath in configFilePaths:
         savefig(saveDir + "/energy" + cutoffString + ".pdf")
         
         # Temperature plot
-        nMovingAverage = 100
+        nMovingAverage = 1
         figure()
         unitTemperature = 119.74
         #temperatures = kineticEnergies / (3. / 2. * len(atoms) * boltzmannConstant)

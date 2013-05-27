@@ -269,8 +269,11 @@ bool FileManager::setLatestSymlink(int step) {
     unlink(headerSymlinkFileName.c_str());
     unlink(lammpsSymlinkFileName.c_str());
 
+    string relativeHeaderFileName = headerFileName.substr(headerFileName.find_last_of("/") + 1, -1);
+    string relativeLammpsFileName = lammpsFileName.substr(lammpsFileName.find_last_of("/") + 1, -1);
+
     // Symlink returns 0 on success
-    if(symlink(headerFileName.c_str(), headerSymlinkFileName.c_str()) || symlink(lammpsFileName.c_str(), lammpsSymlinkFileName.c_str())) {
+    if(symlink(relativeHeaderFileName.c_str(), headerSymlinkFileName.c_str()) || symlink(relativeLammpsFileName.c_str(), lammpsSymlinkFileName.c_str())) {
         cerr << "Could not create symlink" << endl;
         return false;
     }

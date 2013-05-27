@@ -33,32 +33,38 @@ for configFilePath in configFilePaths:
     totalBins = zeros(distBins[1])
     iFiles = 0
     temperature = 0
-    for fileName in fileNames[400:700:100]:
+    
+    for fileName in fileNames[700:750:100]:
         header, lammps, atoms = loadAtoms(fileName)
         temperature += header["temperature"]
         outFileName = fileName.replace("data", "distances")
-        process = subprocess.call(["../tools/radial-distribution-build-Desktop_Qt_5_0_1_GCC_64bit-Release/radial-distribution", fileName, outFileName])
-        distances = fromfile(outFileName)
+        process = subprocess.call(["../tools/radial-distribution-build-Desktop_Qt_5_0_1_GCC_64bit-Release/radial-distribution", fileName, outFileName, "8", "8"])
+        outFile = open(outFileName, "rb")
+        nBins = fromfile(outFile, dtype='int32', count=1)
+        binEdges = fromfile(outFile, dtype=float, count=nBins + 1) 
+        binContents = fromfile(outFile, dtype=float, count=nBins)
+        outFile.close()
+#        distances = fromfile(outFileName)
         os.remove(outFileName)
         
-        figure("histFigure")
-        distBins = hist(distances, bins=distBins[1])
-        V = 4./3. * pi * distBins[1]**3
+        #figure("histFigure")
+        #distBins = hist(distances, bins=distBins[1])
+        V = 4./3. * pi * binEdges**3
         Vdiff = V[1:] - V[:-1]
-        newBins = distBins[0] / (Vdiff * len(distances))
+        newBins = binContents / (Vdiff * sum(binContents))
         totalBins = totalBins + newBins
-        
+            
         iFiles += 1
     temperature /= iFiles
     temperatureLabel = "%.0f K" % temperature
     totalBins /= iFiles
     latestFigure = figure("latestFigure")
-    plot(distBins[1][1:] * 1e9, newBins, label=temperatureLabel)
+    plot(binEdges[:-1] * 1e9, newBins, label=temperatureLabel)
     xlabel("r [nm]")
     ylabel("g(r)")
     legend()
     distributionFigure = figure("distributionFigure")
-    plot(distBins[1][1:] * 1e9, totalBins, label=temperatureLabel)
+    plot(binEdges[:-1] * 1e9, totalBins, label=temperatureLabel)
     xlabel("r [nm]")
     ylabel("g(r)")
     legend()

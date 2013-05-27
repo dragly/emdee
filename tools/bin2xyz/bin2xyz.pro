@@ -1,21 +1,17 @@
+include(../../molecular-dynamics.pri)
+
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-SOURCES += main.cpp
-
 TARGET = bin2xyz
 
-LIBS += -larmadillo -llapack -lblas -lconfig++ -lhdf5_cpp -lhdf5
+INCLUDEPATH = $$ROOT_DIR
 
+SOURCES += $$system(find $$SRC_DIR -name \'*.cpp\')
+SOURCES = $$replace(SOURCES, $$SRC_DIR/main.cpp, )
 
-COMMON_CXXFLAGS = -std=c++0x
-QMAKE_CXXFLAGS += $$COMMON_CXXFLAGS
-QMAKE_CXXFLAGS_RELEASE += $$COMMON_CXXFLAGS
-QMAKE_CXXFLAGS_DEBUG += $$COMMON_CXXFLAGS
+SOURCES += main.cpp
 
-QMAKE_CXXFLAGS_RELEASE += -O3
-QMAKE_CXXFLAGS += -O3
-QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS -= -O2
+DEFINES += ARMA_NO_DEBUG
