@@ -128,5 +128,5 @@ for configFilePath in configFilePaths:
         legend()
         grid()
         savefig(saveDir + "/pressure-vs-temperature" + cutoffString + ".pdf")
-    
+print "Everything saved to " + saveDir
 show()

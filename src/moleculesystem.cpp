@@ -128,7 +128,8 @@ void MoleculeSystem::updateStatistics()
     mpi::all_reduce(world, m_kineticEnergyTotal, m_kineticEnergyTotal, std::plus<double>());
     mpi::all_reduce(world, m_potentialEnergyTotal, m_potentialEnergyTotal, std::plus<double>());
     m_temperature = m_kineticEnergyTotal / (3./2. * nAtomsTotal);
-    cout << "Atoms: " << nAtomsLocal << " of " << nAtomsTotal << ". Temperature: " << setprecision(5) << m_temperature  << endl;
+    double totalEnergy = (m_potentialEnergyTotal + m_kineticEnergyTotal);
+    cout << "Atoms: " << nAtomsLocal << " of " << nAtomsTotal << ". Temperature: " << setprecision(5) << m_temperature  << ". Etot: " << totalEnergy << endl;
 
     // Calculate diffusion constant
     if(shouldTimeStepBeSaved()) { // only do these calculations if the time step is saved - these are currently not used elsewhere
