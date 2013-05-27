@@ -72,11 +72,17 @@ void VashishtaTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2,
     double invr4s = 1 / r4s;
     double expR4OverR4s = exp(-r/r4s);
 
-    force = -rVec*(-Hij*etaij*pow(r, -etaij) * invr2 - Zi*Zj * invr3 + (0.5*Zi2*alphaj + 0.5*Zj2*alphai)*expR4OverR4s*invr5*invr4s + 4*(0.5*Zi2*alphaj + 0.5*Zj2*alphai)*expR4OverR4s * invr6);
+    double factorH = -Hij*etaij*pow(r, -etaij) * invr2;
+    double factorExp = (0.5*Zi2*alphaj + 0.5*Zj2*alphai)*expR4OverR4s*invr5*invr4s + 4*(0.5*Zi2*alphaj + 0.5*Zj2*alphai)*expR4OverR4s * invr6;
+    double factorCoulomb =  - Zi*Zj * invr3;
 
-    double potential = Hij * pow(invr, etaij)
-            + (Zi * Zj) * invr
-            - (0.5 * (alphai * Zj * Zj + alphaj * Zi * Zi) * invr4) * expR4OverR4s;
+    force = -rVec*(factorH + factorExp + factorCoulomb);
+
+    double potentialH = Hij * pow(invr, etaij);
+    double potentialCoulomb = (Zi * Zj) * invr;
+    double potentialExp = - (0.5 * (alphai * Zj * Zj + alphaj * Zi * Zi) * invr4) * expR4OverR4s;
+
+    double potential = potentialH + potentialCoulomb + potentialExp;
 
     if(m_isNewtonsThirdLawEnabled) {
         atom2->addForce(force);
