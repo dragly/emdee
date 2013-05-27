@@ -4,7 +4,8 @@
 
 VashishtaTwoParticleForce::VashishtaTwoParticleForce() :
     nParticleTypes(2),
-    TwoParticleForce()
+    TwoParticleForce(),
+    invsqrtpi(1 / sqrt(M_PI))
 {
 //    pair<int,int> Si_Si(14,14);
 //    pair<int,int> Si_O(14,8);
@@ -74,7 +75,10 @@ void VashishtaTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2,
 
     double factorH = -Hij*etaij*pow(r, -etaij) * invr2;
     double factorExp = (0.5*Zi2*alphaj + 0.5*Zj2*alphai)*expR4OverR4s*invr5*invr4s + 4*(0.5*Zi2*alphaj + 0.5*Zj2*alphai)*expR4OverR4s * invr6;
-    double factorCoulomb =  - Zi*Zj * invr3;
+
+    double ewaldAlpha = 1 / r4s; // From Toukmaji, Board, Computer Physics Communications 95 (1996)
+    double factorCoulomb = -Zi * Zj * invr3 * (erfc(ewaldAlpha*r) + 2*ewaldAlpha * invsqrtpi * r * exp(-(ewaldAlpha * r)*(ewaldAlpha * r)));
+//    double factorCoulomb =  - Zi*Zj * invr3;
 
     force = -rVec*(factorH + factorExp + factorCoulomb);
 

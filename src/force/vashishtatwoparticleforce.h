@@ -25,6 +25,7 @@ public:
     int comboHash(int v[]);
     Vector3 rVec;
     Vector3 force;
+    double invsqrtpi;
 };
 
 #endif // VASHISHTATWOPARTICLEFORCE_H
