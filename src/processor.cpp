@@ -76,16 +76,16 @@ void Processor::setupProcessors()
     m_coordinateY = (world.rank() / m_nProcessorsZ) % m_nProcessorsY;
     m_coordinateZ = world.rank() % m_nProcessorsZ;
 
-    //    cout << "My coordinate is " << m_coordinateX << " " << m_coordinateY << " " << m_coordinateZ << endl;
+//        cout << "My coordinate is " << m_coordinateX << " " << m_coordinateY << " " << m_coordinateZ << endl;
 
     // Find my cells
     m_cellRangeX = Range(m_coordinateX, m_nProcessorsX, m_moleculeSystem->nCells()(0));
     m_cellRangeY = Range(m_coordinateY, m_nProcessorsY, m_moleculeSystem->nCells()(1));
     m_cellRangeZ = Range(m_coordinateZ, m_nProcessorsZ, m_moleculeSystem->nCells()(2));
 
-    //    cout << "X Range: " << m_cellRangeX << endl;
-    //    cout << "Y Range: " << m_cellRangeY << endl;
-    //    cout << "Z Range: " << m_cellRangeZ << endl;
+//        cout << "X Range: " << m_cellRangeX << endl;
+//        cout << "Y Range: " << m_cellRangeY << endl;
+//        cout << "Z Range: " << m_cellRangeZ << endl;
 
     for(int i = m_cellRangeX.firstElement(); i <= m_cellRangeX.lastElement(); i++) {
         for(int j = m_cellRangeY.firstElement(); j <= m_cellRangeY.lastElement(); j++) {
@@ -209,6 +209,10 @@ void Processor::setupProcessors()
         sendNeighbors.push_back(sendNeighbor);
         receiveNeighbors.push_back(receiveNeighbor);
     }
+    // We need to swap the receiving neighbors in each direction (x, y or z) because of the send/receive order
+    swap(receiveNeighbors[0], receiveNeighbors[1]);
+    swap(receiveNeighbors[2], receiveNeighbors[3]);
+    swap(receiveNeighbors[4], receiveNeighbors[5]);
 }
 
 int Processor::rank()
@@ -220,11 +224,14 @@ void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
     //    int atomsRemoved = 0;
     //    cout << "About to receive atoms" << endl;
     for(MoleculeSystemCell* cellToReceive : neighbor.cells) {
+//        cout << "Cell to receive atoms: " << cellToReceive->indices() << " has room for: " << cellToReceive->atoms().size() << endl;
         //        cout << "Receiving from cell" << endl;
         vector<Atom*> atomsToReceive; // IMPORTANT: This list must be freed manually! (Should be done below in this scope)
         pureCommunicationTimer.restart();
         world.recv(neighbor.rank, 0, atomsToReceive); // IMPORTANT: This list must be freed manually! (Should be done below in this scope)
         m_pureCommunicationTime += pureCommunicationTimer.elapsed();
+
+//        cout << "Received " << atomsToReceive.size() << " atoms" << endl;
 
         uint nAtomsAvailable = cellToReceive->atoms().size();
         // Allocate space for new atoms if not enough atoms are available on this processor
@@ -259,12 +266,97 @@ void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
 
 void Processor::sendAtomsToNeighbor(const ProcessorNeighbor& neighbor) {
     for(MoleculeSystemCell* cellToSend : neighbor.cells) {
+//        cout << "Cell to send atoms: " << cellToSend->indices() << " is sending: " << cellToSend->atoms().size() << endl;
         vector<Atom*> atomsToSend;
         atomsToSend.insert(atomsToSend.end(), cellToSend->atoms().begin(), cellToSend->atoms().end());
         pureCommunicationTimer.restart();
         world.send(neighbor.rank, 0, atomsToSend);
         m_pureCommunicationTime += pureCommunicationTimer.elapsed();
         atomsToSend.clear();
+    }
+}
+
+void Processor::receiveForcesFromNeighbor(const ProcessorNeighbor& neighbor) {
+    //    int atomsRemoved = 0;
+    //    cout << "About to receive atoms" << endl;
+    for(MoleculeSystemCell* cellToReceive : neighbor.cells) {
+        //        cout << "Receiving from cell" << endl;
+        vector<Vector3> forcesToReceive; // IMPORTANT: This list must be freed manually! (Should be done below in this scope)
+        pureCommunicationTimer.restart();
+        world.recv(neighbor.rank, 151, forcesToReceive); // IMPORTANT: This list must be freed manually! (Should be done below in this scope)
+        m_pureCommunicationTime += pureCommunicationTimer.elapsed();
+
+//        uint nAtomsAvailable = cellToReceive->atoms().size();
+        // Allocate space for new atoms if not enough atoms are available on this processor
+//        if(atomsToReceive.size() > nAtomsAvailable) {
+//            vector<Atom*> locallyAllocatedAtoms;
+//            for(uint i = nAtomsAvailable; i < atomsToReceive.size(); i++) {
+//                Atom* localAtom = new Atom();
+//                locallyAllocatedAtoms.push_back(localAtom);
+//            }
+//            cellToReceive->addAtoms(locallyAllocatedAtoms);
+//        } else if(atomsToReceive.size() < nAtomsAvailable) {
+//            for(uint i = atomsToReceive.size(); i < nAtomsAvailable; i++) {
+//                Atom* localAtom = cellToReceive->atoms().at(i);
+//                delete localAtom;
+//            }
+//            cellToReceive->deleteAtoms(nAtomsAvailable - atomsToReceive.size());
+//        }
+        cout << "Cell to receive: " << cellToReceive->indices() << " atoms: " << forcesToReceive.size() << " available atoms:" << cellToReceive->atoms().size() << endl;
+        if(forcesToReceive.size() != cellToReceive->atoms().size()) {
+            stringstream message;
+            message << "The number of forces received does not match the number of atoms in the cell! Forces received: " << forcesToReceive.size() << ". Atoms available: " << cellToReceive->atoms().size();
+            throw std::logic_error(message.str());
+        }
+        // For each received atom, make a clone to the local atom
+        for(uint i = 0; i < forcesToReceive.size(); i++) {
+            Atom* localAtom = cellToReceive->atoms().at(i);
+            localAtom->addForce(forcesToReceive.at(i));
+        }
+
+        //  IMPORTANT: Need to explicitly free the memory used by MPI::Boost when allocating a received list of atoms
+//        for(Atom* atom : atomsToReceive) {
+//            delete atom;
+//        }
+        forcesToReceive.clear();
+    }
+}
+
+void Processor::sendForcesToNeighbor(const ProcessorNeighbor& neighbor) {
+    for(MoleculeSystemCell* cellToSend : neighbor.cells) {
+        vector<Vector3> forcesToSend;
+        forcesToSend.reserve(cellToSend->atoms().size());
+//        forcesToSend.insert(atomsToSend.end(), cellToSend->atoms().begin(), cellToSend->atoms().end());
+        for(Atom* atom : cellToSend->atoms()) {
+            forcesToSend.push_back(atom->force());
+        }
+        cout << "Cell to send: " << cellToSend->indices() << " atoms: " << forcesToSend.size() << endl;
+        pureCommunicationTimer.restart();
+        world.send(neighbor.rank, 151, forcesToSend);
+        m_pureCommunicationTime += pureCommunicationTimer.elapsed();
+        forcesToSend.clear();
+    }
+}
+
+void Processor::clearForcesInNeighborCells() {
+    for(uint i = 0; i < directions.size(); i++) {
+        irowvec direction = directions.at(i);
+        if(!checkDirection(direction)) {
+            continue;
+        }
+        int iNeighbor = 0;
+        if(!(i % 2)) { // even
+            iNeighbor = i + 1;
+        } else { // odd
+            iNeighbor = i - 1;
+        }
+        const ProcessorNeighbor& sendNeighbor = receiveNeighbors.at(iNeighbor);
+
+        for(MoleculeSystemCell* cell : sendNeighbor.cells) {
+            for(Atom* atom : cell->atoms()) {
+                atom->clearForcePotentialPressure();
+            }
+        }
     }
 }
 
@@ -301,6 +393,46 @@ void Processor::communicateAtoms() {
         } else { // receive first, then send
             receiveAtomsFromNeighbor(receiveNeighbor);
             sendAtomsToNeighbor(sendNeighbor);
+        }
+    }
+    m_totalCommunicationTime += communicationTimer.elapsed();
+    if(m_moleculeSystem->isOutputEnabledForThisStep()) {
+        cout << "Communication time: " << setprecision(3) << m_totalCommunicationTime << ", pure: " << setprecision(3) << m_pureCommunicationTime << endl;
+    }
+}
+
+bool Processor::checkDirection(const irowvec& direction) {
+//    const irowvec& direction = m_neighborDirections[neighborID];
+    return ( // if one of ..
+       ((direction(0) >= 0 && direction(1) >= 0) && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1)) // 2x2x3 in upper right (except inwards)
+       || (direction(0) == 1 && direction(1) == -1)) // 1x1x3 lower right
+    ;
+}
+
+void Processor::communicateForces() {
+    communicationTimer.restart();
+//return;
+    // Send atoms to neighbors
+    for(uint i = 0; i < directions.size(); i++) {
+        irowvec direction = directions.at(i);
+        if(!checkDirection(direction)) {
+            continue;
+        }
+        int iNeighbor = 0;
+        if(!(i % 2)) { // even
+            iNeighbor = i + 1;
+        } else { // odd
+            iNeighbor = i - 1;
+        }
+        const ProcessorNeighbor& receiveNeighbor = sendNeighbors.at(iNeighbor);
+        const ProcessorNeighbor& sendNeighbor = receiveNeighbors.at(iNeighbor);
+
+        if(shouldSendFirst(direction)) { // is even in the direction of transfer, send first, then receive
+            sendForcesToNeighbor(sendNeighbor);
+            receiveForcesFromNeighbor(receiveNeighbor);
+        } else { // receive first, then send
+            receiveForcesFromNeighbor(receiveNeighbor);
+            sendForcesToNeighbor(sendNeighbor);
         }
     }
     m_totalCommunicationTime += communicationTimer.elapsed();

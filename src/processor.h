@@ -41,7 +41,12 @@ public:
     int nProcessors();
 //    void receiveForcesFromNeighbor(const ProcessorNeighbor &neighbor);
 //    void sendForcesToNeighbor(const ProcessorNeighbor &neighbor);
-//    void communicateForces();
+    //    void communicateForces();
+    void receiveForcesFromNeighbor(const ProcessorNeighbor &neighbor);
+    void sendForcesToNeighbor(const ProcessorNeighbor &neighbor);
+    void communicateForces();
+    bool checkDirection(const irowvec &direction);
+    void clearForcesInNeighborCells();
 protected:
 
     void receiveAtomsFromNeighbor(const ProcessorNeighbor &neighbor);

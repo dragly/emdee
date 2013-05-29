@@ -191,11 +191,15 @@ void MoleculeSystem::updateForces()
     //    refreshCellContents();
     m_processor->communicateAtoms();
     refreshCellContents();
+    m_processor->communicateAtoms();
+    refreshCellContents();
     for(MoleculeSystemCell* cell : m_processor->cells()) {
         for(Atom* atom : cell->atoms()) {
             atom->clearForcePotentialPressure();
         }
     }
+
+    m_processor->clearForcesInNeighborCells();
 
     for(TwoParticleForce* twoParticleForce : m_twoParticleForces) {
         if(shouldTimeStepBeSaved()) {
@@ -209,6 +213,7 @@ void MoleculeSystem::updateForces()
     for(MoleculeSystemCell* cell : m_processor->cells()) {
         cell->updateForces();
     }
+    m_processor->communicateForces();
 }
 
 MoleculeSystemCell* MoleculeSystem::cell(int i, int j, int k) {
@@ -412,7 +417,7 @@ void MoleculeSystem::setupCells(double minCutLength) {
     for(int i = 0; i < nCellsTotal; i++) {
         randomIDs.push_back(i);
     }
-    random_shuffle(randomIDs.begin(), randomIDs.end());
+//    random_shuffle(randomIDs.begin(), randomIDs.end());
 
     for(int i = 0; i < nCellsTotal; i++) {
         MoleculeSystemCell* cell = new MoleculeSystemCell(this);
