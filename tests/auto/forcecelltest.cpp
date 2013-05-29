@@ -9,7 +9,7 @@
 #include <src/integrator/integrator.h>
 
 void setupSixAtoms(const vector<Atom*> atoms) {
-    Vector3 offset(-12, -12, -12);
+    Vector3 offset(-13.5, 0, 0);
     atoms[0]->setPosition(Vector3(10,12,12) + offset);
     atoms[1]->setPosition(Vector3(17.5,12.5,12.5) + offset);
 
@@ -73,7 +73,7 @@ TEST(ForceCellTest) {
     system.addTwoParticleForce(&twoParticleForce);
     system.addThreeParticleForce(&threeParticleForce);
 
-    system.setNSimulationSteps(20);
+    system.setNSimulationSteps(10);
     system.simulate();
     for(Atom* atom : atoms) {
         positions1.push_back(atom->position());
