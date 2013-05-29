@@ -45,7 +45,7 @@ public:
     void receiveForcesFromNeighbor(const ProcessorNeighbor &neighbor);
     void sendForcesToNeighbor(const ProcessorNeighbor &neighbor);
     void communicateForces();
-    bool checkDirection(const irowvec &direction);
+//    bool checkDirection(const irowvec &direction);
     void clearForcesInNeighborCells();
 protected:
 
