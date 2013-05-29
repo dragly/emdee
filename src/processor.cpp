@@ -302,7 +302,7 @@ void Processor::receiveForcesFromNeighbor(const ProcessorNeighbor& neighbor) {
 //            }
 //            cellToReceive->deleteAtoms(nAtomsAvailable - atomsToReceive.size());
 //        }
-        cout << "Cell to receive: " << cellToReceive->indices() << " atoms: " << forcesToReceive.size() << " available atoms:" << cellToReceive->atoms().size() << endl;
+//        cout << "Cell to receive: " << cellToReceive->indices() << " atoms: " << forcesToReceive.size() << " available atoms:" << cellToReceive->atoms().size() << endl;
         if(forcesToReceive.size() != cellToReceive->atoms().size()) {
             stringstream message;
             message << "The number of forces received does not match the number of atoms in the cell! Forces received: " << forcesToReceive.size() << ". Atoms available: " << cellToReceive->atoms().size();
@@ -330,7 +330,7 @@ void Processor::sendForcesToNeighbor(const ProcessorNeighbor& neighbor) {
         for(Atom* atom : cellToSend->atoms()) {
             forcesToSend.push_back(atom->force());
         }
-        cout << "Cell to send: " << cellToSend->indices() << " atoms: " << forcesToSend.size() << endl;
+//        cout << "Cell to send: " << cellToSend->indices() << " atoms: " << forcesToSend.size() << endl;
         pureCommunicationTimer.restart();
         world.send(neighbor.rank, 151, forcesToSend);
         m_pureCommunicationTime += pureCommunicationTimer.elapsed();
@@ -339,20 +339,34 @@ void Processor::sendForcesToNeighbor(const ProcessorNeighbor& neighbor) {
 }
 
 void Processor::clearForcesInNeighborCells() {
-    for(uint i = 0; i < directions.size(); i++) {
-        irowvec direction = directions.at(i);
-        if(!checkDirection(direction)) {
-            continue;
-        }
-        int iNeighbor = 0;
-        if(!(i % 2)) { // even
-            iNeighbor = i + 1;
-        } else { // odd
-            iNeighbor = i - 1;
-        }
-        const ProcessorNeighbor& sendNeighbor = receiveNeighbors.at(iNeighbor);
+//    for(uint i = 0; i < directions.size(); i++) {
+//        irowvec direction = directions.at(i);
+//        if(!checkDirection(direction)) {
+//            continue;
+//        }
+//        int iNeighbor = 0;
+//        if(!(i % 2)) { // even
+//            iNeighbor = i + 1;
+//        } else { // odd
+//            iNeighbor = i - 1;
+//        }
+//        const ProcessorNeighbor& sendNeighbor = receiveNeighbors.at(iNeighbor);
 
-        for(MoleculeSystemCell* cell : sendNeighbor.cells) {
+//        for(MoleculeSystemCell* cell : sendNeighbor.cells) {
+//            for(Atom* atom : cell->atoms()) {
+//                atom->clearForcePotentialPressure();
+//            }
+//        }
+//    }
+    for(const ProcessorNeighbor& neighbor : sendNeighbors) {
+        for(MoleculeSystemCell* cell : neighbor.cells) {
+            for(Atom* atom : cell->atoms()) {
+                atom->clearForcePotentialPressure();
+            }
+        }
+    }
+    for(const ProcessorNeighbor& neighbor : receiveNeighbors) {
+        for(MoleculeSystemCell* cell : neighbor.cells) {
             for(Atom* atom : cell->atoms()) {
                 atom->clearForcePotentialPressure();
             }
@@ -413,11 +427,11 @@ void Processor::communicateForces() {
     communicationTimer.restart();
 //return;
     // Send atoms to neighbors
-    for(uint i = 0; i < directions.size(); i++) {
+    for(int i = directions.size() - 1; i >= 0; i--) {
         irowvec direction = directions.at(i);
-        if(!checkDirection(direction)) {
-            continue;
-        }
+//        if(!checkDirection(direction)) {
+//            continue;
+//        }
         int iNeighbor = 0;
         if(!(i % 2)) { // even
             iNeighbor = i + 1;
