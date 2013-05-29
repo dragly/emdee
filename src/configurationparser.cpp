@@ -305,7 +305,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     //    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
     cout << "addded" << endl;
 //    m_moleculeSystem->setupCells(potentialConstant * 3);
-    m_moleculeSystem->setupCells(4.43);
+    m_moleculeSystem->setupCells(5.5);
     m_moleculeSystem->setNSimulationSteps(nSimulationSteps);
     cout << "Setup cells" << endl;
 
