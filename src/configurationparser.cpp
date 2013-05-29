@@ -299,6 +299,8 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     integrator->setTimeStep(timeStep);
     m_moleculeSystem->setIntegrator(integrator);
 
+    m_moleculeSystem->setCreateSymlink(true);
+
     // Set up the rest of the system
     //    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
     cout << "addded" << endl;

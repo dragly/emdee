@@ -68,7 +68,7 @@ public:
     // I/O
     bool isOutputEnabled() const;
     void setOutputEnabled(bool enabled);
-    void setOutFileName(string fileName);
+//    void setOutFileName(string fileName);
     bool isSaveEnabled() const;
     void setSaveEnabled(bool enabled);
     void obeyBoundaries();
@@ -138,6 +138,9 @@ public:
     inline const unordered_map<int, AtomType>& particleTypesById();
     void addThreeParticleForce(ThreeParticleForce *force);
     const vector<ThreeParticleForce*>& threeParticleForces() const;
+    bool isOutputEnabledForThisStep() const;
+    void save(string fileName);
+    void setCreateSymlink(bool enabled);
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
@@ -198,7 +201,7 @@ protected:
     vector<SingleParticleForce*> m_singleParticleForces;
     vector<AtomType> m_particleTypes;
     unordered_map<int,AtomType> m_particleTypesByID;
-
+    bool m_isCreateSymlinkEnabled;
 };
 
 inline void MoleculeSystem::addSingleParticleForce(SingleParticleForce *force) {

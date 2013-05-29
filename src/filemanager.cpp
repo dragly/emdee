@@ -43,8 +43,8 @@ typedef struct s1_t {
 FileManager::FileManager(MoleculeSystem* system) :
     m_outFileName("/tmp/data*.bin"),
     m_moleculeSystem(system),
-    m_unitLength(1),
-    m_unitTime(1),
+    m_unitLength(1e-10),
+    m_unitTime(1e-15),
     m_unitEnergy(1),
     m_unitMass(1),
     m_unitTemperature(1)

@@ -34,11 +34,11 @@ for configFilePath in configFilePaths:
     iFiles = 0
     temperature = 0
     
-    for fileName in fileNames[700:750:100]:
+    for fileName in fileNames[-100:-1]:
         header, lammps, atoms = loadAtoms(fileName)
         temperature += header["temperature"]
         outFileName = fileName.replace("data", "distances")
-        process = subprocess.call(["../tools/radial-distribution-build-Desktop_Qt_5_0_1_GCC_64bit-Release/radial-distribution", fileName, outFileName, "8", "8"])
+        process = subprocess.call(["../tools/radial-distribution-build-Desktop_Qt_5_0_1_GCC_64bit-Release/radial-distribution", fileName, outFileName, "14", "8"])
         outFile = open(outFileName, "rb")
         nBins = fromfile(outFile, dtype='int32', count=1)
         binEdges = fromfile(outFile, dtype=float, count=nBins + 1) 
@@ -59,17 +59,19 @@ for configFilePath in configFilePaths:
     temperatureLabel = "%.0f K" % temperature
     totalBins /= iFiles
     latestFigure = figure("latestFigure")
-    plot(binEdges[:-1] * 1e9, newBins, label=temperatureLabel)
-    xlabel("r [nm]")
+    plot(binEdges[:-1] * 1e10, newBins, label=temperatureLabel)
+    xlabel(u"r [Å]")
     ylabel("g(r)")
     legend()
     distributionFigure = figure("distributionFigure")
-    plot(binEdges[:-1] * 1e9, totalBins, label=temperatureLabel)
-    xlabel("r [nm]")
+    plot(binEdges[:-1] * 1e10, totalBins, label=temperatureLabel)
+    xlabel(u"r [Å]")
     ylabel("g(r)")
     legend()
+    numberDensity = len(atoms) / prod(header["upperBounds"] - header["lowerBounds"])
+    totalMass = sum(atoms["type"] == 8)*2.65676264126474e-26  + sum(atoms["type"] == 14) * 4.66370658657455e-26
+    print "Mass density (g/cm^3): " + str(totalMass * 1e3 / (prod(header["upperBounds"] - header["lowerBounds"]) * 1e6))
     
-    
-latestFigure.savefig(join(saveDir, "..", "..", "radial-distribution-latest.pdf"))
-distributionFigure.savefig(join(saveDir, "..", "..", "radial-distribution.pdf"))
+latestFigure.savefig(join(saveDir, "radial-distribution-latest.pdf"))
+distributionFigure.savefig(join(saveDir, "radial-distribution.pdf"))
 show()

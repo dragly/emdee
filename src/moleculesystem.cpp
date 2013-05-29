@@ -25,7 +25,7 @@ MoleculeSystem::MoleculeSystem() :
     m_potentialConstant(1.0),
     m_nDimensions(3),
     pow3nDimensions(pow(3, m_nDimensions)),
-    m_isSaveEnabled(true),
+    m_isSaveEnabled(false),
     m_isOutputEnabled(true),
     m_areCellsSetUp(false),
     m_temperature(1.0),
@@ -40,7 +40,8 @@ MoleculeSystem::MoleculeSystem() :
     m_isCalculatePotentialEnabled(true),
     m_saveEveryNSteps(1),
     m_nSimulationSteps(0),
-    m_isFinalTimeStep(false)
+    m_isFinalTimeStep(false),
+    m_isCreateSymlinkEnabled(false)
 {
     m_progressReporter = new ProgressReporter("dragly", "somerun");
     m_integrator = new VelocityVerletIntegrator(this);
@@ -128,11 +129,11 @@ void MoleculeSystem::updateStatistics()
     mpi::all_reduce(world, m_kineticEnergyTotal, m_kineticEnergyTotal, std::plus<double>());
     mpi::all_reduce(world, m_potentialEnergyTotal, m_potentialEnergyTotal, std::plus<double>());
     m_temperature = m_kineticEnergyTotal / (3./2. * nAtomsTotal);
-    double totalEnergy = (m_potentialEnergyTotal + m_kineticEnergyTotal);
-    cout << "Atoms: " << nAtomsLocal << " of " << nAtomsTotal << ". Temperature: " << setprecision(5) << m_temperature  << ". Etot: " << totalEnergy << endl;
 
     // Calculate diffusion constant
     if(shouldTimeStepBeSaved()) { // only do these calculations if the time step is saved - these are currently not used elsewhere
+        double totalEnergy = (m_potentialEnergyTotal + m_kineticEnergyTotal);
+        cout << "Atoms: " << nAtomsLocal << " of " << nAtomsTotal << ". Temperature: " << setprecision(5) << m_temperature  << ". Etot: " << totalEnergy << endl;
         m_averageDisplacement = 0;
         m_averageSquareDisplacement = 0;
         for(MoleculeSystemCell* cell : m_processor->cells()) {
@@ -267,7 +268,7 @@ void MoleculeSystem::simulate()
         cout << "Starting simulation " << endl;
     }
     for(iStep = iStep; iStep < m_nSimulationSteps; iStep++) {
-        if(isOutputEnabled()) {
+        if(isOutputEnabledForThisStep()) {
             cout << "Step " << m_step << ".." << endl;
         }
         m_isFinalTimeStep = (iStep == (m_nSimulationSteps - 1));
@@ -284,13 +285,15 @@ void MoleculeSystem::simulate()
                 m_progressReporter->reportProgress((double)iStep / (double)m_nSimulationSteps);
             }
         }
+        if(isOutputEnabledForThisStep()) {
+            cout << "Time used so far: " << setprecision(5) << timer.elapsed() << endl;
+        }
 
-        cout << "Time used so far: " << setprecision(5) << timer.elapsed() << endl;
         // Finalize step
         m_time += m_integrator->timeStep();
         m_step++;
     }
-    if(m_isSaveEnabled) {
+    if(m_isCreateSymlinkEnabled) {
         m_fileManager->setLatestSymlink(m_step-1);
         if(m_processor->rank() == 0) {
             m_progressReporter->reportProgress(1);
@@ -382,7 +385,7 @@ void MoleculeSystem::setBoundaries(mat boundaries)
 
 void MoleculeSystem::setupCells(double minCutLength) {
     double minCutLengthUnit = minCutLength; // / m_unitLength;
-    for(uint i = 0; m_cells.size(); i++) {
+    for(uint i = 0; i < m_cells.size(); i++) {
         MoleculeSystemCell* cellToDelete = m_cells.at(i);
         delete cellToDelete;
     }
@@ -539,6 +542,22 @@ bool MoleculeSystem::isSaveEnabled() const
 void MoleculeSystem::setSaveEnabled(bool enabled)
 {
     m_isSaveEnabled = enabled;
+}
+
+bool MoleculeSystem::isOutputEnabledForThisStep() const
+{
+    return (m_isOutputEnabled && (m_step % m_saveEveryNSteps) == 0);
+}
+
+void MoleculeSystem::save(string fileName)
+{
+    m_fileManager->setOutFileName(fileName);
+    m_fileManager->save(m_step);
+}
+
+void MoleculeSystem::setCreateSymlink(bool enabled)
+{
+    m_isCreateSymlinkEnabled = enabled;
 }
 
 bool MoleculeSystem::isOutputEnabled() const
