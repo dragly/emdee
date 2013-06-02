@@ -72,3 +72,4 @@ for configFilePath in configFilePaths:
     f.write(str(diffConstant))
     f.close()
     show()
+    

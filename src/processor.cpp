@@ -423,6 +423,14 @@ void Processor::communicateAtoms() {
 //    ;
 //}
 
+/*!
+ * \brief Processor::communicateForces
+ * \note We must send forces back in the reverse order of receiving atoms. This is because the corner cases must be
+ * included when sending back. Note that the cell we send to is the one we receive atoms from, but in the opposite
+ * direction. So if we received atoms from the right (leftwards direction), we need to send the forces back in the
+ * rightwards direction to the neighbor which was on our receive-list in the first place. This may sound confusing,
+ * but if you draw this up for one case on paper, you should see that it works out.
+ */
 void Processor::communicateForces() {
     communicationTimer.restart();
 //return;

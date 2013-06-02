@@ -85,12 +85,14 @@ for configFilePath in configFilePaths:
         potentialEnergiesCutoff = potentialEnergies[-cutoff:]
         cTemperaturesCutoff = cTemperatures[-cutoff:]
         pressuresCutoff = pressures[-cutoff:]
+        nMovingAverage = 1
         
         
         electronVolt = 1 #1.6e-19 # J
 #        plot(picoTimes, kineticEnergiesCutoff / electronVolt, label="Kinetic")
 #        plot(picoTimes, potentialEnergiesCutoff / electronVolt, label="Potential")
         plot(picoTimes, (kineticEnergiesCutoff + potentialEnergiesCutoff) / electronVolt, label="Sum")
+#        plot(picoTimes[nMovingAverage - 1:], movavg((kineticEnergiesCutoff + potentialEnergiesCutoff) / electronVolt, nMovingAverage), label="Moving average")
         xlabel("t [ps]")
         ylabel(r"energy [eV]")
         legend()
@@ -98,7 +100,6 @@ for configFilePath in configFilePaths:
         savefig(saveDir + "/energy" + cutoffString + ".pdf")
         
         # Temperature plot
-        nMovingAverage = 1
         figure()
         unitTemperature = 119.74
         #temperatures = kineticEnergies / (3. / 2. * len(atoms) * boltzmannConstant)
