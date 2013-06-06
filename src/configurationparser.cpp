@@ -247,10 +247,35 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
 //    LennardJonesForce* force = new LennardJonesForce();
 //    force->setPotentialConstant(potentialConstant);
 //    force->setEnergyConstant(energyConstant);
-    VashishtaTwoParticleForce* twoParticleForce = new VashishtaTwoParticleForce();
-    m_moleculeSystem->addTwoParticleForce(twoParticleForce);
-    VashishtaThreeParticleForce* threeParticleForce = new VashishtaThreeParticleForce();
-    m_moleculeSystem->addThreeParticleForce(threeParticleForce);
+    cout << "Looking up forces" << endl;
+    Setting& forces = config.lookup("forces");
+    for(uint i = 0; true; i++) {
+        string forceName;
+        try {
+            forces[i].lookupValue("type", forceName);
+        } catch(exception) {
+            cout << "No more forces found. Breaking." << endl;
+            break;
+        }
+        cout << "Found force " << forceName << endl;
+        if(forceName == "vashishta") {
+            VashishtaTwoParticleForce* twoParticleForce = new VashishtaTwoParticleForce();
+            m_moleculeSystem->addTwoParticleForce(twoParticleForce);
+            VashishtaThreeParticleForce* threeParticleForce = new VashishtaThreeParticleForce();
+            m_moleculeSystem->addThreeParticleForce(threeParticleForce);
+        } else if(forceName == "lennardJones") {
+            double potentialConstantLJ = 0;
+            forces[i].lookupValue("potentialConstant", potentialConstantLJ);
+            potentialConstantLJ /= unitLength;
+            double energyConstantLJ = 0;
+            forces[i].lookupValue("energyConstant", energyConstantLJ);
+            energyConstantLJ /= unitEnergy;
+            LennardJonesForce* force = new LennardJonesForce();
+            force->setPotentialConstant(potentialConstantLJ);
+            force->setEnergyConstant(energyConstantLJ);
+            m_moleculeSystem->addTwoParticleForce(force);
+        }
+    }
 
     // Set up modifiers
     Setting& modifiers = config.lookup("modifiers");
@@ -305,7 +330,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     //    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
     cout << "addded" << endl;
 //    m_moleculeSystem->setupCells(potentialConstant * 3);
-    m_moleculeSystem->setupCells(5.5);
+    m_moleculeSystem->setupCells(6.5);
     m_moleculeSystem->setNSimulationSteps(nSimulationSteps);
     cout << "Setup cells" << endl;
 
