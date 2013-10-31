@@ -19,7 +19,7 @@ void BerendsenThermostat::apply()
     double tau = m_relaxationTime;
     double currentTemperature = m_moleculeSystem->temperature();
     double gamma = sqrt(1 + dt / tau * (m_targetTemperature / currentTemperature - 1));
-    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
+    for(MoleculeSystemCell* cell : m_moleculeSystem->allCells()) {
         for(Atom* atom : cell->atoms()) {
             if(atom->isPositionFixed()) {
                 continue;

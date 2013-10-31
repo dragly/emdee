@@ -2,13 +2,14 @@
 #define PROCESSOR_H
 
 #include <src/range.h>
-
+#ifdef USE_MPI
 #include <boost/mpi.hpp>
+namespace mpi = boost::mpi;
+#endif
 #include <vector>
 #include <armadillo>
 using namespace std;
 using namespace arma;
-namespace mpi = boost::mpi;
 
 class MoleculeSystem;
 class MoleculeSystemCell;
@@ -54,9 +55,11 @@ protected:
 
     MoleculeSystem* m_moleculeSystem;
 
+#ifdef USE_MPI
     mpi::communicator world;
     mpi::timer communicationTimer;
     mpi::timer pureCommunicationTimer;
+#endif
 
     int m_nProcessors;
 

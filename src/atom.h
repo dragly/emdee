@@ -8,7 +8,9 @@
 // System includes
 //#include <armadillo>
 #include <vector>
+#ifdef USE_MPI
 #include <boost/serialization/serialization.hpp>
+#endif
 
 //using namespace arma;
 using namespace std;
@@ -78,15 +80,19 @@ protected:
     int m_atomTypeIndex;
 
 private:
+#ifdef USE_MPI
     friend class boost::serialization::access;
     template<class Archive>
     void serialize(Archive & ar, const unsigned int );
+#endif
 };
 
+#ifdef USE_MPI
 BOOST_CLASS_IMPLEMENTATION(Atom,object_serializable)
 BOOST_IS_BITWISE_SERIALIZABLE(Atom)
 BOOST_IS_MPI_DATATYPE(Atom)
 BOOST_CLASS_TRACKING(Atom,track_never)
+#endif
 
 // Inlined constructors
 inline Atom::Atom()  :
@@ -119,6 +125,7 @@ inline Atom::Atom(const AtomType &atomType) :
 {
 }
 
+#ifdef USE_MPI
 template<class Archive>
 inline void Atom::serialize(Archive & ar, const unsigned int)
 {
@@ -134,7 +141,7 @@ inline void Atom::serialize(Archive & ar, const unsigned int)
     //        ar & m_cellID;
     //        ar & m_type;
 }
-
+#endif
 // Inlined functions
 inline void Atom::addForce(int component, double force)
 {

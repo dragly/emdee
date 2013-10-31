@@ -50,6 +50,9 @@ public:
     bool shouldNewtonsThirdBeEnabled(MoleculeSystemCell *neighbor);
     bool checkDirection(int neighborID);
     bool checkDirection(const irowvec &direction);
+    const vector<MoleculeSystemCell*> &neighborCells() {
+        return m_neighborCells;
+    }
 protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;

@@ -3,8 +3,10 @@
 
 #include <string>
 
+#ifdef USE_MPI
 #include <boost/mpi.hpp>
 #include <boost/serialization/string.hpp>
+#endif
 
 using namespace std;
 

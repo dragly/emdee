@@ -7,9 +7,12 @@
 #include <src/force/lennardjonesforce.h>
 #include <src/force/twoparticleforce.h>
 #include <src/integrator/velocityverletintegrator.h>
-#include <src/filemanager.h>
 #include <src/modifier/modifier.h>
+
+#ifdef USE_MPI
+#include <src/filemanager.h>
 #include <src/processor.h>
+#endif
 #include <src/progressreporter.h>
 #include <src/force/threeparticleforce.h>
 
@@ -35,7 +38,9 @@ MoleculeSystem::MoleculeSystem() :
     m_step(0),
     m_time(0),
     m_skipInitialize(false),
+    #ifdef USE_MPI
     m_processor(new Processor(this)),
+    #endif
     m_isCalculatePressureEnabled(true),
     m_isCalculatePotentialEnabled(true),
     m_saveEveryNSteps(1),
@@ -45,14 +50,19 @@ MoleculeSystem::MoleculeSystem() :
 {
     m_progressReporter = new ProgressReporter("dragly", "somerun");
     m_integrator = new VelocityVerletIntegrator(this);
+#ifdef USE_MPI
     m_fileManager = new FileManager(this);
+#endif
     m_cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
     m_boundaries = zeros(2,m_nDimensions);
 }
 
 bool MoleculeSystem::load(string fileName) {
     m_skipInitialize = true;
+#ifdef USE_MPI
     return m_fileManager->load(fileName);
+#endif
+    return true;
 }
 
 void MoleculeSystem::clearAtoms()
@@ -91,6 +101,14 @@ void MoleculeSystem::deleteAtoms() {
     //    m_atoms.clear();
 }
 
+const vector<MoleculeSystemCell*>& MoleculeSystem::allCells() const {
+#ifdef USE_MPI
+    return m_processor->cells();
+#else
+    return cells();
+#endif
+}
+
 void MoleculeSystem::updateStatistics()
 {
     if(m_atoms.size() < 1) {
@@ -105,29 +123,33 @@ void MoleculeSystem::updateStatistics()
     Vector3 totalDrift;
     totalDrift.zeros();
     int nAtomsTotal = 0;
-    for(MoleculeSystemCell* cell : m_processor->cells()) {
+    for(MoleculeSystemCell* cell : allCells()) {
         nAtomsTotal += cell->atoms().size();
         for(Atom* atom : cell->atoms()) {
             totalDrift += atom->velocity();
         }
     }
     int nAtomsLocal = nAtomsTotal;
+#ifdef USE_MPI
     mpi::all_reduce(world, nAtomsTotal, nAtomsTotal, std::plus<int>());
+#endif
 
     Vector3 averageDrift = totalDrift / nAtomsTotal;
 
     // Calculate kinetic and potential energy
     m_kineticEnergyTotal = 0;
     m_potentialEnergyTotal = 0;
-    for(MoleculeSystemCell* cell : m_processor->cells()) {
+    for(MoleculeSystemCell* cell : allCells()) {
         for(Atom* atom : cell->atoms()) {
             Vector3 nonDriftVelocity = atom->velocity() - averageDrift;
             m_kineticEnergyTotal += 0.5 * atom->mass() * (dot(nonDriftVelocity, nonDriftVelocity));
             m_potentialEnergyTotal += atom->potential();
         }
     }
+#ifdef USE_MPI
     mpi::all_reduce(world, m_kineticEnergyTotal, m_kineticEnergyTotal, std::plus<double>());
     mpi::all_reduce(world, m_potentialEnergyTotal, m_potentialEnergyTotal, std::plus<double>());
+#endif
     m_temperature = m_kineticEnergyTotal / (3./2. * nAtomsTotal);
 
     // Calculate diffusion constant
@@ -136,7 +158,7 @@ void MoleculeSystem::updateStatistics()
         cout << "Atoms: " << nAtomsLocal << " of " << nAtomsTotal << ". Temperature: " << setprecision(5) << m_temperature  << ". Etot: " << totalEnergy << endl;
         m_averageDisplacement = 0;
         m_averageSquareDisplacement = 0;
-        for(MoleculeSystemCell* cell : m_processor->cells()) {
+        for(MoleculeSystemCell* cell : allCells()) {
             for(Atom* atom : cell->atoms()) {
                 m_averageSquareDisplacement += (dot(atom->displacement(), atom->displacement()));
                 m_averageDisplacement += sqrt(m_averageSquareDisplacement);
@@ -144,21 +166,25 @@ void MoleculeSystem::updateStatistics()
         }
         m_averageSquareDisplacement /= nAtomsTotal;
         m_averageDisplacement /= nAtomsTotal;
+
+#ifdef USE_MPI
         mpi::all_reduce(world, m_averageSquareDisplacement, m_averageSquareDisplacement, std::plus<double>());
         mpi::all_reduce(world, m_averageDisplacement, m_averageDisplacement, std::plus<double>());
-
+#endif
         // Calculate pressure
         rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
         double volume = (sideLengths(0) * sideLengths(1) * sideLengths(2));
         double density = nAtomsTotal / volume;
         double volumeThreeInverse = 1. / (3. * volume);
         m_pressure = 0;
-        for(MoleculeSystemCell* cell : m_processor->cells()) {
+        for(MoleculeSystemCell* cell : allCells()) {
             for(Atom* atom : cell->atoms()) {
                 m_pressure += volumeThreeInverse * atom->localPressure();
             }
         }
+#ifdef USE_MPI
         mpi::all_reduce(world, m_pressure, m_pressure, std::plus<double>());
+#endif
         m_pressure += density * m_temperature;
         //    cout << "Pressure " << m_pressure << endl;
     }
@@ -189,17 +215,21 @@ void MoleculeSystem::updateForces()
 {
     obeyBoundaries();
     //    refreshCellContents();
+#ifdef USE_MPI
     m_processor->communicateAtoms();
     refreshCellContents();
     m_processor->communicateAtoms();
+#endif
     refreshCellContents();
-    for(MoleculeSystemCell* cell : m_processor->cells()) {
+    for(MoleculeSystemCell* cell : allCells()) {
         for(Atom* atom : cell->atoms()) {
             atom->clearForcePotentialPressure();
         }
     }
 
+#ifdef USE_MPI
     m_processor->clearForcesInNeighborCells();
+#endif
 
     for(TwoParticleForce* twoParticleForce : m_twoParticleForces) {
         if(shouldTimeStepBeSaved()) {
@@ -210,10 +240,12 @@ void MoleculeSystem::updateForces()
             twoParticleForce->setCalculatePressureEnabled(false);
         }
     }
-    for(MoleculeSystemCell* cell : m_processor->cells()) {
+    for(MoleculeSystemCell* cell : allCells()) {
         cell->updateForces();
     }
+#ifdef USE_MPI
     m_processor->communicateForces();
+#endif
 }
 
 MoleculeSystemCell* MoleculeSystem::cell(int i, int j, int k) {
@@ -230,7 +262,7 @@ void MoleculeSystem::simulate()
     // Forget about all cells but our own
     for(MoleculeSystemCell* systemCell : m_cells) {
         bool inMyCells = false;
-        for(MoleculeSystemCell* cell : m_processor->cells()) {
+        for(MoleculeSystemCell* cell : allCells()) {
             if(cell == systemCell) {
                 inMyCells = true;
             }
@@ -243,24 +275,28 @@ void MoleculeSystem::simulate()
         }
     }
     m_atoms.clear();
-    for(MoleculeSystemCell* cell : m_processor->cells()) {
+    for(MoleculeSystemCell* cell : allCells()) {
         addAtoms(cell->atoms());
     }
 
+#ifdef USE_MPI
     mpi::timer timer;
     timer.restart();
+#endif
     int iStep = 0;
     // Set up integrator if m_skipInitialize is not set (because file was loaded)
     if(!m_skipInitialize) {
-        cout << "Initializing integrator" << endl;
+//        cout << "Initializing integrator" << endl;
         m_integrator->initialize();
         updateStatistics();
+#ifdef USE_MPI
         if(m_isSaveEnabled) {
             m_fileManager->save(m_step);
             if(m_processor->rank() == 0) {
                 m_progressReporter->reportProgress(0);
             }
         }
+#endif
 
         // Finalize step
         m_time += m_integrator->timeStep();
@@ -282,6 +318,7 @@ void MoleculeSystem::simulate()
         m_integrator->stepForward();
         updateStatistics();
 
+#ifdef USE_MPI
         if(shouldTimeStepBeSaved()) {
             m_fileManager->save(m_step);
         }
@@ -293,17 +330,21 @@ void MoleculeSystem::simulate()
         if(isOutputEnabledForThisStep()) {
             cout << "Time used so far: " << setprecision(5) << timer.elapsed() << endl;
         }
+#endif
 
         // Finalize step
         m_time += m_integrator->timeStep();
         m_step++;
     }
+#ifdef USE_MPI
     if(m_isCreateSymlinkEnabled) {
         m_fileManager->setLatestSymlink(m_step-1);
         if(m_processor->rank() == 0) {
             m_progressReporter->reportProgress(1);
         }
+        m_progressReporter->reportProgress(1);
     }
+#endif
 }
 
 bool MoleculeSystem::shouldTimeStepBeSaved()
@@ -319,7 +360,7 @@ bool MoleculeSystem::shouldTimeStepBeSaved()
 
 void MoleculeSystem::obeyBoundaries() {
     // Boundary conditions
-    for(MoleculeSystemCell* cell : m_processor->cells()) {
+    for(MoleculeSystemCell* cell : allCells()) {
         for(Atom* atom : cell->atoms()) {
             //    for(Atom* atom : m_atoms) {
             Vector3 position = atom->position();
@@ -345,12 +386,19 @@ void MoleculeSystem::obeyBoundaries() {
 
 void MoleculeSystem::setFileManager(FileManager *fileManager)
 {
+#ifdef USE_MPI
     m_fileManager = fileManager;
+#endif
 }
 
 void MoleculeSystem::addModifier(Modifier *modifier)
 {
     m_modifiers.push_back(modifier);
+}
+
+void MoleculeSystem::removeModifier(Modifier *modifier)
+{
+    m_modifiers.erase(std::remove(m_modifiers.begin(), m_modifiers.end(), modifier), m_modifiers.end());
 }
 
 void MoleculeSystem::setBoundaries(double min, double max)
@@ -497,8 +545,9 @@ void MoleculeSystem::setupCells(double minCutLength) {
     m_areCellsSetUp = true;
 
     addAtomsToCorrectCells(m_atoms);
-
+#ifdef USE_MPI
     m_processor->setupProcessors();
+#endif
 }
 
 void MoleculeSystem::refreshCellContents() {
@@ -556,8 +605,10 @@ bool MoleculeSystem::isOutputEnabledForThisStep() const
 
 void MoleculeSystem::save(string fileName)
 {
+#ifdef USE_MPI
     m_fileManager->setOutFileName(fileName);
     m_fileManager->save(m_step);
+#endif
 }
 
 void MoleculeSystem::setCreateSymlink(bool enabled)

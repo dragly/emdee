@@ -7,6 +7,7 @@ class Modifier
 {
 public:
     Modifier(MoleculeSystem* moleculeSystem);
+    virtual ~Modifier() {}
 
     virtual void apply() = 0;
 

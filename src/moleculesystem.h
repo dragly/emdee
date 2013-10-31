@@ -21,23 +21,23 @@ class SingleParticleForce;
 #include <vector>
 #include <unordered_map>
 #include <armadillo>
-#include <libconfig.h++>
-#include <H5Cpp.h>
-#include <H5File.h>
+//#include <H5Cpp.h>
+//#include <H5File.h>
 
+#ifdef USE_MPI
+#include <libconfig.h++>
 #include <boost/mpi.hpp>
 namespace mpi = boost::mpi;
+using namespace libconfig;
+#endif
 
 using namespace std;
 using namespace arma;
-using namespace libconfig;
 
 class MoleculeSystem
 {
 public:
     MoleculeSystem();
-
-    void loadConfiguration(Config* config);
 
     void addAtoms(const vector<Atom *> &atoms);
     const vector<Atom*> &atoms() const;
@@ -76,6 +76,7 @@ public:
 
     // Modifiers
     void addModifier(Modifier* modifier);
+    void removeModifier(Modifier* modifier);
     void applyModifiers();
 
     // Getters (fast)
@@ -141,6 +142,7 @@ public:
     bool isOutputEnabledForThisStep() const;
     void save(string fileName);
     void setCreateSymlink(bool enabled);
+    const vector<MoleculeSystemCell *> &allCells() const;
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
@@ -160,18 +162,17 @@ protected:
 
     vector<MoleculeSystemCell*> m_cells;
 
-    Config *m_config;
+//    Config *m_config;
 
 //    TwoParticleForce *m_interatomicForce;
     vector<TwoParticleForce*> m_twoParticleForces;
     vector<ThreeParticleForce*> m_threeParticleForces;
-    FileManager *m_fileManager;
 
     bool m_isSaveEnabled;
     bool m_isOutputEnabled;
 
     bool m_areCellsSetUp;
-    H5::H5File* hdf5File;
+//    H5::H5File* hdf5File;
 
     double m_temperature;
 
@@ -185,12 +186,14 @@ protected:
 
     double m_time;
     bool m_skipInitialize;
-    Processor* m_processor;
 
     double m_kineticEnergyTotal;
     double m_potentialEnergyTotal;
-
+#ifdef USE_MPI
+    FileManager *m_fileManager;
+    Processor* m_processor;
     mpi::communicator world;
+#endif
     bool m_isCalculatePressureEnabled;
     bool m_isCalculatePotentialEnabled;
 
@@ -254,9 +257,11 @@ inline const irowvec &MoleculeSystem::nCells() const {
     return m_nCells;
 }
 
+#ifdef USE_MPI
 inline Processor* MoleculeSystem::processor() {
     return m_processor;
 }
+#endif
 
 inline double MoleculeSystem::kineticEnergyTotal()
 {

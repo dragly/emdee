@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 // The curl library must be installed, do something like sudo apt-get install libcurl4-openssl-dev
-#include <curl/curl.h>
+//#include <curl/curl.h>
 #include <time.h>
 #include <iostream>
 #include <string>
@@ -19,7 +19,6 @@ public:
     ProgressReporter(string username, string runName);
 
     void reportProgress(double progress);
-    static void callAndCleanCurl(CURL* curl);
 private:
     double m_lastReportTime;
     string m_username;
@@ -84,19 +83,5 @@ inline void ProgressReporter::reportProgress(double progress)
 //        }
 //    }
 //    m_lastReportTime = seconds;
-}
-
-inline void ProgressReporter::callAndCleanCurl(CURL *curl)
-{
-    (void)curl;
-//    /* Perform the request, res will get the return code */
-//    CURLcode res;
-//    res = curl_easy_perform(curl);
-//    /* Check for errors */
-//    if(res != CURLE_OK) {
-//        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-//    }
-//    /* always cleanup */
-//    curl_easy_cleanup(curl);
 }
 #endif // PROGRESSREPORT_H

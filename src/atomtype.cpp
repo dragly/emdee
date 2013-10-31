@@ -57,5 +57,5 @@ AtomType::AtomType(AtomType::AtomTypeEnum atomTypeEnum, int index) :
 }
 
 AtomType AtomType::argon() {
-    return AtomType(ARGON);
+    return AtomType(ARGON, 18);
 }

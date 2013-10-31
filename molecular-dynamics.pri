@@ -1,15 +1,13 @@
 ROOT_DIR = $$PWD
 SRC_DIR = $$PWD/src
 INCLUDEPATH += $$ROOT_DIR
-QMAKE_CXX = ccache g++
+#QMAKE_CXX = ccache g++
 # Libraries
-LIBS += -larmadillo -llapack -lblas -lconfig++ -lhdf5_cpp -lhdf5 -lboost_filesystem -lboost_system
+#LIBS += -larmadillo -llapack -lblas -lconfig++ -lhdf5_cpp -lhdf5
 
-LIBS += -lboost_mpi -lboost_serialization
+#LIBS += -lgcov
 
-LIBS += -lgcov
-
-LIBS += -lcurl
+#LIBS += -lcurl
 
 COMMON_CXXFLAGS = -std=c++0x
 #COMMON_CXXFLAGS += -fprofile-generate
@@ -24,7 +22,7 @@ release {
     QMAKE_CXXFLAGS_RELEASE += -O3
 }
 
-CONFIG += mpi
+#CONFIG += mpi
 mpi {
     message(Using MPI)
     DEFINES += MD_USE_MPI
@@ -39,6 +37,8 @@ mpi {
     QMAKE_LFLAGS += $$system(mpicxx --showme:link)
     QMAKE_CXXFLAGS += $$system(mpicxx --showme:compile) -DMPICH_IGNORE_CXX_SEEK
     QMAKE_CXXFLAGS_RELEASE += $$system(mpicxx --showme:compile) -DMPICH_IGNORE_CXX_SEEK
+
+    LIBS +=  -lboost_filesystem -lboost_system -lboost_mpi -lboost_serialization
 }
 
 QMAKE_CXXFLAGS += -g

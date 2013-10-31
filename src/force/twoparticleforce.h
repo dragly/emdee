@@ -9,10 +9,10 @@ class Atom;
 
 // System headers
 #include <armadillo>
-#include <libconfig.h++>
+//#include <libconfig.h++>
 
 using namespace arma;
-using namespace libconfig;
+//using namespace libconfig;
 
 /*!
  * \brief The InteratomicForce class calculates forces between atoms.

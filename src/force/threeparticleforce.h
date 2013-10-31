@@ -9,10 +9,8 @@ class Atom;
 
 // System headers
 #include <armadillo>
-#include <libconfig.h++>
 
 using namespace arma;
-using namespace libconfig;
 
 /*!
  * \brief The InteratomicForce class calculates forces between atoms.
@@ -32,9 +30,9 @@ public:
     void setCalculatePotentialEnabled(bool enable);
     bool isCalculatePotentialEnabled();
 protected:
-    bool m_isNewtonsThirdLawEnabled;
-    bool m_isCalculatePressureEnabled;
     bool m_isCalculatePotentialEnabled;
+    bool m_isCalculatePressureEnabled;
+    bool m_isNewtonsThirdLawEnabled;
     Vector3 m_zeroVector;
 };
 

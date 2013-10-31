@@ -7,11 +7,10 @@ class Atom;
 
 #include <vector>
 #include <armadillo>
-#include <libconfig.h++>
+//#include <libconfig.h++>
 
 using namespace std;
 using namespace arma;
-using namespace libconfig;
 
 class Generator
 {

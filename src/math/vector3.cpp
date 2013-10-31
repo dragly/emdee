@@ -1,4 +1,6 @@
+#ifdef USE_MPI
 #include <boost/mpi.hpp>
+#endif
 
 #include "vector3.h"
 

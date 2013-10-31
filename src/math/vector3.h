@@ -2,8 +2,11 @@
 #define VECTOR3D_H
 
 #include <iostream>
+#ifdef USE_MPI
 #include <boost/serialization/serialization.hpp>
 #include <boost/mpi.hpp>
+#endif
+#define ARMA_HAVE_STD_TR1
 #include <armadillo>
 
 class Vector3
@@ -55,19 +58,23 @@ public:
 
     static double dot(const Vector3 &vector1, const Vector3 &vector2);
 private:
+#ifdef USE_MPI
     friend class boost::serialization::access;
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version);
+#endif
 };
 
 inline double dot(const Vector3 &vector1, const Vector3 &vector2) {
     return Vector3::dot(vector1, vector2);
 }
 
+#ifdef USE_MPI
 BOOST_CLASS_IMPLEMENTATION(Vector3,object_serializable)
 BOOST_IS_BITWISE_SERIALIZABLE(Vector3)
 BOOST_IS_MPI_DATATYPE(Vector3)
 BOOST_CLASS_TRACKING(Vector3,track_never)
+#endif
 
 inline Vector3::Vector3()
 {
@@ -90,6 +97,7 @@ inline Vector3::Vector3(arma::rowvec armaVector)
     mem_local[2] = armaVector(2);
 }
 
+#ifdef USE_MPI
 template<class Archive>
 inline void Vector3::serialize(Archive & ar, const unsigned int)
 {
@@ -97,7 +105,7 @@ inline void Vector3::serialize(Archive & ar, const unsigned int)
     ar &mem_local[1];
     ar &mem_local[2];
 }
-
+#endif
 inline double& Vector3::operator[](const int component)
 {
     return mem_local[component];

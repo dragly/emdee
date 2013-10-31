@@ -26,7 +26,7 @@ public:
     bool loadBinary(string fileName);
     bool save(int step);
     bool saveXyz(int step);
-    bool saveHDF5(int step);
+//    bool saveHDF5(int step);
     bool saveBinary(int step);
 
     void setOutFileName(string fileName);

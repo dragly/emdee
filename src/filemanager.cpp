@@ -15,15 +15,17 @@
 #include <unistd.h>
 #include <iomanip>
 #include <armadillo>
-#include <H5Cpp.h>
-#include <H5File.h>
+//#include <H5Cpp.h>
+//#include <H5File.h>
 //#include <hdf5.h>
+#ifdef USE_MPI
 #include <boost/filesystem.hpp>
 #include <boost/mpi.hpp>
+namespace mpi = boost::mpi;
+#endif
 
 using namespace std;
 using namespace arma;
-namespace mpi = boost::mpi;
 //using namespace H5;
 
 typedef struct s1_t {
@@ -482,90 +484,90 @@ bool FileManager::saveXyz(int step) {
 }
 
 
-bool FileManager::saveHDF5(int step) {
-    cerr << "saveHDF5 is not yet fully implemented. Missing some parameters and rescaling with units." << endl;
-    stringstream outStepName;
-    outStepName << setw(6) << setfill('0') << step;
-    string outFileNameLocal = m_outFileName;
-    size_t starPos = m_outFileName.find("*");
-    if(starPos != string::npos) {
-        outFileNameLocal.replace(starPos, 1, outStepName.str());
-    }
-    /*
-      * Initialize the data
-      */
-    // TODO Rescale with units!
-    int  i = 0;
-    s1_t* s1 = new s1_t[m_moleculeSystem->processor()->nAtoms()];
-    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
-        for(Atom* atom : cell->atoms()) {
-            sprintf(s1[i].atomType , "Ar");
-            s1[i].positionX = atom->position()(0);
-            s1[i].positionY = atom->position()(1);
-            s1[i].positionZ = atom->position()(2);
-            s1[i].velocityX = atom->velocity()(0);
-            s1[i].velocityY = atom->velocity()(1);
-            s1[i].velocityZ = atom->velocity()(2);
-            s1[i].forceX = atom->force()(0);
-            s1[i].forceY = atom->force()(1);
-            s1[i].forceZ = atom->force()(2);
-            s1[i].cellID = atom->cellID();
-            i++;
-        }
-    }
+//bool FileManager::saveHDF5(int step) {
+//    cerr << "saveHDF5 is not yet fully implemented. Missing some parameters and rescaling with units." << endl;
+//    stringstream outStepName;
+//    outStepName << setw(6) << setfill('0') << step;
+//    string outFileNameLocal = m_outFileName;
+//    size_t starPos = m_outFileName.find("*");
+//    if(starPos != string::npos) {
+//        outFileNameLocal.replace(starPos, 1, outStepName.str());
+//    }
+//    /*
+//      * Initialize the data
+//      */
+//    // TODO Rescale with units!
+//    int  i = 0;
+//    s1_t* s1 = new s1_t[m_moleculeSystem->processor()->nAtoms()];
+//    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
+//        for(Atom* atom : cell->atoms()) {
+//            sprintf(s1[i].atomType , "Ar");
+//            s1[i].positionX = atom->position()(0);
+//            s1[i].positionY = atom->position()(1);
+//            s1[i].positionZ = atom->position()(2);
+//            s1[i].velocityX = atom->velocity()(0);
+//            s1[i].velocityY = atom->velocity()(1);
+//            s1[i].velocityZ = atom->velocity()(2);
+//            s1[i].forceX = atom->force()(0);
+//            s1[i].forceY = atom->force()(1);
+//            s1[i].forceZ = atom->force()(2);
+//            s1[i].cellID = atom->cellID();
+//            i++;
+//        }
+//    }
 
-    /*
-      * Turn off the auto-printing when failure occurs so that we can
-      * handle the errors appropriately
-      */
-    //        Exception::dontPrint();
+//    /*
+//      * Turn off the auto-printing when failure occurs so that we can
+//      * handle the errors appropriately
+//      */
+//    //        Exception::dontPrint();
 
-    /*
-      * Create the data space.
-      */
-    hsize_t dim[] = {m_moleculeSystem->processor()->nAtoms()};   /* Dataspace dimensions */
-    H5::DataSpace space( 1, dim );
+//    /*
+//      * Create the data space.
+//      */
+//    hsize_t dim[] = {m_moleculeSystem->processor()->nAtoms()};   /* Dataspace dimensions */
+//    H5::DataSpace space( 1, dim );
 
-    /*
-      * Create the file.
-      */
-    H5::H5File* file = new H5::H5File( outFileNameLocal, H5F_ACC_TRUNC );
+//    /*
+//      * Create the file.
+//      */
+//    H5::H5File* file = new H5::H5File( outFileNameLocal, H5F_ACC_TRUNC );
 
-    /*
-      * Create the memory datatype.
-      */
-    H5::StrType string_type(H5::PredType::C_S1, 3);
-    H5::CompType mtype1( sizeof(s1_t) );
-    mtype1.insertMember( "atomType", HOFFSET(s1_t, atomType), string_type);
-    mtype1.insertMember( "positionX", HOFFSET(s1_t, positionX), H5::PredType::NATIVE_DOUBLE);
-    mtype1.insertMember( "positionY", HOFFSET(s1_t, positionY), H5::PredType::NATIVE_DOUBLE);
-    mtype1.insertMember( "positionZ", HOFFSET(s1_t, positionZ), H5::PredType::NATIVE_DOUBLE);
-    mtype1.insertMember( "velocityX", HOFFSET(s1_t, velocityX), H5::PredType::NATIVE_DOUBLE);
-    mtype1.insertMember( "velocityY", HOFFSET(s1_t, velocityY), H5::PredType::NATIVE_DOUBLE);
-    mtype1.insertMember( "velocityZ", HOFFSET(s1_t, velocityZ), H5::PredType::NATIVE_DOUBLE);
-    mtype1.insertMember( "forceX", HOFFSET(s1_t, forceX), H5::PredType::NATIVE_DOUBLE);
-    mtype1.insertMember( "forceY", HOFFSET(s1_t, forceY), H5::PredType::NATIVE_DOUBLE);
-    mtype1.insertMember( "forceZ", HOFFSET(s1_t, forceZ), H5::PredType::NATIVE_DOUBLE);
-    mtype1.insertMember( "cellID", HOFFSET(s1_t, cellID), H5::PredType::NATIVE_INT);
+//    /*
+//      * Create the memory datatype.
+//      */
+//    H5::StrType string_type(H5::PredType::C_S1, 3);
+//    H5::CompType mtype1( sizeof(s1_t) );
+//    mtype1.insertMember( "atomType", HOFFSET(s1_t, atomType), string_type);
+//    mtype1.insertMember( "positionX", HOFFSET(s1_t, positionX), H5::PredType::NATIVE_DOUBLE);
+//    mtype1.insertMember( "positionY", HOFFSET(s1_t, positionY), H5::PredType::NATIVE_DOUBLE);
+//    mtype1.insertMember( "positionZ", HOFFSET(s1_t, positionZ), H5::PredType::NATIVE_DOUBLE);
+//    mtype1.insertMember( "velocityX", HOFFSET(s1_t, velocityX), H5::PredType::NATIVE_DOUBLE);
+//    mtype1.insertMember( "velocityY", HOFFSET(s1_t, velocityY), H5::PredType::NATIVE_DOUBLE);
+//    mtype1.insertMember( "velocityZ", HOFFSET(s1_t, velocityZ), H5::PredType::NATIVE_DOUBLE);
+//    mtype1.insertMember( "forceX", HOFFSET(s1_t, forceX), H5::PredType::NATIVE_DOUBLE);
+//    mtype1.insertMember( "forceY", HOFFSET(s1_t, forceY), H5::PredType::NATIVE_DOUBLE);
+//    mtype1.insertMember( "forceZ", HOFFSET(s1_t, forceZ), H5::PredType::NATIVE_DOUBLE);
+//    mtype1.insertMember( "cellID", HOFFSET(s1_t, cellID), H5::PredType::NATIVE_INT);
 
-    /*
-      * Create the dataset.
-      */
-    H5::DataSet* dataset;
-    dataset = new H5::DataSet(file->createDataSet("ArrayOfStructures", mtype1, space));
+//    /*
+//      * Create the dataset.
+//      */
+//    H5::DataSet* dataset;
+//    dataset = new H5::DataSet(file->createDataSet("ArrayOfStructures", mtype1, space));
 
-    /*
-      * Write data to the dataset;
-      */
-    dataset->write( s1, mtype1 );
+//    /*
+//      * Write data to the dataset;
+//      */
+//    dataset->write( s1, mtype1 );
 
-    /*
-      * Release resources
-      */
-    delete dataset;
-    delete file;
-    return true;
-}
+//    /*
+//      * Release resources
+//      */
+//    delete dataset;
+//    delete file;
+//    return true;
+//}
 
 string FileManager::parseFileName(string fileName) {
     // Replace tilde ~ with home directory

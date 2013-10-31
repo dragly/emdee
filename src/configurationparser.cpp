@@ -330,7 +330,16 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     //    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
     cout << "addded" << endl;
 //    m_moleculeSystem->setupCells(potentialConstant * 3);
-    m_moleculeSystem->setupCells(6.5);
+    try {
+        double cellSize = config.lookup("simulation.cellSize");
+        cellSize /= unitLength;
+        cout << "Loaded cell size from config: " << cellSize << " * " << unitLength << endl;
+        m_moleculeSystem->setupCells(cellSize);
+    } catch (SettingNotFoundException) {
+        cout << "Cell size not set in config, setting to default value." << endl;
+        m_moleculeSystem->setupCells(6.5);
+    }
+
     m_moleculeSystem->setNSimulationSteps(nSimulationSteps);
     cout << "Setup cells" << endl;
 

@@ -3,8 +3,10 @@
 using namespace std;
 
 #include <src/moleculesystem.h>
+#include <src/moleculesystemcell.h>
 #include <src/atom.h>
 #include <src/math/vector3.h>
+#include <boost/mpi.hpp>
 #include <fstream>
 #include <armadillo>
 #include <iomanip>
@@ -14,18 +16,22 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    if(argc < 7) {
+    boost::mpi::environment env(argc, argv);
+    boost::mpi::communicator world;
+    cout << "Starting angular distribution..." << endl;
+    if(argc < 9) {
         cout << "EROR! Too few arguments..." << endl;
-        cout << "Usage: angular-distribution inputfile outputfile atom1number atom2number atom3number nBins cutoff" << endl;
+        cout << "Usage: angular-distribution inputfile outputfile atom1number atom2number atom3number cutoff1 cutoff2 nBins" << endl;
         exit(0);
     }
     int atomTypeNumber1 = atoi(argv[3]);
     int atomTypeNumber2 = atoi(argv[4]);
     int atomTypeNumber3 = atoi(argv[5]);
-    int nBins = atoi(argv[6]);
-    double cutoffDistance = atof(argv[7]);
+    double cutoffDistance1 = atof(argv[6]);
+    double cutoffDistance2 = atof(argv[7]);
+    int nBins = atoi(argv[8]);
     cout << "Starting angular distribution calculator" << endl;
-    cout << "cutoffDistance: " << cutoffDistance << endl;
+    cout << "cutoffDistances: " << cutoffDistance1 << " " << cutoffDistance2 << endl;
 
 //    int a1 = atomTypeNumber1;
 //    int a2 = atomTypeNumber2;
@@ -57,6 +63,7 @@ int main(int argc, char* argv[])
 
     MoleculeSystem system;
     system.load(argv[1]);
+    system.setupCells(fmax(cutoffDistance1, cutoffDistance2));
     cout << "Calculating angles" << endl;
 
 
@@ -67,28 +74,31 @@ int main(int argc, char* argv[])
     vec binEdges = linspace(0, M_PI, nBins + 1);
     double binSize = binEdges(1) - binEdges(0);
     vec binContent = zeros(nBins);
-    for(uint i = 0; i < system.atoms().size(); i++) {
+    for(MoleculeSystemCell* cell1 : system.cells())
+    for(uint i = 0; i < cell1->atoms().size(); i++) {
 //        cout << "i: " << i << endl;
-        Atom* atom1 = system.atoms()[i];
-        for(uint j = 0; j < system.atoms().size(); j++) {
-            if(i == j) {
+        Atom* atom1 = cell1->atoms()[i];
+        for(MoleculeSystemCell* cell2 : cell1->neighborCells())
+        for(uint j = 0; j < cell2->atoms().size(); j++) {
+//            cout << "j: " << j << endl;
+            Atom* atom2 = cell2->atoms()[j];
+            if(atom1 == atom2) {
                 continue;
             }
-//            cout << "j: " << j << endl;
-            Atom* atom2 = system.atoms()[j];
             Vector3 rij = atom1->position() - atom2->position();
             double lij = sqrt(dot(rij,rij));
-            if(lij > cutoffDistance) {
+            if(lij > cutoffDistance1) {
                 continue;
             }
-            for(uint k = 0; k < system.atoms().size(); k++) {
-                if(i == k || j == k) {
+            for(MoleculeSystemCell* cell3 : cell1->neighborCells())
+            for(uint k = 0; k < cell3->atoms().size(); k++) {
+                Atom* atom3 = cell3->atoms()[k];
+                if(atom1 == atom3 || atom2 == atom3) {
                     continue;
                 }
-                Atom* atom3 = system.atoms()[k];
                 Vector3 rik = atom3->position() - atom2->position();
                 double lik = sqrt(dot(rik,rik));
-                if(lik > cutoffDistance) {
+                if(lik > cutoffDistance2) {
                     continue;
                 }
 

@@ -21,7 +21,7 @@ void AndersenThermostat::apply()
     double dt = m_moleculeSystem->integrator()->timeStep();
     double tau = m_collisionTime;
     double targetTemperature = m_targetTemperature;
-    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
+    for(MoleculeSystemCell* cell : m_moleculeSystem->allCells()) {
         for(Atom* atom : cell->atoms()) {
             if(atom->isPositionFixed()) {
                 continue;
