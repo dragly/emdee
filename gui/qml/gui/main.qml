@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtGraphicalEffects 1.0
 import Qt3D 2.0
 import Qt3D.Shapes 2.0
 import MolecularDynamics 1.0
@@ -23,14 +24,26 @@ Rectangle {
 
         camera: Camera {
             id: myCamera
-            eye: Qt.vector3d(21,7,19)
-            nearPlane: 5
+            eye: Qt.vector3d(5,5,5)
+            center: Qt.vector3d(0,0,0)
+            nearPlane: 0.1
             farPlane: 50
-
+            fieldOfView: 120
+            onFieldOfViewChanged: {
+                console.log(fieldOfView)
+                if(fieldOfView > 160) {
+                    fieldOfView = 160
+                } else if(fieldOfView < 20) {
+                    fieldOfView = 20
+                }
+            }
         }
 
         MolecularDynamics {
             id: moleculeSystem
+            x: 2
+            y: 2
+            z: 2
             effect: Effect {
                 blending: true
                 texture: "particle.png"
@@ -53,6 +66,28 @@ Rectangle {
             onPressed: {
                 menuRect.state = ""
                 mouse.accepted = false
+            }
+        }
+        PinchArea {
+            property real startingFieldOfView: 90
+            anchors.fill: parent
+            enabled: true
+            onPinchStarted: {
+                startingFieldOfView = myCamera.fieldOfView
+            }
+
+            onPinchUpdated: {
+                var pinchDiff = pinch.scale;
+//                console.log("Scale: " + pinch.scale + " previousScale: " + pinch.previousScale + " diff " + pinchDiff)
+                console.log("Starting " + startingFieldOfView + " scale " + pinch.scale)
+                if(pinchDiff > 1) {
+                    pinchDiff *= 10
+                } else {
+                    pinchDiff = -1/pinchDiff * 10
+                }
+                console.log("pinchDiff " + pinchDiff)
+                myCamera.fieldOfView = startingFieldOfView - pinchDiff
+//                myCamera.fieldOfView = startingFieldOfView / (Math.sqrt(Math.sqrt(pinch.scale)))
             }
         }
     }
@@ -103,15 +138,15 @@ Rectangle {
             }
             Label {
                 text: "Target temperature:"
-                enabled: thermostatCheckBox.checked
+//                enabled: thermostatCheckBox.checked
             }
             Slider {
                 id: targetTemperatureSlider
                 Layout.fillWidth: true
                 minimumValue: 0.0001
-                maximumValue: 100
+                maximumValue: 500
                 value: 1.0
-                enabled: thermostatCheckBox.checked
+//                enabled: thermostatCheckBox.checked
             }
             Label {
                 text: "Simulation:"
@@ -127,5 +162,15 @@ Rectangle {
                 Layout.fillHeight: true
             }
         }
+    }
+    NavigationPad {
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+            margins: parent.width * 0.01
+        }
+
+        width: parent.width * 0.1
+        height: parent.width * 0.1
     }
 }

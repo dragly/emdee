@@ -137,12 +137,12 @@ bool MolecularDynamics::useThermostat() const
 
 void MolecularDynamics::setTargetTemperature(double arg)
 {
-    if(m_thermostat) {
-        if (m_temperature != arg) {
+    if (m_temperature != arg) {
+        if(m_thermostat) {
             m_thermostat->setTargetTemperature(arg);
-            m_temperature = arg;
-            emit targetTemperatureChanged(arg);
         }
+        m_temperature = arg;
+        emit targetTemperatureChanged(arg);
     }
 }
 
@@ -153,6 +153,7 @@ void MolecularDynamics::setUseThermostat(bool arg)
         if(arg) {
             m_thermostat = new BerendsenThermostat(m_moleculeSystem);
             m_thermostat->setTargetTemperature(m_temperature);
+            m_thermostat->setRelaxationTime(0.01);
             m_moleculeSystem->addModifier(m_thermostat);
         } else {
             m_moleculeSystem->removeModifier(m_thermostat);

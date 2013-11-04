@@ -14,7 +14,8 @@ QML_IMPORT_PATH =
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
-    moleculardynamics.cpp
+    moleculardynamics.cpp \
+    supercamera.cpp
 
 # Installation path
 # target.path =
@@ -24,7 +25,8 @@ include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
 qtcAddDeployment()
 
 HEADERS += \
-    moleculardynamics.h
+    moleculardynamics.h \
+    supercamera.h
 
 include(../molecular-dynamics.pri)
 message(find $$SRC_DIR -name '*.cpp')
