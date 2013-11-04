@@ -50,6 +50,9 @@ MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
 
 void MolecularDynamics::drawItem(QGLPainter *painter)
 {
+    if(!painter) {
+        return;
+    }
     //    qDebug() << "Painting...";
     QGLBuilder builder;
     builder.newSection(QGL::NoSmoothing);
@@ -115,7 +118,9 @@ void MolecularDynamics::drawItem(QGLPainter *painter)
         delete m_geometry;
     }
     m_geometry = geometry;
-    m_geometry->draw(painter);
+    if(m_geometry) {
+        m_geometry->draw(painter);
+    }
 }
 
 void MolecularDynamics::stepForward()

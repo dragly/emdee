@@ -15,7 +15,19 @@ QML_IMPORT_PATH =
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
     moleculardynamics.cpp \
-    supercamera.cpp
+    supercamera.cpp \
+    stereoviewport.cpp \
+    qglmaskedsurface.cpp \
+    qgldrawbuffersurface.cpp \
+    fileio.cpp \
+    oculusreader.cpp
+
+# Oculus libraries
+linux: INCLUDEPATH += /home/svenni/apps/oculus/Oculus/OculusSDK/LibOVR/Include
+linux: LIBS += -L/home/svenni/apps/oculus/Oculus/OculusSDK/LibOVR/Lib/Linux/Release/x86_64/ -lovr
+linux: LIBS += -lX11
+linux: LIBS += -lXinerama
+linux: LIBS += -ludev
 
 # Installation path
 # target.path =
@@ -26,7 +38,12 @@ qtcAddDeployment()
 
 HEADERS += \
     moleculardynamics.h \
-    supercamera.h
+    supercamera.h \
+    stereoviewport.h \
+    qglmaskedsurface_p.h \
+    qgldrawbuffersurface_p.h \
+    fileio.h \
+    oculusreader.h
 
 include(../molecular-dynamics.pri)
 message(find $$SRC_DIR -name '*.cpp')

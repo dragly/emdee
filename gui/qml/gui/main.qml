@@ -5,12 +5,26 @@ import Qt3D.Shapes 2.0
 import MolecularDynamics 1.0
 import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
+import StereoViewport 1.0
+import FileIO 1.0
+import OculusReader 1.0
 
 Rectangle {
+    id: rectRoot
+    property point lensOffsetFromCenter: Qt.point(0,0)
+    property rect distortion: Qt.rect(1, 0.22, 0.24, 0.0)
+    property real aspectRatio: width / height;
+    property real fillScale: 1.8;
     width: 1280
     height: 800
     color: "black"
-    Viewport {
+
+    OculusReader {
+        camera: viewportRoot.camera
+    }
+
+    StereoViewport {
+        id: viewportRoot
         blending: true
         anchors.fill: parent
 
@@ -25,7 +39,7 @@ Rectangle {
         camera: Camera {
             id: myCamera
             eye: Qt.vector3d(5,5,5)
-            center: Qt.vector3d(0,0,0)
+//            center: Qt.vector3d(0,0,0)
             nearPlane: 0.1
             farPlane: 50
             fieldOfView: 120
@@ -37,6 +51,7 @@ Rectangle {
                     fieldOfView = 20
                 }
             }
+            eyeSeparation: 0.1
         }
 
         MolecularDynamics {
@@ -50,6 +65,13 @@ Rectangle {
             }
             targetTemperature: targetTemperatureSlider.value
             useThermostat: thermostatCheckBox.checked
+        }
+
+        Sphere {
+            x: 100
+            effect: Effect {
+                color: "blue"
+            }
         }
 
         Timer {
@@ -161,6 +183,93 @@ Rectangle {
             Item {
                 Layout.fillHeight: true
             }
+        }
+    }
+    FileIO {
+        id: vertexShaderFile
+        source: "oculus.vert"
+        onError: console.log(msg)
+    }
+
+    FileIO {
+        id: fragmentShaderFile
+        source: "oculus.frag"
+        onError: console.log(msg)
+    }
+
+    ShaderEffectSource {
+        id: shaderEffectSourceLeft
+        width: rectRoot.width / 2
+        anchors {
+            left: rectRoot.left
+            top: rectRoot.top
+            bottom: rectRoot.bottom
+        }
+        visible: false
+
+        hideSource: true
+        sourceItem: viewportRoot
+        sourceRect: Qt.rect(0, 0, viewportRoot.width / 2, viewportRoot.height)
+    }
+
+    ShaderEffectSource {
+        id: shaderEffectSourceRight
+        width: rectRoot.width / 2
+        anchors {
+            right: rectRoot.right
+            top: rectRoot.top
+            bottom: rectRoot.bottom
+        }
+        visible: false
+
+        hideSource: true
+        sourceItem: viewportRoot
+        sourceRect: Qt.rect(viewportRoot.width / 2, 0, viewportRoot.width / 2, viewportRoot.height)
+    }
+
+    Item {
+        width: rectRoot.width / 2
+        anchors {
+            left: rectRoot.left
+            top: rectRoot.top
+            bottom: rectRoot.bottom
+        }
+        clip: true
+        ShaderEffect {
+            width: parent.width + 100
+            height: parent.height
+            x: 0
+
+            property variant qt_Texture0: shaderEffectSourceLeft
+            property point lensOffsetFromCenter: rectRoot.lensOffsetFromCenter
+            property rect distortion: rectRoot.distortion
+            property real aspectRatio: rectRoot.aspectRatio
+            property real fillScale: rectRoot.fillScale
+            vertexShader: vertexShaderFile.read()
+            fragmentShader: fragmentShaderFile.read()
+        }
+    }
+
+    Item {
+        width: rectRoot.width / 2
+        anchors {
+            right: rectRoot.right
+            top: rectRoot.top
+            bottom: rectRoot.bottom
+        }
+        clip: true
+        ShaderEffect {
+            width: parent.width + 100
+            height: parent.height
+            x: -100
+
+            property variant qt_Texture0: shaderEffectSourceRight
+            property point lensOffsetFromCenter: Qt.point(-rectRoot.lensOffsetFromCenter.x, rectRoot.lensOffsetFromCenter.y)
+            property rect distortion: rectRoot.distortion
+            property real aspectRatio: rectRoot.aspectRatio
+            property real fillScale: rectRoot.fillScale
+            vertexShader: vertexShaderFile.read()
+            fragmentShader: fragmentShaderFile.read()
         }
     }
     NavigationPad {
