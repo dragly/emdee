@@ -67,6 +67,7 @@ Rectangle {
             useThermostat: thermostatCheckBox.checked
         }
 
+        // TODO Fix bug in MolecularDynamics class and remove this Sphere
         Sphere {
             x: 100
             effect: Effect {
