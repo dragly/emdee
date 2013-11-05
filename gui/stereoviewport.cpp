@@ -274,7 +274,7 @@ class StereoViewportSubsurface : public QGLSubsurface
 {
 public:
     StereoViewportSubsurface(QGLAbstractSurface *surface, const QRect &region,
-                      float adjust)
+                             float adjust)
         : QGLSubsurface(surface, region), m_adjust(adjust) {}
 
     float aspectRatio() const;
@@ -1039,12 +1039,14 @@ void StereoViewport::render(QGLPainter *painter)
     // boundingRect is in local coordinates. We need to map it to the scene coordinates
     // in order to render to correct area.
     QRect originalViewport = mapRectToScene(boundingRect()).toRect();
+    QRect target_rect( (renderMode() == DirectRender)? originalViewport.x():0,
+                       (renderMode() == DirectRender)? originalViewport.y():0,
+                       originalViewport.width(),
+                       originalViewport.height() );
     // TODO
     // Deal with transforms on the object, which change the viewport?
 
-    // Disable the effect to return control to the GL paint engine.
-    painter->disableEffect();
-    QGLSubsurface mainSurface (painter->currentSurface(), originalViewport);
+    QGLSubsurface mainSurface (painter->currentSurface(), target_rect);
     if (d->showPicking &&
             d->stereoType == StereoViewport::RedCyanAnaglyph) {
         // If showing picking, then render normally.  This really
@@ -1061,13 +1063,13 @@ void StereoViewport::render(QGLPainter *painter)
         glDisable(GL_CULL_FACE);
         painter->setPicking(false);
     } else if (d->camera->eyeSeparation() == 0.0f) {
-//               && (mainSurface = d->bothEyesSurface()) != 0) {
+        //               && (mainSurface = d->bothEyesSurface()) != 0) {
         // No camera separation, so render the same image into both buffers.
         painter->setEye(QGL::NoEye);
-//        QRect target_rect( (renderMode() == DirectRender)? viewport.x():0,
-//                           (renderMode() == DirectRender)? viewport.y():0,
-//                           viewport.width(),
-//                           viewport.height() );
+        //        QRect target_rect( (renderMode() == DirectRender)? viewport.x():0,
+        //                           (renderMode() == DirectRender)? viewport.y():0,
+        //                           viewport.width(),
+        //                           viewport.height() );
         painter->pushSurface(&mainSurface);
         // Perform early drawing operations.
         earlyDraw(painter);
@@ -1082,6 +1084,7 @@ void StereoViewport::render(QGLPainter *painter)
         painter->setPicking(d->showPicking);
         // May've been set by early draw
         glDisable(GL_CULL_FACE);
+
         draw(painter);
         // May've been set by one of the items
         glDisable(GL_CULL_FACE);
@@ -1136,6 +1139,8 @@ void StereoViewport::render(QGLPainter *painter)
         painter->setPicking(false);
         painter->popSurface();
     }
+    // Disable the effect to return control to the GL paint engine.
+    painter->disableEffect();
 }
 
 /*!

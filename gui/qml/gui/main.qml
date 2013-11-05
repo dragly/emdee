@@ -20,6 +20,7 @@ Rectangle {
     color: "black"
 
     OculusReader {
+        id: oculusNavigator
         camera: viewportRoot.camera
     }
 
@@ -27,19 +28,18 @@ Rectangle {
         id: viewportRoot
         blending: true
         anchors.fill: parent
+//        navigation: false
 
         light: Light {
             ambientColor: Qt.rgba(1,1,1,1)
-            position.x: myCamera.eye.x / 2
-            position.y: myCamera.eye.y / 2
-            position.z: myCamera.eye.z / 2
-            quadraticAttenuation: 0.005
+            position: myCamera.eye.plus(myCamera.center.minus(myCamera.eye).times(0.2))
+            quadraticAttenuation: 0.000005
         }
 
         camera: Camera {
             id: myCamera
             eye: Qt.vector3d(10,0,0)
-//            center: Qt.vector3d(0,0,0)
+            center: Qt.vector3d(0,0,0)
             nearPlane: 0.1
             farPlane: 50
             fieldOfView: 120
@@ -87,8 +87,12 @@ Rectangle {
             propagateComposedEvents: false
             anchors.fill: parent
             onPressed: {
+                oculusNavigator.enabled = false
                 menuRect.state = ""
                 mouse.accepted = false
+            }
+            onReleased: {
+                oculusNavigator.enabled = true
             }
         }
         PinchArea {

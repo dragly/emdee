@@ -15,6 +15,7 @@ class OculusReader : public QObject
     Q_PROPERTY(double theta READ theta WRITE setTheta NOTIFY thetaChanged)
     Q_PROPERTY(double psi READ psi WRITE setPsi NOTIFY psiChanged)
     Q_PROPERTY(QGLCamera* camera READ camera WRITE setCamera NOTIFY cameraChanged)
+    Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
 private:
     double m_phi;
     double m_theta;
@@ -26,6 +27,8 @@ private:
     QVector3D viewVectorStart;
 
     QGLCamera* m_camera;
+
+    bool m_enabled;
 
 public:
     OculusReader();
@@ -52,6 +55,11 @@ public:
     QGLCamera* camera() const
     {
         return m_camera;
+    }
+
+    bool enabled() const
+    {
+        return m_enabled;
     }
 
 public slots:
@@ -87,10 +95,13 @@ public slots:
         }
     }
 
+    void setEnabled(bool arg);
+
 signals:
     void phiChanged(double arg);
     void thetaChanged(double arg);
     void psiChanged(double arg);
     void cameraChanged(QGLCamera* arg);
+    void enabledChanged(bool arg);
 };
 #endif //OCULUSREADER_H
