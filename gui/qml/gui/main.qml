@@ -14,7 +14,7 @@ Rectangle {
     property point lensOffsetFromCenter: Qt.point(0,0)
     property rect distortion: Qt.rect(1, 0.22, 0.24, 0.0)
     property real aspectRatio: width / height;
-    property real fillScale: 1.8;
+    property real fillScale: 1.3;
     width: 1280
     height: 800
     color: "black"
@@ -44,14 +44,13 @@ Rectangle {
             farPlane: 50
             fieldOfView: 120
             onFieldOfViewChanged: {
-                console.log(fieldOfView)
                 if(fieldOfView > 160) {
                     fieldOfView = 160
                 } else if(fieldOfView < 20) {
                     fieldOfView = 20
                 }
             }
-            eyeSeparation: 0.1
+//            eyeSeparation: 0.1
         }
 
         MolecularDynamics {
@@ -190,93 +189,93 @@ Rectangle {
             }
         }
     }
-    FileIO {
-        id: vertexShaderFile
-        source: "oculus.vert"
-        onError: console.log(msg)
-    }
+//    FileIO {
+//        id: vertexShaderFile
+//        source: "oculus.vert"
+//        onError: console.log(msg)
+//    }
 
-    FileIO {
-        id: fragmentShaderFile
-        source: "oculus.frag"
-        onError: console.log(msg)
-    }
+//    FileIO {
+//        id: fragmentShaderFile
+//        source: "oculus.frag"
+//        onError: console.log(msg)
+//    }
 
-    ShaderEffectSource {
-        id: shaderEffectSourceLeft
-        width: rectRoot.width / 2
-        anchors {
-            left: rectRoot.left
-            top: rectRoot.top
-            bottom: rectRoot.bottom
-        }
-        visible: false
+//    ShaderEffectSource {
+//        id: shaderEffectSourceLeft
+//        width: rectRoot.width / 2
+//        anchors {
+//            left: rectRoot.left
+//            top: rectRoot.top
+//            bottom: rectRoot.bottom
+//        }
+//        visible: false
 
-        hideSource: true
-        sourceItem: viewportRoot
-        sourceRect: Qt.rect(0, 0, viewportRoot.width / 2, viewportRoot.height)
-    }
+//        hideSource: true
+//        sourceItem: viewportRoot
+//        sourceRect: Qt.rect(0, 0, viewportRoot.width / 2, viewportRoot.height)
+//    }
 
-    ShaderEffectSource {
-        id: shaderEffectSourceRight
-        width: rectRoot.width / 2
-        anchors {
-            right: rectRoot.right
-            top: rectRoot.top
-            bottom: rectRoot.bottom
-        }
-        visible: false
+//    ShaderEffectSource {
+//        id: shaderEffectSourceRight
+//        width: rectRoot.width / 2
+//        anchors {
+//            right: rectRoot.right
+//            top: rectRoot.top
+//            bottom: rectRoot.bottom
+//        }
+//        visible: false
 
-        hideSource: true
-        sourceItem: viewportRoot
-        sourceRect: Qt.rect(viewportRoot.width / 2, 0, viewportRoot.width / 2, viewportRoot.height)
-    }
+//        hideSource: true
+//        sourceItem: viewportRoot
+//        sourceRect: Qt.rect(viewportRoot.width / 2, 0, viewportRoot.width / 2, viewportRoot.height)
+//    }
 
-    Item {
-        width: rectRoot.width / 2
-        anchors {
-            left: rectRoot.left
-            top: rectRoot.top
-            bottom: rectRoot.bottom
-        }
-        clip: true
-        ShaderEffect {
-            width: parent.width + 100
-            height: parent.height
-            x: 0
+//    Item {
+//        width: rectRoot.width / 2
+//        anchors {
+//            left: rectRoot.left
+//            top: rectRoot.top
+//            bottom: rectRoot.bottom
+//        }
+//        clip: true
+//        ShaderEffect {
+//            width: parent.width + 100
+//            height: parent.height
+//            x: 0
 
-            property variant qt_Texture0: shaderEffectSourceLeft
-            property point lensOffsetFromCenter: rectRoot.lensOffsetFromCenter
-            property rect distortion: rectRoot.distortion
-            property real aspectRatio: rectRoot.aspectRatio
-            property real fillScale: rectRoot.fillScale
-            vertexShader: vertexShaderFile.read()
-            fragmentShader: fragmentShaderFile.read()
-        }
-    }
+//            property variant qt_Texture0: shaderEffectSourceLeft
+//            property point lensOffsetFromCenter: rectRoot.lensOffsetFromCenter
+//            property rect distortion: rectRoot.distortion
+//            property real aspectRatio: rectRoot.aspectRatio
+//            property real fillScale: rectRoot.fillScale
+//            vertexShader: vertexShaderFile.read()
+//            fragmentShader: fragmentShaderFile.read()
+//        }
+//    }
 
-    Item {
-        width: rectRoot.width / 2
-        anchors {
-            right: rectRoot.right
-            top: rectRoot.top
-            bottom: rectRoot.bottom
-        }
-        clip: true
-        ShaderEffect {
-            width: parent.width + 100
-            height: parent.height
-            x: -100
+//    Item {
+//        width: rectRoot.width / 2
+//        anchors {
+//            right: rectRoot.right
+//            top: rectRoot.top
+//            bottom: rectRoot.bottom
+//        }
+//        clip: true
+//        ShaderEffect {
+//            width: parent.width + 100
+//            height: parent.height
+//            x: -100
 
-            property variant qt_Texture0: shaderEffectSourceRight
-            property point lensOffsetFromCenter: Qt.point(-rectRoot.lensOffsetFromCenter.x, rectRoot.lensOffsetFromCenter.y)
-            property rect distortion: rectRoot.distortion
-            property real aspectRatio: rectRoot.aspectRatio
-            property real fillScale: rectRoot.fillScale
-            vertexShader: vertexShaderFile.read()
-            fragmentShader: fragmentShaderFile.read()
-        }
-    }
+//            property variant qt_Texture0: shaderEffectSourceRight
+//            property point lensOffsetFromCenter: Qt.point(-rectRoot.lensOffsetFromCenter.x, rectRoot.lensOffsetFromCenter.y)
+//            property rect distortion: rectRoot.distortion
+//            property real aspectRatio: rectRoot.aspectRatio
+//            property real fillScale: rectRoot.fillScale
+//            vertexShader: vertexShaderFile.read()
+//            fragmentShader: fragmentShaderFile.read()
+//        }
+//    }
     NavigationPad {
         anchors {
             right: parent.right

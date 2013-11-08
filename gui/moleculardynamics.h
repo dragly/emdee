@@ -44,6 +44,11 @@ private:
     BerendsenThermostat* m_thermostat;
     double m_temperature;
     bool m_useThermostat;
+
+    QArray<QVector3D> vertices;
+    QArray<QVector3D> normals;
+    QArray<QVector2D> texCoords;
+    QArray<uint> indexes;
 };
 
 #endif // MOLECULARDYNAMICS_H

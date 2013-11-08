@@ -31,7 +31,7 @@ MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
     //    generator.setUnitLength(unitLength);
     LennardJonesForce *force = new LennardJonesForce();
     force->setPotentialConstant(potentialConstant);
-    vector<Atom*> atoms = generator.generateFcc(bUnit, 4, AtomType::argon());
+    vector<Atom*> atoms = generator.generateFcc(bUnit, 8, AtomType::argon());
     generator.boltzmannDistributeVelocities(3, atoms);
 
     VelocityVerletIntegrator *integrator = new VelocityVerletIntegrator(m_moleculeSystem);
@@ -65,7 +65,20 @@ void MolecularDynamics::drawItem(QGLPainter *painter)
     up.setX(modelViewMatrix(1,0));
     up.setY(modelViewMatrix(1,1));
     up.setZ(modelViewMatrix(1,2));
-    QGeometryData quad;
+
+
+    QGLVertexBundle vertexBundle;
+    QGLIndexBuffer indexBuffer;
+
+    vertices.clear();
+//    normals.clear();
+    texCoords.clear();
+    indexes.clear();
+
+    vertices.reserve(4*m_points.length());
+//    normals.reserve(4*m_points.length());
+    texCoords.reserve(4*m_points.length());
+    indexes.reserve(6*m_points.length());
 
     //    if(m_sortPoints == BackToFront) {
     QMultiMap<double, QVector3D> sortedPoints;
@@ -89,38 +102,48 @@ void MolecularDynamics::drawItem(QGLPainter *painter)
     QVector3D b;
     QVector3D c;
     QVector3D d;
+    QVector3D aOffset =  - right * 0.5 - up * 0.5;
+    QVector3D bOffset =  right * 0.5 - up * 0.5;
+    QVector3D cOffset =  right * 0.5 + up * 0.5;
+    QVector3D dOffset =  - right * 0.5 + up * 0.5;
     QVector2D ta(0,0);
     QVector2D tb(0,1);
     QVector2D tc(1,1);
     QVector2D td(1,0);
     //    for(MoleculeSystemCell* cell : m_moleculeSystem->allCells()) {
     //        for(Atom* atom : cell->atoms()) {
+    QVector3D normal(QVector3D::crossProduct(right, up));
+    int count = 0;
     for(const QVector3D& centerIn : m_points) {
         QVector3D center = centerIn - QVector3D(5,5,5);
-        if(painter->isCullable(center)) {
-            continue;
-        }
+//        if(painter->isCullable(center)) {
+//            continue;
+//        }
         double size = 0.2;
-        a = center - right * (size * 0.5);
-        b = center + right * size * 0.5;
-        c = center + right * size * 0.5 + up * size;
-        d = center - right * size * 0.5 + up * size;
-        quad.appendVertex(a,b,c,d);
-        quad.appendTexCoord(ta, tb, tc, td);
+        a = center + size * aOffset;
+        b = center + size * bOffset;
+        c = center + size * cOffset;
+        d = center + size * dOffset;
+        vertices.append(a, b, c, d);
+        texCoords.append(ta, tb, tc, td);
+//        normals.append(normal, normal, normal, normal);
+        indexes.append(count*4 + 0, count*4 + 1, count*4 + 2);
+        indexes.append(count*4 + 2, count*4 + 3, count*4 + 0);
+        count++;
     }
-    //        }
-    //    }
+    vertexBundle.addAttribute(QGL::Position, vertices);
+    vertexBundle.addAttribute(QGL::TextureCoord0, texCoords);
+//    vertexBundle.addAttribute(QGL::Normal, normals);
+    indexBuffer.setIndexes(indexes);
 
-    // }
-    builder.addQuads(quad);
-    QGLSceneNode* geometry = builder.finalizedSceneNode();
-    if(m_geometry) {
-        delete m_geometry;
-    }
-    m_geometry = geometry;
-    if(m_geometry) {
-        m_geometry->draw(painter);
-    }
+    painter->clearAttributes();
+    // Set up normal attributes to use only one element
+    painter->glDisableVertexAttribArray(GLuint(QGL::Normal));
+    painter->glVertexAttrib3f(GLuint(QGL::Normal), normal.x(), normal.y(), normal.z());
+
+    // Set the rest of the vertex bundle (basically only positions)
+    painter->setVertexBundle(vertexBundle);
+    painter->draw(QGL::DrawingMode(QGL::Triangles), indexBuffer, 0, indexBuffer.indexCount());
 }
 
 void MolecularDynamics::stepForward()
