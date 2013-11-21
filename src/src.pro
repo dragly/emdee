@@ -1,9 +1,11 @@
-include(../molecular-dynamics.pri)
-
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
+
+CONFIG += mpi
+
+include(../molecular-dynamics.pri)
 
 TARGET = molecular-dynamics
 

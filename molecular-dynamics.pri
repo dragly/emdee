@@ -3,7 +3,7 @@ SRC_DIR = $$PWD/src
 INCLUDEPATH += $$ROOT_DIR
 #QMAKE_CXX = ccache g++
 # Libraries
-#LIBS += -larmadillo -llapack -lblas -lconfig++ -lhdf5_cpp -lhdf5
+LIBS += -larmadillo -llapack -lblas -lconfig++
 
 #LIBS += -lgcov
 
@@ -22,10 +22,10 @@ release {
     QMAKE_CXXFLAGS_RELEASE += -O3
 }
 
-#CONFIG += mpi
 mpi {
     message(Using MPI)
     DEFINES += MD_USE_MPI
+    DEFINES+=USE_MPI
 
 #    QMAKE_CXX = mpicxx
     QMAKE_CXX = ccache mpicxx

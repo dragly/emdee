@@ -443,8 +443,6 @@ bool FileManager::save(int step) {
         return saveXyz(step);
     } else if(m_outFileName.find(".bin") != string::npos) {
         return saveBinary(step);
-    } else if(m_outFileName.find(".h5") != string::npos) {
-        return saveHDF5(step);
     }
     return false;
 }
