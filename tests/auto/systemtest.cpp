@@ -1,10 +1,10 @@
-#include <src/moleculesystem.h>
-#include <src/moleculesystemcell.h>
-#include <src/generator.h>
-#include <src/atomtype.h>
-#include <src/force/lennardjonesforce.h>
-#include <src/integrator/velocityverletintegrator.h>
-#include <src/filemanager.h>
+#include <moleculesystem.h>
+#include <moleculesystemcell.h>
+#include <generator.h>
+#include <atomtype.h>
+#include <force/lennardjonesforce.h>
+#include <integrator/velocityverletintegrator.h>
+#include <filemanager.h>
 
 #include <unittest++/UnitTest++.h>
 

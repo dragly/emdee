@@ -1,12 +1,12 @@
 #include <unittest++/UnitTest++.h>
-#include <src/atom.h>
-#include <src/math/vector3.h>
-#include <src/force/lennardjonesforce.h>
-#include <src/force/vashishtatwoparticleforce.h>
-#include <src/force/vashishtathreeparticleforce.h>
-#include <src/moleculesystem.h>
-#include <src/filemanager.h>
-#include <src/integrator/integrator.h>
+#include <atom.h>
+#include <math/vector3.h>
+#include <force/lennardjonesforce.h>
+#include <force/vashishtatwoparticleforce.h>
+#include <force/vashishtathreeparticleforce.h>
+#include <moleculesystem.h>
+#include <filemanager.h>
+#include <integrator/integrator.h>
 
 void setupSixAtoms(const vector<Atom*> atoms) {
     Vector3 offset(-13.5, 0, 0);

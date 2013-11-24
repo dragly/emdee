@@ -1,5 +1,5 @@
-#include <src/generator.h>
-#include <src/atom.h>
+#include <generator.h>
+#include <atom.h>
 
 #include <unittest++/UnitTest++.h>
 

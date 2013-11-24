@@ -1,9 +1,9 @@
 #include <unittest++/UnitTest++.h>
-#include <src/atom.h>
-#include <src/math/vector3.h>
-#include <src/force/lennardjonesforce.h>
-#include <src/force/vashishtatwoparticleforce.h>
-#include <src/force/vashishtathreeparticleforce.h>
+#include <atom.h>
+#include <math/vector3.h>
+#include <force/lennardjonesforce.h>
+#include <force/vashishtatwoparticleforce.h>
+#include <force/vashishtathreeparticleforce.h>
 
 TEST(ArgonForceTest) {
     Atom* atom1 = new Atom(AtomType::argon());
