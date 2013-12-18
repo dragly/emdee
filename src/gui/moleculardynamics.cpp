@@ -23,59 +23,31 @@ MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
     m_thermostat(0)
 {
     m_moleculeSystem = new MoleculeSystem();
-    m_moleculeSystem->setOutputEnabled(false);
-    m_moleculeSystem->setSaveEnabled(false);
+     m_moleculeSystem->setOutputEnabled(false);
+     m_moleculeSystem->setSaveEnabled(false);
 
-    double potentialConstant = 1;
-    double bUnit = 5.620 / 3.405;
+     double potentialConstant = 1;
+     double bUnit = 5.620 / 3.405;
 
-    Generator generator;
-    //    generator.setUnitLength(unitLength);
-//    LennardJonesForce *force = new LennardJonesForce();
-//    force->setPotentialConstant(potentialConstant);
-    VashishtaTwoParticleForce *force = new VashishtaTwoParticleForce();
-    VashishtaThreeParticleForce *threeParticleForce = new VashishtaThreeParticleForce();
-    m_moleculeSystem->setBoundaries(0,10,0,10,0,10);
-    vector<Atom*> atoms;
-    int idCounter = 1;
-    int type = 0;
-    AtomType silicon(0);
-    silicon.setEffectiveCharge(1.6);
-    silicon.setElectronicPolarizability(0.0);
-    silicon.setMass(28.0855);
-    AtomType oxygen(1);
-    oxygen.setEffectiveCharge(-0.8);
-    oxygen.setElectronicPolarizability(2.4);
-    oxygen.setMass(15.9994);
-    for(int i = 0; i < 5; i++) {
-        for(int j = 0; j < 5; j++) {
-            type = ((i+j)%2);
-            for(int k = 0; k < 5; k++) {
-                Atom* atom;
-                if(type % 2) {
-                    atom = new Atom(silicon);
-                } else {
-                    atom = new Atom(oxygen);
-                }
-                atom->setID(idCounter);
-                Vector3 position(i + sin(i / 5.0),j + cos(i / 5.0),k);
-                position *= 3.0;
-                atom->setPosition(position);
-                atoms.push_back(atom);
-                idCounter++;
-                type++;
-            }
-        }
-    }
-    m_moleculeSystem->addAtoms(atoms);
-    generator.boltzmannDistributeVelocities(1000, atoms);
+     Generator generator;
+     // generator.setUnitLength(unitLength);
+     LennardJonesForce *force = new LennardJonesForce();
+     force->setPotentialConstant(potentialConstant);
+     vector<Atom*> atoms = generator.generateFcc(bUnit, 4, AtomType::argon());
+     generator.boltzmannDistributeVelocities(3, atoms);
 
-    VelocityVerletIntegrator *integrator = new VelocityVerletIntegrator(m_moleculeSystem);
-    integrator->setTimeStep(0.001);
-    m_moleculeSystem->setIntegrator(integrator);
-    m_moleculeSystem->addTwoParticleForce(force);
-    m_moleculeSystem->addThreeParticleForce(threeParticleForce);
-    m_moleculeSystem->setupCells(3);
+     VelocityVerletIntegrator *integrator = new VelocityVerletIntegrator(m_moleculeSystem);
+     integrator->setTimeStep(0.001);
+     m_moleculeSystem->setIntegrator(integrator);
+     m_moleculeSystem->addTwoParticleForce(force);
+     // system.setPotentialConstant(potentialConstant);
+     mat lastBoundaries = generator.lastBoundaries();
+     lastBoundaries(1,0) += 5;
+     lastBoundaries(1,1) += 5;
+     lastBoundaries(1,2) += 5;
+     m_moleculeSystem->setBoundaries(lastBoundaries);
+     m_moleculeSystem->addAtoms(atoms);
+     m_moleculeSystem->setupCells(potentialConstant * 3);
 }
 
 void MolecularDynamics::drawItem(QGLPainter *painter)
