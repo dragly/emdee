@@ -19,11 +19,6 @@ Rectangle {
     height: 800
     color: "black"
 
-//    OculusReader {
-//        id: oculusNavigator
-//        camera: viewportRoot.camera
-//    }
-
     StereoViewport {
         id: viewportRoot
         blending: true
@@ -62,8 +57,8 @@ Rectangle {
                 blending: true
                 texture: "particle.png"
             }
-            targetTemperature: targetTemperatureSlider.value
-            useThermostat: thermostatCheckBox.checked
+            //targetTemperature: targetTemperatureSlider.value
+            //useThermostat: thermostatCheckBox.checked
         }
 
         // TODO Fix bug in MolecularDynamics class and remove this Sphere
@@ -86,7 +81,7 @@ Rectangle {
             propagateComposedEvents: false
             anchors.fill: parent
             onPressed: {
-                menuRect.state = ""
+//                menuRect.state = ""
                 mouse.accepted = false
             }
         }
@@ -113,78 +108,30 @@ Rectangle {
             }
         }
     }
-    Rectangle {
-        id: menuRect
-        color: Qt.rgba(0.85, 0.85, 0.95, 1.0)
-        width: parent.width * 0.2
-        radius: parent.width * 0.01
-        anchors {
-            left: parent.left
-            top: parent.top
-            bottom: parent.bottom
-            margins: width * 0.05
-            leftMargin: -(width - radius)
-        }
-        Behavior on anchors.leftMargin {
-            NumberAnimation { duration: 400; easing.type: Easing.InOutCubic }
-        }
 
-        states: [
-            State {
-                name: "hovered"
-                PropertyChanges {
-                    target: menuRect
-                    anchors.leftMargin: -menuRect.radius
-                }
-            }
+    PlaybackControls {
 
-        ]
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            onPressed: {
-                menuRect.state = "hovered"
-            }
-        }
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: menuRect.radius
-            anchors.leftMargin: 2 * menuRect.radius
-            Label {
-                text: "Thermostat:"
-            }
-            CheckBox {
-                id: thermostatCheckBox
-                checked: false
-                text: "Enabled"
-            }
-            Label {
-                text: "Target temperature:"
-//                enabled: thermostatCheckBox.checked
-            }
-            Slider {
-                id: targetTemperatureSlider
-                Layout.fillWidth: true
-                minimumValue: 0.0001
-                maximumValue: 500
-                value: 1.0
-//                enabled: thermostatCheckBox.checked
-            }
-            Label {
-                text: "Simulation:"
-            }
-            Button {
-                text: timer.running ? "Pause" : "Play"
-                onClicked: {
-                    timer.running = !timer.running
-                }
-            }
-
-            Item {
-                Layout.fillHeight: true
-            }
-        }
     }
+
+    Tools {
+        id: tools
+    }
+
+//    NavigationPad {
+//        anchors {
+//            right: parent.right
+//            bottom: parent.bottom
+//            margins: parent.width * 0.01
+//        }
+
+//        width: parent.width * 0.1
+//        height: parent.width * 0.1
+//    }
+
+    //    OculusReader {
+    //        id: oculusNavigator
+    //        camera: viewportRoot.camera
+    //    }
 //    FileIO {
 //        id: vertexShaderFile
 //        source: "oculus.vert"
@@ -272,14 +219,4 @@ Rectangle {
 //            fragmentShader: fragmentShaderFile.read()
 //        }
 //    }
-    NavigationPad {
-        anchors {
-            right: parent.right
-            bottom: parent.bottom
-            margins: parent.width * 0.01
-        }
-
-        width: parent.width * 0.1
-        height: parent.width * 0.1
-    }
 }
