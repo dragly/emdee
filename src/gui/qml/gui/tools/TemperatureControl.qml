@@ -2,8 +2,9 @@ import QtQuick 2.0
 import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 
-Rectangle {
+ToolPane {
     height: layout.height
+    title: "Thermostat"
 
     function kelvinToCelcius(kelvin) {
         return kelvin - 273.15
@@ -13,11 +14,6 @@ Rectangle {
         id: layout
         anchors.fill: parent
         anchors.margins: 10
-        Label {
-            text: "Thermostat"
-            horizontalAlignment: Text.AlignHCenter
-            Layout.fillWidth: true
-        }
         Label {
             text: "Target temperature:"
             horizontalAlignment: Text.AlignHCenter

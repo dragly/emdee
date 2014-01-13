@@ -64,22 +64,7 @@ Rectangle {
 
     TemperatureControl {
         id: temperatureControl
-        anchors {
-            bottom: parent.top
-            bottomMargin: -temperatureControl.height
-            left: parent.left
-            right: parent.right
-        }
         height: parent.height * 2
-        states: [
-            State {
-                name: "toggled"
-                PropertyChanges {
-                    target: temperatureControl
-                    anchors.bottomMargin: 0
-                }
-            }
-        ]
     }
 
     GridLayout {
