@@ -63,3 +63,6 @@ oculus {
     SOURCES +=  \
         oculusreader.cpp
 }
+
+OTHER_FILES += \
+    qml/gui/tools/Thermostat.qml

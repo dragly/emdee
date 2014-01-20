@@ -3,6 +3,7 @@ import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 
 Rectangle {
+    id: toolPaneRoot
     default property alias content: theContent.data
     property alias title: titleText.text
     width: 200
@@ -48,7 +49,7 @@ Rectangle {
         State {
             name: "toggled"
             PropertyChanges {
-                target: temperatureControl
+                target: toolPaneRoot
                 anchors.bottomMargin: 0
             }
         }

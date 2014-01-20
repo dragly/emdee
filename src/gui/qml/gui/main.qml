@@ -53,12 +53,13 @@ Rectangle {
             x: 2
             y: 2
             z: 2
+            sortPoints: MolecularDynamics.BackToFront
             effect: Effect {
                 blending: true
                 texture: "particle.png"
             }
-            //targetTemperature: targetTemperatureSlider.value
-            //useThermostat: thermostatCheckBox.checked
+            targetTemperature: tools.thermostat.targetTemperature
+            useThermostat: tools.thermostat.thermostatEnabled
         }
 
         // TODO Fix bug in MolecularDynamics class and remove this Sphere
@@ -67,6 +68,13 @@ Rectangle {
             effect: Effect {
                 color: "blue"
             }
+        }
+
+        Text {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            text: moleculeSystem.fps.toFixed(1) + " FPS"
+            color: "white"
         }
 
         Timer {
@@ -115,6 +123,11 @@ Rectangle {
 
     Tools {
         id: tools
+    }
+
+    StatisticsView {
+        pressure: moleculeSystem.pressure
+        temperature: moleculeSystem.temperature
     }
 
 //    NavigationPad {

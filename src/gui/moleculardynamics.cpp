@@ -19,35 +19,44 @@
 MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
     QQuickItem3D(parent),
     m_temperature(1.0),
+    m_targetTemperature(1.0),
+    m_pressure(0.0),
     m_useThermostat(false),
     m_thermostat(0)
 {
     m_moleculeSystem = new MoleculeSystem();
-     m_moleculeSystem->setOutputEnabled(false);
-     m_moleculeSystem->setSaveEnabled(false);
+    m_moleculeSystem->setOutputEnabled(false);
+    m_moleculeSystem->setSaveEnabled(false);
 
-     double potentialConstant = 1;
-     double bUnit = 5.620 / 3.405;
+    double potentialConstant = 1;
+    double bUnit = 5.620 / 3.405;
 
-     Generator generator;
-     // generator.setUnitLength(unitLength);
-     LennardJonesForce *force = new LennardJonesForce();
-     force->setPotentialConstant(potentialConstant);
-     vector<Atom*> atoms = generator.generateFcc(bUnit, 4, AtomType::argon());
-     generator.boltzmannDistributeVelocities(3, atoms);
+    Generator generator;
+    // generator.setUnitLength(unitLength);
+    LennardJonesForce *force = new LennardJonesForce();
+    force->setPotentialConstant(potentialConstant);
+    vector<Atom*> atoms = generator.generateFcc(bUnit, 7, AtomType::argon());
+    cout << atoms.size() << endl;
+    generator.boltzmannDistributeVelocities(3, atoms);
 
-     VelocityVerletIntegrator *integrator = new VelocityVerletIntegrator(m_moleculeSystem);
-     integrator->setTimeStep(0.001);
-     m_moleculeSystem->setIntegrator(integrator);
-     m_moleculeSystem->addTwoParticleForce(force);
-     // system.setPotentialConstant(potentialConstant);
-     mat lastBoundaries = generator.lastBoundaries();
-     lastBoundaries(1,0) += 5;
-     lastBoundaries(1,1) += 5;
-     lastBoundaries(1,2) += 5;
-     m_moleculeSystem->setBoundaries(lastBoundaries);
-     m_moleculeSystem->addAtoms(atoms);
-     m_moleculeSystem->setupCells(potentialConstant * 3);
+//    for(Atom* atom : atoms) {
+//        if(Vector3::dot(atom->position(), atom->position()) < 100) {
+//            atom->setPositionFixed(true);
+//        }
+//    }
+
+    VelocityVerletIntegrator *integrator = new VelocityVerletIntegrator(m_moleculeSystem);
+    integrator->setTimeStep(0.001);
+    m_moleculeSystem->setIntegrator(integrator);
+    m_moleculeSystem->addTwoParticleForce(force);
+    // system.setPotentialConstant(potentialConstant);
+    mat lastBoundaries = generator.lastBoundaries();
+    lastBoundaries(1,0) += 5;
+    lastBoundaries(1,1) += 5;
+    lastBoundaries(1,2) += 5;
+    m_moleculeSystem->setBoundaries(lastBoundaries);
+    m_moleculeSystem->addAtoms(atoms);
+    m_moleculeSystem->setupCells(potentialConstant * 3);
 }
 
 void MolecularDynamics::drawItem(QGLPainter *painter)
@@ -55,9 +64,12 @@ void MolecularDynamics::drawItem(QGLPainter *painter)
     if(!painter) {
         return;
     }
+    double currentFps = 1000.0 / fpsTimer.restart();
+    m_fps = 0.9*m_fps + 0.1 * currentFps;
+    emit fpsChanged(m_fps);
     //    qDebug() << "Painting...";
-//    QGLBuilder builder;
-//    builder.newSection(QGL::NoSmoothing);
+    //    QGLBuilder builder;
+    //    builder.newSection(QGL::NoSmoothing);
     const QMatrix4x4 &modelViewMatrix = painter->modelViewMatrix();
     QVector3D right;
     right.setX(modelViewMatrix(0,0));
@@ -73,32 +85,40 @@ void MolecularDynamics::drawItem(QGLPainter *painter)
     QGLIndexBuffer indexBuffer;
 
     vertices.clear();
-//    normals.clear();
+    //    normals.clear();
     texCoords.clear();
     indexes.clear();
 
     vertices.reserve(4*m_points.length());
-//    normals.reserve(4*m_points.length());
+    //    normals.reserve(4*m_points.length());
     texCoords.reserve(4*m_points.length());
     indexes.reserve(6*m_points.length());
 
-    //    if(m_sortPoints == BackToFront) {
-    QMultiMap<double, QVector3D> sortedPoints;
-    for(MoleculeSystemCell* cell : m_moleculeSystem->allCells()) {
-        for(Atom* atom : cell->atoms()) {
-            QVector3D center = QVector3D(atom->position().x(), atom->position().y(), atom->position().z());
-            const QVector4D &depthVector = painter->modelViewMatrix() * center;
-            double depth = depthVector.z();
-            sortedPoints.insert(depth, center);
+    if(m_sortPoints == BackToFront) {
+        QMultiMap<double, QVector3D> sortedPoints;
+        for(MoleculeSystemCell* cell : m_moleculeSystem->allCells()) {
+            for(Atom* atom : cell->atoms()) {
+                QVector3D center = QVector3D(atom->position().x(), atom->position().y(), atom->position().z());
+                const QVector4D &depthVector = painter->modelViewMatrix() * center;
+                double depth = depthVector.z();
+                sortedPoints.insert(depth, center);
+            }
+        }
+        m_points.clear();
+        QMapIterator<double, QVector3D> i(sortedPoints);
+        while(i.hasNext()) {
+            m_points.push_back(i.next().value());
+        }
+        sortedPoints.clear();
+    } else {
+        m_points.clear();
+        for(MoleculeSystemCell* cell : m_moleculeSystem->allCells()) {
+            for(Atom* atom : cell->atoms()) {
+                QVector3D center = QVector3D(atom->position().x(), atom->position().y(), atom->position().z());
+                m_points.push_back(center);
+            }
         }
     }
-    m_points.clear();
-    QMapIterator<double, QVector3D> i(sortedPoints);
-    while(i.hasNext()) {
-        m_points.push_back(i.next().value());
-    }
-    sortedPoints.clear();
-    //    }
 
     QVector3D a;
     QVector3D b;
@@ -118,9 +138,9 @@ void MolecularDynamics::drawItem(QGLPainter *painter)
     int count = 0;
     for(const QVector3D& centerIn : m_points) {
         QVector3D center = centerIn - QVector3D(5,5,5);
-//        if(painter->isCullable(center)) {
-//            continue;
-//        }
+        //        if(painter->isCullable(center)) {
+        //            continue;
+        //        }
         double size = 0.2;
         a = center + size * aOffset;
         b = center + size * bOffset;
@@ -128,14 +148,14 @@ void MolecularDynamics::drawItem(QGLPainter *painter)
         d = center + size * dOffset;
         vertices.append(a, b, c, d);
         texCoords.append(ta, tb, tc, td);
-//        normals.append(normal, normal, normal, normal);
+        //        normals.append(normal, normal, normal, normal);
         indexes.append(count*4 + 0, count*4 + 1, count*4 + 2);
         indexes.append(count*4 + 2, count*4 + 3, count*4 + 0);
         count++;
     }
     vertexBundle.addAttribute(QGL::Position, vertices);
     vertexBundle.addAttribute(QGL::TextureCoord0, texCoords);
-//    vertexBundle.addAttribute(QGL::Normal, normals);
+    //    vertexBundle.addAttribute(QGL::Normal, normals);
     indexBuffer.setIndexes(indexes);
 
     painter->clearAttributes();
@@ -152,12 +172,19 @@ void MolecularDynamics::stepForward()
 {
     m_moleculeSystem->setNSimulationSteps(2);
     m_moleculeSystem->simulate();
+
+    m_pressure = m_pressure * 0.9 + m_moleculeSystem->pressure() * 0.1;
+    m_temperature = m_temperature * 0.9 + m_moleculeSystem->temperature() * 0.1;
+
+    emit pressureChanged(m_pressure);
+    emit temperatureChanged(m_temperature);
+
     update();
 }
 
 double MolecularDynamics::targetTemperature() const
 {
-    return m_temperature;
+    return m_targetTemperature;
 }
 
 bool MolecularDynamics::useThermostat() const
@@ -167,11 +194,11 @@ bool MolecularDynamics::useThermostat() const
 
 void MolecularDynamics::setTargetTemperature(double arg)
 {
-    if (m_temperature != arg) {
+    if (m_targetTemperature != arg) {
         if(m_thermostat) {
             m_thermostat->setTargetTemperature(arg);
         }
-        m_temperature = arg;
+        m_targetTemperature = arg;
         emit targetTemperatureChanged(arg);
     }
 }
@@ -182,12 +209,14 @@ void MolecularDynamics::setUseThermostat(bool arg)
         m_useThermostat = arg;
         if(arg) {
             m_thermostat = new BerendsenThermostat(m_moleculeSystem);
-            m_thermostat->setTargetTemperature(m_temperature);
+            m_thermostat->setTargetTemperature(m_targetTemperature);
             m_thermostat->setRelaxationTime(0.01);
             m_moleculeSystem->addModifier(m_thermostat);
         } else {
-            m_moleculeSystem->removeModifier(m_thermostat);
-            delete m_thermostat;
+            if(m_thermostat) {
+                m_moleculeSystem->removeModifier(m_thermostat);
+                delete m_thermostat;
+            }
         }
         emit useThermostatChanged(arg);
     }

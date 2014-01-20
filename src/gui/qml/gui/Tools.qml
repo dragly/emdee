@@ -5,6 +5,7 @@ import "tools"
 
 Rectangle {
     id: toolsRect
+    property alias thermostat: temperatureControl
     anchors {
         right: parent.right
         bottom: parent.bottom
@@ -62,7 +63,7 @@ Rectangle {
         }
     ]
 
-    TemperatureControl {
+    Thermostat {
         id: temperatureControl
         height: parent.height * 2
     }

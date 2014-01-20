@@ -3,6 +3,8 @@ import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.0
 
 ToolPane {
+    property alias targetTemperature: targetTemperatureSlider.value
+    property alias thermostatEnabled: thermostatEnabledCheckbox.checked
     height: layout.height
     title: "Thermostat"
 
@@ -20,7 +22,7 @@ ToolPane {
             Layout.fillWidth: true
         }
         Label {
-            text: kelvinToCelcius(targetTemperatureSlider.value).toFixed(1) + " °C"
+            text: kelvinToCelcius(targetTemperatureSlider.value).toFixed(1) + " °C(a.u.)"
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
         }
@@ -37,6 +39,7 @@ ToolPane {
             Layout.fillWidth: true
         }
         CheckBox{
+            id: thermostatEnabledCheckbox
             anchors.horizontalCenter: parent.horizontalCenter
         }
     }
