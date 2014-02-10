@@ -23,7 +23,7 @@ Rectangle {
         id: viewportRoot
         blending: true
         anchors.fill: parent
-//        navigation: false
+        navigation: false
 
         light: Light {
             ambientColor: Qt.rgba(1,1,1,1)
@@ -37,7 +37,7 @@ Rectangle {
             center: Qt.vector3d(0,0,0)
             nearPlane: 0.1
             farPlane: 5000
-            fieldOfView: 120
+            fieldOfView: 90
             onFieldOfViewChanged: {
                 if(fieldOfView > 160) {
                     fieldOfView = 160
@@ -63,12 +63,12 @@ Rectangle {
         }
 
         // TODO Fix bug in MolecularDynamics class and remove this Sphere
-        Sphere {
-            x: 100
-            effect: Effect {
-                color: "blue"
-            }
-        }
+//        Sphere {
+//            x: 100
+//            effect: Effect {
+//                color: "blue"
+//            }
+//        }
 
         Text {
             anchors.left: parent.left
@@ -130,16 +130,27 @@ Rectangle {
         temperature: moleculeSystem.temperature
     }
 
-//    NavigationPad {
-//        anchors {
-//            right: parent.right
-//            bottom: parent.bottom
-//            margins: parent.width * 0.01
-//        }
+    NavigationPad {
+        anchors {
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+            margins: parent.width * 0.01
+        }
 
-//        width: parent.width * 0.1
-//        height: parent.width * 0.1
-//    }
+        width: parent.width * 0.1
+        height: parent.width * 0.1
+    }
+
+    RotationPad {
+        anchors {
+            left: parent.left
+            verticalCenter: parent.verticalCenter
+            margins: parent.width * 0.01
+        }
+
+        width: parent.width * 0.1
+        height: parent.width * 0.1
+    }
 
     //    OculusReader {
     //        id: oculusNavigator
