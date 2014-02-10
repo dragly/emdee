@@ -20,7 +20,7 @@ Item {
         property point startPosition
         property real forwardSpeed: 0.0
         property real rightSpeed: 0.0
-        property real sensitivity: 0.005
+        property real sensitivity: 0.01
         anchors.fill: parent
 
         onPressed: {

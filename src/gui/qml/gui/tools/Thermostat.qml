@@ -12,6 +12,14 @@ ToolPane {
         return kelvin - 273.15
     }
 
+    function temperatureToKelvin(temperature) {
+        return temperature*119.57
+    }
+
+    function temperatureToCelsius(temperature) {
+        return kelvinToCelcius(temperatureToKelvin(temperature))
+    }
+
     ColumnLayout {
         id: layout
         anchors.fill: parent
@@ -20,23 +28,26 @@ ToolPane {
             text: "Target temperature:"
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
+            color: "white"
         }
         Label {
-            text: kelvinToCelcius(targetTemperatureSlider.value).toFixed(1) + " °C(a.u.)"
+            text: temperatureToCelsius(targetTemperatureSlider.value).toFixed(1) + " °C"
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
+            color: "white"
         }
         Slider {
             id: targetTemperatureSlider
             Layout.fillWidth: true
             minimumValue: 0.0001
-            maximumValue: 500
+            maximumValue: 5.0
             value: 1.0
         }
         Label {
             text: "Enabled:"
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
+            color: "white"
         }
         CheckBox{
             id: thermostatEnabledCheckbox

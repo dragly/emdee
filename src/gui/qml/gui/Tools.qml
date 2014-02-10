@@ -6,6 +6,7 @@ import "tools"
 Rectangle {
     id: toolsRect
     property alias thermostat: temperatureControl
+    color: "black"
     anchors {
         right: parent.right
         bottom: parent.bottom
@@ -77,12 +78,14 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            color: "black"
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
                 onPressed: {
                     if(toolsRect.state === "toggled") {
                         toolsRect.state = ""
+                        temperatureControl.state = ""
                     } else {
                         toolsRect.state = "toggled"
                     }
@@ -91,27 +94,33 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 text: "Tools"
+                color: "white"
             }
         }
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            color: "black"
             Text {
                 anchors.centerIn: parent
                 text: "Select"
+                color: "white"
             }
         }
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            color: "black"
             Text {
                 anchors.centerIn: parent
                 text: "Create"
+                color: "white"
             }
         }
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            color: "black"
             MouseArea {
                 anchors.fill: parent
                 onPressed: {
@@ -126,22 +135,27 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 text: "Temp"
+                color: "white"
             }
         }
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            color: "black"
             Text {
                 anchors.centerIn: parent
                 text: "Force"
+                color: "white"
             }
         }
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            color: "black"
             Text {
                 anchors.centerIn: parent
                 text: "Delete"
+                color: "white"
             }
         }
     }

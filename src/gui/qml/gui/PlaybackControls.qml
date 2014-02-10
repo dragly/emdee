@@ -4,7 +4,8 @@ import QtQuick.Controls 1.0
 
 Rectangle {
     id: menuRect
-    color: Qt.rgba(0.85, 0.85, 0.95, 1.0)
+    //    color: Qt.rgba(0.85, 0.85, 0.95, 1.0)
+    color: "black"
     width: parent.width * 0.1
     height: parent.width * 0.1
     anchors {
@@ -32,19 +33,25 @@ Rectangle {
             menuRect.state = "hovered"
         }
     }
-    RowLayout {
-        anchors.fill: parent
-        anchors.margins: menuRect.radius
-        anchors.leftMargin: 2 * menuRect.radius
-        Button {
-            text: timer.running ? "Pause" : "Play"
+    //    RowLayout {
+    //        anchors.fill: parent
+    //        anchors.margins: menuRect.radius
+    //        anchors.leftMargin: 2 * menuRect.radius
+    Text {
+        anchors.centerIn: parent
+        text: timer.running ? "Pause" : "Play"
+        color: "white"
+        MouseArea {
+            anchors.fill: parent
+
             onClicked: {
                 timer.running = !timer.running
             }
         }
-
-        Item {
-            Layout.fillHeight: true
-        }
     }
+
+    //        Item {
+    //            Layout.fillHeight: true
+    //        }
+    //    }
 }

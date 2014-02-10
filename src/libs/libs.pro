@@ -11,6 +11,9 @@ mpi {
 !mpi {
     TARGET = emdee
 }
+android {
+    TARGET = emdeeandroid
+}
 
 SOURCES += \
     moleculesystem.cpp \

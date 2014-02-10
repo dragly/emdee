@@ -46,7 +46,7 @@ MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
 //    }
 
     VelocityVerletIntegrator *integrator = new VelocityVerletIntegrator(m_moleculeSystem);
-    integrator->setTimeStep(0.001);
+    integrator->setTimeStep(0.01);
     m_moleculeSystem->setIntegrator(integrator);
     m_moleculeSystem->addTwoParticleForce(force);
     // system.setPotentialConstant(potentialConstant);
@@ -57,6 +57,8 @@ MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
     m_moleculeSystem->setBoundaries(lastBoundaries);
     m_moleculeSystem->addAtoms(atoms);
     m_moleculeSystem->setupCells(potentialConstant * 3);
+
+    cout << m_moleculeSystem->boundaries().at(1,1) << endl;
 }
 
 void MolecularDynamics::drawItem(QGLPainter *painter)

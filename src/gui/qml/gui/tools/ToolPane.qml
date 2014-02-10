@@ -8,6 +8,7 @@ Rectangle {
     property alias title: titleText.text
     width: 200
     height: 100
+    color: "black"
 
     anchors {
         bottom: parent.top
@@ -18,7 +19,7 @@ Rectangle {
 
     Rectangle {
         id: header
-        color: "lightblue"
+        color: "darkblue"
         anchors {
             top: parent.top
             left: parent.left
@@ -32,10 +33,12 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             anchors.fill: parent
+            color: "white"
         }
     }
     Rectangle {
         id: theContent
+        color: "black"
         anchors {
             left: parent.left
             right: parent.right

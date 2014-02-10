@@ -27,7 +27,7 @@ Rectangle {
 
         light: Light {
             ambientColor: Qt.rgba(1,1,1,1)
-            position: myCamera.eye.plus(myCamera.center.minus(myCamera.eye).times(0.2))
+            position: myCamera.eye
             quadraticAttenuation: 0.000005
         }
 
@@ -85,49 +85,36 @@ Rectangle {
                 moleculeSystem.stepForward()
             }
         }
-        MouseArea {
-            propagateComposedEvents: false
-            anchors.fill: parent
-            onPressed: {
-//                menuRect.state = ""
-                mouse.accepted = false
-            }
-        }
-        PinchArea {
-            property real startingFieldOfView: 90
-            anchors.fill: parent
-            enabled: true
-            onPinchStarted: {
-                startingFieldOfView = myCamera.fieldOfView
-            }
+//        MouseArea {
+//            propagateComposedEvents: false
+//            anchors.fill: parent
+//            onPressed: {
+////                menuRect.state = ""
+//                mouse.accepted = false
+//            }
+//        }
+//        PinchArea {
+//            property real startingFieldOfView: 90
+//            anchors.fill: parent
+//            enabled: true
+//            onPinchStarted: {
+//                startingFieldOfView = myCamera.fieldOfView
+//            }
 
-            onPinchUpdated: {
-                var pinchDiff = pinch.scale;
-//                console.log("Scale: " + pinch.scale + " previousScale: " + pinch.previousScale + " diff " + pinchDiff)
-                console.log("Starting " + startingFieldOfView + " scale " + pinch.scale)
-                if(pinchDiff > 1) {
-                    pinchDiff *= 10
-                } else {
-                    pinchDiff = -1/pinchDiff * 10
-                }
-                console.log("pinchDiff " + pinchDiff)
-                myCamera.fieldOfView = startingFieldOfView - pinchDiff
-//                myCamera.fieldOfView = startingFieldOfView / (Math.sqrt(Math.sqrt(pinch.scale)))
-            }
-        }
-    }
-
-    PlaybackControls {
-
-    }
-
-    Tools {
-        id: tools
-    }
-
-    StatisticsView {
-        pressure: moleculeSystem.pressure
-        temperature: moleculeSystem.temperature
+//            onPinchUpdated: {
+//                var pinchDiff = pinch.scale;
+////                console.log("Scale: " + pinch.scale + " previousScale: " + pinch.previousScale + " diff " + pinchDiff)
+//                console.log("Starting " + startingFieldOfView + " scale " + pinch.scale)
+//                if(pinchDiff > 1) {
+//                    pinchDiff *= 10
+//                } else {
+//                    pinchDiff = -1/pinchDiff * 10
+//                }
+//                console.log("pinchDiff " + pinchDiff)
+//                myCamera.fieldOfView = startingFieldOfView - pinchDiff
+////                myCamera.fieldOfView = startingFieldOfView / (Math.sqrt(Math.sqrt(pinch.scale)))
+//            }
+//        }
     }
 
     NavigationPad {
@@ -150,6 +137,19 @@ Rectangle {
 
         width: parent.width * 0.1
         height: parent.width * 0.1
+    }
+
+    PlaybackControls {
+
+    }
+
+    Tools {
+        id: tools
+    }
+
+    StatisticsView {
+        pressure: moleculeSystem.pressure
+        temperature: moleculeSystem.temperature
     }
 
     //    OculusReader {

@@ -24,7 +24,12 @@ include(../../defaults.pri)
 TARGET = emdee
 
 # Local libraries
-LIBS += -L../libs -lemdee
+android {
+    LIBS += -L../libs -lemdeeandroid
+    ANDROID_EXTRA_LIBS += $$OUT_PWD/../libs/libemdeeandroid.so
+} else {
+    LIBS += -L../libs -lemdee
+}
 
 # Oculus libraries
 oculus {

@@ -3,6 +3,7 @@ import QtQuick 2.0
 Rectangle {
     property double temperature
     property double pressure
+    color: "black"
     width: parent.width * 0.2
     height: parent.width * 0.025
     anchors {
@@ -14,6 +15,18 @@ Rectangle {
         return kelvin - 273.15
     }
 
+    function temperatureToKelvin(temperature) {
+        return temperature*119.57
+    }
+
+    function temperatureToCelsius(temperature) {
+        return kelvinToCelcius(temperatureToKelvin(temperature))
+    }
+
+    function pressureToPascal(pressure) {
+        return pressure * 41818086.5802
+    }
+
     Text {
         anchors {
             left: parent.left
@@ -23,7 +36,8 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
 
-        text: kelvinToCelcius(temperature).toFixed(1) + " °C(a.u.)"
+        text: temperatureToCelsius(temperature).toFixed(1) + " °C"
+        color: "white"
     }
 
     Text {
@@ -35,6 +49,7 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
 
-        text: pressure.toFixed(1) + " Pa(a.u.)"
+        text: (pressureToPascal(pressure)/1000000 * 3.3).toFixed(1) + " kPa"
+        color: "white"
     }
 }
