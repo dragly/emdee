@@ -3,10 +3,10 @@ SRC_DIR = $$PWD/src
 INCLUDEPATH += $$ROOT_DIR/src/libs
 
 !noccache {
-    QMAKE_CXX = ccache g++
+    QMAKE_CXX = ccache $$QMAKE_CXX
 }
 
-COMMON_CXXFLAGS = -std=c++0x
+COMMON_CXXFLAGS = -std=c++11
 QMAKE_CXXFLAGS += $$COMMON_CXXFLAGS
 QMAKE_CXXFLAGS_RELEASE += $$COMMON_CXXFLAGS
 QMAKE_CXXFLAGS_DEBUG += $$COMMON_CXXFLAGS
@@ -15,6 +15,10 @@ release {
     DEFINES += ARMA_NO_DEBUG
     QMAKE_CXXFLAGS_RELEASE -= -O2
     QMAKE_CXXFLAGS_RELEASE += -O3
+}
+
+android {
+    INCLUDEPATH += $$ROOT_DIR/armadillo
 }
 
 mpi {
