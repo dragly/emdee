@@ -22,7 +22,6 @@ android {
 }
 
 mpi {
-    message(Using MPI)
     DEFINES += MD_USE_MPI
     DEFINES+=USE_MPI
 

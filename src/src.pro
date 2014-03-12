@@ -1,5 +1,5 @@
 TEMPLATE=subdirs
-CONFIG=ordered
+CONFIG+=ordered
 SUBDIRS+=libs
 
 CONFIG += gui
@@ -7,6 +7,11 @@ CONFIG += gui
 app {
     SUBDIRS += app
 }
-gui {
+!mpi:gui {
     SUBDIRS += gui
+}
+
+
+mpi:gui {
+    message(Cannot compile gui with mpi enabled)
 }
