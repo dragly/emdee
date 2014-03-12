@@ -466,7 +466,6 @@ bool FileManager::saveXyz(int step) {
     outFile.open(outFileName, ios::out);
     cout << "Saving to " << outFileName << endl;
 
-
     int nAtomsSum = collectNAtoms();
     if(m_moleculeSystem->processor()->rank() == 0) {
         outFile << nAtomsSum << endl;
