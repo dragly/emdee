@@ -28,7 +28,7 @@ int main(int argc, char** argv)
     cout << "I am processor number " << world.rank() << " of " << world.size() << endl;
 #endif
     string configFileName = "testconfig.cfg";
-    if(argc > 1) {
+    if(argc > 1 && argv[1][0] != '-') {
         configFileName = argv[1];
     }
     MoleculeSystem system;
