@@ -86,6 +86,7 @@ const irowvec &MoleculeSystemCell::indices() const
 }
 
 bool MoleculeSystemCell::shouldNewtonsThirdBeEnabled(MoleculeSystemCell* neighbor) {
+    (void)neighbor;
     return true;
 //    if(m_isOnProcessorEdge || neighbor->isOnProcessorEdge()) {
 //        return false;

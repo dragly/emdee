@@ -139,7 +139,6 @@ void MoleculeSystem::updateStatistics()
             totalDrift += atom->velocity();
         }
     }
-    int nAtomsLocal = nAtomsTotal;
 #ifdef USE_MPI
     mpi::all_reduce(world, nAtomsTotal, nAtomsTotal, std::plus<int>());
 #endif
@@ -163,8 +162,8 @@ void MoleculeSystem::updateStatistics()
     m_temperature = m_kineticEnergyTotal / (3./2. * nAtomsTotal);
 
     // Calculate diffusion constant
-//    double totalEnergy = (m_potentialEnergyTotal + m_kineticEnergyTotal);
-//    cout << "Atoms: " << nAtomsLocal << " of " << nAtomsTotal << ". Temperature: " << setprecision(5) << m_temperature  << ". Etot: " << totalEnergy << endl;
+    //    double totalEnergy = (m_potentialEnergyTotal + m_kineticEnergyTotal);
+    //    cout << "Atoms: " << nAtomsLocal << " of " << nAtomsTotal << ". Temperature: " << setprecision(5) << m_temperature  << ". Etot: " << totalEnergy << endl;
     m_averageDisplacement = 0;
     m_averageSquareDisplacement = 0;
     for(MoleculeSystemCell* cell : allCells()) {
@@ -294,38 +293,29 @@ void MoleculeSystem::simulate()
     int iStep = 0;
     // Set up integrator if m_skipInitialize is not set (because file was loaded)
     if(!m_skipInitialize) {
-        //        cout << "Initializing integrator" << endl;
-        m_integrator->initialize();
-        updateStatistics();
-#ifdef USE_MPI
-        if(m_isSaveEnabled) {
-            m_fileManager->save(m_step);
-            if(m_processor->rank() == 0) {
-                m_progressReporter->reportProgress(0);
-            }
+        if(isOutputEnabled()) {
+            cout << "Initializing integrator" << endl;
         }
-#endif
-
-        // Finalize step
-        m_time += m_integrator->timeStep();
-        iStep++;
-        m_step++;
-    } else {
-        updateStatistics(); // We will in any case have to update the statistics
+        m_integrator->initialize();
     }
+    updateStatistics();
     if(isOutputEnabled()) {
         cout << "Starting simulation " << endl;
     }
     for(iStep = iStep; iStep < m_nSimulationSteps; iStep++) {
-        if(isOutputEnabledForThisStep()) {
-            cout << "Step " << m_step << ".." << endl;
-        }
         m_isFinalTimeStep = (iStep == (m_nSimulationSteps - 1));
 
         applyModifiers();
         m_integrator->stepForward();
         updateStatistics();
 
+        if(isOutputEnabledForThisStep()) {
+            cout << "Step: " << m_step
+                 << " TE: " << m_potentialEnergyTotal + m_kineticEnergyTotal
+                 << " PE: " << m_potentialEnergyTotal
+                 << " KE: " << m_kineticEnergyTotal
+                 << endl;
+        }
 #ifdef USE_MPI
         if(shouldTimeStepBeSaved()) {
             m_fileManager->save(m_step);
@@ -357,7 +347,7 @@ void MoleculeSystem::simulate()
 
 bool MoleculeSystem::shouldTimeStepBeSaved()
 {
-    if(m_isSaveEnabled && (m_step % m_saveEveryNSteps) == 0) {
+    if(m_isSaveEnabled && ((m_step % m_saveEveryNSteps) == 0 || m_step == 0)) {
         return true;
     }
     if(m_isSaveEnabled && m_isFinalTimeStep) {
