@@ -59,6 +59,8 @@ protected:
     double m_unitTemperature;
 
     string m_configurationName;
+private:
+    int collectNAtoms();
 };
 
 inline void FileManager::setConfigurationName(string configurationName) {

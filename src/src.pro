@@ -1,17 +1,19 @@
 TEMPLATE=subdirs
 CONFIG+=ordered
 SUBDIRS+=libs
-
-CONFIG += gui
+CONFIG += console
+CONFIG -= app_bundle
+CONFIG -= qt
+CONFIG += mdgui
 
 app {
     SUBDIRS += app
 }
-!mpi:gui {
+!mpi:mdgui {
     SUBDIRS += gui
 }
 
 
-mpi:gui {
+mpi:mdgui {
     message(Cannot compile gui with mpi enabled)
 }

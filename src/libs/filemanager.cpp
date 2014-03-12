@@ -310,8 +310,28 @@ string FileManager::lammpsFileNameFromStep(int step) {
     return lammpsFileName;
 }
 
-bool FileManager::saveBinary(int step) {
+int FileManager::collectNAtoms() {
+#ifdef USE_MPI
     mpi::communicator world;
+    if(m_moleculeSystem->processor()->rank() == 0) {
+        int nAtomsSum = m_moleculeSystem->processor()->nAtoms();
+        for(int i = 1; i < m_moleculeSystem->processor()->nProcessors(); i++) {
+            int nOtherAtoms = 0;
+            world.recv(i, 141, nOtherAtoms);
+            nAtomsSum += nOtherAtoms;
+        }
+        return nAtomsSum;
+    } else {
+        int nAtoms = m_moleculeSystem->processor()->nAtoms();
+        world.send(0, 141, nAtoms);
+        return -1;
+    }
+#else
+    return m_moleculeSystem->processor()->nAtoms();
+#endif
+}
+
+bool FileManager::saveBinary(int step) {
     ofstream headerFile;
     ofstream lammpsFile;
     string headerFileName = headerFileNameFromStep(step);
@@ -366,22 +386,17 @@ bool FileManager::saveBinary(int step) {
     int nChunks = 1;
     double shear = 0.0;
 
+    int nAtomsSum = collectNAtoms();
     if(m_moleculeSystem->processor()->rank() == 0) {
-        int nAtomsTotal = nAtoms;
-        for(int i = 1; i < m_moleculeSystem->processor()->nProcessors(); i++) {
-            int nOtherAtoms = 0;
-            world.recv(i, 141, nOtherAtoms);
-            nAtomsTotal += nOtherAtoms;
-        }
 
         for(int i = 0; i < 6; i++) {
             systemBoundaries[i] /= 1e-10; // LAMMPS wants lengths in Ångstrøm
         }
 
 //        cout << "The total number of atoms written to file will be " << nAtomsTotal << endl;
-        int chunkLength = nAtomsTotal * nColumns;
+        int chunkLength = nAtomsSum * nColumns;
         lammpsFile.write((char*)&step, sizeof(int));
-        lammpsFile.write((char*)&nAtomsTotal, sizeof(int));
+        lammpsFile.write((char*)&nAtomsSum, sizeof(int));
         lammpsFile.write((char*)&systemBoundaries[0], sizeof(double));
         lammpsFile.write((char*)&systemBoundaries[3], sizeof(double));
         lammpsFile.write((char*)&systemBoundaries[1], sizeof(double));
@@ -394,8 +409,6 @@ bool FileManager::saveBinary(int step) {
         lammpsFile.write((char*)&nColumns, sizeof(int));
         lammpsFile.write((char*)&nChunks, sizeof(int));
         lammpsFile.write((char*)&chunkLength, sizeof(int));
-    } else {
-        world.send(0, 141, nAtoms);
     }
 
     // Write atom data
@@ -448,21 +461,17 @@ bool FileManager::save(int step) {
 }
 
 bool FileManager::saveXyz(int step) {
-    stringstream outStepName;
-    outStepName << setw(6) << setfill('0') << step;
-    string outFileNameLocal = m_outFileName;
-    size_t starPos = m_outFileName.find("*");
     ofstream outFile;
-    if(starPos != string::npos) {
-        outFileNameLocal.replace(starPos, 1, outStepName.str());
-        outFile.open(outFileNameLocal);
-    } else {
-        outFile.open(outFileNameLocal, ios_base::app);
-    }
-    cout << "Saving to " << outFileNameLocal << endl;
+    string outFileName = headerFileNameFromStep(step);
+    outFile.open(outFileName, ios::out);
+    cout << "Saving to " << outFileName << endl;
 
-    outFile << m_moleculeSystem->atoms().size() << endl;
-    outFile << "Some nice comment" << endl;
+
+    int nAtomsSum = collectNAtoms();
+    if(m_moleculeSystem->processor()->rank() == 0) {
+        outFile << nAtomsSum << endl;
+        outFile << "Some nice comment" << endl;
+    }
 
     char line[1000];
     for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
