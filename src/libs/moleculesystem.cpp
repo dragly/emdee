@@ -446,7 +446,9 @@ void MoleculeSystem::setBoundaries(mat boundaries)
 }
 
 void MoleculeSystem::setupCells(double minCutLength) {
+    cout << "Setting up cells..." << endl;
     double minCutLengthUnit = minCutLength; // / m_unitLength;
+    cout << "Cutoff length: " << minCutLengthUnit << endl;
     for(uint i = 0; i < m_cells.size(); i++) {
         MoleculeSystemCell* cellToDelete = m_cells.at(i);
         delete cellToDelete;
@@ -456,9 +458,10 @@ void MoleculeSystem::setupCells(double minCutLength) {
     int nCellsTotal = 1;
     m_nCells = zeros<irowvec>(m_nDimensions);
     m_cellLengths = zeros<rowvec>(m_nDimensions);
+    rowvec systemSize = m_boundaries.row(1) - m_boundaries.row(0);
+    cout << "System size: " << systemSize << endl;
     for(int iDim = 0; iDim < m_nDimensions; iDim++) {
         double totalLength = m_boundaries(1,iDim) - m_boundaries(0,iDim);
-        cout << totalLength << endl;
         m_nCells(iDim) = totalLength / minCutLengthUnit;
         m_cellLengths(iDim) = totalLength / m_nCells(iDim);
         nCellsTotal *= m_nCells(iDim);

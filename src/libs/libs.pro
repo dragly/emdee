@@ -13,7 +13,6 @@ mpi {
     TARGET = emdee
 }
 
-
 SOURCES += \
     moleculesystem.cpp \
     generator.cpp \

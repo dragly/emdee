@@ -17,11 +17,15 @@
 #include <atom.h>
 
 // System includes
+#ifdef USE_MPI
 #include <boost/mpi.hpp>
 namespace mpi = boost::mpi;
+#endif
 
+#include <libconfig.h++>
 #include <string>
 using namespace std;
+using namespace libconfig;
 
 ConfigurationParser::ConfigurationParser(MoleculeSystem *moleculeSystem) :
     m_moleculeSystem(moleculeSystem)
@@ -30,6 +34,7 @@ ConfigurationParser::ConfigurationParser(MoleculeSystem *moleculeSystem) :
 
 void ConfigurationParser::runConfiguration(string configurationFileName) {
     Config config;
+#ifdef USE_MPI
     // Make sure only one processor reads the config file at a time
     mpi::communicator world;
     for(int rank = 0; rank < world.size(); rank++) {
@@ -43,6 +48,9 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
         }
         world.barrier();
     }
+#else
+    config.readFile(configurationFileName.c_str());
+#endif
 
     double unitLength = config.lookup("units.length");
     double unitTime = config.lookup("units.time");
@@ -50,7 +58,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     double boltzmannConstant = config.lookup("units.boltzmannConstant");
     double unitVelocity = unitLength / unitTime;
     double unitTemperature = (unitVelocity * unitVelocity * unitMass) / (boltzmannConstant);
-//    double unitTemperature = config.lookup("units.temperature");
+    //    double unitTemperature = config.lookup("units.temperature");
     double unitForce = unitLength * unitMass / (unitTime * unitTime);
     double unitEnergy = unitLength * unitLength * unitMass / (unitTime * unitTime);
 
@@ -78,6 +86,8 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     // Set up molecule system
 
     // Set up file manager
+#ifdef USE_MPI
+    // TODO this has nothing to do with MPI, include it also otherwise
     FileManager fileManager(m_moleculeSystem);
     fileManager.setOutFileName(outFileName);
     fileManager.setUnitLength(unitLength);
@@ -88,6 +98,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     fileManager.setConfigurationName(configurationName);
 
     m_moleculeSystem->setFileManager(&fileManager);
+#endif
     m_moleculeSystem->setSaveEnabled(isSaveEnabled);
     m_moleculeSystem->setCalculatePotentialEnabled(isCalcualatePotentialEnabled);
     m_moleculeSystem->setCalculatePressureEnabled(isCalcualatePressureEnabled);
@@ -188,34 +199,6 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
                     }
                 }
                 m_moleculeSystem->addAtoms(atoms);
-//                for(int i = 0; i < 3; i++) {
-//                    for(int j = 0; j < 2; j++) {
-//                        Atom* atom1;
-//                        Atom* atom2;
-//                        Atom* atom3;
-//                        if(i % 2) {
-//                            atom1 = new Atom(particleTypesByID[14]);
-//                            atom2 = new Atom(particleTypesByID[14]);
-//                            atom3 = new Atom(particleTypesByID[8 ]);
-//                        } else {
-//                            atom1 = new Atom(particleTypesByID[8]);
-//                            atom2 = new Atom(particleTypesByID[8]);
-//                            atom3 = new Atom(particleTypesByID[14]);
-//                        }
-//                        atom1->setID(1 + j * 3 + i * 2 * 3);
-//                        atom2->setID(2 + j * 3 + i * 2 * 3);
-//                        atom3->setID(3 + j * 3 + i * 2 * 3);
-//                        double scale = 1.3;
-//                        atom1->setPosition(Vector3(1.0, -0.2 + j*3, 1.0 + i * 2) * scale);
-//                        atom2->setPosition(Vector3(3.0, -0.2 + j*3, 1.0 + i * 2) * scale);
-//                        atom3->setPosition(Vector3(2.0, 1.5 + j*3, 1.0 + i * 2) * scale);
-//    //                    atom1->setPosition(Vector3(1.0, 1.0, 1.0 + i * 2.5) * scale);
-//    //                    atom2->setPosition(Vector3(3.0, 1.0, 1.0 + i * 2.5) * scale);
-//    //                    atom3->setPosition(Vector3(2.0, 2.7, 1.0 + i * 2.5) * scale);
-//                        vector<Atom*> atoms({atom1, atom2, atom3});
-//                        m_moleculeSystem->addAtoms(atoms);
-//                    }
-//                }
             } else if(initializationType == "boltzmannVelocity") {
                 double initialTemperature = initialization[i]["initialTemperature"];
                 initialTemperature /= unitTemperature;
@@ -244,10 +227,10 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     m_moleculeSystem->setProgressReporter(reporter);
 
     // Set up force
-//    LennardJonesForce* force = new LennardJonesForce();
-//    force->setPotentialConstant(potentialConstant);
-//    force->setEnergyConstant(energyConstant);
-    cout << "Looking up forces" << endl;
+    //    LennardJonesForce* force = new LennardJonesForce();
+    //    force->setPotentialConstant(potentialConstant);
+    //    force->setEnergyConstant(energyConstant);
+    cout << "Setting up forces" << endl;
     Setting& forces = config.lookup("forces");
     for(uint i = 0; true; i++) {
         string forceName;
@@ -277,6 +260,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
         }
     }
 
+    cout << "Setting up modifiers" << endl;
     // Set up modifiers
     Setting& modifiers = config.lookup("modifiers");
     for(uint i = 0; true; i++) {
@@ -327,14 +311,12 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
     m_moleculeSystem->setCreateSymlink(true);
 
     // Set up the rest of the system
-    //    m_moleculeSystem->loadConfiguration(&config); // TODO remove this
-    cout << "addded" << endl;
-//    m_moleculeSystem->setupCells(potentialConstant * 3);
+//        m_moleculeSystem->setupCells(potentialConstant * 3);
     try {
         double cellSize = config.lookup("simulation.cellSize");
         cellSize /= unitLength;
         cout << "Loaded cell size from config: " << cellSize << " * " << unitLength << endl;
-        m_moleculeSystem->setupCells(cellSize);
+        m_moleculeSystem->setupCells(cellSize * unitLength);
     } catch (SettingNotFoundException) {
         cout << "Cell size not set in config, setting to default value." << endl;
         m_moleculeSystem->setupCells(6.5);
