@@ -459,13 +459,15 @@ bool FileManager::saveXyz(int step) {
     } else {
         outFile.open(outFileNameLocal, ios_base::app);
     }
+    cout << "Saving to " << outFileNameLocal << endl;
 
+    outFile << m_moleculeSystem->atoms().size() << endl;
     outFile << "Some nice comment" << endl;
 
     char line[1000];
     for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
         for(Atom* atom : cell->atoms()) {
-            Vector3 position = atom->position() * m_unitLength;
+            Vector3 position = atom->position() * m_unitLength * 1e10;
             Vector3 velocity = atom->velocity() * (m_unitLength / m_unitTime);
             Vector3 force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
             sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",

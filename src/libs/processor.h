@@ -36,7 +36,7 @@ public:
     int rank();
     void communicateAtoms();
 
-    const vector<MoleculeSystemCell*> cells() const;
+    const vector<MoleculeSystemCell*>& cells() const;
     bool shouldSendFirst(const irowvec &direction);
     int nAtoms();
     int nProcessors();
@@ -90,7 +90,7 @@ protected:
     vector<irowvec> forceDirections;
 };
 
-inline const vector<MoleculeSystemCell*> Processor::cells() const {
+inline const vector<MoleculeSystemCell *> &Processor::cells() const {
     return m_cells;
 }
 

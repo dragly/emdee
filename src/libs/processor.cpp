@@ -410,9 +410,6 @@ void Processor::communicateAtoms() {
         }
     }
     m_totalCommunicationTime += communicationTimer.elapsed();
-    if(m_moleculeSystem->isOutputEnabledForThisStep()) {
-        cout << "Communication time: " << setprecision(3) << m_totalCommunicationTime << ", pure: " << setprecision(3) << m_pureCommunicationTime << endl;
-    }
 }
 
 //bool Processor::checkDirection(const irowvec& direction) {
@@ -458,9 +455,6 @@ void Processor::communicateForces() {
         }
     }
     m_totalCommunicationTime += communicationTimer.elapsed();
-    if(m_moleculeSystem->isOutputEnabledForThisStep()) {
-        cout << "Communication time: " << setprecision(3) << m_totalCommunicationTime << ", pure: " << setprecision(3) << m_pureCommunicationTime << endl;
-    }
 }
 
 
