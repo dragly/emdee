@@ -37,6 +37,8 @@ int main(int argc, char** argv)
 #ifdef MD_USE_MPI
     cout << "Finished after " << setprecision(5) << timer.elapsed() << " seconds" << endl;
 #endif
+
+
     return 0;
 }
 

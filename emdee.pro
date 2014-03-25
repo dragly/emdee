@@ -1,5 +1,6 @@
 TEMPLATE=subdirs
-SUBDIRS+=src
+SUBDIRS+=src \
+    tools
 
 tests {
     SUBDIRS += tests
