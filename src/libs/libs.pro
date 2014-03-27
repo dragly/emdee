@@ -60,6 +60,14 @@ HEADERS += \
     force/vashishtathreeparticleforce.h \
     force/threeparticleforce.h
 
+!nofann {
+    HEADERS += \
+        force/fannforce.h
+    SOURCES += \
+        force/fannforce.cpp
+    LIBS += -ldoublefann
+}
+
 mpi {
     SOURCES += \
         processor.cpp \

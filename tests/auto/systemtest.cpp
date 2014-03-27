@@ -41,7 +41,9 @@ TEST(CellSetup)
         nMoleculesInCells += cell->atoms().size();
     }
     CHECK_EQUAL(system.atoms().size(), nMoleculesInCells);
-    system.setNSimulationSteps(1000);
+    system.setSaveEnabled(false);
+    system.setOutputEnabled(false);
+    system.setNSimulationSteps(100);
     system.simulate();
     system.refreshCellContents();
     nMoleculesInCells = 0;

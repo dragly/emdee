@@ -21,6 +21,8 @@ android {
     INCLUDEPATH += $$ROOT_DIR/armadillo
 }
 
+LIBS += -lglog
+
 mpi {
     DEFINES += MD_USE_MPI
     DEFINES+=USE_MPI

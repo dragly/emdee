@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <libconfig.h++>
 #include <fenv.h>
+#include <glog/logging.h>
 
 //#include <boost/mpi.hpp>
 
@@ -16,6 +17,7 @@ using namespace libconfig;
 
 int main(int argc, char** argv)
 {
+    google::InitGoogleLogging(argv[0]);
     cout << "Starting molecular-dynamics" << endl;
 #ifdef MD_USE_MPI
     mpi::environment env(argc, argv);

@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <sys/stat.h>
 #include <algorithm>
+#include <glog/logging.h>
 
 using namespace std;
 
@@ -457,8 +458,8 @@ void MoleculeSystem::setupCells(double minCutLength) {
         nCellsTotal *= m_nCells(iDim);
     }
     if(isOutputEnabled()) {
-        cout << "Dividing space into a total of " << nCellsTotal << " cells" << endl;
-        cout << "With geometry " << m_nCells << endl;
+        VLOG(1) << "Dividing space into a total of " << nCellsTotal << " cells";
+        VLOG(1) << "With geometry " << m_nCells;
     }
 
     irowvec indices = zeros<irowvec>(m_nDimensions);

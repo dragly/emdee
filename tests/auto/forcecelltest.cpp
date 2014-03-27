@@ -7,6 +7,7 @@
 #include <moleculesystem.h>
 #include <filemanager.h>
 #include <integrator/integrator.h>
+#include <glog/logging.h>
 
 void setupSixAtoms(const vector<Atom*> atoms) {
     Vector3 offset(-13.5, 0, 0);
@@ -74,6 +75,7 @@ TEST(ForceCellTest) {
     system.addThreeParticleForce(&threeParticleForce);
 
     system.setNSimulationSteps(10);
+    system.setOutputEnabled(false);
     system.simulate();
     for(Atom* atom : atoms) {
         positions1.push_back(atom->position());
