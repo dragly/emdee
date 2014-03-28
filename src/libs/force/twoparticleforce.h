@@ -38,8 +38,8 @@ protected:
     bool m_isNewtonsThirdLawEnabled;
     bool m_isCalculatePressureEnabled;
     bool m_isCalculatePotentialEnabled;
-    double m_cutoffRadius;
     Vector3 m_zeroVector;
+    double m_cutoffRadius;
 };
 
 inline void TwoParticleForce::setNewtonsThirdLawEnabled(bool enable) {

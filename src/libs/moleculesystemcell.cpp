@@ -122,19 +122,24 @@ void MoleculeSystemCell::updateForces()
 
     // Loop over neighbors and their atoms
     if(twoParticleForce) {
+        double cutoffRadiusSquared = twoParticleForce->cutoffRadius()*twoParticleForce->cutoffRadius();
         twoParticleForce->setNewtonsThirdLawEnabled(true);
         for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
-            MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
+            MoleculeSystemCell* neighborCell = m_neighborCells[iNeighbor];
             const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
 
             if(!checkDirection(iNeighbor)) {
                 continue;
             }
 
-            const vector<Atom*>& neighborAtoms = neighbor->atoms();
+            const vector<Atom*>& neighborCellAtoms = neighborCell->atoms();
             for(Atom* atom1 : m_atoms) {
-                for(Atom* atom2 : neighborAtoms) {
+                for(Atom* atom2 : neighborCellAtoms) {
                     if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
+                        continue;
+                    }
+                    double distanceSquared = Vector3::differenceSquared(atom1->position(), atom2->position());
+                    if(distanceSquared > cutoffRadiusSquared) {
                         continue;
                     }
                     twoParticleForce->calculateAndApplyForce(atom1, atom2, neighborOffset);
@@ -148,11 +153,12 @@ void MoleculeSystemCell::updateForces()
             int jAtomStart = 0;
             jAtomStart = iAtom + 1;
             for(uint jAtom = jAtomStart; jAtom < m_atoms.size(); jAtom++) {
-                if(iAtom == jAtom) {
-                    continue;
-                }
                 Atom* atom2 = m_atoms[jAtom];
                 if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
+                    continue;
+                }
+                double distanceSquared = Vector3::differenceSquared(atom1->position(), atom2->position());
+                if(distanceSquared > cutoffRadiusSquared) {
                     continue;
                 }
                 twoParticleForce->calculateAndApplyForce(atom1, atom2);

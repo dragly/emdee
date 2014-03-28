@@ -57,6 +57,7 @@ public:
     static Vector3 createZeros();
 
     static double dot(const Vector3 &vector1, const Vector3 &vector2);
+    static double differenceSquared(const Vector3 &vector1, const Vector3 &vector2);
 private:
 #ifdef USE_MPI
     friend class boost::serialization::access;
@@ -226,6 +227,13 @@ inline Vector3 operator* (const Vector3 &vector1, const Vector3 &vector2)
 
 inline double Vector3::dot(const Vector3 &vector1, const Vector3 &vector2) {
     return (vector1.mem_local[0] * vector2.mem_local[0] + vector1.mem_local[1] * vector2.mem_local[1] + vector1.mem_local[2] * vector2.mem_local[2]);
+}
+
+inline double Vector3::differenceSquared(const Vector3 &vector1, const Vector3 &vector2) {
+    double dx = vector2.mem_local[0] - vector1.mem_local[0];
+    double dy = vector2.mem_local[1] - vector1.mem_local[1];
+    double dz = vector2.mem_local[2] - vector1.mem_local[2];
+    return dx*dx + dy*dy + dz*dz;
 }
 
 
