@@ -3,8 +3,8 @@
 #include <atom.h>
 
 VashishtaTwoParticleForce::VashishtaTwoParticleForce() :
-    nParticleTypes(2),
     TwoParticleForce(),
+    nParticleTypes(2),
     invsqrtpi(1 / sqrt(M_PI))
 {
 //    pair<int,int> Si_Si(14,14);

@@ -47,7 +47,9 @@ MoleculeSystem::MoleculeSystem() :
     m_saveEveryNSteps(1),
     m_nSimulationSteps(0),
     m_isFinalTimeStep(false),
-    m_isCreateSymlinkEnabled(false)
+    m_isCreateSymlinkEnabled(false),
+    m_twoParticleForce(NULL),
+    m_threeParticleForce(NULL)
 {
     m_progressReporter = new ProgressReporter("dragly", "somerun");
     m_integrator = new VelocityVerletIntegrator(this);
@@ -62,6 +64,8 @@ bool MoleculeSystem::load(string fileName) {
     m_skipInitialize = true;
 #ifdef USE_MPI
     return m_fileManager->load(fileName);
+#else
+    (void)fileName;
 #endif
     return true;
 }
@@ -119,6 +123,26 @@ const vector<MoleculeSystemCell*>& MoleculeSystem::allCells() const {
     return cells();
 #endif
 }
+ThreeParticleForce *MoleculeSystem::threeParticleForce() const
+{
+    return m_threeParticleForce;
+}
+
+void MoleculeSystem::setThreeParticleForce(ThreeParticleForce *threeParticleForce)
+{
+    m_threeParticleForce = threeParticleForce;
+}
+TwoParticleForce *MoleculeSystem::twoParticleForce() const
+{
+    return m_twoParticleForce;
+}
+
+void MoleculeSystem::setTwoParticleForce(TwoParticleForce *twoParticleForce)
+{
+    m_twoParticleForce = twoParticleForce;
+}
+
+
 
 void MoleculeSystem::updateStatistics()
 {
@@ -239,15 +263,17 @@ void MoleculeSystem::updateForces()
     m_processor->clearForcesInNeighborCells();
 #endif
 
-    for(TwoParticleForce* twoParticleForce : m_twoParticleForces) {
+//    for(TwoParticleForce* m_twoParticleForce : m_twoParticleForces) {
+    if(m_twoParticleForce) {
         if(shouldTimeStepBeSaved()) {
-            twoParticleForce->setCalculatePotentialEnabled(m_isCalculatePotentialEnabled);
-            twoParticleForce->setCalculatePressureEnabled(m_isCalculatePressureEnabled);
+            m_twoParticleForce->setCalculatePotentialEnabled(m_isCalculatePotentialEnabled);
+            m_twoParticleForce->setCalculatePressureEnabled(m_isCalculatePressureEnabled);
         } else {
-            twoParticleForce->setCalculatePotentialEnabled(false);
-            twoParticleForce->setCalculatePressureEnabled(false);
+            m_twoParticleForce->setCalculatePotentialEnabled(false);
+            m_twoParticleForce->setCalculatePressureEnabled(false);
         }
     }
+//    }
     for(MoleculeSystemCell* cell : allCells()) {
         cell->updateForces();
     }
@@ -388,6 +414,8 @@ void MoleculeSystem::setFileManager(FileManager *fileManager)
 {
 #ifdef USE_MPI
     m_fileManager = fileManager;
+#else
+    (void)fileManager;
 #endif
 }
 
@@ -572,24 +600,24 @@ void MoleculeSystem::setIntegrator(Integrator *integrator)
     m_integrator = integrator;
 }
 
-void MoleculeSystem::addTwoParticleForce(TwoParticleForce *force)
-{
-    m_twoParticleForces.push_back(force);
-}
+//void MoleculeSystem::addTwoParticleForce(TwoParticleForce *force)
+//{
+//    m_twoParticleForces.push_back(force);
+//}
 
-void MoleculeSystem::addThreeParticleForce(ThreeParticleForce *force) {
-    m_threeParticleForces.push_back(force);
-}
+//void MoleculeSystem::addThreeParticleForce(ThreeParticleForce *force) {
+//    m_threeParticleForces.push_back(force);
+//}
 
-const vector<ThreeParticleForce *> &MoleculeSystem::threeParticleForces() const
-{
-    return m_threeParticleForces;
-}
+//const vector<ThreeParticleForce *> &MoleculeSystem::threeParticleForces() const
+//{
+//    return m_threeParticleForces;
+//}
 
-const vector<TwoParticleForce*>& MoleculeSystem::twoParticleForces() const
-{
-    return m_twoParticleForces;
-}
+//const vector<TwoParticleForce*>& MoleculeSystem::twoParticleForces() const
+//{
+//    return m_twoParticleForces;
+//}
 
 bool MoleculeSystem::isSaveEnabled() const
 {
@@ -611,6 +639,8 @@ void MoleculeSystem::save(string fileName)
 #ifdef USE_MPI
     m_fileManager->setOutFileName(fileName);
     m_fileManager->save(m_step);
+#else
+    (void)fileName;
 #endif
 }
 

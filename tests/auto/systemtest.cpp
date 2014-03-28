@@ -30,6 +30,7 @@ TEST(CellSetup)
     integrator.setTimeStep(0.005);
     system.setIntegrator(&integrator);
 //    system.setInteratomicForce(&force);
+//    system.setTwoParticleForce(&force);
 //    system.setPotentialConstant(potentialConstant);
     system.setBoundaries(generator.lastBoundaries());
     system.addAtoms(atoms);

@@ -4,16 +4,14 @@ SUBDIRS+=libs
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
-CONFIG += mdgui
 
-app {
+!noapp {
     SUBDIRS += app
 }
-!mpi:mdgui {
+!nomdgui {
     SUBDIRS += gui
 }
-
-
-mpi:mdgui {
+mpi:!nomdgui {
     message(Cannot compile gui with mpi enabled)
+    SUBDIRS -= gui
 }

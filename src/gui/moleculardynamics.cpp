@@ -18,11 +18,11 @@
 
 MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
     QQuickItem3D(parent),
-    m_temperature(1.0),
+    m_thermostat(NULL),
     m_targetTemperature(1.0),
-    m_pressure(0.0),
     m_useThermostat(false),
-    m_thermostat(0)
+    m_pressure(0.0),
+    m_temperature(1.0)
 {
     m_moleculeSystem = new MoleculeSystem();
     m_moleculeSystem->setOutputEnabled(false);
@@ -48,7 +48,7 @@ MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
     VelocityVerletIntegrator *integrator = new VelocityVerletIntegrator(m_moleculeSystem);
     integrator->setTimeStep(0.01);
     m_moleculeSystem->setIntegrator(integrator);
-    m_moleculeSystem->addTwoParticleForce(force);
+    m_moleculeSystem->setTwoParticleForce(force);
     // system.setPotentialConstant(potentialConstant);
     mat lastBoundaries = generator.lastBoundaries();
     lastBoundaries(1,0) += 5;

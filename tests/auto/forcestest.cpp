@@ -114,9 +114,9 @@ TEST(VashishtaThreeForceTest) {
 
     for(int test = 0; test < 10; test++) {
 
-        vec3 randomPosition1 = randn(3) * 0.1;
-        vec3 randomPosition2 = randn(3) * 0.1;
-        vec3 randomPosition3 = randn(3) * 0.1;
+        rowvec3 randomPosition1 = randn<rowvec>(3) * 0.1;
+        rowvec3 randomPosition2 = randn<rowvec>(3) * 0.1;
+        rowvec3 randomPosition3 = randn<rowvec>(3) * 0.1;
 
         atom1.setPosition(Vector3(randomPosition1));
         atom2.setPosition(Vector3(randomPosition2));

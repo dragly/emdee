@@ -71,8 +71,8 @@ TEST(ForceCellTest) {
     fileManager.setOutFileName("/tmp/data*.bin");
     system.setFileManager(&fileManager);
 
-    system.addTwoParticleForce(&twoParticleForce);
-    system.addThreeParticleForce(&threeParticleForce);
+    system.setTwoParticleForce(&twoParticleForce);
+    system.setThreeParticleForce(&threeParticleForce);
 
     system.setNSimulationSteps(10);
     system.setOutputEnabled(false);

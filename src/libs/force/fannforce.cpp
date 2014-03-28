@@ -15,6 +15,9 @@ void FannForce::loadNetwork(std::string fileName)
 
 void FannForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3)
 {
+    (void)atom1;
+    (void)atom2;
+    (void)atom3;
     if(!m_ann) {
         if(!m_hasWarnedAboutMissingNetwork) {
             cerr << "FANN network not loaded. Cannot apply force." << endl;
@@ -26,6 +29,11 @@ void FannForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3)
 
 void FannForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3, const Vector3 &atom2Offset, const Vector3 &atom3Offset)
 {
+    (void)atom1;
+    (void)atom2;
+    (void)atom3;
+    (void)atom2Offset;
+    (void)atom3Offset;
     if(!m_ann) {
         if(!m_hasWarnedAboutMissingNetwork) {
             cerr << "FANN network not loaded. Cannot apply force." << endl;

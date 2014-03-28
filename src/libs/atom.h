@@ -8,6 +8,7 @@
 // System includes
 //#include <armadillo>
 #include <vector>
+#include <set>
 #ifdef USE_MPI
 #include <boost/serialization/serialization.hpp>
 #endif
@@ -78,6 +79,8 @@ protected:
     bool m_isPositionFixed;
     int m_id;
     int m_atomTypeIndex;
+
+    std::set<Atom*> m_neighbors;
 
 private:
 #ifdef USE_MPI

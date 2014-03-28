@@ -2,6 +2,6 @@ TEMPLATE=subdirs
 SUBDIRS+=src \
     tools
 
-tests {
+!notests {
     SUBDIRS += tests
 }

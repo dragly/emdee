@@ -61,8 +61,8 @@ public:
 
 //    void setPotentialConstant(double potentialConstant);
     void setIntegrator(Integrator *integrator);
-    void addTwoParticleForce(TwoParticleForce* force);
-    const vector<TwoParticleForce*>& twoParticleForces() const;
+//    void addTwoParticleForce(TwoParticleForce* force);
+//    const vector<TwoParticleForce*>& twoParticleForces() const;
     void updateStatistics();
 
     // I/O
@@ -137,12 +137,19 @@ public:
     const vector<SingleParticleForce*>& singleParticleForces() const;
     void setParticleTypes(const vector<AtomType> &particleTypes);
     inline const unordered_map<int, AtomType>& particleTypesById();
-    void addThreeParticleForce(ThreeParticleForce *force);
-    const vector<ThreeParticleForce*>& threeParticleForces() const;
+//    void addThreeParticleForce(ThreeParticleForce *force);
+//    const vector<ThreeParticleForce*>& threeParticleForces() const;
     bool isOutputEnabledForThisStep() const;
     void save(string fileName);
     void setCreateSymlink(bool enabled);
     const vector<MoleculeSystemCell *> &allCells() const;
+
+    ThreeParticleForce *threeParticleForce() const;
+    void setThreeParticleForce(ThreeParticleForce *threeParticleForce);
+
+    TwoParticleForce *twoParticleForce() const;
+    void setTwoParticleForce(TwoParticleForce *twoParticleForce);
+
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
@@ -163,10 +170,8 @@ protected:
     vector<MoleculeSystemCell*> m_cells;
 
 //    Config *m_config;
-
-//    TwoParticleForce *m_interatomicForce;
-    vector<TwoParticleForce*> m_twoParticleForces;
-    vector<ThreeParticleForce*> m_threeParticleForces;
+//    vector<TwoParticleForce*> m_twoParticleForces;
+//    vector<ThreeParticleForce*> m_threeParticleForces;
 
     bool m_isSaveEnabled;
     bool m_isOutputEnabled;
@@ -205,6 +210,9 @@ protected:
     vector<AtomType> m_particleTypes;
     unordered_map<int,AtomType> m_particleTypesByID;
     bool m_isCreateSymlinkEnabled;
+
+    TwoParticleForce *m_twoParticleForce;
+    ThreeParticleForce *m_threeParticleForce;
 };
 
 inline void MoleculeSystem::addSingleParticleForce(SingleParticleForce *force) {

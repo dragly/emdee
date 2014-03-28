@@ -243,9 +243,9 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
         cout << "Found force " << forceName << endl;
         if(forceName == "vashishta") {
             VashishtaTwoParticleForce* twoParticleForce = new VashishtaTwoParticleForce();
-            m_moleculeSystem->addTwoParticleForce(twoParticleForce);
+            m_moleculeSystem->setTwoParticleForce(twoParticleForce);
             VashishtaThreeParticleForce* threeParticleForce = new VashishtaThreeParticleForce();
-            m_moleculeSystem->addThreeParticleForce(threeParticleForce);
+            m_moleculeSystem->setThreeParticleForce(threeParticleForce);
         } else if(forceName == "lennardJones") {
             double potentialConstantLJ = 0;
             forces[i].lookupValue("potentialConstant", potentialConstantLJ);
@@ -256,7 +256,7 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
             LennardJonesForce* force = new LennardJonesForce();
             force->setPotentialConstant(potentialConstantLJ);
             force->setEnergyConstant(energyConstantLJ);
-            m_moleculeSystem->addTwoParticleForce(force);
+            m_moleculeSystem->setTwoParticleForce(force);
         }
     }
 
