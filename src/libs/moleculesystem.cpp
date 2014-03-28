@@ -55,6 +55,9 @@ MoleculeSystem::MoleculeSystem() :
     m_twoParticleForce(NULL),
     m_threeParticleForce(NULL)
 {
+    for(int iDim = 0; iDim < 3; iDim++) {
+        m_isPeriodicDimension[iDim] = false;
+    }
     m_progressReporter = new ProgressReporter("dragly", "somerun");
     m_integrator = new VelocityVerletIntegrator(this);
 #ifdef USE_MPI
@@ -86,7 +89,9 @@ void MoleculeSystem::addAtomsToCorrectCells(vector<Atom *> &atoms)
         //        cout << position << endl;
         for(int iDim = 0; iDim < m_nDimensions; iDim++) {
             double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
-            position(iDim) = fmod(position(iDim) + sideLength * 10, sideLength);
+            if(m_isPeriodicDimension[iDim]) {
+                position(iDim) = fmod(position(iDim) + sideLength * 10, sideLength);
+            }
             //            atom->setPosition(position);
             //            atom->addDisplacement(-sideLength, iDim);
         }
@@ -94,7 +99,15 @@ void MoleculeSystem::addAtomsToCorrectCells(vector<Atom *> &atoms)
         int j = position(1) / m_cellLengths(1);
         int k = position(2) / m_cellLengths(2);
 
-
+        if(i < 0 || i >= m_nCells(0)) {
+            LOG(FATAL) << "Atom ended up outside of system in x direction";
+        }
+        if(i < 0 || i >= m_nCells(0)) {
+            LOG(FATAL) << "Atom ended up outside of system in y direction";
+        }
+        if(i < 0 || i >= m_nCells(0)) {
+            LOG(FATAL) << "Atom ended up outside of system in z direction";
+        }
 
         int cellID = k * m_nCells(0) * m_nCells(1) + j *  m_nCells(0) + i;
 
@@ -268,7 +281,7 @@ void MoleculeSystem::updateForces()
     m_processor->clearForcesInNeighborCells();
 #endif
 
-//    for(TwoParticleForce* m_twoParticleForce : m_twoParticleForces) {
+    //    for(TwoParticleForce* m_twoParticleForce : m_twoParticleForces) {
     if(m_twoParticleForce) {
         if(shouldTimeStepBeSaved()) {
             m_twoParticleForce->setCalculatePotentialEnabled(m_isCalculatePotentialEnabled);
@@ -278,7 +291,7 @@ void MoleculeSystem::updateForces()
             m_twoParticleForce->setCalculatePressureEnabled(false);
         }
     }
-//    }
+    //    }
     for(MoleculeSystemCell* cell : allCells()) {
         cell->updateForces();
     }
@@ -392,24 +405,13 @@ void MoleculeSystem::obeyBoundaries() {
     // Boundary conditions
     for(MoleculeSystemCell* cell : allCells()) {
         for(Atom* atom : cell->atoms()) {
-            //    for(Atom* atom : m_atoms) {
             Vector3 position = atom->position();
             for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-                double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
-                //                if(fabs(atom->position()(iDim)) >= (m_boundaries(1,iDim) + sideLength)
-                //                        || fabs(atom->position()(iDim)) < (m_boundaries(0,iDim) - sideLength)) {
-                //                    cerr << "Wow! An atom ended up  outside 2 x boundaries! The time step must be too big. No reason to continue..." << endl;
-                //                    throw(new exception());
-                //                } else if(atom->position()(iDim) >= m_boundaries(1,iDim)) {
-                //                    position(iDim) -= sideLength;
-                //                    atom->setPosition(position);
-                //                    atom->addDisplacement(sideLength, iDim);
-                //                } else if(atom->position()(iDim) < m_boundaries(0,iDim)) {
-                //                    position(iDim) += sideLength - 1e-6;
-                //                }
-                position(iDim) = fmod(position(iDim) + sideLength * 10, sideLength);
-                atom->setPosition(position);
-                //                atom->addDisplacement(-sideLength, iDim);
+                if(m_isPeriodicDimension[iDim]) {
+                    double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
+                    position(iDim) = fmod(position(iDim) + sideLength * 10, sideLength);
+                    atom->setPosition(position);
+                }
             }
         }
     }
@@ -480,7 +482,7 @@ void MoleculeSystem::setupCells() {
         }
         cutoffRadius = minimumSideLength / 3;
     } else {
-         cutoffRadius = m_twoParticleForce->cutoffRadius();
+        cutoffRadius = m_twoParticleForce->cutoffRadius();
     }
     LOG(INFO) << "Setting up cells...";
     LOG(INFO) << "Cutoff length: " << cutoffRadius;
@@ -545,38 +547,45 @@ void MoleculeSystem::setupCells() {
     for(MoleculeSystemCell *cell1 : m_cells) {
         irowvec counters = zeros<irowvec>(3);
         nNeighbors = 0;
-        for(int i = 0; i < pow3nDimensions; i++) {
-            irowvec direction = counters - ones<irowvec>(3);
-            irowvec shiftVec = (cell1->indices() + direction);
-            rowvec offsetVec = zeros<rowvec>(3);
-            // Boundaries
-            for(uint j = 0; j < shiftVec.n_cols; j++) {
-                if(shiftVec(j) >= m_nCells(j)) {
-                    shiftVec(j) -= m_nCells(j);
-                    offsetVec(j) += (m_boundaries(1,j) - m_boundaries(0,j));
-                } else if(shiftVec(j) < 0) {
-                    shiftVec(j) += m_nCells(j);
-                    offsetVec(j) -= (m_boundaries(1,j) - m_boundaries(0,j));
-                }
-            }
-            int cellIndex = 0;
-            for(int j = 0; j < m_nDimensions; j++) {
-                int multiplicator = 1;
-                for(int k = j + 1; k < m_nDimensions; k++) {
-                    multiplicator *= m_nCells(m_nDimensions - k - 1);
-                }
-                cellIndex += multiplicator * shiftVec(m_nDimensions - j - 1);
-            }
-            MoleculeSystemCell* cell2 = m_cells.at(cellIndex);
-            if(cell2 != cell1 || m_cells.size() == 1) {
-                cell1->addNeighbor(cell2, offsetVec, direction);
-                nNeighbors++;
-            }
-            counters(0) += 1;
-            for(uint iDim = 1; iDim < indices.size(); iDim++) {
-                if(counters(iDim - 1) >= m_nDimensions) {
-                    counters(iDim - 1) = 0;
-                    counters(iDim) += 1;
+        for(int i = -1; i <= 1; i++) {
+            for(int j = -1; j <= 1; j++) {
+                for(int k = -1; k <= 1; k++) {
+                    if(i == j == k == 0) {
+                        continue; // do not add ourselves
+                    }
+                    irowvec direction = {i, j, k};
+                    irowvec shiftVec = (cell1->indices() + direction);
+                    rowvec offsetVec = zeros<rowvec>(3);
+                    // Boundaries
+                    for(uint j = 0; j < shiftVec.n_cols; j++) {
+                        if(shiftVec(j) >= m_nCells(j)) {
+                            shiftVec(j) -= m_nCells(j);
+                            offsetVec(j) += (m_boundaries(1,j) - m_boundaries(0,j));
+                        } else if(shiftVec(j) < 0) {
+                            shiftVec(j) += m_nCells(j);
+                            offsetVec(j) -= (m_boundaries(1,j) - m_boundaries(0,j));
+                        }
+                    }
+                    int cellIndex = 0;
+                    for(int j = 0; j < m_nDimensions; j++) {
+                        int multiplicator = 1;
+                        for(int k = j + 1; k < m_nDimensions; k++) {
+                            multiplicator *= m_nCells(m_nDimensions - k - 1);
+                        }
+                        cellIndex += multiplicator * shiftVec(m_nDimensions - j - 1);
+                    }
+                    MoleculeSystemCell* cell2 = m_cells.at(cellIndex);
+                    if(cell2 != cell1 || m_cells.size() == 1) {
+                        cell1->addNeighbor(cell2, offsetVec, direction);
+                        nNeighbors++;
+                    }
+                    counters(0) += 1;
+                    for(uint iDim = 1; iDim < indices.size(); iDim++) {
+                        if(counters(iDim - 1) >= m_nDimensions) {
+                            counters(iDim - 1) = 0;
+                            counters(iDim) += 1;
+                        }
+                    }
                 }
             }
         }

@@ -208,6 +208,7 @@ protected:
     vector<AtomType> m_particleTypes;
     unordered_map<int,AtomType> m_particleTypesByID;
     bool m_isCreateSymlinkEnabled;
+    bool m_isPeriodicDimension[3];
 
     TwoParticleForce *m_twoParticleForce;
     ThreeParticleForce *m_threeParticleForce;
