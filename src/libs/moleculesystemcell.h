@@ -74,6 +74,7 @@ protected:
     int m_id;
     Vector3& force;
     Vector3 blankForce;
+    Vector3 zeroOffset;
     bool m_isOnProcessorEdge;
 };
 

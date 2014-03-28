@@ -260,6 +260,7 @@ void MoleculeSystem::updateForces()
     for(MoleculeSystemCell* cell : allCells()) {
         for(Atom* atom : cell->atoms()) {
             atom->clearForcePotentialPressure();
+            atom->clearNeighborAtoms();
         }
     }
 
@@ -642,7 +643,7 @@ void MoleculeSystem::setSaveEnabled(bool enabled)
 
 bool MoleculeSystem::isOutputEnabledForThisStep() const
 {
-    return (m_isOutputEnabled && (m_step % m_saveEveryNSteps) == 0);
+    return (m_isOutputEnabled && ((m_step % m_saveEveryNSteps) == 0 || m_isFinalTimeStep));
 }
 
 void MoleculeSystem::save(string fileName)

@@ -34,7 +34,8 @@ SOURCES += \
     force/constantforce.cpp \
     force/vashishtatwoparticleforce.cpp \
     force/vashishtathreeparticleforce.cpp \
-    force/threeparticleforce.cpp
+    force/threeparticleforce.cpp \
+    force/fanntwoparticleforce.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -59,7 +60,8 @@ HEADERS += \
     force/vashishtatwoparticleforce.h \
     force/vashishtathreeparticleforce.h \
     force/threeparticleforce.h \
-    glogfallback.h
+    glogfallback.h \
+    force/fanntwoparticleforce.h
 
 !nofann {
     HEADERS += \

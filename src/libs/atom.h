@@ -8,7 +8,7 @@
 // System includes
 //#include <armadillo>
 #include <vector>
-#include <set>
+#include <forward_list>
 #ifdef USE_MPI
 #include <boost/serialization/serialization.hpp>
 #endif
@@ -64,7 +64,11 @@ public:
     inline bool isPositionFixed();
     inline void setPositionFixed(bool fixed);
 
-    void setID(int id);
+    inline void setID(int id);
+
+    const std::vector<std::pair<Atom *, const Vector3 *>> &neighborAtoms();
+    void clearNeighborAtoms();
+    void addNeighborAtom(Atom *neighborAtom, const Vector3 *offsetVector);
 protected:
     Vector3 m_position;
     Vector3 m_force;
@@ -80,7 +84,7 @@ protected:
     int m_id;
     int m_atomTypeIndex;
 
-    std::set<Atom*> m_neighbors;
+    std::vector<std::pair<Atom *, const Vector3 *>> m_neighborAtoms;
 
 private:
 #ifdef USE_MPI
