@@ -31,10 +31,14 @@ public:
     bool isCalculatePressureEnabled();
     void setCalculatePotentialEnabled(bool enable);
     bool isCalculatePotentialEnabled();
+    double cutoffRadius() const;
+    void setCutoffRadius(double cutoffRadius);
+
 protected:
     bool m_isNewtonsThirdLawEnabled;
     bool m_isCalculatePressureEnabled;
     bool m_isCalculatePotentialEnabled;
+    double m_cutoffRadius;
     Vector3 m_zeroVector;
 };
 

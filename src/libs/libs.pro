@@ -58,7 +58,8 @@ HEADERS += \
     force/constantforce.h \
     force/vashishtatwoparticleforce.h \
     force/vashishtathreeparticleforce.h \
-    force/threeparticleforce.h
+    force/threeparticleforce.h \
+    glogfallback.h
 
 !nofann {
     HEADERS += \

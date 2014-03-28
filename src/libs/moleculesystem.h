@@ -51,7 +51,7 @@ public:
     void setBoundaries(mat boundaries);
 
 //    void setupCells();
-    void setupCells(double minCutLength);
+    void setupCells();
 
 //    double potentialConstant();
 
@@ -153,8 +153,6 @@ public:
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
-
-    double m_potentialConstant;
 
     mat m_boundaries;
 

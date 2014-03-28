@@ -64,7 +64,7 @@ TEST(ForceCellTest) {
     system.integrator()->setTimeStep(1);
     system.addAtoms(atoms);
     system.setBoundaries(0,30);
-    system.setupCells(10);
+    system.setupCells();
     system.setSaveEnabled(true);
     FileManager fileManager(&system);
 
@@ -83,7 +83,7 @@ TEST(ForceCellTest) {
     }
 
     setupSixAtoms(atoms);
-    system.setupCells(5);
+    system.setupCells();
     system.simulate();
 
     for(Atom* atom : atoms) {

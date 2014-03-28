@@ -24,6 +24,10 @@ android {
 
 LIBS += -lglog
 
+!noglog {
+    DEFINES += MD_USE_GLOG
+}
+
 mpi {
     DEFINES += MD_USE_MPI
     DEFINES+=USE_MPI

@@ -11,6 +11,12 @@
 #include <sys/types.h>
 #include <pwd.h>
 
+#ifdef MD_USE_GLOG
+#include <glog/logging.h>
+#else
+#include <glogfallback.h>
+#endif
+
 // System includes
 #include <unistd.h>
 #include <iomanip>
@@ -340,7 +346,7 @@ bool FileManager::saveBinary(int step) {
     headerFile.open(headerFileName, ios::out | ios::binary);
     lammpsFile.open(lammpsFileName, ios::out | ios::binary);
 
-    cout << "Writing to file " << headerFileName << endl;
+    LOG(INFO) << "Writing to file " << headerFileName;
 
     // Write header data
     int rank = m_moleculeSystem->processor()->rank();

@@ -6,7 +6,11 @@
 #include <force/threeparticleforce.h>
 #include <force/singleparticleforce.h>
 
+#ifdef MD_USE_GLOG
 #include <glog/logging.h>
+#else
+#include <glogfallback.h>
+#endif
 
 MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     m_nDimensions(3),

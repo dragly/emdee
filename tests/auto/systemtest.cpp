@@ -34,7 +34,7 @@ TEST(CellSetup)
 //    system.setPotentialConstant(potentialConstant);
     system.setBoundaries(generator.lastBoundaries());
     system.addAtoms(atoms);
-    system.setupCells(potentialConstant * 3);
+    system.setupCells();
 //    system.setUnitLength(unitLength);
 
     ulong nMoleculesInCells = 0;

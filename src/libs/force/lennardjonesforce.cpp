@@ -81,6 +81,7 @@ void LennardJonesForce::setPotentialConstant(double potentialConstant)
 {
     m_potentialConstant = potentialConstant;
     m_potentialConstantSquared = potentialConstant*potentialConstant;
+    setCutoffRadius(3*potentialConstant);
 }
 
 void LennardJonesForce::setEnergyConstant(double energyConstant)

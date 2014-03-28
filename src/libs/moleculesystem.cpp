@@ -21,12 +21,16 @@
 #include <iomanip>
 #include <sys/stat.h>
 #include <algorithm>
+
+#ifdef MD_USE_GLOG
 #include <glog/logging.h>
+#else
+#include <glogfallback.h>
+#endif
 
 using namespace std;
 
 MoleculeSystem::MoleculeSystem() :
-    m_potentialConstant(1.0),
     m_nDimensions(3),
     pow3nDimensions(pow(3, m_nDimensions)),
     m_isSaveEnabled(false),
@@ -445,7 +449,7 @@ void MoleculeSystem::setBoundaries(double xMin, double xMax, double yMin, double
 void MoleculeSystem::setBoundaries(mat boundaries)
 {
     if(isOutputEnabled()) {
-        cout << "Setting boundaries to" << endl << boundaries;
+        LOG(INFO) << "Setting boundaries to\n" << boundaries;
     }
     m_boundaries = boundaries;
     irowvec counters = zeros<irowvec>(m_nDimensions);
@@ -464,10 +468,21 @@ void MoleculeSystem::setBoundaries(mat boundaries)
     }
 }
 
-void MoleculeSystem::setupCells(double minCutLength) {
-    cout << "Setting up cells..." << endl;
-    double minCutLengthUnit = minCutLength; // / m_unitLength;
-    cout << "Cutoff length: " << minCutLengthUnit << endl;
+void MoleculeSystem::setupCells() {
+    double cutoffRadius = 0.0;
+    if(!m_twoParticleForce || m_twoParticleForce->cutoffRadius() <= 0) {
+        LOG(WARNING) << "Two-particle force not set or cutoff radius of two-particle force is <= 0. Defaulting to 3x3x3 cells.";
+        // TODO: Allow one big cell instead...
+        double minimumSideLength = INFINITY;
+        for(int iDim = 0; iDim < m_nDimensions; iDim++) {
+            minimumSideLength = min(minimumSideLength, m_boundaries(1, iDim) - m_boundaries(0,iDim));
+        }
+        cutoffRadius = minimumSideLength / 3;
+    } else {
+         cutoffRadius = m_twoParticleForce->cutoffRadius();
+    }
+    LOG(INFO) << "Setting up cells...";
+    LOG(INFO) << "Cutoff length: " << cutoffRadius;
     for(uint i = 0; i < m_cells.size(); i++) {
         MoleculeSystemCell* cellToDelete = m_cells.at(i);
         delete cellToDelete;
@@ -478,16 +493,16 @@ void MoleculeSystem::setupCells(double minCutLength) {
     m_nCells = zeros<irowvec>(m_nDimensions);
     m_cellLengths = zeros<rowvec>(m_nDimensions);
     rowvec systemSize = m_boundaries.row(1) - m_boundaries.row(0);
-    cout << "System size: " << systemSize << endl;
+    LOG(INFO) << "System size: " << systemSize;
     for(int iDim = 0; iDim < m_nDimensions; iDim++) {
         double totalLength = m_boundaries(1,iDim) - m_boundaries(0,iDim);
-        m_nCells(iDim) = totalLength / minCutLengthUnit;
+        m_nCells(iDim) = totalLength / cutoffRadius;
         m_cellLengths(iDim) = totalLength / m_nCells(iDim);
         nCellsTotal *= m_nCells(iDim);
     }
     if(isOutputEnabled()) {
-        VLOG(1) << "Dividing space into a total of " << nCellsTotal << " cells";
-        VLOG(1) << "With geometry " << m_nCells;
+        LOG(INFO) << "Dividing space into a total of " << nCellsTotal << " cells";
+        LOG(INFO) << "With geometry " << m_nCells;
     }
 
     irowvec indices = zeros<irowvec>(m_nDimensions);
@@ -551,8 +566,6 @@ void MoleculeSystem::setupCells(double minCutLength) {
                 }
                 cellIndex += multiplicator * shiftVec(m_nDimensions - j - 1);
             }
-            //            cout << cellIndex << endl;
-            //            cout << offsetVec << endl;
             MoleculeSystemCell* cell2 = m_cells.at(cellIndex);
             if(cell2 != cell1 || m_cells.size() == 1) {
                 cell1->addNeighbor(cell2, offsetVec, direction);
@@ -569,8 +582,7 @@ void MoleculeSystem::setupCells(double minCutLength) {
     }
 
     if(m_cells.size() < 27) {
-        cerr << "The number of cells can never be less than 27!" << endl;
-        throw new std::logic_error("The number of cells can never be less than 27!");
+        LOG(FATAL) << "The number of cells can never be less than 27! Got " << m_cells.size() << " cells.";
     }
 
     m_areCellsSetUp = true;
@@ -583,15 +595,14 @@ void MoleculeSystem::setupCells(double minCutLength) {
 
 void MoleculeSystem::refreshCellContents() {
     if(!m_areCellsSetUp) {
-        cerr << "Cells must be set up before refreshing their contents!" << endl;
-        throw(new exception());
+        LOG(FATAL) << "Cells must be set up before refreshing their contents!";
     }
     vector<Atom*> allAtoms;
     for(MoleculeSystemCell* cell : m_cells) {
         allAtoms.insert(allAtoms.end(), cell->atoms().begin(), cell->atoms().end());
         cell->clearAtoms();
     }
-    //    cout << "Refreshing cell contents with " << allAtoms.size() << " atoms" << endl;
+    LOG(INFO) << "Refreshing cell contents with " << allAtoms.size() << " atoms";
     addAtomsToCorrectCells(allAtoms);
 }
 
