@@ -115,12 +115,12 @@ void MoleculeSystemCell::updateForces()
     //    cout << "I have " << m_neighborCells.size() << " neighbors" << endl;
     // Loop over neighbors and their atoms
     for(TwoParticleForce* twoParticleForce : m_moleculeSystem->twoParticleForces()) {
+        twoParticleForce->setNewtonsThirdLawEnabled(true);
         for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
             MoleculeSystemCell* neighbor = m_neighborCells[iNeighbor];
             const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
 
-            twoParticleForce->setNewtonsThirdLawEnabled(shouldNewtonsThirdBeEnabled(neighbor));
-            if(twoParticleForce->isNewtonsThirdLawEnabled() && !checkDirection(iNeighbor)) {
+            if(!checkDirection(iNeighbor)) {
                 continue;
             }
 
@@ -136,18 +136,13 @@ void MoleculeSystemCell::updateForces()
         }
 
         // Loop over own atoms
-        twoParticleForce->setNewtonsThirdLawEnabled(true);
         for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
             Atom* atom1 = m_atoms[iAtom];
             int jAtomStart = 0;
-            if(twoParticleForce->isNewtonsThirdLawEnabled()) {
-                jAtomStart = iAtom + 1;
-            }
+            jAtomStart = iAtom + 1;
             for(uint jAtom = jAtomStart; jAtom < m_atoms.size(); jAtom++) {
-                if(!twoParticleForce->isNewtonsThirdLawEnabled()) {
-                    if(iAtom == jAtom) {
-                        continue;
-                    }
+                if(iAtom == jAtom) {
+                    continue;
                 }
                 Atom* atom2 = m_atoms[jAtom];
                 if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
