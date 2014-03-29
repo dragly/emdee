@@ -278,7 +278,7 @@ void MoleculeSystem::updateForces()
     obeyBoundaries();
     //    refreshCellContents();
 #ifdef USE_MPI
-    //    m_processor->communicateAtoms();
+    m_processor->communicateAtoms();
     refreshCellContents();
     m_processor->communicateAtoms();
 #endif
