@@ -17,7 +17,10 @@ using namespace libconfig;
 
 int main(int argc, char** argv)
 {
+#ifdef MD_USE_GLOG
+    FLAGS_log_dir = ".";
     google::InitGoogleLogging(argv[0]);
+#endif
     LOG(INFO) << "Starting molecular-dynamics";
 #ifdef MD_USE_MPI
     mpi::environment env(argc, argv);

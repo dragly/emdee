@@ -4,7 +4,7 @@
 #include <unittest++/TestRunner.h>
 
 #include <fenv.h>
-#include <glog/logging.h>
+#include <utils/logging.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -17,6 +17,10 @@ namespace mpi = boost::mpi;
 
 int main(int argc, char* argv[])
 {
+#ifdef MD_USE_GLOG
+    FLAGS_log_dir = ".";
+    google::InitGoogleLogging(argv[0]);
+#endif
 #ifdef MD_USE_MPI
     mpi::environment env(argc, argv);
     mpi::communicator world;
@@ -26,7 +30,6 @@ int main(int argc, char* argv[])
     (void)argc;
 #endif
 
-    FLAGS_log_dir = ".";
     google::InitGoogleLogging(argv[0]);
 
     feenableexcept(FE_INVALID | FE_OVERFLOW);
