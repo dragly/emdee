@@ -342,28 +342,6 @@ MoleculeSystemCell* MoleculeSystem::cell(int i, int j, int k) {
 
 void MoleculeSystem::simulate()
 {
-    //    cout << "Factor is " << m_unitLength / m_unitTime << endl;
-
-    // Forget about all cells but our own
-//    for(MoleculeSystemCell* systemCell : m_globalCells) {
-//        bool inMyCells = false;
-//        for(MoleculeSystemCell* cell : localCells()) {
-//            if(cell == systemCell) {
-//                inMyCells = true;
-//            }
-//        }
-//        if(!inMyCells) {
-//            for(Atom* atom : systemCell->atoms()) {
-//                delete atom;
-//            }
-//            systemCell->clearAtoms();
-//        }
-//    }
-//    m_atoms.clear();
-//    for(MoleculeSystemCell* cell : localCells()) {
-//        addAtoms(cell->atoms());
-//    }
-
 #ifdef USE_MPI
     mpi::timer timer;
     timer.restart();

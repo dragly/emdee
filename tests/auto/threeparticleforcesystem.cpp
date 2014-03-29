@@ -61,51 +61,51 @@ SUITE(ThreeParticleForceSystem) {
         }
     };
 
-//    TEST(ThreeParticleForceSum)
-//    {
-//        LOG(INFO) << "ThreeParticleForceSum test started";
-//        cout << "Testing three-particle forces" << endl;
-//        MoleculeSystem system;
-//        system.setOutputEnabled(true);
-//        system.setSaveEnabled(true);
-//        Generator generator;
-//        TwoParticleTestForce testForce2;
-//        testForce2.setCutoffRadius(1.0);
-//        ThreeParticleTestForce testForce3;
-//        vector<AtomType> particleTypes;
-//        AtomType dummyType(0);
-//        particleTypes.push_back(dummyType);
-//        vector<Atom*> atoms = generator.generateFcc(1.0, 2, dummyType);
+    TEST(ThreeParticleForceSum)
+    {
+        LOG(INFO) << "ThreeParticleForceSum test started";
+        cout << "Testing three-particle forces" << endl;
+        MoleculeSystem system;
+        system.setOutputEnabled(true);
+        system.setSaveEnabled(true);
+        Generator generator;
+        TwoParticleTestForce testForce2;
+        testForce2.setCutoffRadius(1.0);
+        ThreeParticleTestForce testForce3;
+        vector<AtomType> particleTypes;
+        AtomType dummyType(0);
+        particleTypes.push_back(dummyType);
+        vector<Atom*> atoms = generator.generateFcc(1.0, 2, dummyType);
 
-//        CHECK_EQUAL(32, atoms.size());
+        CHECK_EQUAL(32, atoms.size());
 
-//        VelocityVerletIntegrator integrator(&system);
-//        integrator.setTimeStep(0.005);
-//        system.setPeriodicity(false, false, false);
-//        system.setParticleTypes(particleTypes);
-//        system.setIntegrator(&integrator);
-//        system.setTwoParticleForce(&testForce2);
-//        system.setThreeParticleForce(&testForce3);
-//        system.setBoundaries(0.0, 7.5, 0.0, 7.5, 0.0, 7.5);
-//        system.addAtoms(atoms);
-//        system.setSaveEnabled(false);
-//        system.setSaveEveryNSteps(10);
-//        system.setOutputEnabled(false);
-//        system.setNSimulationSteps(1);
-//        system.setupCells();
+        VelocityVerletIntegrator integrator(&system);
+        integrator.setTimeStep(0.005);
+        system.setPeriodicity(false, false, false);
+        system.setParticleTypes(particleTypes);
+        system.setIntegrator(&integrator);
+        system.setTwoParticleForce(&testForce2);
+        system.setThreeParticleForce(&testForce3);
+        system.setBoundaries(0.0, 7.5, 0.0, 7.5, 0.0, 7.5);
+        system.addAtoms(atoms);
+        system.setSaveEnabled(false);
+        system.setSaveEveryNSteps(10);
+        system.setOutputEnabled(false);
+        system.setNSimulationSteps(1);
+        system.setupCells();
 
-//        // Let all atoms interact with each other
-//        testForce2.setCutoffRadius(1000.0);
+        // Let all atoms interact with each other
+        testForce2.setCutoffRadius(1000.0);
 
-//        system.simulate();
+        system.simulate();
 
-//        // There are 32 atoms
-//        // Each atom has every other atom as a neighbor, i.e, 31 neighbors
-//        // There are 31c2 = 465 ways to pick two neighbors for a three-particle force calculation
-//        // Resulting in 465 * 32 = 14880 three-particle force calculations
-//        CHECK_CLOSE(14880, system.potentialEnergyTotal(), 1e-9);
-//        LOG(INFO) << "ThreeParticleForceSum test complete";
-//    }
+        // There are 32 atoms
+        // Each atom has every other atom as a neighbor, i.e, 31 neighbors
+        // There are 31c2 = 465 ways to pick two neighbors for a three-particle force calculation
+        // Resulting in 465 * 32 = 14880 three-particle force calculations
+        CHECK_CLOSE(14880, system.potentialEnergyTotal(), 1e-9);
+        LOG(INFO) << "ThreeParticleForceSum test complete";
+    }
 
     TEST(ThreeParticleForceSumPeriodic)
     {
