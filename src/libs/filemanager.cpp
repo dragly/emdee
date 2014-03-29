@@ -261,6 +261,10 @@ bool FileManager::loadBinary(string fileName) {
 }
 
 bool FileManager::setLatestSymlink(int step) {
+    if (m_outFileName.find(".bin") == std::string::npos) {
+        LOG(ERROR) << "Cannot create symlink because file is .xyz (currently not implemented - nothing to worry about)";
+        return false;
+    }
     string headerFileName = headerFileNameFromStep(step);
     string lammpsFileName = lammpsFileNameFromStep(step);
 
@@ -282,7 +286,7 @@ bool FileManager::setLatestSymlink(int step) {
 
     // Symlink returns 0 on success
     if(symlink(relativeHeaderFileName.c_str(), headerSymlinkFileName.c_str()) || symlink(relativeLammpsFileName.c_str(), lammpsSymlinkFileName.c_str())) {
-        cerr << "Could not create symlink" << endl;
+        LOG(ERROR) << "Could not create symlink. symlink command returned something else than 0.";
         return false;
     }
     return true;

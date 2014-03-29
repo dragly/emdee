@@ -34,6 +34,7 @@ int main(int argc, char** argv)
         configFileName = argv[1];
     }
     MoleculeSystem system;
+    system.setPeriodicity(true, true, true);
     ConfigurationParser parser(&system);
     parser.runConfiguration(configFileName);
 #ifdef MD_USE_MPI

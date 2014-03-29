@@ -147,7 +147,7 @@ SUITE(ThreeParticleForceSystem) {
         // TODO Add a check to see if the particle types are actually set
         system.setParticleTypes(particleTypes);
         FileManager fileManager(&system);
-        fileManager.setOutFileName("atoms*.bin");
+        fileManager.setOutFileName("./atoms*.bin");
         system.setFileManager(&fileManager);
         system.setSaveEveryNSteps(1);
         system.setOutputEnabled(false);

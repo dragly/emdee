@@ -15,8 +15,7 @@
 
 TEST(CellSetup)
 {
-//    double unitLength = 3.405;
-    double potentialConstant = 1;
+    double potentialConstant = 1.0;
     double bUnit = 5.620 / 3.405;
     MoleculeSystem system;
     system.setOutputEnabled(true);
@@ -24,15 +23,22 @@ TEST(CellSetup)
     FileManager fileManager(&system);
     fileManager.setOutFileName("/tmp/out*.bin");
     system.setFileManager(&fileManager);
+    system.setPeriodicity(true, true, true);
     Generator generator;
 //    generator.setUnitLength(unitLength);
     LennardJonesForce force;
     force.setPotentialConstant(potentialConstant);
-    vector<Atom*> atoms = generator.generateFcc(bUnit, 6, AtomType::argon());
+    vector<AtomType> particleTypes;
+    AtomType dummyType(0);
+    dummyType.setNumber(1);
+    particleTypes.push_back(dummyType);
+    system.setParticleTypes(particleTypes);
+    vector<Atom*> atoms = generator.generateFcc(bUnit, 6, dummyType);
+    int nAtomsToBeginWith = atoms.size();
 //    generator.boltzmannDistributeVelocities(20.0, atoms);
 
     VelocityVerletIntegrator integrator(&system);
-    integrator.setTimeStep(0.005);
+    integrator.setTimeStep(0.001);
     system.setIntegrator(&integrator);
 //    system.setInteratomicForce(&force);
     system.setTwoParticleForce(&force);
@@ -42,19 +48,10 @@ TEST(CellSetup)
     system.setupCells();
 //    system.setUnitLength(unitLength);
 
-    ulong nMoleculesInCells = 0;
-    for(MoleculeSystemCell* cell : system.localCells()) {
-        nMoleculesInCells += cell->atoms().size();
-    }
-    CHECK_EQUAL(system.atoms().size(), nMoleculesInCells);
     system.setSaveEnabled(false);
     system.setOutputEnabled(false);
     system.setNSimulationSteps(100);
     system.simulate();
     system.refreshCellContents();
-    nMoleculesInCells = 0;
-    for(MoleculeSystemCell* cell : system.localCells()) {
-        nMoleculesInCells += cell->atoms().size();
-    }
-    CHECK_EQUAL(system.atoms().size(), nMoleculesInCells);
+    CHECK_EQUAL(nAtomsToBeginWith, system.nAtomsTotal());
 }

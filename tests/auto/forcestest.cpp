@@ -84,7 +84,6 @@ TEST(VashishtaForceTest) {
         toPrint.col(i + 1) = forceX;
         toPrint.col(i + 4) = potential;
     }
-    toPrint.save("output.dat", raw_ascii);
 //    CHECK_ARRAY_CLOSE(atom1.force(), newForce, 3, 0.005);
 }
 
