@@ -1,11 +1,11 @@
 #include <moleculesystem.h>
 #include <configurationparser.h>
+#include <utils/logging.h>
 
 #include <iostream>
 #include <iomanip>
 #include <libconfig.h++>
 #include <fenv.h>
-#include <glog/logging.h>
 
 //#include <boost/mpi.hpp>
 
@@ -18,7 +18,7 @@ using namespace libconfig;
 int main(int argc, char** argv)
 {
     google::InitGoogleLogging(argv[0]);
-    cout << "Starting molecular-dynamics" << endl;
+    LOG(INFO) << "Starting molecular-dynamics";
 #ifdef MD_USE_MPI
     mpi::environment env(argc, argv);
     mpi::communicator world;
@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     feenableexcept(FE_INVALID | FE_OVERFLOW);
 #ifdef MD_USE_MPI
     timer.restart();
-    cout << "I am processor number " << world.rank() << " of " << world.size() << endl;
+    LOG(INFO) << "I am processor number " << world.rank() << " of " << world.size();
 #endif
     string configFileName = "testconfig.cfg";
     if(argc > 1 && argv[1][0] != '-') {
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     ConfigurationParser parser(&system);
     parser.runConfiguration(configFileName);
 #ifdef MD_USE_MPI
-    cout << "Finished after " << setprecision(5) << timer.elapsed() << " seconds" << endl;
+    LOG(INFO) << "Finished after " << setprecision(5) << timer.elapsed() << " seconds";
 #endif
 
 

@@ -41,7 +41,7 @@ public:
 
     void addAtoms(const vector<Atom *> &atoms);
     const vector<Atom*> &atoms() const;
-    const vector<MoleculeSystemCell*> &cells() const;
+    const vector<MoleculeSystemCell*> &globalCells() const;
     const vector<AtomType> &particleTypes() const;
     void updateForces();
     void simulate();
@@ -142,7 +142,7 @@ public:
     bool isOutputEnabledForThisStep() const;
     void save(string fileName);
     void setCreateSymlink(bool enabled);
-    const vector<MoleculeSystemCell *> &allCells() const;
+    const vector<MoleculeSystemCell *> &localCells() const;
 
     ThreeParticleForce *threeParticleForce() const;
     void setThreeParticleForce(ThreeParticleForce *threeParticleForce);
@@ -151,6 +151,9 @@ public:
     void setTwoParticleForce(TwoParticleForce *twoParticleForce);
 
     int cellIndex(int xIndex, int yIndex, int zIndex);
+    void setPeriodicity(bool periodicInX, bool periodicInY, bool periodicInZ);
+
+    int nAtomsTotal();
 
 protected:
     vector<Atom*> m_atoms;
@@ -164,10 +167,10 @@ protected:
 
     int pow3nDimensions;
 
-    irowvec m_nCells;
+    irowvec m_globalCellsPerDimension;
     rowvec m_cellLengths;
 
-    vector<MoleculeSystemCell*> m_cells;
+    vector<MoleculeSystemCell*> m_globalCells;
 
 //    Config *m_config;
 //    vector<TwoParticleForce*> m_twoParticleForces;
@@ -214,6 +217,8 @@ protected:
 
     TwoParticleForce *m_twoParticleForce;
     ThreeParticleForce *m_threeParticleForce;
+
+    int m_nAtomsTotal;
 };
 
 inline void MoleculeSystem::addSingleParticleForce(SingleParticleForce *force) {
@@ -263,7 +268,7 @@ inline int MoleculeSystem::saveEveryNSteps() {
 }
 
 inline const irowvec &MoleculeSystem::nCells() const {
-    return m_nCells;
+    return m_globalCellsPerDimension;
 }
 
 #ifdef USE_MPI

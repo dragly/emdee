@@ -60,8 +60,9 @@ HEADERS += \
     force/vashishtatwoparticleforce.h \
     force/vashishtathreeparticleforce.h \
     force/threeparticleforce.h \
-    glogfallback.h \
-    force/fanntwoparticleforce.h
+    force/fanntwoparticleforce.h \
+    utils/logging.h \
+    utils/glogfallback.h
 
 !nofann {
     HEADERS += \

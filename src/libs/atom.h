@@ -246,35 +246,13 @@ inline const AtomType& Atom::type() const
     return m_atomType;
 }
 
-//inline const int Atom::atomTypeId() const
-//{
-//    return m_atomTypeId;
-//}
-
 inline void Atom::communicationClone(const Atom &other, const vector<AtomType>& particleTypes)
 {
-//    cout << "Cloning!" << endl;
     this->m_id = other.m_id;
-//    cout << "a" << endl;
     this->m_position = other.m_position;
-//    cout << "b" << endl;
-//    this->m_displacement = other.m_displacement;
     this->m_velocity = other.m_velocity;
-//    cout << "c" << endl;
     this->m_atomTypeIndex = other.m_atomTypeIndex;
-//    cout << "d" << endl;
-//    cout << "Other type id: " << other.m_atomTypeIndex << endl;
-//    for(const AtomType& type : particleTypes) {
-//        cout << type.abbreviation() << endl;
-//        cout << type.number() << endl;
-//    }
     this->m_atomType = particleTypes[other.m_atomTypeIndex];
-//    cout << "e" << endl;
-    //    this->m_cellID = other.m_cellID;
-    //    this->m_force = other.m_force;
-    //    this->m_localPressure = other.m_localPressure;
-    //    this->m_potential = other.m_potential;
-    //    this->m_type = other.m_type;
 }
 
 inline bool Atom::isPositionFixed() {

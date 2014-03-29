@@ -15,4 +15,5 @@ SOURCES += main.cpp \
     forcestest.cpp \
     generatortest.cpp \
     systemtest.cpp \
-    forcecelltest.cpp
+    forcecelltest.cpp \
+    threeparticleforcesystem.cpp

@@ -3,8 +3,8 @@
 #include <iostream>
 
 AtomType::AtomType() :
-    m_name(""),
-    m_abbreviation(""),
+    m_name("A"),
+    m_abbreviation("A"),
     m_number(-1),
     m_mass(-1),
     m_index(-1)
@@ -12,8 +12,8 @@ AtomType::AtomType() :
 }
 
 AtomType::AtomType(int index) :
-    m_name(""),
-    m_abbreviation(""),
+    m_name("A"),
+    m_abbreviation("A"),
     m_number(-1),
     m_mass(-1),
     m_index(index)

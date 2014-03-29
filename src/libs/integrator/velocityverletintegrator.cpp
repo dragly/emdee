@@ -16,7 +16,7 @@ void VelocityVerletIntegrator::initialize() {
 // TODO Build the timestep into the velocity to reduce the number of computations
 void VelocityVerletIntegrator::stepForward() {
     double dt = m_timeStep;
-    for(MoleculeSystemCell* cell : m_moleculeSystem->allCells()) {
+    for(MoleculeSystemCell* cell : m_moleculeSystem->localCells()) {
         for(Atom* atom : cell->atoms()) {
             if(atom->isPositionFixed()) {
                 continue;
@@ -31,7 +31,7 @@ void VelocityVerletIntegrator::stepForward() {
     }
     m_moleculeSystem->updateForces();
 
-    for(MoleculeSystemCell* cell : m_moleculeSystem->allCells()) {
+    for(MoleculeSystemCell* cell : m_moleculeSystem->localCells()) {
         for(Atom* atom : cell->atoms()) {
             if(atom->isPositionFixed()) {
                 continue;

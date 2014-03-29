@@ -4,6 +4,7 @@
 #include <range.h>
 #include <atom.h>
 #include <math/vector3.h>
+#include <utils/logging.h>
 
 #include <iostream>
 #include <iomanip>
@@ -24,6 +25,7 @@ Processor::Processor(MoleculeSystem *moleculeSystem) :
     m_totalCommunicationTime(0),
     m_pureCommunicationTime(0)
 {
+    LOG(INFO) << "Processor loaded. I am rank " << world.rank() << " of " << world.size() << " processors.";
     irowvec left = {-1, 0, 0};
     directions.push_back(left);
     irowvec right = {1, 0, 0};
@@ -229,6 +231,7 @@ void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
         vector<Atom*> atomsToReceive; // IMPORTANT: This list must be freed manually! (Should be done below in this scope)
         pureCommunicationTimer.restart();
         world.recv(neighbor.rank, 0, atomsToReceive); // IMPORTANT: This list must be freed manually! (Should be done below in this scope)
+//        cout << "Rank " << world.rank() << " receives from " << neighbor.rank << ", atoms for cell " << cellToReceive->indices() << ", in total:" << atomsToReceive.size() << endl;
         m_pureCommunicationTime += pureCommunicationTimer.elapsed();
 
 //        cout << "Received " << atomsToReceive.size() << " atoms" << endl;
@@ -253,6 +256,7 @@ void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
         for(uint i = 0; i < atomsToReceive.size(); i++) {
             Atom* atom = atomsToReceive.at(i);
             Atom* localAtom = cellToReceive->atoms().at(i);
+            // TODO Add a check to see if the particle types are actually set
             localAtom->communicationClone(*atom, m_moleculeSystem->particleTypes());
         }
 
@@ -266,7 +270,7 @@ void Processor::receiveAtomsFromNeighbor(const ProcessorNeighbor& neighbor) {
 
 void Processor::sendAtomsToNeighbor(const ProcessorNeighbor& neighbor) {
     for(MoleculeSystemCell* cellToSend : neighbor.cells) {
-//        cout << "Cell to send atoms: " << cellToSend->indices() << " is sending: " << cellToSend->atoms().size() << endl;
+//        cout << "Rank " << world.rank() << " sends to " << neighbor.rank << ", atoms from cell " << cellToSend->indices() << ", in total: " << cellToSend->atoms().size() << endl;
         vector<Atom*> atomsToSend;
         atomsToSend.insert(atomsToSend.end(), cellToSend->atoms().begin(), cellToSend->atoms().end());
         pureCommunicationTimer.restart();
@@ -302,7 +306,6 @@ void Processor::receiveForcesFromNeighbor(const ProcessorNeighbor& neighbor) {
 //            }
 //            cellToReceive->deleteAtoms(nAtomsAvailable - atomsToReceive.size());
 //        }
-//        cout << "Cell to receive: " << cellToReceive->indices() << " atoms: " << forcesToReceive.size() << " available atoms:" << cellToReceive->atoms().size() << endl;
         if(forcesToReceive.size() != cellToReceive->atoms().size()) {
             stringstream message;
             message << "The number of forces received does not match the number of atoms in the cell! Forces received: " << forcesToReceive.size() << ". Atoms available: " << cellToReceive->atoms().size();
@@ -394,7 +397,6 @@ int Processor::nProcessors()
 
 void Processor::communicateAtoms() {
     communicationTimer.restart();
-
     // Send atoms to neighbors
     for(uint i = 0; i < directions.size(); i++) {
         irowvec direction = directions.at(i);

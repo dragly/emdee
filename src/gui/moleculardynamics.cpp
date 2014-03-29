@@ -36,7 +36,6 @@ MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
     LennardJonesForce *force = new LennardJonesForce();
     force->setPotentialConstant(potentialConstant);
     vector<Atom*> atoms = generator.generateFcc(bUnit, 5, AtomType::argon());
-    cout << atoms.size() << endl;
     generator.boltzmannDistributeVelocities(3, atoms);
 
 //    for(Atom* atom : atoms) {
@@ -96,7 +95,7 @@ void MolecularDynamics::drawItem(QGLPainter *painter)
 
     if(m_sortPoints == BackToFront) {
         QMultiMap<double, QVector3D> sortedPoints;
-        for(MoleculeSystemCell* cell : m_moleculeSystem->allCells()) {
+        for(MoleculeSystemCell* cell : m_moleculeSystem->localCells()) {
             for(Atom* atom : cell->atoms()) {
                 QVector3D center = QVector3D(atom->position().x(), atom->position().y(), atom->position().z());
                 const QVector4D &depthVector = painter->modelViewMatrix() * center;
@@ -112,7 +111,7 @@ void MolecularDynamics::drawItem(QGLPainter *painter)
         sortedPoints.clear();
     } else {
         m_points.clear();
-        for(MoleculeSystemCell* cell : m_moleculeSystem->allCells()) {
+        for(MoleculeSystemCell* cell : m_moleculeSystem->localCells()) {
             for(Atom* atom : cell->atoms()) {
                 QVector3D center = QVector3D(atom->position().x(), atom->position().y(), atom->position().z());
                 m_points.push_back(center);

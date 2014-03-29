@@ -6,12 +6,6 @@
 #include <force/threeparticleforce.h>
 #include <force/singleparticleforce.h>
 
-#ifdef MD_USE_GLOG
-#include <glog/logging.h>
-#else
-#include <glogfallback.h>
-#endif
-
 MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     m_nDimensions(3),
     pow3nDimensions(pow(3, m_nDimensions)),
@@ -91,33 +85,9 @@ const irowvec &MoleculeSystemCell::indices() const
     return m_indices;
 }
 
-bool MoleculeSystemCell::shouldNewtonsThirdBeEnabled(MoleculeSystemCell* neighbor) {
-    (void)neighbor;
-    return true;
-    //    if(m_isOnProcessorEdge || neighbor->isOnProcessorEdge()) {
-    //        return false;
-    //    } else {
-    //        return true;
-    //    }
-}
-
-bool MoleculeSystemCell::checkDirection(int neighborID) {
-    const irowvec& direction = m_neighborDirections[neighborID];
-    return checkDirection(direction);
-}
-
-bool MoleculeSystemCell::checkDirection(const irowvec &direction) {
-    bool is2x2x3UpperRight = ((direction(0) >= 0 && direction(1) >= 0)
-                              && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1));
-    bool is1x1x3LowerRight = (direction(0) == 1 && direction(1) == -1);
-    return is2x2x3UpperRight || is1x1x3LowerRight;
-}
-
-void MoleculeSystemCell::updateForces()
+void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
 {
-    LOG(INFO) << "Updating forces in cell";
     TwoParticleForce* twoParticleForce = m_moleculeSystem->twoParticleForce();
-    ThreeParticleForce* threeParticleForce = m_moleculeSystem->threeParticleForce();
     // Single particle forces
     for(SingleParticleForce* singleParticleForce : m_moleculeSystem->singleParticleForces()) {
         for(Atom* atom : m_atoms) {
@@ -133,20 +103,20 @@ void MoleculeSystemCell::updateForces()
             MoleculeSystemCell* neighborCell = m_neighborCells[iNeighbor];
             const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
 
-            if(!checkDirection(iNeighbor)) {
-                continue;
-            }
-
             const vector<Atom*>& neighborCellAtoms = neighborCell->atoms();
             for(Atom* atom1 : m_atoms) {
                 for(Atom* atom2 : neighborCellAtoms) {
-                    if(atom1 == atom2) {
+                    // Newton's third law implmented so that each atom is responsible for
+                    // calculating and applying forces to all atoms with a higher atom ID
+                    // This is an alternative to only caring about neighbor cells in a
+                    // certain direction
+                    if(atom1->id() >= atom2->id()) {
                         continue;
                     }
                     if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
                         continue;
                     }
-                    double distanceSquared = Vector3::differenceSquared(atom1->position(), atom2->position());
+                    double distanceSquared = Vector3::differenceSquared(atom1->position(), atom2->position() + neighborOffset);
                     if(distanceSquared > cutoffRadiusSquared) {
                         continue;
                     }
@@ -176,21 +146,6 @@ void MoleculeSystemCell::updateForces()
 //                twoParticleForce->calculateAndApplyForce(atom1, atom2);
 //            }
 //        }
-    }
-
-    if(threeParticleForce) {
-        for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
-            Atom* atom1 = m_atoms[iAtom];
-            for(uint jAtom = 0; jAtom < atom1->neighborAtoms().size(); jAtom++) {
-                std::pair<Atom*,const Vector3*> atom2 = atom1->neighborAtoms()[jAtom];
-                for(uint kAtom = jAtom + 1; kAtom < atom1->neighborAtoms().size(); kAtom++) {
-                    std::pair<Atom*,const Vector3*> atom3 = atom1->neighborAtoms()[kAtom];
-                    const Vector3& offsetVector2 = (*(atom2.second));
-                    const Vector3& offsetVector3 = (*(atom3.second));
-                    threeParticleForce->calculateAndApplyForce(atom1, atom2.first, atom3.first, offsetVector2, offsetVector3);
-                }
-            }
-        }
     }
 
 //    // TODO Ensure the three-particle forces work properly by creating a test that checks the potential for a run with one big cell and one with 3x3x3 cells
@@ -350,7 +305,7 @@ int MoleculeSystemCell::id()
 void MoleculeSystemCell::deleteAtomsFromCellAndSystem()
 {
     vector<Atom*> atomsExceptThisCell;
-    for(MoleculeSystemCell* cell : m_moleculeSystem->cells()) {
+    for(MoleculeSystemCell* cell : m_moleculeSystem->globalCells()) {
         if(cell == this) {
             continue;
         }

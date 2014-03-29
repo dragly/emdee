@@ -32,7 +32,7 @@ public:
     void setIndices(const irowvec& indices);
     const irowvec& indices() const;
 
-    void updateForces();
+    void updateTwoParticleForceAndNeighborAtoms();
     void clearAtoms();
     void clearAlreadyCalculatedNeighbors();
     void deleteAtomsFromCellAndSystem();
@@ -47,9 +47,6 @@ public:
     void setOnProcessorEdge(bool enable);
     bool isOnProcessorEdge();
     void deleteAtoms(int nAtoms);
-    bool shouldNewtonsThirdBeEnabled(MoleculeSystemCell *neighbor);
-    bool checkDirection(int neighborID);
-    bool checkDirection(const irowvec &direction);
     const vector<MoleculeSystemCell*> &neighborCells() {
         return m_neighborCells;
     }

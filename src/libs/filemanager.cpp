@@ -74,11 +74,11 @@ bool FileManager::load(string fileName) {
 }
 
 bool FileManager::loadBinary(string fileName) {
-    cout << "Loading binary file " << fileName << endl;
+    LOG(INFO) << "Loading binary file " << fileName;
     ifstream headerFile;
     headerFile.open(fileName, ios::binary | ios::in);
     if(!headerFile.good()) {
-        cout << "Header file " << fileName << " no good...";
+        LOG(ERROR) << "Header file " << fileName << " no good...";
         return false;
     }
     // Read header data
@@ -121,7 +121,7 @@ bool FileManager::loadBinary(string fileName) {
         headerFile.open(subFileName, ios::binary | ios::in);
         lammpsFile.open(lammpsFileName, ios::binary | ios::in);
         if(!lammpsFile.good() || !headerFile.good()) {
-            cout << "File " << subFileName << " or " << lammpsFileName << " no good...";
+            LOG(ERROR) << "File " << subFileName << " or " << lammpsFileName << " no good...";
             return false;
         }
 
@@ -174,9 +174,9 @@ bool FileManager::loadBinary(string fileName) {
             }
         }
 
-        cout << "step: " << step << " time: " << time << " timeStep: " << timeStep << " nAtoms: " << nAtoms << " temperature: " << temperature << endl << "boundaries:" << endl;
-        cout << systemBoundaries[0] << " "  << systemBoundaries[1] << " "  << systemBoundaries[2] << " " << endl;
-        cout << systemBoundaries[3] << " "  << systemBoundaries[4] << " "  << systemBoundaries[5] << " " << endl;
+        LOG(INFO) << "step: " << step << " time: " << time << " timeStep: " << timeStep << " nAtoms: " << nAtoms << " temperature: " << temperature << " boundaries: ";
+        LOG(INFO) << systemBoundaries[0] << " "  << systemBoundaries[1] << " "  << systemBoundaries[2] << " ";
+        LOG(INFO) << systemBoundaries[3] << " "  << systemBoundaries[4] << " "  << systemBoundaries[5] << " ";
 
         // Append step by one
         m_moleculeSystem->setStep(step + 1);
@@ -188,7 +188,7 @@ bool FileManager::loadBinary(string fileName) {
         vector<Atom*> atoms;
         // Read atom data
         //    m_moleculeSystem->deleteAtoms();
-        cout << "Reading data for " << nAtoms << " atoms" << endl;
+        LOG(INFO) << "Reading data for " << nAtoms << " atoms";
         //    if(nAtoms > 10000) {
         //        cout << "Too many atoms, "
         //        exit(9999);

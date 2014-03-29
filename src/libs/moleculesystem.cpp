@@ -8,6 +8,7 @@
 #include <force/twoparticleforce.h>
 #include <integrator/velocityverletintegrator.h>
 #include <modifier/modifier.h>
+#include <utils/logging.h>
 
 #ifdef USE_MPI
 #include <filemanager.h>
@@ -21,12 +22,6 @@
 #include <iomanip>
 #include <sys/stat.h>
 #include <algorithm>
-
-#ifdef MD_USE_GLOG
-#include <glog/logging.h>
-#else
-#include <glogfallback.h>
-#endif
 
 using namespace std;
 
@@ -53,7 +48,8 @@ MoleculeSystem::MoleculeSystem() :
     m_isFinalTimeStep(false),
     m_isCreateSymlinkEnabled(false),
     m_twoParticleForce(NULL),
-    m_threeParticleForce(NULL)
+    m_threeParticleForce(NULL),
+    m_nAtomsTotal(0)
 {
     for(int iDim = 0; iDim < 3; iDim++) {
         m_isPeriodicDimension[iDim] = false;
@@ -99,18 +95,18 @@ void MoleculeSystem::addAtomsToCorrectCells(vector<Atom *> &atoms)
         int j = position(1) / m_cellLengths(1);
         int k = position(2) / m_cellLengths(2);
 
-        if(i < 0 || i >= m_nCells(0)) {
+        if(i < 0 || i >= m_globalCellsPerDimension(0)) {
             LOG(FATAL) << "Atom ended up outside of system in x direction";
         }
-        if(i < 0 || i >= m_nCells(0)) {
+        if(i < 0 || i >= m_globalCellsPerDimension(0)) {
             LOG(FATAL) << "Atom ended up outside of system in y direction";
         }
-        if(i < 0 || i >= m_nCells(0)) {
+        if(i < 0 || i >= m_globalCellsPerDimension(0)) {
             LOG(FATAL) << "Atom ended up outside of system in z direction";
         }
 
 
-        MoleculeSystemCell* cell = m_cells.at(cellIndex(i,j,k));
+        MoleculeSystemCell* cell = m_globalCells.at(cellIndex(i,j,k));
         //        cout << "Put atom into " << cell->indices();
         cell->addAtom(atom);
     }
@@ -122,7 +118,7 @@ void MoleculeSystem::setStep(uint step)
 }
 
 void MoleculeSystem::deleteAtoms() {
-    for(MoleculeSystemCell* cell : m_cells) {
+    for(MoleculeSystemCell* cell : m_globalCells) {
         for(Atom* atom : cell->atoms()) {
             delete atom;
         }
@@ -131,7 +127,7 @@ void MoleculeSystem::deleteAtoms() {
     //    m_atoms.clear();
 }
 
-const vector<MoleculeSystemCell*>& MoleculeSystem::allCells() const {
+const vector<MoleculeSystemCell*>& MoleculeSystem::localCells() const {
 #ifdef USE_MPI
     return m_processor->cells();
 #else
@@ -159,66 +155,85 @@ void MoleculeSystem::setTwoParticleForce(TwoParticleForce *twoParticleForce)
 
 int MoleculeSystem::cellIndex(int xIndex, int yIndex, int zIndex)
 {
-    return zIndex * m_nCells(0) * m_nCells(1) + yIndex *  m_nCells(0) + xIndex;
+    return zIndex * m_globalCellsPerDimension(0) * m_globalCellsPerDimension(1) + yIndex *  m_globalCellsPerDimension(0) + xIndex;
 }
 
+void MoleculeSystem::setPeriodicity(bool periodicInX, bool periodicInY, bool periodicInZ)
+{
+    m_isPeriodicDimension[0] = periodicInX;
+    m_isPeriodicDimension[1] = periodicInY;
+    m_isPeriodicDimension[2] = periodicInZ;
+}
 
+int MoleculeSystem::nAtomsTotal()
+{
+    return m_nAtomsTotal;
+}
 
 void MoleculeSystem::updateStatistics()
 {
-    if(m_atoms.size() < 1) {
-        m_kineticEnergyTotal = 0;
-        m_potentialEnergyTotal = 0;
-        m_averageDisplacement = 0;
-        m_averageSquareDisplacement = 0;
-        m_pressure = 0;
-        return;
+    // Count the total number of atoms
+    m_nAtomsTotal = 0;
+    for(MoleculeSystemCell* cell : localCells()) {
+        m_nAtomsTotal += cell->atoms().size();
     }
+    LOG(INFO) << world.rank() << " has " << m_nAtomsTotal;
+#ifdef USE_MPI
+    mpi::all_reduce(world, m_nAtomsTotal, m_nAtomsTotal, std::plus<int>());
+#endif
+
     // Calculate total drift
     Vector3 totalDrift;
     totalDrift.zeros();
-    int nAtomsTotal = 0;
-    for(MoleculeSystemCell* cell : allCells()) {
-        nAtomsTotal += cell->atoms().size();
+    for(MoleculeSystemCell* cell : localCells()) {
         for(Atom* atom : cell->atoms()) {
             totalDrift += atom->velocity();
         }
     }
-#ifdef USE_MPI
-    mpi::all_reduce(world, nAtomsTotal, nAtomsTotal, std::plus<int>());
-#endif
 
-    Vector3 averageDrift = totalDrift / nAtomsTotal;
+    Vector3 averageDrift;
+    averageDrift.zeros();
+    if(m_nAtomsTotal > 0) {
+        totalDrift / m_nAtomsTotal;
+    }
 
     // Calculate kinetic and potential energy
     m_kineticEnergyTotal = 0;
     m_potentialEnergyTotal = 0;
-    for(MoleculeSystemCell* cell : allCells()) {
+    for(MoleculeSystemCell* cell : localCells()) {
         for(Atom* atom : cell->atoms()) {
             Vector3 nonDriftVelocity = atom->velocity() - averageDrift;
             m_kineticEnergyTotal += 0.5 * atom->mass() * (dot(nonDriftVelocity, nonDriftVelocity));
             m_potentialEnergyTotal += atom->potential();
         }
     }
+
+    LOG(INFO) << world.rank() << " contribution: " << m_potentialEnergyTotal;
+
 #ifdef USE_MPI
     mpi::all_reduce(world, m_kineticEnergyTotal, m_kineticEnergyTotal, std::plus<double>());
     mpi::all_reduce(world, m_potentialEnergyTotal, m_potentialEnergyTotal, std::plus<double>());
 #endif
-    m_temperature = m_kineticEnergyTotal / (3./2. * nAtomsTotal);
+    if(m_nAtomsTotal > 0) {
+        m_temperature = m_kineticEnergyTotal / (3./2. * m_nAtomsTotal);
+    }
 
     // Calculate diffusion constant
     //    double totalEnergy = (m_potentialEnergyTotal + m_kineticEnergyTotal);
     //    cout << "Atoms: " << nAtomsLocal << " of " << nAtomsTotal << ". Temperature: " << setprecision(5) << m_temperature  << ". Etot: " << totalEnergy << endl;
     m_averageDisplacement = 0;
     m_averageSquareDisplacement = 0;
-    for(MoleculeSystemCell* cell : allCells()) {
+    for(MoleculeSystemCell* cell : localCells()) {
         for(Atom* atom : cell->atoms()) {
             m_averageSquareDisplacement += (dot(atom->displacement(), atom->displacement()));
             m_averageDisplacement += sqrt(m_averageSquareDisplacement);
         }
     }
-    m_averageSquareDisplacement /= nAtomsTotal;
-    m_averageDisplacement /= nAtomsTotal;
+
+    if(m_nAtomsTotal > 0) {
+        m_averageSquareDisplacement /= m_nAtomsTotal;
+        m_averageDisplacement /= m_nAtomsTotal;
+    }
 
 #ifdef USE_MPI
     mpi::all_reduce(world, m_averageSquareDisplacement, m_averageSquareDisplacement, std::plus<double>());
@@ -227,10 +242,10 @@ void MoleculeSystem::updateStatistics()
     // Calculate pressure
     rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
     double volume = (sideLengths(0) * sideLengths(1) * sideLengths(2));
-    double density = nAtomsTotal / volume;
+    double density = m_nAtomsTotal / volume;
     double volumeThreeInverse = 1. / (3. * volume);
     m_pressure = 0;
-    for(MoleculeSystemCell* cell : allCells()) {
+    for(MoleculeSystemCell* cell : localCells()) {
         for(Atom* atom : cell->atoms()) {
             m_pressure += volumeThreeInverse * atom->localPressure();
         }
@@ -246,11 +261,6 @@ void MoleculeSystem::addAtoms(const vector<Atom *>& atoms)
 {
     m_atoms.insert(m_atoms.end(), atoms.begin(), atoms.end());
     obeyBoundaries();
-
-    //    cout << "Positions:" << endl;
-    //    for(Atom* atom : m_atoms) {
-    //        cout << atom->position() << endl;
-    //    }
 }
 
 const vector<Atom *> &MoleculeSystem::atoms() const
@@ -258,9 +268,9 @@ const vector<Atom *> &MoleculeSystem::atoms() const
     return m_atoms;
 }
 
-const vector<MoleculeSystemCell *> &MoleculeSystem::cells() const
+const vector<MoleculeSystemCell *> &MoleculeSystem::globalCells() const
 {
-    return m_cells;
+    return m_globalCells;
 }
 
 void MoleculeSystem::updateForces()
@@ -268,12 +278,12 @@ void MoleculeSystem::updateForces()
     obeyBoundaries();
     //    refreshCellContents();
 #ifdef USE_MPI
-    m_processor->communicateAtoms();
+    //    m_processor->communicateAtoms();
     refreshCellContents();
     m_processor->communicateAtoms();
 #endif
     refreshCellContents();
-    for(MoleculeSystemCell* cell : allCells()) {
+    for(MoleculeSystemCell* cell : globalCells()) {
         for(Atom* atom : cell->atoms()) {
             atom->clearForcePotentialPressure();
             atom->clearNeighborAtoms();
@@ -284,7 +294,6 @@ void MoleculeSystem::updateForces()
     m_processor->clearForcesInNeighborCells();
 #endif
 
-    //    for(TwoParticleForce* m_twoParticleForce : m_twoParticleForces) {
     if(m_twoParticleForce) {
         if(shouldTimeStepBeSaved()) {
             m_twoParticleForce->setCalculatePotentialEnabled(m_isCalculatePotentialEnabled);
@@ -294,20 +303,41 @@ void MoleculeSystem::updateForces()
             m_twoParticleForce->setCalculatePressureEnabled(false);
         }
     }
-    //    }
-    for(MoleculeSystemCell* cell : allCells()) {
-        cell->updateForces();
+
+    // Calculate two-particle force and update atoms' lists of neighbor atoms
+    for(MoleculeSystemCell* cell : globalCells()) {
+        cell->updateTwoParticleForceAndNeighborAtoms();
     }
+
+    // Use the neighbor lists for each atom to calculate the three-particle force
+    if(m_threeParticleForce) {
+        for(MoleculeSystemCell* cell : globalCells()) {
+            for(Atom* atom1 : cell->atoms()) {
+                int counter = 0;
+                for(uint jAtom = 0; jAtom < atom1->neighborAtoms().size(); jAtom++) {
+                    std::pair<Atom*,const Vector3*> atom2 = atom1->neighborAtoms()[jAtom];
+                    for(uint kAtom = jAtom + 1; kAtom < atom1->neighborAtoms().size(); kAtom++) {
+                        std::pair<Atom*,const Vector3*> atom3 = atom1->neighborAtoms()[kAtom];
+                        const Vector3& offsetVector2 = (*(atom2.second));
+                        const Vector3& offsetVector3 = (*(atom3.second));
+                        m_threeParticleForce->calculateAndApplyForce(atom1, atom2.first, atom3.first, offsetVector2, offsetVector3);
+                        counter++;
+                    }
+                }
+            }
+        }
+    }
+
 #ifdef USE_MPI
-    m_processor->communicateForces();
+    //    m_processor->communicateForces();
 #endif
 }
 
 MoleculeSystemCell* MoleculeSystem::cell(int i, int j, int k) {
-    int iPeriodic = (i + m_nCells(0)) % m_nCells(0);
-    int jPeriodic = (j + m_nCells(1)) % m_nCells(1);
-    int kPeriodic = (k + m_nCells(2)) % m_nCells(2);
-    return m_cells.at(iPeriodic + jPeriodic * m_nCells(0) + kPeriodic * m_nCells(0) * m_nCells(1));
+    int iPeriodic = (i + m_globalCellsPerDimension(0)) % m_globalCellsPerDimension(0);
+    int jPeriodic = (j + m_globalCellsPerDimension(1)) % m_globalCellsPerDimension(1);
+    int kPeriodic = (k + m_globalCellsPerDimension(2)) % m_globalCellsPerDimension(2);
+    return m_globalCells.at(iPeriodic + jPeriodic * m_globalCellsPerDimension(0) + kPeriodic * m_globalCellsPerDimension(0) * m_globalCellsPerDimension(1));
 }
 
 void MoleculeSystem::simulate()
@@ -315,24 +345,24 @@ void MoleculeSystem::simulate()
     //    cout << "Factor is " << m_unitLength / m_unitTime << endl;
 
     // Forget about all cells but our own
-    for(MoleculeSystemCell* systemCell : m_cells) {
-        bool inMyCells = false;
-        for(MoleculeSystemCell* cell : allCells()) {
-            if(cell == systemCell) {
-                inMyCells = true;
-            }
-        }
-        if(!inMyCells) {
-            for(Atom* atom : systemCell->atoms()) {
-                delete atom;
-            }
-            systemCell->clearAtoms();
-        }
-    }
-    m_atoms.clear();
-    for(MoleculeSystemCell* cell : allCells()) {
-        addAtoms(cell->atoms());
-    }
+//    for(MoleculeSystemCell* systemCell : m_globalCells) {
+//        bool inMyCells = false;
+//        for(MoleculeSystemCell* cell : localCells()) {
+//            if(cell == systemCell) {
+//                inMyCells = true;
+//            }
+//        }
+//        if(!inMyCells) {
+//            for(Atom* atom : systemCell->atoms()) {
+//                delete atom;
+//            }
+//            systemCell->clearAtoms();
+//        }
+//    }
+//    m_atoms.clear();
+//    for(MoleculeSystemCell* cell : localCells()) {
+//        addAtoms(cell->atoms());
+//    }
 
 #ifdef USE_MPI
     mpi::timer timer;
@@ -406,7 +436,7 @@ bool MoleculeSystem::shouldTimeStepBeSaved()
 
 void MoleculeSystem::obeyBoundaries() {
     // Boundary conditions
-    for(MoleculeSystemCell* cell : allCells()) {
+    for(MoleculeSystemCell* cell : localCells()) {
         for(Atom* atom : cell->atoms()) {
             Vector3 position = atom->position();
             for(int iDim = 0; iDim < m_nDimensions; iDim++) {
@@ -487,28 +517,27 @@ void MoleculeSystem::setupCells() {
     } else {
         cutoffRadius = m_twoParticleForce->cutoffRadius();
     }
-    LOG(INFO) << "Setting up cells...";
-    LOG(INFO) << "Cutoff length: " << cutoffRadius;
-    for(uint i = 0; i < m_cells.size(); i++) {
-        MoleculeSystemCell* cellToDelete = m_cells.at(i);
+    LOG(INFO) << "Setting up cells for " << m_atoms.size() << " atoms with cutoff radius: " << cutoffRadius;
+    for(uint i = 0; i < m_globalCells.size(); i++) {
+        MoleculeSystemCell* cellToDelete = m_globalCells.at(i);
         delete cellToDelete;
     }
-    m_cells.clear();
+    m_globalCells.clear();
 
     int nCellsTotal = 1;
-    m_nCells = zeros<irowvec>(m_nDimensions);
+    m_globalCellsPerDimension = zeros<irowvec>(m_nDimensions);
     m_cellLengths = zeros<rowvec>(m_nDimensions);
     rowvec systemSize = m_boundaries.row(1) - m_boundaries.row(0);
     LOG(INFO) << "System size: " << systemSize;
     for(int iDim = 0; iDim < m_nDimensions; iDim++) {
         double totalLength = m_boundaries(1,iDim) - m_boundaries(0,iDim);
-        m_nCells(iDim) = totalLength / cutoffRadius;
-        m_cellLengths(iDim) = totalLength / m_nCells(iDim);
-        nCellsTotal *= m_nCells(iDim);
+        m_globalCellsPerDimension(iDim) = totalLength / cutoffRadius;
+        m_cellLengths(iDim) = totalLength / m_globalCellsPerDimension(iDim);
+        nCellsTotal *= m_globalCellsPerDimension(iDim);
     }
     if(isOutputEnabled()) {
         LOG(INFO) << "Dividing space into a total of " << nCellsTotal << " cells";
-        LOG(INFO) << "With geometry " << m_nCells;
+        LOG(INFO) << "With geometry " << m_globalCellsPerDimension;
     }
 
     irowvec indices = zeros<irowvec>(m_nDimensions);
@@ -534,24 +563,24 @@ void MoleculeSystem::setupCells() {
 
         cell->setIndices(indices);
 
-        m_cells.push_back(cell);
+        m_globalCells.push_back(cell);
 
         indices(0) += 1;
         for(uint iDim = 1; iDim < indices.size(); iDim++) {
-            if(indices(iDim - 1) > m_nCells(iDim - 1) - 1) {
+            if(indices(iDim - 1) > m_globalCellsPerDimension(iDim - 1) - 1) {
                 indices(iDim - 1) = 0;
                 indices(iDim) += 1;
             }
         }
     }
 
-    if(m_cells.size() < 27) {
-        LOG(FATAL) << "The number of cells can never be less than 27! Got " << m_cells.size() << " cells.";
+    if(m_globalCells.size() < 27) {
+        LOG(FATAL) << "The number of cells can never be less than 27! Got " << m_globalCells.size() << " cells.";
     }
 
     // Find the neighbor cells
     int nNeighbors;
-    for(MoleculeSystemCell *cell1 : m_cells) {
+    for(MoleculeSystemCell *cell1 : m_globalCells) {
         nNeighbors = 0;
         for(int i = -1; i <= 1; i++) {
             for(int j = -1; j <= 1; j++) {
@@ -563,16 +592,16 @@ void MoleculeSystem::setupCells() {
                     bool skipNeighbor = false;
                     for(uint l = 0; l < 3; l++) {
                         if(m_isPeriodicDimension[l]) {
-                            if(shiftVec(l) >= m_nCells(l)) {
-                                shiftVec(l) -= m_nCells(l);
+                            if(shiftVec(l) >= m_globalCellsPerDimension(l)) {
+                                shiftVec(l) -= m_globalCellsPerDimension(l);
                                 offsetVec(l) += (m_boundaries(1,l) - m_boundaries(0,l));
                             } else if(shiftVec(l) < 0) {
-                                shiftVec(l) += m_nCells(l);
+                                shiftVec(l) += m_globalCellsPerDimension(l);
                                 offsetVec(l) -= (m_boundaries(1,l) - m_boundaries(0,l));
                             }
                         } else {
                             // Not periodic boundary conditions and neighbor beyond edge
-                            if(shiftVec(l) >= m_nCells(l) || shiftVec(l) < 0) {
+                            if(shiftVec(l) >= m_globalCellsPerDimension(l) || shiftVec(l) < 0) {
                                 skipNeighbor = true;
                             }
                         }
@@ -580,7 +609,7 @@ void MoleculeSystem::setupCells() {
                     if(skipNeighbor) {
                         continue;
                     }
-                    MoleculeSystemCell* cell2 = m_cells.at(cellIndex(shiftVec(0), shiftVec(1), shiftVec(2)));
+                    MoleculeSystemCell* cell2 = m_globalCells.at(cellIndex(shiftVec(0), shiftVec(1), shiftVec(2)));
                     cell1->addNeighbor(cell2, offsetVec, direction);
                     nNeighbors++;
                 }
@@ -601,12 +630,18 @@ void MoleculeSystem::refreshCellContents() {
         LOG(FATAL) << "Cells must be set up before refreshing their contents!";
     }
     vector<Atom*> allAtoms;
-    for(MoleculeSystemCell* cell : m_cells) {
+    for(MoleculeSystemCell* cell : m_globalCells) {
         allAtoms.insert(allAtoms.end(), cell->atoms().begin(), cell->atoms().end());
         cell->clearAtoms();
     }
     LOG(INFO) << "Refreshing cell contents with " << allAtoms.size() << " atoms";
     addAtomsToCorrectCells(allAtoms);
+
+    int atomCounter = 0;
+    for(MoleculeSystemCell* cell : m_globalCells) {
+        atomCounter += cell->atoms().size();
+    }
+    LOG(INFO) << "Now holds " << atomCounter << " atoms in all cells.";
 }
 
 void MoleculeSystem::setIntegrator(Integrator *integrator)
