@@ -61,10 +61,9 @@ SUITE(ThreeParticleForceSystem) {
         }
     };
 
-    TEST(ThreeParticleForceSum)
+    TEST(ThreeParticlePotentialSumSingleCell)
     {
         LOG(INFO) << "ThreeParticleForceSum test started";
-        cout << "Testing three-particle forces" << endl;
         MoleculeSystem system;
         system.setOutputEnabled(true);
         system.setSaveEnabled(true);
@@ -107,10 +106,9 @@ SUITE(ThreeParticleForceSystem) {
         LOG(INFO) << "ThreeParticleForceSum test complete";
     }
 
-    TEST(ThreeParticleForceSumPeriodic)
+    TEST(ThreeParticlePotentialSumPeriodic)
     {
         LOG(INFO) << "ThreeParticleForceSumPeriodic test started";
-        cout << "Testing three-particle forces with periodic boundaries" << endl;
         MoleculeSystem system;
         Generator generator;
         TwoParticleTestForce testForce2;
@@ -136,7 +134,6 @@ SUITE(ThreeParticleForceSystem) {
                 }
             }
         }
-        cout << system.processor()->rank() << " inserts N atoms: " << atoms.size() << endl;
         system.addAtoms(atoms);
 
         VelocityVerletIntegrator integrator(&system);
@@ -153,7 +150,7 @@ SUITE(ThreeParticleForceSystem) {
         fileManager.setOutFileName("atoms*.bin");
         system.setFileManager(&fileManager);
         system.setSaveEveryNSteps(1);
-        system.setOutputEnabled(true);
+        system.setOutputEnabled(false);
         system.setNSimulationSteps(2);
         system.setupCells();
         testForce2.setCutoffRadius(1.1);
