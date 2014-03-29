@@ -91,7 +91,7 @@ void Processor::setupProcessors()
 
     // Clear local cell state
     for(MoleculeSystemCell* cell : m_moleculeSystem->globalCells()) {
-        cell->setLocalCell(false);
+        cell->setLocal(false);
     }
 
     // Find all local cells
@@ -104,7 +104,7 @@ void Processor::setupProcessors()
                         (m_nProcessorsX > 1 && m_cellRangeX.lastElement() == i) || (m_nProcessorsY > 1 && m_cellRangeY.lastElement() == j) || (m_nProcessorsZ > 1 && m_cellRangeZ.lastElement() == k)) {
                     cell->setOnProcessorEdge(true);
                 }
-                cell->setLocalCell(true);
+                cell->setLocal(true);
                 m_localCells.push_back(cell);
                 m_localAndGhostCells.push_back(cell);
             }
