@@ -36,7 +36,8 @@ public:
     int rank();
     void communicateAtoms();
 
-    const vector<MoleculeSystemCell*>& cells() const;
+    const vector<MoleculeSystemCell*>& localCells() const;
+    const vector<MoleculeSystemCell*>& localAndGhostCells() const;
     bool shouldSendFirst(const irowvec &direction);
     int nAtoms();
     int nProcessors();
@@ -75,7 +76,8 @@ protected:
     Range m_cellRangeY;
     Range m_cellRangeZ;
 
-    vector<MoleculeSystemCell*> m_cells;
+    vector<MoleculeSystemCell*> m_localCells;
+    vector<MoleculeSystemCell*> m_localAndGhostCells;
 
     double m_totalCommunicationTime;
     double m_pureCommunicationTime;
@@ -90,8 +92,13 @@ protected:
     vector<irowvec> forceDirections;
 };
 
-inline const vector<MoleculeSystemCell *> &Processor::cells() const {
-    return m_cells;
+inline const vector<MoleculeSystemCell *> &Processor::localCells() const {
+    return m_localCells;
+}
+
+inline const vector<MoleculeSystemCell *> &Processor::localAndGhostCells() const
+{
+    return m_localAndGhostCells;
 }
 
 #endif // PROCESSOR_H

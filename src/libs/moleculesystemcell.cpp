@@ -14,7 +14,8 @@ MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     //    m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors(false),
     m_id(0),
     force(blankForce),
-    m_isOnProcessorEdge(false)
+    m_isOnProcessorEdge(false),
+    m_isLocalCell(true)
 {
     cellShiftVectors = zeros(pow3nDimensions, m_nDimensions);
 }
@@ -101,6 +102,13 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
         twoParticleForce->setNewtonsThirdLawEnabled(true);
         for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
             MoleculeSystemCell* neighborCell = m_neighborCells[iNeighbor];
+
+            // No reason to calculate forces between atoms on two ghost cells.
+            // This will also skip internal calculations on ghost cells.
+            if(!m_isLocalCell && !neighborCell->isLocalCell()) {
+                continue;
+            }
+
             const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
 
             const vector<Atom*>& neighborCellAtoms = neighborCell->atoms();
@@ -321,4 +329,14 @@ void MoleculeSystemCell::deleteAtomsFromCellAndSystem()
 
 void MoleculeSystemCell::deleteAtoms(int nAtoms) {
     m_atoms.erase(m_atoms.end() - nAtoms, m_atoms.end());
+}
+
+void MoleculeSystemCell::setLocalCell(bool localCell)
+{
+    m_isLocalCell = localCell;
+}
+
+bool MoleculeSystemCell::isLocalCell() const
+{
+    return m_isLocalCell;
 }

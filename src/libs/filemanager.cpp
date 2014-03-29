@@ -422,7 +422,7 @@ bool FileManager::saveBinary(int step) {
     }
 
     // Write atom data
-    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
+    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->localCells()) {
         for(Atom* atom : cell->atoms()) {
             double atomID = atom->id();
             Vector3 position = atom->position() * m_unitLength;
@@ -483,7 +483,7 @@ bool FileManager::saveXyz(int step) {
     }
 
     char line[1000];
-    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->cells()) {
+    for(MoleculeSystemCell* cell : m_moleculeSystem->processor()->localCells()) {
         for(Atom* atom : cell->atoms()) {
             Vector3 position = atom->position() * m_unitLength * 1e10;
             Vector3 velocity = atom->velocity() * (m_unitLength / m_unitTime);

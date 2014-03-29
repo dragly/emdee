@@ -50,6 +50,9 @@ public:
     const vector<MoleculeSystemCell*> &neighborCells() {
         return m_neighborCells;
     }
+
+    void setLocalCell(bool localCell);
+    bool isLocalCell() const;
 protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
@@ -73,6 +76,7 @@ protected:
     Vector3 blankForce;
     Vector3 zeroOffset;
     bool m_isOnProcessorEdge;
+    bool m_isLocalCell;
 };
 
 inline void MoleculeSystemCell::setOnProcessorEdge(bool enable) {

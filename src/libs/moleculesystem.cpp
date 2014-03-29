@@ -129,7 +129,7 @@ void MoleculeSystem::deleteAtoms() {
 
 const vector<MoleculeSystemCell*>& MoleculeSystem::localCells() const {
 #ifdef USE_MPI
-    return m_processor->cells();
+    return m_processor->localCells();
 #else
     return cells();
 #endif
@@ -168,6 +168,15 @@ void MoleculeSystem::setPeriodicity(bool periodicInX, bool periodicInY, bool per
 int MoleculeSystem::nAtomsTotal()
 {
     return m_nAtomsTotal;
+}
+
+const vector<MoleculeSystemCell *> &MoleculeSystem::localAndGhostCells() const
+{
+#ifdef MD_USE_MPI
+    return m_processor->localAndGhostCells();
+#else
+    return m_globalCells;
+#endif
 }
 
 void MoleculeSystem::updateStatistics()
@@ -283,7 +292,7 @@ void MoleculeSystem::updateForces()
     m_processor->communicateAtoms();
 #endif
     refreshCellContents();
-    for(MoleculeSystemCell* cell : globalCells()) {
+    for(MoleculeSystemCell* cell : localAndGhostCells()) {
         for(Atom* atom : cell->atoms()) {
             atom->clearForcePotentialPressure();
             atom->clearNeighborAtoms();
@@ -305,13 +314,13 @@ void MoleculeSystem::updateForces()
     }
 
     // Calculate two-particle force and update atoms' lists of neighbor atoms
-    for(MoleculeSystemCell* cell : globalCells()) {
+    for(MoleculeSystemCell* cell : localAndGhostCells()) {
         cell->updateTwoParticleForceAndNeighborAtoms();
     }
 
     // Use the neighbor lists for each atom to calculate the three-particle force
     if(m_threeParticleForce) {
-        for(MoleculeSystemCell* cell : globalCells()) {
+        for(MoleculeSystemCell* cell : localAndGhostCells()) {
             for(Atom* atom1 : cell->atoms()) {
                 int counter = 0;
                 for(uint jAtom = 0; jAtom < atom1->neighborAtoms().size(); jAtom++) {
@@ -553,12 +562,12 @@ void MoleculeSystem::setupCells() {
     }
 
     if(m_globalCells.size() < 27) {
-        LOG(FATAL) << "The number of cells can never be less than 27! Got " << m_globalCells.size() << " cells.";
+        LOG(FATAL) << "The number of cells can never be less than 27! Got " << globalCells().size() << " cells.";
     }
 
     // Find the neighbor cells
     int nNeighbors;
-    for(MoleculeSystemCell *cell1 : m_globalCells) {
+    for(MoleculeSystemCell *cell1 : globalCells()) {
         nNeighbors = 0;
         for(int i = -1; i <= 1; i++) {
             for(int j = -1; j <= 1; j++) {
