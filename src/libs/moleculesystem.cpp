@@ -109,10 +109,8 @@ void MoleculeSystem::addAtomsToCorrectCells(vector<Atom *> &atoms)
             LOG(FATAL) << "Atom ended up outside of system in z direction";
         }
 
-        int cellID = k * m_nCells(0) * m_nCells(1) + j *  m_nCells(0) + i;
 
-
-        MoleculeSystemCell* cell = m_cells.at(cellID);
+        MoleculeSystemCell* cell = m_cells.at(cellIndex(i,j,k));
         //        cout << "Put atom into " << cell->indices();
         cell->addAtom(atom);
     }
@@ -157,6 +155,11 @@ TwoParticleForce *MoleculeSystem::twoParticleForce() const
 void MoleculeSystem::setTwoParticleForce(TwoParticleForce *twoParticleForce)
 {
     m_twoParticleForce = twoParticleForce;
+}
+
+int MoleculeSystem::cellIndex(int xIndex, int yIndex, int zIndex)
+{
+    return zIndex * m_nCells(0) * m_nCells(1) + yIndex *  m_nCells(0) + xIndex;
 }
 
 
@@ -542,57 +545,47 @@ void MoleculeSystem::setupCells() {
         }
     }
 
+    if(m_cells.size() < 27) {
+        LOG(FATAL) << "The number of cells can never be less than 27! Got " << m_cells.size() << " cells.";
+    }
+
     // Find the neighbor cells
     int nNeighbors;
     for(MoleculeSystemCell *cell1 : m_cells) {
-        irowvec counters = zeros<irowvec>(3);
         nNeighbors = 0;
         for(int i = -1; i <= 1; i++) {
             for(int j = -1; j <= 1; j++) {
                 for(int k = -1; k <= 1; k++) {
-                    if(i == j == k == 0) {
-                        continue; // do not add ourselves
-                    }
                     irowvec direction = {i, j, k};
                     irowvec shiftVec = (cell1->indices() + direction);
                     rowvec offsetVec = zeros<rowvec>(3);
                     // Boundaries
-                    for(uint j = 0; j < shiftVec.n_cols; j++) {
-                        if(shiftVec(j) >= m_nCells(j)) {
-                            shiftVec(j) -= m_nCells(j);
-                            offsetVec(j) += (m_boundaries(1,j) - m_boundaries(0,j));
-                        } else if(shiftVec(j) < 0) {
-                            shiftVec(j) += m_nCells(j);
-                            offsetVec(j) -= (m_boundaries(1,j) - m_boundaries(0,j));
+                    bool skipNeighbor = false;
+                    for(uint l = 0; l < 3; l++) {
+                        if(m_isPeriodicDimension[l]) {
+                            if(shiftVec(l) >= m_nCells(l)) {
+                                shiftVec(l) -= m_nCells(l);
+                                offsetVec(l) += (m_boundaries(1,l) - m_boundaries(0,l));
+                            } else if(shiftVec(l) < 0) {
+                                shiftVec(l) += m_nCells(l);
+                                offsetVec(l) -= (m_boundaries(1,l) - m_boundaries(0,l));
+                            }
+                        } else {
+                            // Not periodic boundary conditions and neighbor beyond edge
+                            if(shiftVec(l) >= m_nCells(l) || shiftVec(l) < 0) {
+                                skipNeighbor = true;
+                            }
                         }
                     }
-                    int cellIndex = 0;
-                    for(int j = 0; j < m_nDimensions; j++) {
-                        int multiplicator = 1;
-                        for(int k = j + 1; k < m_nDimensions; k++) {
-                            multiplicator *= m_nCells(m_nDimensions - k - 1);
-                        }
-                        cellIndex += multiplicator * shiftVec(m_nDimensions - j - 1);
+                    if(skipNeighbor) {
+                        continue;
                     }
-                    MoleculeSystemCell* cell2 = m_cells.at(cellIndex);
-                    if(cell2 != cell1 || m_cells.size() == 1) {
-                        cell1->addNeighbor(cell2, offsetVec, direction);
-                        nNeighbors++;
-                    }
-                    counters(0) += 1;
-                    for(uint iDim = 1; iDim < indices.size(); iDim++) {
-                        if(counters(iDim - 1) >= m_nDimensions) {
-                            counters(iDim - 1) = 0;
-                            counters(iDim) += 1;
-                        }
-                    }
+                    MoleculeSystemCell* cell2 = m_cells.at(cellIndex(shiftVec(0), shiftVec(1), shiftVec(2)));
+                    cell1->addNeighbor(cell2, offsetVec, direction);
+                    nNeighbors++;
                 }
             }
         }
-    }
-
-    if(m_cells.size() < 27) {
-        LOG(FATAL) << "The number of cells can never be less than 27! Got " << m_cells.size() << " cells.";
     }
 
     m_areCellsSetUp = true;

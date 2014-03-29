@@ -56,7 +56,7 @@ MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
     lastBoundaries(1,2) += 5;
     m_moleculeSystem->setBoundaries(lastBoundaries);
     m_moleculeSystem->addAtoms(atoms);
-    m_moleculeSystem->setupCells(potentialConstant * 3);
+    m_moleculeSystem->setupCells();
 }
 
 void MolecularDynamics::drawItem(QGLPainter *painter)

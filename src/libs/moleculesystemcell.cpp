@@ -103,6 +103,10 @@ bool MoleculeSystemCell::shouldNewtonsThirdBeEnabled(MoleculeSystemCell* neighbo
 
 bool MoleculeSystemCell::checkDirection(int neighborID) {
     const irowvec& direction = m_neighborDirections[neighborID];
+    return checkDirection(direction);
+}
+
+bool MoleculeSystemCell::checkDirection(const irowvec &direction) {
     bool is2x2x3UpperRight = ((direction(0) >= 0 && direction(1) >= 0)
                               && !(direction(0) == 0 && direction(1) == 0 && direction(2) == -1));
     bool is1x1x3LowerRight = (direction(0) == 1 && direction(1) == -1);
@@ -136,6 +140,9 @@ void MoleculeSystemCell::updateForces()
             const vector<Atom*>& neighborCellAtoms = neighborCell->atoms();
             for(Atom* atom1 : m_atoms) {
                 for(Atom* atom2 : neighborCellAtoms) {
+                    if(atom1 == atom2) {
+                        continue;
+                    }
                     if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
                         continue;
                     }
@@ -151,24 +158,24 @@ void MoleculeSystemCell::updateForces()
         }
 
         // Loop over own atoms
-        for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
-            Atom* atom1 = m_atoms[iAtom];
-            int jAtomStart = 0;
-            jAtomStart = iAtom + 1;
-            for(uint jAtom = jAtomStart; jAtom < m_atoms.size(); jAtom++) {
-                Atom* atom2 = m_atoms[jAtom];
-                if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
-                    continue;
-                }
-                double distanceSquared = Vector3::differenceSquared(atom1->position(), atom2->position());
-                if(distanceSquared > cutoffRadiusSquared) {
-                    continue;
-                }
-                atom1->addNeighborAtom(atom2, &zeroOffset);
-                atom2->addNeighborAtom(atom1, &zeroOffset);
-                twoParticleForce->calculateAndApplyForce(atom1, atom2);
-            }
-        }
+//        for(uint iAtom = 0; iAtom < m_atoms.size(); iAtom++) {
+//            Atom* atom1 = m_atoms[iAtom];
+//            int jAtomStart = 0;
+//            jAtomStart = iAtom + 1;
+//            for(uint jAtom = jAtomStart; jAtom < m_atoms.size(); jAtom++) {
+//                Atom* atom2 = m_atoms[jAtom];
+//                if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
+//                    continue;
+//                }
+//                double distanceSquared = Vector3::differenceSquared(atom1->position(), atom2->position());
+//                if(distanceSquared > cutoffRadiusSquared) {
+//                    continue;
+//                }
+//                atom1->addNeighborAtom(atom2, &zeroOffset);
+//                atom2->addNeighborAtom(atom1, &zeroOffset);
+//                twoParticleForce->calculateAndApplyForce(atom1, atom2);
+//            }
+//        }
     }
 
     if(threeParticleForce) {

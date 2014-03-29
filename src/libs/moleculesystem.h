@@ -150,6 +150,8 @@ public:
     TwoParticleForce *twoParticleForce() const;
     void setTwoParticleForce(TwoParticleForce *twoParticleForce);
 
+    int cellIndex(int xIndex, int yIndex, int zIndex);
+
 protected:
     vector<Atom*> m_atoms;
     Integrator *m_integrator;
