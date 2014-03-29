@@ -100,10 +100,10 @@ void Processor::setupProcessors()
             for(int k = m_cellRangeZ.firstElement(); k <= m_cellRangeZ.lastElement(); k++) {
                 //                cout << "I have cells " << i << " " << j << " " << k << endl;
                 MoleculeSystemCell* cell = m_moleculeSystem->cell(i,j,k);
-                if((m_nProcessorsX > 1 && m_cellRangeX.firstElement() == i) || (m_nProcessorsY > 1 && m_cellRangeY.firstElement() == j) || (m_nProcessorsZ > 1 && m_cellRangeZ.firstElement() == k) ||
-                        (m_nProcessorsX > 1 && m_cellRangeX.lastElement() == i) || (m_nProcessorsY > 1 && m_cellRangeY.lastElement() == j) || (m_nProcessorsZ > 1 && m_cellRangeZ.lastElement() == k)) {
-                    cell->setOnProcessorEdge(true);
-                }
+//                if((m_nProcessorsX > 1 && m_cellRangeX.firstElement() == i) || (m_nProcessorsY > 1 && m_cellRangeY.firstElement() == j) || (m_nProcessorsZ > 1 && m_cellRangeZ.firstElement() == k) ||
+//                        (m_nProcessorsX > 1 && m_cellRangeX.lastElement() == i) || (m_nProcessorsY > 1 && m_cellRangeY.lastElement() == j) || (m_nProcessorsZ > 1 && m_cellRangeZ.lastElement() == k)) {
+//                    cell->setOnProcessorEdge(true);
+//                }
                 cell->setLocal(true);
                 m_localCells.push_back(cell);
                 m_localAndGhostCells.push_back(cell);

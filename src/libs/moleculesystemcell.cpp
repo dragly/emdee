@@ -105,7 +105,7 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
 
             // No reason to calculate forces between atoms on two ghost cells.
             // This will also skip internal calculations on ghost cells.
-            if(!m_isLocalCell && !neighborCell->isLocalCell()) {
+            if(!m_isLocalCell && !neighborCell->local()) {
                 continue;
             }
 
@@ -331,12 +331,12 @@ void MoleculeSystemCell::deleteAtoms(int nAtoms) {
     m_atoms.erase(m_atoms.end() - nAtoms, m_atoms.end());
 }
 
-void MoleculeSystemCell::setLocalCell(bool localCell)
+void MoleculeSystemCell::setLocal(bool localCell)
 {
     m_isLocalCell = localCell;
 }
 
-bool MoleculeSystemCell::isLocalCell() const
+bool MoleculeSystemCell::local() const
 {
     return m_isLocalCell;
 }

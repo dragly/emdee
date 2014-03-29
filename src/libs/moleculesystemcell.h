@@ -38,14 +38,7 @@ public:
     void deleteAtomsFromCellAndSystem();
     void setID(int id);
     int id();
-
-//    bool hasAlreadyCalculatedForcesBetweenSelfAndNeighbors()
-//    {
-//        return m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
-    //    }
     void addAtoms(const vector<Atom *> &atoms);
-    void setOnProcessorEdge(bool enable);
-    bool isOnProcessorEdge();
     void deleteAtoms(int nAtoms);
     const vector<MoleculeSystemCell*> &neighborCells() {
         return m_neighborCells;
@@ -63,7 +56,6 @@ protected:
     int pow3nDimensions;
     irowvec m_indices;
     MoleculeSystem* m_moleculeSystem;
-//    bool m_hasAlreadyCalculatedForcesBetweenSelfAndNeighbors;
 
     mat m_boundaries;
     mat cellShiftVectors;
@@ -78,13 +70,5 @@ protected:
     bool m_isOnProcessorEdge;
     bool m_isLocalCell;
 };
-
-inline void MoleculeSystemCell::setOnProcessorEdge(bool enable) {
-    m_isOnProcessorEdge = enable;
-}
-
-inline bool MoleculeSystemCell::isOnProcessorEdge() {
-    return m_isOnProcessorEdge;
-}
 
 #endif // MOLECULESYSTEMCELL_H
