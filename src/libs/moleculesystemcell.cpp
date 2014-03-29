@@ -304,7 +304,7 @@ void MoleculeSystemCell::setID(int id)
     m_id = id;
 }
 
-int MoleculeSystemCell::id()
+int MoleculeSystemCell::id() const
 {
     return m_id;
 }

@@ -37,7 +37,7 @@ public:
     void clearAlreadyCalculatedNeighbors();
     void deleteAtomsFromCellAndSystem();
     void setID(int id);
-    int id();
+    int id() const;
     void addAtoms(const vector<Atom *> &atoms);
     void deleteAtoms(int nAtoms);
     const vector<MoleculeSystemCell*> &neighborCells() {
