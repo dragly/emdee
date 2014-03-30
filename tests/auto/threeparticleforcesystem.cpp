@@ -183,7 +183,7 @@ SUITE(ThreeParticleForceSystem) {
         MoleculeSystem system;
         Generator generator;
         TwoParticleTestForce testForce2;
-        testForce2.setCutoffRadius(1.01);
+        testForce2.setCutoffRadius(2.0);
         ThreeParticleTestForce testForce3;
 
         vector<AtomType> particleTypes;
@@ -213,7 +213,7 @@ SUITE(ThreeParticleForceSystem) {
         system.setIntegrator(&integrator);
         system.setTwoParticleForce(&testForce2);
         system.setThreeParticleForce(&testForce3);
-        system.setBoundaries(0.0, 10.1, 0.0, 10.1, 0.0, 10.1);
+        system.setBoundaries(0.0, 10.0, 0.0, 10.0, 0.0, 10.0);
         system.setSaveEnabled(true);
         // TODO Add a check to see if the particle types are actually set
         system.setParticleTypes(particleTypes);
@@ -224,7 +224,7 @@ SUITE(ThreeParticleForceSystem) {
         system.setOutputEnabled(false);
         system.setNSimulationSteps(2);
         system.setupCells();
-        testForce2.setCutoffRadius(1.1);
+        testForce2.setCutoffRadius(1.0);
         system.simulate();
 
         CHECK_EQUAL(1000, system.nAtomsTotal());
@@ -240,6 +240,7 @@ SUITE(ThreeParticleForceSystem) {
                 CHECK_CLOSE(15, atom->potential(), 1e-9);
             }
         }
+
         // There are 27 atoms
         // Each atom has 6 neighbors
         // There are 6c2 = 15 ways to pick two neighbors for a three-particle force calculation

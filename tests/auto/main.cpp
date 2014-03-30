@@ -26,6 +26,7 @@ int main(int argc, char* argv[])
     mpi::communicator world;
     (void)env;
     (void)world;
+
 #else
     (void)argc;
 #endif
@@ -36,6 +37,7 @@ int main(int argc, char* argv[])
 //    UnitTest::TestRunner runner(reporter);
 //    result = runner.RunTestsIf(UnitTest::Test::GetTestList(), "ForceCellTest", UnitTest::True(), 0);
 //    return result;
+
     return UnitTest::RunAllTests();
 }
 
