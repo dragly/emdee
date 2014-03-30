@@ -29,17 +29,13 @@ int main(int argc, char* argv[])
 #else
     (void)argc;
 #endif
-
-    google::InitGoogleLogging(argv[0]);
-
     feenableexcept(FE_INVALID | FE_OVERFLOW);
 
 //    int result = 0;
 //    UnitTest::TestReporterStdout reporter;
 //    UnitTest::TestRunner runner(reporter);
-//    result = runner.RunTestsIf(UnitTest::Test::GetTestList(), "ThreeParticleForceSystem", UnitTest::True(), 0);
+//    result = runner.RunTestsIf(UnitTest::Test::GetTestList(), "ForceCellTest", UnitTest::True(), 0);
 //    return result;
-
     return UnitTest::RunAllTests();
 }
 

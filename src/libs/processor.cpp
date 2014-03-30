@@ -64,6 +64,7 @@ void Processor::setupProcessors()
     sendNeighbors.clear();
     receiveNeighbors.clear();
     m_localCells.clear();
+    m_localAndGhostCells.clear();
 
     m_nProcessors = world.size();
     //    cout << "Setting up " << m_nProcessors << " processors" << endl;
@@ -165,7 +166,15 @@ void Processor::setupProcessors()
                     int kReceiveLocal = (kReceive + m_moleculeSystem->nCells()(2)) % m_moleculeSystem->nCells()(2);
                     cellsToSend.push_back(m_moleculeSystem->cell(iSendLocal, jSendLocal, kSendLocal));
                     cellsToReceive.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
-                    m_localAndGhostCells.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
+                    bool cellAlreadyAdded = false;
+                    for(MoleculeSystemCell* currentCell : m_localAndGhostCells) {
+                        if(currentCell == m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal)) {
+                            cellAlreadyAdded = true;
+                        }
+                    }
+                    if(!cellAlreadyAdded) {
+                        m_localAndGhostCells.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
+                    }
                 }
             }
         } else if(abs(direction(1)) == 1) { // y-directional faces
@@ -190,7 +199,16 @@ void Processor::setupProcessors()
                     int kReceiveLocal = (kReceive + m_moleculeSystem->nCells()(2)) % m_moleculeSystem->nCells()(2);
                     cellsToSend.push_back(m_moleculeSystem->cell(iSendLocal, jSendLocal, kSendLocal));
                     cellsToReceive.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
-                    m_localAndGhostCells.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
+
+                    bool cellAlreadyAdded = false;
+                    for(MoleculeSystemCell* currentCell : m_localAndGhostCells) {
+                        if(currentCell == m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal)) {
+                            cellAlreadyAdded = true;
+                        }
+                    }
+                    if(!cellAlreadyAdded) {
+                        m_localAndGhostCells.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
+                    }
                 }
             }
         } else if(abs(direction(2)) == 1) { // z-directional faces
@@ -215,7 +233,16 @@ void Processor::setupProcessors()
                     int kReceiveLocal = (kReceive + m_moleculeSystem->nCells()(2)) % m_moleculeSystem->nCells()(2);
                     cellsToSend.push_back(m_moleculeSystem->cell(iSendLocal, jSendLocal, kSendLocal));
                     cellsToReceive.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
-                    m_localAndGhostCells.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
+
+                    bool cellAlreadyAdded = false;
+                    for(MoleculeSystemCell* currentCell : m_localAndGhostCells) {
+                        if(currentCell == m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal)) {
+                            cellAlreadyAdded = true;
+                        }
+                    }
+                    if(!cellAlreadyAdded) {
+                        m_localAndGhostCells.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
+                    }
                 }
             }
         }

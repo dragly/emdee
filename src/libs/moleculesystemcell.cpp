@@ -103,12 +103,6 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
         for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
             MoleculeSystemCell* neighborCell = m_neighborCells[iNeighbor];
 
-            // No reason to calculate forces between atoms on two ghost cells.
-            // This will also skip internal calculations on ghost cells.
-            if(!m_isLocalCell && !neighborCell->local()) {
-                continue;
-            }
-
             const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
 
             const vector<Atom*>& neighborCellAtoms = neighborCell->atoms();
@@ -130,7 +124,12 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
                     }
                     atom1->addNeighborAtom(atom2, &neighborOffset);
                     atom2->addNeighborAtom(atom1, &neighborOffset);
-                    twoParticleForce->calculateAndApplyForce(atom1, atom2, neighborOffset);
+
+                    // No reason to calculate forces between atoms on two ghost cells.
+                    // This will also skip internal calculations on ghost cells.
+                    if(m_isLocalCell || neighborCell->local()) {
+                        twoParticleForce->calculateAndApplyForce(atom1, atom2, neighborOffset);
+                    }
                 }
             }
         }

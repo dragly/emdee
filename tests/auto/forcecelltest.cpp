@@ -9,7 +9,7 @@
 #include <integrator/integrator.h>
 #include <glog/logging.h>
 
-void setupSixAtoms(const vector<Atom*> atoms) {
+void setupSixAtoms(const vector<Atom*>& atoms) {
     Vector3 offset(-13.5, 0, 0);
     atoms[0]->setPosition(Vector3(10,12,12) + offset);
     atoms[1]->setPosition(Vector3(17.5,12.5,12.5) + offset);
@@ -52,13 +52,18 @@ TEST(ForceCellTest) {
 
 
     Atom* atom;
+    int idCounter = 1;
     for(int i = 0; i < 2; i++) {
         atom = new Atom(silicon);
+        atom->setID(idCounter);
         atoms.push_back(atom);
+        idCounter++;
     }
     for(int i = 0; i < 4; i++) {
         atom = new Atom(oxygen);
+        atom->setID(idCounter);
         atoms.push_back(atom);
+        idCounter++;
     }
     setupSixAtoms(atoms);
 
@@ -71,7 +76,7 @@ TEST(ForceCellTest) {
     system.addAtoms(atoms);
     system.setBoundaries(0,30);
     system.setupCells();
-    system.setSaveEnabled(true);
+    system.setSaveEnabled(false);
     FileManager fileManager(&system);
 
     fileManager.setOutFileName("/tmp/data*.bin");
