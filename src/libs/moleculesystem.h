@@ -155,7 +155,7 @@ public:
 
     int nAtomsTotal();
 
-    const vector<MoleculeSystemCell*>& localAndGhostCells() const;
+    const vector<MoleculeSystemCell *> &localAndGhostCells() const;
 
 protected:
     vector<Atom*> m_atoms;
