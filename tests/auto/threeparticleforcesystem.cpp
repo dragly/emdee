@@ -176,4 +176,75 @@ SUITE(ThreeParticleForceSystem) {
         CHECK_CLOSE(405, system.potentialEnergyTotal(), 1e-9);
         LOG(INFO) << "ThreeParticleForceSumPeriodic test complete";
     }
+
+    TEST(ThreeParticlePotentialSumPeriodicLarge)
+    {
+        LOG(INFO) << "ThreeParticleForceSumPeriodic test started";
+        MoleculeSystem system;
+        Generator generator;
+        TwoParticleTestForce testForce2;
+        testForce2.setCutoffRadius(1.01);
+        ThreeParticleTestForce testForce3;
+
+        vector<AtomType> particleTypes;
+        AtomType dummyType(0);
+        dummyType.setNumber(1);
+        particleTypes.push_back(dummyType);
+        vector<Atom*> atoms;
+        atoms.reserve(10*10*10);
+        int idCounter = 1;
+        // Set up a system with one atom in each cell
+        for(int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; ++j) {
+                for (int k = 0; k < 10; ++k) {
+                    Atom* atom = new Atom(dummyType);
+                    atom->setID(idCounter);
+                    atom->setPosition(Vector3(0.5 + k, 0.5 + j, 0.5 + i));
+                    atoms.push_back(atom);
+                    idCounter += 1;
+                }
+            }
+        }
+        system.addAtoms(atoms);
+
+        VelocityVerletIntegrator integrator(&system);
+        integrator.setTimeStep(0.005);
+        system.setPeriodicity(true, true, true);
+        system.setIntegrator(&integrator);
+        system.setTwoParticleForce(&testForce2);
+        system.setThreeParticleForce(&testForce3);
+        system.setBoundaries(0.0, 10.1, 0.0, 10.1, 0.0, 10.1);
+        system.setSaveEnabled(true);
+        // TODO Add a check to see if the particle types are actually set
+        system.setParticleTypes(particleTypes);
+        FileManager fileManager(&system);
+        fileManager.setOutFileName("./atoms*.bin");
+        system.setFileManager(&fileManager);
+        system.setSaveEveryNSteps(1);
+        system.setOutputEnabled(false);
+        system.setNSimulationSteps(2);
+        system.setupCells();
+        testForce2.setCutoffRadius(1.1);
+        system.simulate();
+
+        CHECK_EQUAL(1000, system.nAtomsTotal());
+
+        for(MoleculeSystemCell* cell : system.localCells()) {
+            for(Atom* atom : cell->atoms()) {
+                CHECK_EQUAL(6, atom->neighborAtoms().size());
+            }
+        }
+
+        for(MoleculeSystemCell* cell : system.localCells()) {
+            for(Atom* atom : cell->atoms()) {
+                CHECK_CLOSE(15, atom->potential(), 1e-9);
+            }
+        }
+        // There are 27 atoms
+        // Each atom has 6 neighbors
+        // There are 6c2 = 15 ways to pick two neighbors for a three-particle force calculation
+        // Resulting in 15 * 27 = 405 force calculations in total
+        CHECK_CLOSE(15000, system.potentialEnergyTotal(), 1e-9);
+        LOG(INFO) << "ThreeParticleForceSumPeriodic test complete";
+    }
 }
