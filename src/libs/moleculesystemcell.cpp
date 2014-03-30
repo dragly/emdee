@@ -102,7 +102,13 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
         twoParticleForce->setNewtonsThirdLawEnabled(true);
         for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
             MoleculeSystemCell* neighborCell = m_neighborCells[iNeighbor];
-
+            // No reason to calculate forces between atoms on two ghost cells.
+            // This will also skip internal calculations on ghost cells.
+            // This skip may only be performed if there are no need for
+            // listing neighbors, as it is when three-particle forces are in use
+            if(!m_moleculeSystem->threeParticleForce() && !m_isLocalCell && !neighborCell->local()) {
+                continue;
+            }
             const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
 
             const vector<Atom*>& neighborCellAtoms = neighborCell->atoms();
