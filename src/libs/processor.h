@@ -36,8 +36,8 @@ public:
     int rank();
     void communicateAtoms();
 
-    const vector<MoleculeSystemCell*>& localCells() const;
-    const vector<MoleculeSystemCell*>& localAndGhostCells() const;
+    const vector<MoleculeSystemCell *> &localCells() const;
+    const vector<MoleculeSystemCell *> &localAndGhostCells() const;
     bool shouldSendFirst(const irowvec &direction);
     int nAtoms();
     int nProcessors();
