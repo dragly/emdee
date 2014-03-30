@@ -134,7 +134,8 @@ void Processor::setupProcessors()
         receiveNeighbor.rank = sendNeighbor.coordinates(0) * m_nProcessorsY * m_nProcessorsZ + sendNeighbor.coordinates(1) * m_nProcessorsZ + sendNeighbor.coordinates(2);
 
         if(sendNeighbor.rank == world.rank()) {
-            //            cout << "No need to communicate with self..." << endl;
+            // If we're supposed to communicate with ourselves, we may
+            // just push this information and skip the list of cells.
             sendNeighbors.push_back(sendNeighbor);
             receiveNeighbors.push_back(receiveNeighbor);
             continue;
@@ -165,15 +166,10 @@ void Processor::setupProcessors()
                     int kSendLocal = (kSend + m_moleculeSystem->nCells()(2)) % m_moleculeSystem->nCells()(2);
                     int kReceiveLocal = (kReceive + m_moleculeSystem->nCells()(2)) % m_moleculeSystem->nCells()(2);
                     cellsToSend.push_back(m_moleculeSystem->cell(iSendLocal, jSendLocal, kSendLocal));
-                    cellsToReceive.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
-                    bool cellAlreadyAdded = false;
-                    for(MoleculeSystemCell* currentCell : m_localAndGhostCells) {
-                        if(currentCell == m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal)) {
-                            cellAlreadyAdded = true;
-                        }
-                    }
-                    if(!cellAlreadyAdded) {
-                        m_localAndGhostCells.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
+                    MoleculeSystemCell* cellToReceive = m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal);
+                    cellsToReceive.push_back(cellToReceive);
+                    if(std::find(m_localAndGhostCells.begin(), m_localAndGhostCells.end(), cellToReceive) == m_localAndGhostCells.end()) {
+                        m_localAndGhostCells.push_back(cellToReceive);
                     }
                 }
             }
@@ -198,16 +194,10 @@ void Processor::setupProcessors()
                     int kSendLocal = (kSend + m_moleculeSystem->nCells()(2)) % m_moleculeSystem->nCells()(2);
                     int kReceiveLocal = (kReceive + m_moleculeSystem->nCells()(2)) % m_moleculeSystem->nCells()(2);
                     cellsToSend.push_back(m_moleculeSystem->cell(iSendLocal, jSendLocal, kSendLocal));
-                    cellsToReceive.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
-
-                    bool cellAlreadyAdded = false;
-                    for(MoleculeSystemCell* currentCell : m_localAndGhostCells) {
-                        if(currentCell == m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal)) {
-                            cellAlreadyAdded = true;
-                        }
-                    }
-                    if(!cellAlreadyAdded) {
-                        m_localAndGhostCells.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
+                    MoleculeSystemCell* cellToReceive = m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal);
+                    cellsToReceive.push_back(cellToReceive);
+                    if(std::find(m_localAndGhostCells.begin(), m_localAndGhostCells.end(), cellToReceive) == m_localAndGhostCells.end()) {
+                        m_localAndGhostCells.push_back(cellToReceive);
                     }
                 }
             }
@@ -232,16 +222,10 @@ void Processor::setupProcessors()
                     int kSendLocal = (kSend + m_moleculeSystem->nCells()(2)) % m_moleculeSystem->nCells()(2);
                     int kReceiveLocal = (kReceive + m_moleculeSystem->nCells()(2)) % m_moleculeSystem->nCells()(2);
                     cellsToSend.push_back(m_moleculeSystem->cell(iSendLocal, jSendLocal, kSendLocal));
-                    cellsToReceive.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
-
-                    bool cellAlreadyAdded = false;
-                    for(MoleculeSystemCell* currentCell : m_localAndGhostCells) {
-                        if(currentCell == m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal)) {
-                            cellAlreadyAdded = true;
-                        }
-                    }
-                    if(!cellAlreadyAdded) {
-                        m_localAndGhostCells.push_back(m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal));
+                    MoleculeSystemCell* cellToReceive = m_moleculeSystem->cell(iReceiveLocal, jReceiveLocal, kReceiveLocal);
+                    cellsToReceive.push_back(cellToReceive);
+                    if(std::find(m_localAndGhostCells.begin(), m_localAndGhostCells.end(), cellToReceive) == m_localAndGhostCells.end()) {
+                        m_localAndGhostCells.push_back(cellToReceive);
                     }
                 }
             }
