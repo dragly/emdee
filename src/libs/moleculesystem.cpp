@@ -131,7 +131,7 @@ const vector<MoleculeSystemCell*>& MoleculeSystem::localCells() const {
 #ifdef USE_MPI
     return m_processor->localCells();
 #else
-    return cells();
+    return globalCells();
 #endif
 }
 ThreeParticleForce *MoleculeSystem::threeParticleForce() const
@@ -186,8 +186,8 @@ void MoleculeSystem::updateStatistics()
     for(MoleculeSystemCell* cell : localCells()) {
         m_nAtomsTotal += cell->atoms().size();
     }
-    LOG(INFO) << world.rank() << " has " << m_nAtomsTotal;
 #ifdef USE_MPI
+    LOG(INFO) << world.rank() << " has " << m_nAtomsTotal;
     mpi::all_reduce(world, m_nAtomsTotal, m_nAtomsTotal, std::plus<int>());
 #endif
 
@@ -216,8 +216,6 @@ void MoleculeSystem::updateStatistics()
             m_potentialEnergyTotal += atom->potential();
         }
     }
-
-    LOG(INFO) << world.rank() << " contribution: " << m_potentialEnergyTotal;
 
 #ifdef USE_MPI
     mpi::all_reduce(world, m_kineticEnergyTotal, m_kineticEnergyTotal, std::plus<double>());

@@ -146,9 +146,6 @@ SUITE(ThreeParticleForceSystem) {
         system.setSaveEnabled(true);
         // TODO Add a check to see if the particle types are actually set
         system.setParticleTypes(particleTypes);
-        FileManager fileManager(&system);
-        fileManager.setOutFileName("./atoms*.bin");
-        system.setFileManager(&fileManager);
         system.setSaveEveryNSteps(1);
         system.setOutputEnabled(false);
         system.setNSimulationSteps(2);
@@ -217,9 +214,6 @@ SUITE(ThreeParticleForceSystem) {
         system.setSaveEnabled(true);
         // TODO Add a check to see if the particle types are actually set
         system.setParticleTypes(particleTypes);
-        FileManager fileManager(&system);
-        fileManager.setOutFileName("./atoms*.bin");
-        system.setFileManager(&fileManager);
         system.setSaveEveryNSteps(1);
         system.setOutputEnabled(false);
         system.setNSimulationSteps(2);
@@ -232,20 +226,34 @@ SUITE(ThreeParticleForceSystem) {
         for(MoleculeSystemCell* cell : system.localCells()) {
             for(Atom* atom : cell->atoms()) {
                 CHECK_EQUAL(6, atom->neighborAtoms().size());
-            }
-        }
-
-        for(MoleculeSystemCell* cell : system.localCells()) {
-            for(Atom* atom : cell->atoms()) {
                 CHECK_CLOSE(15, atom->potential(), 1e-9);
             }
         }
 
-        // There are 27 atoms
+        // There are 1000 atoms
         // Each atom has 6 neighbors
         // There are 6c2 = 15 ways to pick two neighbors for a three-particle force calculation
-        // Resulting in 15 * 27 = 405 force calculations in total
+        // Resulting in 15 * 1000 = 15000 force calculations in total
         CHECK_CLOSE(15000, system.potentialEnergyTotal(), 1e-9);
+
+        // Enable motion for a couple of time steps
+        for(MoleculeSystemCell* cell : system.localCells()) {
+            for(Atom* atom : cell->atoms()) {
+                atom->setVelocity(Vector3(0.1,0.2,0.3));
+            }
+        }
+        system.setNSimulationSteps(100);
+        system.simulate();
+
+        CHECK_EQUAL(1000, system.nAtomsTotal());
+
+        for(MoleculeSystemCell* cell : system.localCells()) {
+            for(Atom* atom : cell->atoms()) {
+                CHECK_EQUAL(6, atom->neighborAtoms().size());
+                CHECK_CLOSE(15, atom->potential(), 1e-9);
+            }
+        }
+
         LOG(INFO) << "ThreeParticleForceSumPeriodic test complete";
     }
 }

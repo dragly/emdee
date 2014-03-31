@@ -20,9 +20,6 @@ TEST(CellSetup)
     MoleculeSystem system;
     system.setOutputEnabled(true);
     system.setSaveEnabled(true);
-    FileManager fileManager(&system);
-    fileManager.setOutFileName("/tmp/out*.bin");
-    system.setFileManager(&fileManager);
     system.setPeriodicity(true, true, true);
     Generator generator;
 //    generator.setUnitLength(unitLength);

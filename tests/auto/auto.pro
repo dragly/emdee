@@ -5,7 +5,7 @@ CONFIG -= qt
 include(../../defaults.pri)
 
 LIBS += -lunittest++
-!nompi {
+mpi {
     LIBS += -L../../src/libs -lemdeempi
 } else {
     LIBS += -L../../src/libs -lemdee
