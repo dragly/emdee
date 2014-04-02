@@ -124,7 +124,7 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
                     if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
                         continue;
                     }
-                    double distanceSquared = Vector3::differenceSquared(atom1->position(), atom2->position() + neighborOffset);
+                    double distanceSquared = Vector3::distanceSquared(atom1->position(), atom2->position() + neighborOffset);
                     if(distanceSquared > cutoffRadiusSquared) {
                         continue;
                     }

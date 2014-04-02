@@ -32,12 +32,12 @@ int main(int argc, char* argv[])
 #endif
     feenableexcept(FE_INVALID | FE_OVERFLOW);
 
-//    int result = 0;
-//    UnitTest::TestReporterStdout reporter;
-//    UnitTest::TestRunner runner(reporter);
-//    result = runner.RunTestsIf(UnitTest::Test::GetTestList(), "ForceCellTest", UnitTest::True(), 0);
-//    return result;
+    int result = 0;
+    UnitTest::TestReporterStdout reporter;
+    UnitTest::TestRunner runner(reporter);
+    result = runner.RunTestsIf(UnitTest::Test::GetTestList(), "FannForceSystem", UnitTest::True(), 0);
+    return result;
 
-    return UnitTest::RunAllTests();
+//    return UnitTest::RunAllTests();
 }
 

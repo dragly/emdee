@@ -205,7 +205,7 @@ SUITE(ThreeParticleForceSystem) {
         system.addAtoms(atoms);
 
         VelocityVerletIntegrator integrator(&system);
-        integrator.setTimeStep(0.005);
+        integrator.setTimeStep(1.0);
         system.setPeriodicity(true, true, true);
         system.setIntegrator(&integrator);
         system.setTwoParticleForce(&testForce2);
@@ -242,7 +242,7 @@ SUITE(ThreeParticleForceSystem) {
                 atom->setVelocity(Vector3(0.1,0.2,0.3));
             }
         }
-        system.setNSimulationSteps(100);
+        system.setNSimulationSteps(88);
         system.simulate();
 
         CHECK_EQUAL(1000, system.nAtomsTotal());

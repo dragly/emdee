@@ -16,4 +16,5 @@ SOURCES += main.cpp \
     generatortest.cpp \
     systemtest.cpp \
     forcecelltest.cpp \
-    threeparticleforcesystem.cpp
+    threeparticleforcesystem.cpp \
+    fanntest.cpp

@@ -2,7 +2,6 @@
 
 FannTwoParticleForce::FannTwoParticleForce()
 {
-    setCutoffRadius(1.0);
 }
 
 

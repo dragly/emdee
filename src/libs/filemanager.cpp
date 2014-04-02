@@ -488,10 +488,12 @@ bool FileManager::saveXyz(int step) {
             Vector3 position = atom->position() * m_unitLength * 1e10;
             Vector3 velocity = atom->velocity() * (m_unitLength / m_unitTime);
             Vector3 force = atom->force() * (m_unitMass * m_unitLength / (m_unitTime * m_unitTime));
-            sprintf(line, " %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %.8f %d\n",
+            double potential = atom->potential() * (m_unitMass * m_unitLength * m_unitLength / (m_unitTime * m_unitTime));
+            sprintf(line, " %.8e %.8e %.8e %.8e %.8e %.8e %.8e %.8e %.8e %.8e %d\n",
                     position(0), position(1), position(2),
                     velocity(0), velocity(1), velocity(2),
                     force(0), force(1), force(2),
+                    potential,
                     atom->cellID());
             outFile << atom->type().abbreviation()
                     << line;
