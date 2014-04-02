@@ -527,15 +527,9 @@ void MoleculeSystem::setupCells() {
 
     irowvec indices = zeros<irowvec>(m_nDimensions);
 
-    vector<int> randomIDs;
-    for(int i = 0; i < nCellsTotal; i++) {
-        randomIDs.push_back(i);
-    }
-    //    random_shuffle(randomIDs.begin(), randomIDs.end());
-
     for(int i = 0; i < nCellsTotal; i++) {
         MoleculeSystemCell* cell = new MoleculeSystemCell(this);
-        cell->setID(randomIDs.at(i));
+        cell->setID(i);
 
         mat cellBoundaries = m_boundaries;
 
