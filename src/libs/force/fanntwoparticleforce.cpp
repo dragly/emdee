@@ -120,10 +120,10 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
         atom2->addForce(0, r12.x() * dEdr12Normalized);
         atom2->addForce(1, r12.y() * dEdr12Normalized);
         atom2->addForce(2, r12.z() * dEdr12Normalized);
-        atom2->addPotential((energyPlus + energyMinus) / 2.0);
+        atom2->addPotential((energyPlus + energyMinus) / 4.0);
     }
 
-    atom1->addPotential((energyPlus + energyMinus) / 2.0);
+    atom1->addPotential((energyPlus + energyMinus) / 4.0);
 }
 
 void FannTwoParticleForce::warnAboutMissingNetwork()
