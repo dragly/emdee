@@ -63,28 +63,45 @@ SUITE(FannForceSystem) {
         particleTypes.push_back(oxygenType);
 
         vector<Atom *> atoms;
-//        for(int i = 0; i < 5; i++) {
-            for(int j = 0; j < 5; j++) {
-                for(int k = 0; k < 5; k++) {
-                    Atom *hydrogenAtom1 = new Atom(hydrogenType);
-                    hydrogenAtom1->setPosition(Vector3(0,1.0/1.89*j,1.0/1.89*k));
-                    //            hydrogenAtom1->setPosition(Vector3(i*1.0, 0.0, 0.0));
-                    hydrogenAtom1->setID(/*i*5*5 + */j*5 + k + 1);
-                    //            hydrogenAtom1->setPosition(Vector3(0.0, 0.0, 0.0));
-                    //            hydrogenAtom1->setID(1);
-                    //            Atom *hydrogenAtom2 = new Atom(hydrogenType);
-                    //            hydrogenAtom2->setPosition(Vector3(0.74 + 1, i*0.8 + 1, 0.0));
-                    //            hydrogenAtom2->setPosition(Vector3(i*1.0, 0.74, 0.0));
-                    //            hydrogenAtom2->setID(i* 2 + 2);
-                    //            hydrogenAtom2->setPosition(Vector3(0.0, 0.0, 3.0));
-                    //            hydrogenAtom2->setID(2);
-                    //        Atom oxygenAtom(oxygenType);
-                    //        oxygenAtom.setPosition(Vector3(0.0, 0.0, 0.0));
-                    //        oxygenAtom.setID(3);
+        for(int i = 0; i < 1; i++) {
+            Atom *hydrogenAtom1 = new Atom(hydrogenType);
+            hydrogenAtom1->setPosition(Vector3(-0.7575, 0.58707, 2*i));
+//            hydrogenAtom1->setPosition(Vector3(-0.5, 0.58707, i));
+            hydrogenAtom1->setID(1 + i*3);
+            Atom *hydrogenAtom2 = new Atom(hydrogenType);
+            hydrogenAtom2->setPosition(Vector3(0.7575, 0.58707, 2*i));
+//            hydrogenAtom2->setPosition(Vector3(0.5, 0.58707, i));
+            hydrogenAtom2->setID(2 + i*3);
+            Atom *oxygenAtom = new Atom(oxygenType);
+            oxygenAtom->setPosition(Vector3(0.0, 0.0, 2*i));
+            oxygenAtom->setID(3 + i*3);
+            atoms.push_back(hydrogenAtom1);
+            atoms.push_back(hydrogenAtom2);
+            atoms.push_back(oxygenAtom);
+        }
 
-                    atoms.push_back(hydrogenAtom1);
-                }
-            }
+//        for(int i = 0; i < 5; i++) {
+//            for(int j = 0; j < 5; j++) {
+//                for(int k = 0; k < 5; k++) {
+//                    Atom *hydrogenAtom1 = new Atom(hydrogenType);
+//                    hydrogenAtom1->setPosition(Vector3(0,1.0/1.89*j,1.0/1.89*k));
+//                    //            hydrogenAtom1->setPosition(Vector3(i*1.0, 0.0, 0.0));
+//                    hydrogenAtom1->setID(/*i*5*5 + */j*5 + k + 1);
+//                    //            hydrogenAtom1->setPosition(Vector3(0.0, 0.0, 0.0));
+//                    //            hydrogenAtom1->setID(1);
+//                    //            Atom *hydrogenAtom2 = new Atom(hydrogenType);
+//                    //            hydrogenAtom2->setPosition(Vector3(0.74 + 1, i*0.8 + 1, 0.0));
+//                    //            hydrogenAtom2->setPosition(Vector3(i*1.0, 0.74, 0.0));
+//                    //            hydrogenAtom2->setID(i* 2 + 2);
+//                    //            hydrogenAtom2->setPosition(Vector3(0.0, 0.0, 3.0));
+//                    //            hydrogenAtom2->setID(2);
+//                    //        Atom oxygenAtom(oxygenType);
+//                    //        oxygenAtom.setPosition(Vector3(0.0, 0.0, 0.0));
+//                    //        oxygenAtom.setID(3);
+
+//                    atoms.push_back(hydrogenAtom1);
+//                }
+//            }
 //        }
         //        atoms.push_back(&oxygenAtom);
 
@@ -94,24 +111,36 @@ SUITE(FannForceSystem) {
         }
 
         MoleculeSystem system;
-        system.setPeriodicity(false, false, false);
+        system.setPeriodicity(true, true, true);
         system.setBoundaries(0.0, 50.0, 0.0, 50.0, 0.0, 50.0);
         system.setParticleTypes(particleTypes);
         system.addAtoms(atoms);
 
         FannTwoParticleForce testForce2;
-        testForce2.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140418-165800/fann_network.net",
-                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140418-165800/bounds.fann");
+        testForce2.addNetwork(hydrogenType, hydrogenType,
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140419-164116/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140419-164116/bounds.fann");
+        testForce2.addNetwork(hydrogenType, oxygenType,
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140418-165017/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140418-165017/bounds.fann");
+        testForce2.addNetwork(oxygenType, oxygenType,
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140418-162313/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140418-162313/bounds.fann");
+
 //        LennardJonesForce testForce2;
 //        testForce2.setPotentialConstant(pow(2, -1.0/6.0) * 5 / 1.89);
 //        testForce2.setShift(3.6 / 1.89);
 //        testForce2.setEnergyConstant(1);
-        testForce2.setCutoffRadius(6.0 / 1.89);
 
-        //FannForce testForce3;
-        //        testForce3.loadNetwork("/home/svenni/Dropbox/projects/programming/fann-md/build-fann-md-hyperon-Desktop_Qt_5_2_1_GCC_64bit-Release/fann-trainer/fann_network0.net");
+        testForce2.setCutoffRadius(6.0 / 1.89);
         system.setTwoParticleForce(&testForce2);
-        //        system.setThreeParticleForce(&testForce3);
+
+        FannThreeParticleForce testForce3;
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140420-001516/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140420-001516/bounds.fann");
+//        testForce3.loadNetwork("/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/fann_network.net",
+//                               "/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/bounds.fann");
+        system.setThreeParticleForce(&testForce3);
 
         VelocityVerletIntegrator integrator(&system);
         integrator.setTimeStep(0.001);
@@ -127,9 +156,9 @@ SUITE(FannForceSystem) {
         system.setFileManager(&fileManager);
 
         system.setSaveEnabled(true);
-        system.setSaveEveryNSteps(10);
+        system.setSaveEveryNSteps(100);
         system.setOutputEnabled(true);
-        system.setNSimulationSteps(10000);
+        system.setNSimulationSteps(100000);
         system.setupCells();
         system.simulate();
 

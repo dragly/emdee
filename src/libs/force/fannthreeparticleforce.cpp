@@ -6,14 +6,20 @@
 #include <utils/logging.h>
 
 double l12Min = 1.0;
-double l12Max = 6.0;
+double l12Max = 5.0;
 double l13Min = 1.0;
-double l13Max = 6.0;
-double angleMin = M_PI / 3;
+double l13Max = 5.0;
+double angleMin = M_PI / 10;
 double angleMax = M_PI;
+double energyMin = 0.0;
+double energyMax = 1.0;
 
 double rescale(double value, double valueMin, double valueMax) {
     return (value - valueMin) / (valueMax - valueMin) * 0.8 + 0.1;
+}
+
+double rescaleEnergy(double value, double valueMin, double valueMax) {
+    return ((value - 0.1) / 0.8) * (valueMax - valueMin) + valueMin;
 }
 
 FannThreeParticleForce::FannThreeParticleForce() :
@@ -30,9 +36,29 @@ void FannThreeParticleForce::warnAboutMissingNetwork()
     }
 }
 
-void FannThreeParticleForce::loadNetwork(std::string fileName)
+void FannThreeParticleForce::loadNetwork(const std::string& fileName,
+                                         const std::string& boundsFilename)
 {
     m_ann = fann_create_from_file(fileName.c_str());
+
+    // Read bounds
+    ifstream boundsFile(boundsFilename);
+    int nInputs;
+    boundsFile >> nInputs;
+    int nOutputs;
+    boundsFile >> nOutputs;
+
+    boundsFile >> l12Min;
+    boundsFile >> l12Max;
+    boundsFile >> l13Min;
+    boundsFile >> l13Max;
+    boundsFile >> angleMin;
+    boundsFile >> angleMax;
+    boundsFile >> energyMin;
+    boundsFile >> energyMax;
+
+    cout << "3P R12 bounds: " << l12Min << "," << l12Max << endl;
+    cout << "3P Energy bounds: " << energyMin << "," << energyMax << endl;
 }
 
 void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3)
@@ -125,6 +151,10 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     double h = 1e-8;
 
+    if(l12 < l12Min || l12 > l12Max || l13 < l13Min || l13 > l13Max || angle < angleMin || angle > angleMax) {
+        return;
+    }
+
     input[0] = rescale(l12, l12Min, l12Max);
     input[1] = rescale(l13, l13Min, l13Max);
     input[2] = rescale(angle, angleMin, angleMax);
@@ -132,11 +162,11 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     input[0] = rescale(l12 + h, l12Min, l12Max);
     output = fann_run(m_ann, input);
 //    output = testForce(input);
-    energyPlus = output[0];
+    energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
     input[0] = rescale(l12 - h, l12Min, l12Max);
     output = fann_run(m_ann, input);
 //    output = testForce(input);
-    energyMinus = output[0];
+    energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
     double dEdr12 = (energyPlus - energyMinus) / (2 * h);
 
     input[0] = rescale(l12, l12Min, l12Max);
@@ -146,11 +176,11 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     input[1] = rescale(l13 + h, l13Min, l13Max);
     output = fann_run(m_ann, input);
 //    output = testForce(input);
-    energyPlus = output[0];
+    energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
     input[1] = rescale(l13 - h, l13Min, l13Max);
     output = fann_run(m_ann, input);
 //    output = testForce(input);
-    energyMinus = output[0];
+    energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
     double dEdr13 = (energyPlus - energyMinus) / (2 * h);
 
     input[0] = rescale(l12, l12Min, l12Max);
@@ -160,11 +190,11 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     input[2] = rescale(angle + h, angleMin, angleMax);
     output = fann_run(m_ann, input);
 //    output = testForce(input);
-    energyPlus = output[0];
+    energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
     input[2] = rescale(angle - h, angleMin, angleMax);
     output = fann_run(m_ann, input);
 //    output = testForce(input);
-    energyMinus = output[0];
+    energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
     double dEdangle = (energyPlus - energyMinus) / (2 * h);
 
     double dangleda = 0;

@@ -7,14 +7,17 @@
 #include <utils/logging.h>
 
 FannTwoParticleForce::FannTwoParticleForce() :
-    m_ann(0),
     m_hasWarnedAboutMissingNetwork(false)
 {
 }
 
-void FannTwoParticleForce::loadNetwork(const std::string &fileName, const std::string &boundsFilename)
+void FannTwoParticleForce::addNetwork(const AtomType& atomType1, const AtomType& atomType2,
+                                       const std::string &fileName, const std::string &boundsFilename)
 {
-    m_ann = fann_create_from_file(fileName.c_str());
+    FannTwoParticleNetwork network;
+    network.ann = fann_create_from_file(fileName.c_str());
+    network.atomType1 = atomType1;
+    network.atomType2 = atomType2;
 
     // Read bounds
     ifstream boundsFile(boundsFilename);
@@ -25,13 +28,14 @@ void FannTwoParticleForce::loadNetwork(const std::string &fileName, const std::s
     boundsFile >> nOutputs;
     cout << nOutputs << endl;
 
-    boundsFile >> m_r12Min;
-    boundsFile >> m_r12Max;
-    boundsFile >> m_energyMin;
-    boundsFile >> m_energyMax;
+    boundsFile >> network.r12Min;
+    boundsFile >> network.r12Max;
+    boundsFile >> network.energyMin;
+    boundsFile >> network.energyMax;
 
-    cout << "R12 bounds: " << m_r12Min << "," << m_r12Max << endl;
-    cout << "Energy bounds: " << m_energyMin << "," << m_energyMax << endl;
+    cout << "R12 bounds: " << network.r12Min << "," << network.r12Max << endl;
+    cout << "Energy bounds: " << network.energyMin << "," << network.energyMax << endl;
+    m_networks.push_back(network);
 }
 
 void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2)
@@ -43,7 +47,20 @@ bool printed = false;
 
 void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const Vector3 &atom2Offset)
 {
-    if(!m_ann) {
+    if(m_networks.empty()) {
+        return;
+    }
+    const FannTwoParticleNetwork* network = 0;
+    for(const FannTwoParticleNetwork& networkA : m_networks) {
+        if((atom1->type() == networkA.atomType1 && atom2->type() == networkA.atomType2)
+                || (atom1->type() == networkA.atomType1 && atom2->type() == networkA.atomType2)) {
+            network = &networkA;
+        }
+    }
+    if(!network) {
+        return;
+    }
+    if(!network->ann) {
         warnAboutMissingNetwork();
         return;
     }
@@ -64,14 +81,14 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
 
     double oldl12 = l12;
     bool softForce = false;
-    if(l12 > m_r12Max) {
-        l12 = m_r12Max;
+    if(l12 > network->r12Max) {
+        l12 = network->r12Max;
         softForce = true;
     }
 
     bool hardForce = false;
-    if(l12 < m_r12Min) {
-        l12 = m_r12Min;
+    if(l12 < network->r12Min) {
+        l12 = network->r12Min;
         hardForce = true;
     }
 
@@ -81,21 +98,21 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
     double energyPlus = 0;
     double energyMinus = 0;
 
-    input[0] = rescaleDistance(l12 + h);
-    output = fann_run(m_ann, input);
-    energyPlus = rescaleEnergy(output[0]);
+    input[0] = network->rescaleDistance(l12 + h);
+    output = fann_run(network->ann, input);
+    energyPlus = network->rescaleEnergy(output[0]);
 
-    input[0] = rescaleDistance(l12 - h);
-    output = fann_run(m_ann, input);
-    energyMinus = rescaleEnergy(output[0]);
+    input[0] = network->rescaleDistance(l12 - h);
+    output = fann_run(network->ann, input);
+    energyMinus = network->rescaleEnergy(output[0]);
 
-    double dEdr12 = -2.0*(energyPlus - energyMinus) / (2 * h);
+    double dEdr12 = -1.0*(energyPlus - energyMinus) / (2 * h);
 
     if(hardForce) {
         double diff = oldl12;
         double diff2 = diff*diff;
         double diff4 = diff2*diff2;
-        double normal2 = m_r12Min*m_r12Min;
+        double normal2 = network->r12Min*network->r12Min;
         double normal4 = normal2*normal2;
         dEdr12 += (1 / diff4 - 1 / normal4);
     }
@@ -109,7 +126,7 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
 //    cout << oldl12 << " -> " << dEdr12Normalized << endl;
 
 //    if(softForce) {
-//        dEdr12 *= exp(-(l12 - m_r12Max));
+//        dEdr12 *= exp(-(l12 - network->r12Max));
 //    }
 
     atom1->addForce(0, -r12.x() * dEdr12Normalized);
@@ -132,14 +149,4 @@ void FannTwoParticleForce::warnAboutMissingNetwork()
         LOG(ERROR) << "FANN network not loaded. Cannot apply force." << endl;
         m_hasWarnedAboutMissingNetwork = true;
     }
-}
-
-double FannTwoParticleForce::rescaleDistance(double r12)
-{
-    return (r12 - m_r12Min) / (m_r12Max - m_r12Min) * 0.8 + 0.1;
-}
-
-double FannTwoParticleForce::rescaleEnergy(double energy)
-{
-    return ((energy - 0.1) / 0.8) * (m_energyMax - m_energyMin) + m_energyMin;
 }

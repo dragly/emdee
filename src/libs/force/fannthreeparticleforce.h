@@ -10,7 +10,7 @@ class FannThreeParticleForce : public ThreeParticleForce
 public:
     FannThreeParticleForce();
 
-    void loadNetwork(std::string fileName);
+    void loadNetwork(const std::string &fileName, const std::string &boundsFilename);
 
     // ThreeParticleForce interface
 public:
