@@ -82,14 +82,11 @@ void MoleculeSystem::addAtomsToCorrectCells(vector<Atom *> &atoms)
 {
     for(Atom* atom : atoms) {
         Vector3 position = atom->position();
-        //        cout << position << endl;
         for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-            double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
             if(m_isPeriodicDimension[iDim]) {
+                double sideLength = (m_boundaries(1,iDim) - m_boundaries(0,iDim));
                 position(iDim) = fmod(position(iDim) + sideLength * 10, sideLength);
             }
-            //            atom->setPosition(position);
-            //            atom->addDisplacement(-sideLength, iDim);
         }
         int i = position(0) / m_cellLengths(0);
         int j = position(1) / m_cellLengths(1);
@@ -155,7 +152,11 @@ void MoleculeSystem::setTwoParticleForce(TwoParticleForce *twoParticleForce)
 
 int MoleculeSystem::cellIndex(int xIndex, int yIndex, int zIndex)
 {
-    return zIndex * m_globalCellsPerDimension(0) * m_globalCellsPerDimension(1) + yIndex *  m_globalCellsPerDimension(0) + xIndex;
+    int indexToReturn = zIndex * m_globalCellsPerDimension(0) * m_globalCellsPerDimension(1) + yIndex *  m_globalCellsPerDimension(0) + xIndex;
+    if(indexToReturn < 0) {
+        LOG(ERROR) << "Got index lower than zero. This should not happen. Arguments were " << xIndex << ", " << yIndex << ", " << zIndex;
+    }
+    return indexToReturn;
 }
 
 void MoleculeSystem::setPeriodicity(bool periodicInX, bool periodicInY, bool periodicInZ)
@@ -469,9 +470,7 @@ void MoleculeSystem::setBoundaries(double xMin, double xMax, double yMin, double
 
 void MoleculeSystem::setBoundaries(mat boundaries)
 {
-    if(isOutputEnabled()) {
-        LOG(INFO) << "Setting boundaries to\n" << boundaries;
-    }
+    LOG(INFO) << "Setting boundaries to\n" << boundaries;
     m_boundaries = boundaries;
     irowvec counters = zeros<irowvec>(m_nDimensions);
     for(int i = 0; i < pow3nDimensions; i++) {

@@ -35,7 +35,8 @@ SOURCES += \
     force/vashishtatwoparticleforce.cpp \
     force/vashishtathreeparticleforce.cpp \
     force/threeparticleforce.cpp \
-    force/fanntwoparticleforce.cpp
+    force/fanntwoparticleforce.cpp \
+    force/fannthreeparticleforce.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -62,13 +63,12 @@ HEADERS += \
     force/threeparticleforce.h \
     force/fanntwoparticleforce.h \
     utils/logging.h \
-    utils/glogfallback.h
+    utils/glogfallback.h \
+    force/fannthreeparticleforce.h
 
 !nofann {
-    HEADERS += \
-        force/fannforce.h
-    SOURCES += \
-        force/fannforce.cpp
+    HEADERS +=
+    SOURCES +=
     LIBS += -ldoublefann
 }
 

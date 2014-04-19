@@ -13,6 +13,7 @@ public:
 
     void setPotentialConstant(double potentialConstant);
     void setEnergyConstant(double energyConstant);
+    void setShift(double shift);
 
 protected:
     Vector3 zeroVector;
@@ -23,6 +24,8 @@ protected:
     double m_energyConstant;
     double m_energyConstant4;
     double m_energyConstant24;
+    double m_shift;
+    double m_shiftSquared;
 };
 
 #endif // LENNARDJONESFORCE_H

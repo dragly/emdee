@@ -5,7 +5,7 @@
 #include <generator.h>
 #include <atomtype.h>
 #include <force/lennardjonesforce.h>
-#include <force/fannforce.h>
+#include <force/fannthreeparticleforce.h>
 #include <force/fanntwoparticleforce.h>
 #include <atom.h>
 #include <processor.h>

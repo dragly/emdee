@@ -6,7 +6,8 @@ LennardJonesForce::LennardJonesForce() :
     m_potentialConstantSquared(1),
     m_energyConstant(1),
     m_energyConstant4(4),
-    m_energyConstant24(24)
+    m_energyConstant24(24),
+    m_shift(0.0)
 {
 }
 
@@ -36,6 +37,8 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const V
     y = atom2->position()(1) + atom2Offset(1) - atom1->position()(1);
     z = atom2->position()(2) + atom2Offset(2) - atom1->position()(2);
     rSquared = x*x + y*y + z*z;
+    double r = sqrt(rSquared) + m_shift;
+    rSquared = r*r;
     sigmaSquaredOverRSquared = sigmaSquared/rSquared;
     double sigmaOverR6 = sigmaSquaredOverRSquared * sigmaSquaredOverRSquared * sigmaSquaredOverRSquared;
     double sigmaOverR12 = sigmaOverR6 * sigmaOverR6;
@@ -89,4 +92,10 @@ void LennardJonesForce::setEnergyConstant(double energyConstant)
     m_energyConstant = energyConstant;
     m_energyConstant4 = energyConstant * 4;
     m_energyConstant24 = energyConstant * 24;
+}
+
+void LennardJonesForce::setShift(double shift)
+{
+    m_shift = shift;
+    m_shiftSquared = shift*shift;
 }

@@ -5,10 +5,10 @@
 struct fann;
 typedef double fann_type;
 
-class FannForce : public ThreeParticleForce
+class FannThreeParticleForce : public ThreeParticleForce
 {
 public:
-    FannForce();
+    FannThreeParticleForce();
 
     void loadNetwork(std::string fileName);
 
