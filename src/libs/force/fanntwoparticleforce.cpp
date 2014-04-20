@@ -67,12 +67,11 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
 
     Vector3 r12 = atom2->position() + atom2Offset - atom1->position();
 
-    double l12Squared = dot(r12, r12);
-
     // Scaling from ångstrøm to atomic units
     double siToAU = 1.8897;
+    r12 = siToAU * r12;
 
-    l12Squared *= siToAU*siToAU;
+    double l12Squared = dot(r12, r12);
 
     double l12 = sqrt(l12Squared);
 
@@ -81,8 +80,8 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
 
     double oldl12 = l12;
     bool softForce = false;
-    if(l12 > network->r12Max) {
-        l12 = network->r12Max;
+    if(l12 > network->r12Max - 1.0) {
+        l12 = network->r12Max - 1.0;
         softForce = true;
     }
 
@@ -118,7 +117,9 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
     }
 
     if(softForce) {
-        dEdr12 = 0;
+        double power = 12.0;
+        dEdr12 *= 1.0 / pow(oldl12 - l12 + 1, power + 1);
+//        dEdr12 *= 0.0;
     }
 
     double dEdr12Normalized = dEdr12 / oldl12;
