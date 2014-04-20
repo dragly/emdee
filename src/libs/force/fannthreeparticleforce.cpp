@@ -133,7 +133,11 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     // TODO: Use cos angle as parameter instead of angle
     //    double angle2 = acos((l12*l12 + l13*l13 - l23*l23) / (2 * l12 * l13));
-    double angle = acos(dotr12r13 / (l12*l13));
+    double angleParam = dotr12r13 / (l12*l13);
+    if(angleParam > 1.0 || angleParam < -1.0) {
+        return; // This should never happen, but means two atom2 and atom3 are on top of each other
+    }
+    double angle = acos(angleParam);
 
     if(l12 < l12Min || l12 > l12Max || l13 < l13Min || l13 > l13Max || angle < angleMin || angle > angleMax) {
         return;
@@ -263,7 +267,8 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         atom3->addForce(a, forceComp);
     }
 
-    atom1->addPotential(energyPlus / 3.0);
-    atom2->addPotential(energyPlus / 3.0);
-    atom3->addPotential(energyPlus / 3.0);
+    double potentialPerAtom = 0.5 * (energyPlus + energyMinus) / 3.0;
+    atom1->addPotential(potentialPerAtom);
+    atom2->addPotential(potentialPerAtom);
+    atom3->addPotential(potentialPerAtom);
 }
