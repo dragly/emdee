@@ -78,7 +78,7 @@ fann_type* FannThreeParticleForce::testForce(fann_type* input) {
     m_fanntmp += k1*(input[0] - eqDistanceScaled) * (input[0] - eqDistanceScaled);
     m_fanntmp += k1*(input[1] - eqDistanceScaled) * (input[1] - eqDistanceScaled);
     m_fanntmp += k2*(input[2] - eqAngleScaled) * (input[2] - eqAngleScaled);
-//    cout << input[2] << " vs. " << eqAngleScaled << endl;
+    //    cout << input[2] << " vs. " << eqAngleScaled << endl;
     return &m_fanntmp;
 }
 
@@ -96,9 +96,22 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     //    fann_type *output;
     //    fann_type input[3];
 
-    Vector3 r12 = atom2->position() - atom1->position();
-    Vector3 r13 = atom3->position() - atom1->position();
-    Vector3 r23 = atom3->position() - atom2->position();
+    //    if(atom2->id() > atom3->id()) { // Make the potential symmetric - i think?
+    //        Atom* tmp = atom2;
+    //        atom2 = atom3;
+    //        atom3 = tmp;
+    //    }
+
+    Vector3 r12 = atom2->position() + atom2Offset - atom1->position();
+    Vector3 r13 = atom3->position() + atom3Offset - atom1->position();
+    Vector3 r23 = atom3->position() + atom3Offset - (atom2->position() + atom2Offset);
+
+    // Scaling from ångstrøm to atomic units
+    double siToAU = 1.8897;
+
+    r12 = r12 * siToAU;
+    r13 = r13 * siToAU;
+    r23 = r23 * siToAU;
 
     double shield = 1e-12;
 
@@ -107,26 +120,27 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double l13Squared = dot(r13, r13);
     double l23Squared = dot(r23, r23);
 
-    // Scaling from ångstrøm to atomic units
-    double siToAU = 1.8897;
-
-    l12Squared *= siToAU*siToAU;
-    l13Squared *= siToAU*siToAU;
-    l23Squared *= siToAU*siToAU;
-
-//    if(l12Squared > l12Max*l12Max) {
-//        return;
-//    }
-//    if(l12Squared > l13Max*l13Max) {
-//        return;
-//    }
+    //    if(l12Squared > l12Max*l12Max) {
+    //        return;
+    //    }
+    //    if(l12Squared > l13Max*l13Max) {
+    //        return;
+    //    }
 
     double l12 = sqrt(l12Squared);
     double l13 = sqrt(l13Squared);
     double l23 = sqrt(l23Squared);
 
+    // TODO: Use cos angle as parameter instead of angle
+    //    double angle2 = acos((l12*l12 + l13*l13 - l23*l23) / (2 * l12 * l13));
+    double angle = acos(dotr12r13 / (l12*l13));
+
+    if(l12 < l12Min || l12 > l12Max || l13 < l13Min || l13 > l13Max || angle < angleMin || angle > angleMax) {
+        return;
+    }
+
     double l12Inv = 1 / l12;
-    double l13Inv = 1 / l12;
+    double l13Inv = 1 / l13;
     double l23Inv = 1 / l23;
 
     double invSqrtDotOverLenghtSquared = 1. /
@@ -136,13 +150,6 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
                     )
                 );
 
-
-    //    // TODO: Use cos angle as parameter instead of angle
-    double angle = acos((l12*l12 + l13*l13 - l23*l23) / (2 * l12 * l13));
-//    if(angle < angleMin) {
-//        return;
-//    }
-
     fann_type input[3];
     fann_type *output;
 
@@ -151,37 +158,52 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     double h = 1e-8;
 
-    if(l12 < l12Min || l12 > l12Max || l13 < l13Min || l13 > l13Max || angle < angleMin || angle > angleMax) {
-        return;
-    }
-
     input[0] = rescale(l12, l12Min, l12Max);
     input[1] = rescale(l13, l13Min, l13Max);
     input[2] = rescale(angle, angleMin, angleMax);
 
     input[0] = rescale(l12 + h, l12Min, l12Max);
     output = fann_run(m_ann, input);
-//    output = testForce(input);
+    //    output = testForce(input);
     energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
     input[0] = rescale(l12 - h, l12Min, l12Max);
     output = fann_run(m_ann, input);
-//    output = testForce(input);
+    //    output = testForce(input);
     energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
     double dEdr12 = (energyPlus - energyMinus) / (2 * h);
 
-    input[0] = rescale(l12, l12Min, l12Max);
-    input[1] = rescale(l13, l13Min, l13Max);
-    input[2] = rescale(angle, angleMin, angleMax);
+    bool symmetric = true;
 
-    input[1] = rescale(l13 + h, l13Min, l13Max);
-    output = fann_run(m_ann, input);
-//    output = testForce(input);
-    energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
-    input[1] = rescale(l13 - h, l13Min, l13Max);
-    output = fann_run(m_ann, input);
-//    output = testForce(input);
-    energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
-    double dEdr13 = (energyPlus - energyMinus) / (2 * h);
+    double dEdr13 = 0;
+    if(symmetric) {
+        input[0] = rescale(l13, l12Min, l12Max);
+        input[1] = rescale(l12, l13Min, l13Max);
+        input[2] = rescale(angle, angleMin, angleMax);
+
+        input[0] = rescale(l13 + h, l13Min, l13Max);
+        output = fann_run(m_ann, input);
+        //    output = testForce(input);
+        energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
+        input[0] = rescale(l13 - h, l13Min, l13Max);
+        output = fann_run(m_ann, input);
+        //    output = testForce(input);
+        energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
+        dEdr13 = (energyPlus - energyMinus) / (2 * h);
+    } else {
+        input[0] = rescale(l12, l12Min, l12Max);
+        input[1] = rescale(l13, l13Min, l13Max);
+        input[2] = rescale(angle, angleMin, angleMax);
+
+        input[1] = rescale(l13 + h, l13Min, l13Max);
+        output = fann_run(m_ann, input);
+        //    output = testForce(input);
+        energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
+        input[1] = rescale(l13 - h, l13Min, l13Max);
+        output = fann_run(m_ann, input);
+        //    output = testForce(input);
+        energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
+        dEdr13 = (energyPlus - energyMinus) / (2 * h);
+    }
 
     input[0] = rescale(l12, l12Min, l12Max);
     input[1] = rescale(l13, l13Min, l13Max);
@@ -189,11 +211,11 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     input[2] = rescale(angle + h, angleMin, angleMax);
     output = fann_run(m_ann, input);
-//    output = testForce(input);
+    //    output = testForce(input);
     energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
     input[2] = rescale(angle - h, angleMin, angleMax);
     output = fann_run(m_ann, input);
-//    output = testForce(input);
+    //    output = testForce(input);
     energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
     double dEdangle = (energyPlus - energyMinus) / (2 * h);
 
@@ -222,6 +244,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
                     + ((r13[a]) * (l12Inv * l13Inv))
                     ) * invSqrtDotOverLenghtSquared;
         dr12da = r12[a] * l12Inv;
+        dr13da = 0;
 
         double forceComp = - dEdr12 * dr12da - dEdr13 * dr13da - dEdangle * dangleda;
         atom2->addForce(a, forceComp);
@@ -233,6 +256,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
                     ((dotr12r13 * (-r13[a])) * (l12Inv * l13Inv * l13Inv * l13Inv))
                     + ((r12[a]) * (l12Inv * l13Inv))
                     ) * invSqrtDotOverLenghtSquared;
+        dr12da = 0;
         dr13da = r13[a] * l13Inv;
 
         double forceComp = - dEdr12 * dr12da - dEdr13 * dr13da - dEdangle * dangleda;
