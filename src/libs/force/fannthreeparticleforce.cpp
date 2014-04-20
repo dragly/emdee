@@ -131,14 +131,21 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         return;
     }
 
-    double power = 12.0;
+    double power = 6.0;
     double softenFactor = 1.0;
-//    double limiter = 1.5;
-//    if(l12 > l12Max - limiter) {
-//        softenFactor *= 1.0 / pow(l12 - (l12Max - limiter) + 1, power + 1);
-//    }
-//    if(l13 > l13Max - limiter) {
-//        softenFactor *= 1.0 / pow(l13 - (l13Max - limiter) + 1, power + 1);
+    double limiter = 2.0;
+    if(l12 > l12Max - limiter) {
+        softenFactor *= (1 - 1 / limiter * (l12 - (l12Max - limiter)));
+    }
+    if(l13 > l13Max - limiter) {
+        softenFactor *= (1 - 1 / limiter * (l13 - (l13Max - limiter)));
+    }
+    double angleLimiter = 0.5;
+    if(angle > angleMax - angleLimiter) {
+        softenFactor *= (1 - 1 / limiter * (angle - (angleMax - angleLimiter)));
+    }
+//    if(angle < angleMin + angleLimiter) {
+//        softenFactor *= (1 - 1 / limiter * (x - (angleMin - angleLimiter)));
 //    }
 
     double l12Inv = 1 / l12;
@@ -271,8 +278,10 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     }
 
-    double potentialPerAtom = 0.5 * (energyPlus + energyMinus) / 3.0;
+//    double potentialPerAtom = 0.5 * (energyPlus + energyMinus) / 3.0;
+    double potentialPerAtom = 100;
     atom1->addPotential(potentialPerAtom);
     atom2->addPotential(potentialPerAtom);
     atom3->addPotential(potentialPerAtom);
+
 }

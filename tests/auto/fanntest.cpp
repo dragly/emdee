@@ -127,7 +127,7 @@ SUITE(FannForceSystem) {
             Atom *oxygenAtom = new Atom(oxygenType);
             oxygenAtom->setPosition(Vector3(0.0, 1+0.0, 0));
             oxygenAtom->setID(3);
-            double distance = 3.0;
+            double distance = 2.0;
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
             hydrogenAtom3->setPosition(Vector3(-0.7575, distance+0.58707, 0));
             hydrogenAtom3->setID(4);
