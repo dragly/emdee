@@ -8,6 +8,7 @@
 #include <force/fannthreeparticleforce.h>
 #include <force/fanntwoparticleforce.h>
 #include <modifier/andersenthermostat.h>
+#include <modifier/berendsenthermostat.h>
 #include <atom.h>
 #include <processor.h>
 #include <utils/logging.h>
@@ -63,28 +64,32 @@ SUITE(FannForceSystem) {
         particleTypes.push_back(oxygenType);
 
         vector<Atom *> atoms;
-        double spacingz = 3;
-        double spacingy = 5;
-        int nz = 2;
-        int ny = 2;
+        double spacingx = 6;
+        double spacingy = 6;
+        double spacingz = 6;
+        int nx = 3;
+        int ny = 3;
+        int nz = 3;
         int idCounter = 0;
         for(int i = 0; i < nz; i++) {
             for (int j = 0; j < ny; j++) {
-                Atom *hydrogenAtom1 = new Atom(hydrogenType);
-                hydrogenAtom1->setPosition(Vector3(-0.7575, 0.58707 + spacingy*j, spacingz*i));
-    //            hydrogenAtom1->setPosition(Vector3(-0.5, 0.58707, i));
-                hydrogenAtom1->setID(1 + idCounter);
-                Atom *hydrogenAtom2 = new Atom(hydrogenType);
-                hydrogenAtom2->setPosition(Vector3(0.7575, 0.58707 + spacingy*j, spacingz*i));
-    //            hydrogenAtom2->setPosition(Vector3(0.5, 0.58707, i));
-                hydrogenAtom2->setID(2 + idCounter);
-                Atom *oxygenAtom = new Atom(oxygenType);
-                oxygenAtom->setPosition(Vector3(0.0, 0.0 + spacingy*j, spacingz*i));
-                oxygenAtom->setID(3 + idCounter);
-                atoms.push_back(hydrogenAtom1);
-                atoms.push_back(hydrogenAtom2);
-                atoms.push_back(oxygenAtom);
-                idCounter += 3;
+                for (int k = 0; k < nx; ++k) {
+                    Atom *hydrogenAtom1 = new Atom(hydrogenType);
+                    hydrogenAtom1->setPosition(Vector3(-0.7575 + spacingx*k, 0.58707 + spacingy*j, spacingz*i));
+        //            hydrogenAtom1->setPosition(Vector3(-0.5, 0.58707, i));
+                    hydrogenAtom1->setID(1 + idCounter);
+                    Atom *hydrogenAtom2 = new Atom(hydrogenType);
+                    hydrogenAtom2->setPosition(Vector3(0.7575 + spacingx*k, 0.58707 + spacingy*j, spacingz*i));
+        //            hydrogenAtom2->setPosition(Vector3(0.5, 0.58707, i));
+                    hydrogenAtom2->setID(2 + idCounter);
+                    Atom *oxygenAtom = new Atom(oxygenType);
+                    oxygenAtom->setPosition(Vector3(0.0 + spacingx*k, 0.0 + spacingy*j, spacingz*i));
+                    oxygenAtom->setID(3 + idCounter);
+                    atoms.push_back(hydrogenAtom1);
+                    atoms.push_back(hydrogenAtom2);
+                    atoms.push_back(oxygenAtom);
+                    idCounter += 3;
+                }
             }
         }
 
@@ -123,7 +128,7 @@ SUITE(FannForceSystem) {
 
         MoleculeSystem system;
         system.setPeriodicity(true, true, true);
-        system.setBoundaries(0.0, 50.0, 0.0, 50.0, 0.0, 50.0);
+        system.setBoundaries(0.0, 18.0, 0.0, 18.0, 0.0, 18.0);
         system.setParticleTypes(particleTypes);
         system.addAtoms(atoms);
 
@@ -143,7 +148,7 @@ SUITE(FannForceSystem) {
 //        testForce2.setShift(3.6 / 1.89);
 //        testForce2.setEnergyConstant(1);
 
-        testForce2.setCutoffRadius(15.0);
+        testForce2.setCutoffRadius(6.0);
         system.setTwoParticleForce(&testForce2);
 
         FannThreeParticleForce testForce3;
@@ -157,9 +162,9 @@ SUITE(FannForceSystem) {
         integrator.setTimeStep(0.01);
         system.setIntegrator(&integrator);
 
-        //        AndersenThermostat thermostat(&system);
-        //        thermostat.setTargetTemperature(0.01);
-        //        system.addModifier(&thermostat);
+        BerendsenThermostat thermostat(&system);
+        thermostat.setTargetTemperature(0.001);
+        system.addModifier(&thermostat);
 
         FileManager fileManager(&system);
         fileManager.setOutFileName("/tmp/fannforce/atoms*.xyz");
@@ -169,9 +174,11 @@ SUITE(FannForceSystem) {
         system.setSaveEnabled(true);
         system.setSaveEveryNSteps(100);
         system.setOutputEnabled(true);
-        system.setNSimulationSteps(100000);
+        system.setNSimulationSteps(50000);
 
         system.setupCells();
+        system.simulate();
+        system.removeModifier(&thermostat);
         system.simulate();
 
         //        CHECK_EQUAL(3, system.nAtomsTotal());
