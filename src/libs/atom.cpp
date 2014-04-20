@@ -22,13 +22,13 @@ void Atom::clearNeighborAtoms() {
     m_neighborAtoms.clear();
 }
 
-const std::vector<std::pair<Atom *, const Vector3 *> > &Atom::neighborAtoms()
+const std::vector<std::pair<Atom *, Vector3> > &Atom::neighborAtoms()
 {
     return m_neighborAtoms;
 }
 
-void Atom::addNeighborAtom(Atom* neighborAtom, const Vector3 *offsetVector) {
-    m_neighborAtoms.push_back(std::pair<Atom*, const Vector3*>(neighborAtom, offsetVector));
+void Atom::addNeighborAtom(Atom* neighborAtom, const Vector3 &offsetVector) {
+    m_neighborAtoms.push_back(std::pair<Atom*, Vector3>(neighborAtom, offsetVector));
 }
 
 //void Atom::

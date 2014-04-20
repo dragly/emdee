@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <locale>
 
 #ifdef MD_USE_MPI
 #include <boost/mpi.hpp>
@@ -17,6 +18,7 @@ namespace mpi = boost::mpi;
 
 int main(int argc, char* argv[])
 {
+    setlocale(LC_ALL, "C");
 #ifdef MD_USE_GLOG
     FLAGS_log_dir = ".";
     google::InitGoogleLogging(argv[0]);

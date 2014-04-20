@@ -110,6 +110,7 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
                 continue;
             }
             const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
+            Vector3 neighborOffsetNegative = -m_neighborOffsets[iNeighbor];
 
             const vector<Atom*>& neighborCellAtoms = neighborCell->atoms();
             for(Atom* atom1 : m_atoms) {
@@ -128,8 +129,8 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
                     if(distanceSquared > cutoffRadiusSquared) {
                         continue;
                     }
-                    atom1->addNeighborAtom(atom2, &neighborOffset);
-                    atom2->addNeighborAtom(atom1, &neighborOffset);
+                    atom1->addNeighborAtom(atom2, neighborOffset);
+                    atom2->addNeighborAtom(atom1, neighborOffsetNegative);
 
                     // No reason to calculate forces between atoms on two ghost cells.
                     // This will also skip internal calculations on ghost cells.

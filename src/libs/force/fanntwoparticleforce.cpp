@@ -53,7 +53,7 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
     const FannTwoParticleNetwork* network = 0;
     for(const FannTwoParticleNetwork& networkA : m_networks) {
         if((atom1->type() == networkA.atomType1 && atom2->type() == networkA.atomType2)
-                || (atom1->type() == networkA.atomType1 && atom2->type() == networkA.atomType2)) {
+                || (atom2->type() == networkA.atomType1 && atom1->type() == networkA.atomType2)) {
             network = &networkA;
         }
     }
@@ -117,7 +117,7 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
     }
 
     if(softForce) {
-        double power = 12.0;
+        double power = 5.0;
         dEdr12 *= 1.0 / pow(oldl12 - l12 + 1, power + 1);
 //        dEdr12 *= 0.0;
     }
@@ -138,10 +138,10 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
         atom2->addForce(0, r12.x() * dEdr12Normalized);
         atom2->addForce(1, r12.y() * dEdr12Normalized);
         atom2->addForce(2, r12.z() * dEdr12Normalized);
-        atom2->addPotential((energyPlus + energyMinus) / 4.0);
+//        atom2->addPotential(0.5 * (energyPlus + energyMinus) / 2.0);
     }
 
-    atom1->addPotential((energyPlus + energyMinus) / 4.0);
+//    atom1->addPotential(0.5 * (energyPlus + energyMinus) / 2.0);
 }
 
 void FannTwoParticleForce::warnAboutMissingNetwork()

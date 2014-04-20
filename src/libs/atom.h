@@ -66,9 +66,9 @@ public:
 
     inline void setID(int id);
 
-    const std::vector<std::pair<Atom *, const Vector3 *>> &neighborAtoms();
+    const std::vector<std::pair<Atom *, Vector3> > &neighborAtoms();
     void clearNeighborAtoms();
-    void addNeighborAtom(Atom *neighborAtom, const Vector3 *offsetVector);
+    void addNeighborAtom(Atom *neighborAtom, const Vector3 &offsetVector);
 protected:
     Vector3 m_position;
     Vector3 m_force;
@@ -84,7 +84,7 @@ protected:
     int m_id;
     int m_atomTypeIndex;
 
-    std::vector<std::pair<Atom *, const Vector3 *>> m_neighborAtoms;
+    std::vector<std::pair<Atom *, Vector3>> m_neighborAtoms;
 
 private:
 #ifdef USE_MPI

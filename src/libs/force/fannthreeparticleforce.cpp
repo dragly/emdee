@@ -2,6 +2,7 @@
 
 #include <doublefann.h>
 #include <atom.h>
+#include <iomanip>
 
 #include <utils/logging.h>
 
@@ -93,32 +94,20 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         return;
     }
 
-    //    fann_type *output;
-    //    fann_type input[3];
-
-    //    if(atom2->id() > atom3->id()) { // Make the potential symmetric - i think?
-    //        Atom* tmp = atom2;
-    //        atom2 = atom3;
-    //        atom3 = tmp;
-    //    }
-
     Vector3 r12 = atom2->position() + atom2Offset - atom1->position();
     Vector3 r13 = atom3->position() + atom3Offset - atom1->position();
-    Vector3 r23 = atom3->position() + atom3Offset - (atom2->position() + atom2Offset);
 
     // Scaling from ångstrøm to atomic units
     double siToAU = 1.8897;
 
     r12 = r12 * siToAU;
     r13 = r13 * siToAU;
-    r23 = r23 * siToAU;
 
     double shield = 1e-12;
 
     double dotr12r13 = dot(r12, r13);
     double l12Squared = dot(r12, r12);
     double l13Squared = dot(r13, r13);
-    double l23Squared = dot(r23, r23);
 
     //    if(l12Squared > l12Max*l12Max) {
     //        return;
@@ -129,7 +118,6 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     double l12 = sqrt(l12Squared);
     double l13 = sqrt(l13Squared);
-    double l23 = sqrt(l23Squared);
 
     // TODO: Use cos angle as parameter instead of angle
     //    double angle2 = acos((l12*l12 + l13*l13 - l23*l23) / (2 * l12 * l13));
@@ -143,9 +131,18 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         return;
     }
 
+    double power = 12.0;
+    double softenFactor = 1.0;
+//    double limiter = 1.5;
+//    if(l12 > l12Max - limiter) {
+//        softenFactor *= 1.0 / pow(l12 - (l12Max - limiter) + 1, power + 1);
+//    }
+//    if(l13 > l13Max - limiter) {
+//        softenFactor *= 1.0 / pow(l13 - (l13Max - limiter) + 1, power + 1);
+//    }
+
     double l12Inv = 1 / l12;
     double l13Inv = 1 / l13;
-    double l23Inv = 1 / l23;
 
     double invSqrtDotOverLenghtSquared = 1. /
             (
@@ -180,8 +177,8 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     double dEdr13 = 0;
     if(symmetric) {
-        input[0] = rescale(l13, l12Min, l12Max);
-        input[1] = rescale(l12, l13Min, l13Max);
+        input[0] = rescale(l13, l13Min, l13Max);
+        input[1] = rescale(l12, l12Min, l12Max);
         input[2] = rescale(angle, angleMin, angleMax);
 
         input[0] = rescale(l13 + h, l13Min, l13Max);
@@ -238,6 +235,8 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         dr13da = -r13[a] * l13Inv;
 
         double forceComp = - dEdr12 * dr12da - dEdr13 * dr13da - dEdangle * dangleda;
+
+        forceComp *= softenFactor;
         atom1->addForce(a, forceComp);
     }
 
@@ -251,7 +250,10 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         dr13da = 0;
 
         double forceComp = - dEdr12 * dr12da - dEdr13 * dr13da - dEdangle * dangleda;
+
+        forceComp *= softenFactor;
         atom2->addForce(a, forceComp);
+
     }
 
     // Atom 3
@@ -264,7 +266,9 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         dr13da = r13[a] * l13Inv;
 
         double forceComp = - dEdr12 * dr12da - dEdr13 * dr13da - dEdangle * dangleda;
+        forceComp *= softenFactor;
         atom3->addForce(a, forceComp);
+
     }
 
     double potentialPerAtom = 0.5 * (energyPlus + energyMinus) / 3.0;

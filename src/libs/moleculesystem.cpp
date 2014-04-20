@@ -323,11 +323,11 @@ void MoleculeSystem::updateForces()
             for(Atom* atom1 : cell->atoms()) {
                 int counter = 0;
                 for(uint jAtom = 0; jAtom < atom1->neighborAtoms().size(); jAtom++) {
-                    std::pair<Atom*,const Vector3*> atom2 = atom1->neighborAtoms()[jAtom];
+                    std::pair<Atom*,Vector3> atom2 = atom1->neighborAtoms()[jAtom];
                     for(uint kAtom = jAtom + 1; kAtom < atom1->neighborAtoms().size(); kAtom++) {
-                        std::pair<Atom*,const Vector3*> atom3 = atom1->neighborAtoms()[kAtom];
-                        const Vector3& offsetVector2 = (*(atom2.second));
-                        const Vector3& offsetVector3 = (*(atom3.second));
+                        std::pair<Atom*,Vector3> atom3 = atom1->neighborAtoms()[kAtom];
+                        const Vector3& offsetVector2 = (atom2.second);
+                        const Vector3& offsetVector3 = (atom3.second);
                         m_threeParticleForce->calculateAndApplyForce(atom1, atom2.first, atom3.first, offsetVector2, offsetVector3);
                         counter++;
                     }
