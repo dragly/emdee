@@ -1,6 +1,7 @@
 #include <generator.h>
 
 #include <atom.h>
+#include "math/vector3.h"
 /*!
  * \brief Generator::Generator has multiple functions to generate different setups of atoms.
  * Something is longer than shorter is simple. This is bla bla bla boom.
@@ -31,7 +32,7 @@ vector<Atom*> Generator::generateFcc(double sideLength, int nCells, AtomType ato
             for(int k = 0; k < nCells; k++) {
                 for(int atomi = 0; atomi < 4; atomi++) {
                     Atom* atom = new Atom(atomType);
-                    Vector3 face;;
+                    Vector3 face = Vector3::createZeros();
                     switch(atomi) {
                     case 0:
                         break;
