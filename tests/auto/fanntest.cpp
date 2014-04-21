@@ -36,13 +36,17 @@ SUITE(FannForceSystem) {
 
         vector<Atom *> atoms;
 
-        double sideLength = 2.0;
+        double sideLength = 4.0;
+
+        bool friction = true;
+        bool startVelocities = true;
+        bool thermo = false;
 
         int type = 0;
         if(type == 0)  {
-            int nx = 3;
-            int ny = 3;
-            int nz = 3;
+            int nx = 2;
+            int ny = 2;
+            int nz = 2;
             double spacingx = sideLength / nx;
             double spacingy = sideLength / ny;
             double spacingz = sideLength / nz;
@@ -59,27 +63,26 @@ SUITE(FannForceSystem) {
                     }
                 }
             }
-        }else if(type == 1)  {
+        } else if(type == 1)  {
             Atom *hydrogenAtom1 = new Atom(hydrogenType);
-            hydrogenAtom1->setPosition(Vector3(1.0, 1.0, 1.0));
+            hydrogenAtom1->setPosition(Vector3(0.5, 0.5, 0.9));
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
             Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(1.0 + 0.7127, 1.0, 1.0));
+            hydrogenAtom2->setPosition(Vector3(1.5, 1.5, 1.0));
             hydrogenAtom2->setID(2);
             atoms.push_back(hydrogenAtom2);
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(1.0 + 2 * 0.7127, 1.0, 1.0));
+            hydrogenAtom3->setPosition(Vector3(3.5, 3.5, 1.1));
             hydrogenAtom3->setID(3);
             atoms.push_back(hydrogenAtom3);
             Atom *hydrogenAtom4 = new Atom(hydrogenType);
-            hydrogenAtom4->setPosition(Vector3(1.0 + 3 * 0.7127, 1.0, 1.0));
+            hydrogenAtom4->setPosition(Vector3(2.0, 5.5, 1.0));
             hydrogenAtom4->setID(4);
             atoms.push_back(hydrogenAtom4);
         }
 
-        bool thermo = false;
-        if(thermo) {
+        if(startVelocities) {
             Generator gen;
             gen.boltzmannDistributeVelocities(0.001, atoms);
         }
@@ -106,13 +109,13 @@ SUITE(FannForceSystem) {
         system.setTwoParticleForce(&testForce2);
 
         FannThreeParticleForce testForce3;
-//        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140420-220410/fann_network.net",
-//                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140420-220410/bounds.fann");
+        testForce3.loadNetwork("/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/three/fann_network.net",
+                               "/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/three/bounds.fann");
 
         system.setThreeParticleForce(&testForce3);
 
         VelocityVerletIntegrator integrator(&system);
-        integrator.setTimeStep(0.1);
+        integrator.setTimeStep(0.01);
         system.setIntegrator(&integrator);
 
         BerendsenThermostat thermostat(&system);
@@ -120,8 +123,10 @@ SUITE(FannForceSystem) {
             system.addModifier(&thermostat);
         }
 
-//        Friction friction(&system);
-//        system.addModifier(&friction);
+        Friction frictionModifier(&system);
+        if(friction) {
+            system.addModifier(&frictionModifier);
+        }
 
         FileManager fileManager(&system);
         fileManager.setOutFileName("/tmp/fannforce/hydrogen/atoms*.bin");
@@ -147,6 +152,21 @@ SUITE(FannForceSystem) {
             system.removeModifier(&thermostat);
             system.simulate();
         } else {
+            system.setNSimulationSteps(10000);
+            system.simulate();
+            if(friction) {
+                system.removeModifier(&frictionModifier);
+            }
+            system.setNSimulationSteps(10000);
+            system.simulate();
+            if(friction) {
+                system.addModifier(&frictionModifier);
+            }
+            system.setNSimulationSteps(10000);
+            system.simulate();
+            if(friction) {
+                system.removeModifier(&frictionModifier);
+            }
             system.setNSimulationSteps(10000);
             system.simulate();
         }

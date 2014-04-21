@@ -91,7 +91,11 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         return;
     }
 
-    if(!(atom1->type().number() == 8 && atom2->type().number() == 1 && atom3->type().number() == 1)) {
+//    if(!(atom1->type().number() == 8 && atom2->type().number() == 1 && atom3->type().number() == 1)) {
+//        return;
+//    }
+    // TODO Make this general
+    if(!(atom1->type().number() == 1 && atom2->type().number() == 1 && atom3->type().number() == 1)) {
         return;
     }
 
