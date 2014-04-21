@@ -137,20 +137,25 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     }
 
     double softenFactor = 1.0;
-    double limiter = 0.5;
+
+//    softenFactor = 0.3;
+//     TODO: Consider if this is necessary with 1/3 force for three-particle potentials with equal particles
+//    softenFactor = 1.0 / 3.0; // Because we have equal particles
+
+    double limiter = 0.3;
     if(l12 > l12Max - limiter) {
         softenFactor *= (1 - 1 / limiter * (l12 - (l12Max - limiter)));
     }
     if(l13 > l13Max - limiter) {
         softenFactor *= (1 - 1 / limiter * (l13 - (l13Max - limiter)));
     }
-    double angleLimiter = 0.5;
+    double angleLimiter = 0.1;
     if(angle > angleMax - angleLimiter) {
-        softenFactor *= (1 - 1 / limiter * (angle - (angleMax - angleLimiter)));
+        softenFactor *= (1 - 1 / angleLimiter * (angle - (angleMax - angleLimiter)));
     }
-//    if(angle < angleMin + angleLimiter) {
-//        softenFactor *= (1 - 1 / limiter * (x - (angleMin - angleLimiter)));
-//    }
+    if(angle < angleMin + angleLimiter) {
+        softenFactor *= 1 / angleLimiter * (angle - angleMin);
+    }
 
     double l12Inv = 1 / l12;
     double l13Inv = 1 / l13;
