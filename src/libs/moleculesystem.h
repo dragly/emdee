@@ -51,7 +51,7 @@ public:
     void setBoundaries(mat boundaries);
 
 //    void setupCells();
-    void setupCells();
+    void setupCells(double requestedCellLength = 0.0);
 
 //    double potentialConstant();
 

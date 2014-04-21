@@ -188,7 +188,7 @@ void MoleculeSystem::updateStatistics()
         m_nAtomsTotal += cell->atoms().size();
     }
 #ifdef USE_MPI
-    LOG(INFO) << world.rank() << " has " << m_nAtomsTotal;
+//    LOG(INFO) << world.rank() << " has " << m_nAtomsTotal;
     mpi::all_reduce(world, m_nAtomsTotal, m_nAtomsTotal, std::plus<int>());
 #endif
 
@@ -488,20 +488,19 @@ void MoleculeSystem::setBoundaries(mat boundaries)
     }
 }
 
-void MoleculeSystem::setupCells() {
-    double cutoffRadius = 0.0;
-    if(!m_twoParticleForce || m_twoParticleForce->cutoffRadius() <= 0) {
-        LOG(WARNING) << "Two-particle force not set or cutoff radius of two-particle force is <= 0. Defaulting to 3x3x3 cells.";
-        // TODO: Allow one big cell instead...
-        double minimumSideLength = INFINITY;
-        for(int iDim = 0; iDim < m_nDimensions; iDim++) {
-            minimumSideLength = min(minimumSideLength, m_boundaries(1, iDim) - m_boundaries(0,iDim));
-        }
-        cutoffRadius = minimumSideLength / 3;
-    } else {
-        cutoffRadius = m_twoParticleForce->cutoffRadius();
-    }
-    LOG(INFO) << "Setting up cells for " << m_atoms.size() << " atoms with cutoff radius: " << cutoffRadius;
+void MoleculeSystem::setupCells(double requestedCellLength) {
+//    if(!m_twoParticleForce || m_twoParticleForce->cutoffRadius() <= 0) {
+//        LOG(WARNING) << "Two-particle force not set or cutoff radius of two-particle force is <= 0. Defaulting to 3x3x3 cells.";
+//        // TODO: Allow one big cell instead...
+//        double minimumSideLength = INFINITY;
+//        for(int iDim = 0; iDim < m_nDimensions; iDim++) {
+//            minimumSideLength = min(minimumSideLength, m_boundaries(1, iDim) - m_boundaries(0,iDim));
+//        }
+//        cutoffRadius = minimumSideLength;
+//    } else {
+//        cutoffRadius = m_twoParticleForce->cutoffRadius();
+//    }
+    LOG(INFO) << "Setting up cells for " << m_atoms.size() << " atoms with cutoff radius: " << requestedCellLength;
     for(uint i = 0; i < m_globalCells.size(); i++) {
         MoleculeSystemCell* cellToDelete = m_globalCells.at(i);
         delete cellToDelete;
@@ -515,7 +514,10 @@ void MoleculeSystem::setupCells() {
     LOG(INFO) << "System size: " << systemSize;
     for(int iDim = 0; iDim < m_nDimensions; iDim++) {
         double totalLength = m_boundaries(1,iDim) - m_boundaries(0,iDim);
-        m_globalCellsPerDimension(iDim) = totalLength / cutoffRadius;
+        if(requestedCellLength > totalLength || requestedCellLength == 0.0) {
+            requestedCellLength = totalLength;
+        }
+        m_globalCellsPerDimension(iDim) = totalLength / requestedCellLength;
         m_cellLengths(iDim) = totalLength / m_globalCellsPerDimension(iDim);
         nCellsTotal *= m_globalCellsPerDimension(iDim);
     }
@@ -552,9 +554,9 @@ void MoleculeSystem::setupCells() {
         }
     }
 
-    if(m_globalCells.size() < 27) {
-        LOG(FATAL) << "The number of cells can never be less than 27! Got " << globalCells().size() << " cells.";
-    }
+//    if(m_globalCells.size() < 27) {
+//        LOG(FATAL) << "The number of cells can never be less than 27! Got " << globalCells().size() << " cells.";
+//    }
 
     // Find the neighbor cells
     int nNeighbors;
@@ -612,14 +614,14 @@ void MoleculeSystem::refreshCellContents() {
         allAtoms.insert(allAtoms.end(), cell->atoms().begin(), cell->atoms().end());
         cell->clearAtoms();
     }
-    LOG(INFO) << "Refreshing cell contents with " << allAtoms.size() << " atoms";
+//    LOG(INFO) << "Refreshing cell contents with " << allAtoms.size() << " atoms";
     addAtomsToCorrectCells(allAtoms);
 
     int atomCounter = 0;
     for(MoleculeSystemCell* cell : m_globalCells) {
         atomCounter += cell->atoms().size();
     }
-    LOG(INFO) << "Now holds " << atomCounter << " atoms in all cells.";
+//    LOG(INFO) << "Now holds " << atomCounter << " atoms in all cells.";
 }
 
 void MoleculeSystem::setIntegrator(Integrator *integrator)

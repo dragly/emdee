@@ -111,15 +111,23 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
             }
             const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
             Vector3 neighborOffsetNegative = -m_neighborOffsets[iNeighbor];
-
             const vector<Atom*>& neighborCellAtoms = neighborCell->atoms();
             for(Atom* atom1 : m_atoms) {
                 for(Atom* atom2 : neighborCellAtoms) {
+                    // Exception to ID check below is when the neighbor cell is a copy of this,
+                    // but still a neighbor. This results in a situations where
+                    // the atoms will have the same IDs, even though we want to
+                    // calculate their forces
+                    bool neighborIsCopyOfThis = (this == neighborCell && (neighborOffset.x() != 0.0
+                                                                          || neighborOffset.y() != 0.0
+                                                                          || neighborOffset.z() != 0.0));
+
                     // Newton's third law implmented so that each atom is responsible for
                     // calculating and applying forces to all atoms with a higher atom ID
                     // This is an alternative to only caring about neighbor cells in a
-                    // certain direction
-                    if(atom1->id() >= atom2->id()) {
+                    // certain direction. Note above exception when neighbor is the same as this,
+                    // but still a neighbor.
+                    if(atom1->id() >= atom2->id() && !neighborIsCopyOfThis) {
                         continue;
                     }
                     if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
@@ -130,13 +138,23 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
                         continue;
                     }
                     atom1->addNeighborAtom(atom2, neighborOffset);
-                    atom2->addNeighborAtom(atom1, neighborOffsetNegative);
+                    if(!neighborIsCopyOfThis) {
+                        atom2->addNeighborAtom(atom1, neighborOffsetNegative);
+                    }
 
                     // No reason to calculate forces between atoms on two ghost cells.
                     // This will also skip internal calculations on ghost cells.
-                    if(m_isLocalCell || neighborCell->local()) {
-                        twoParticleForce->calculateAndApplyForce(atom1, atom2, neighborOffset);
+                    // We had to add neighbors above, however
+                    if(!m_isLocalCell && !neighborCell->local()) {
+                        continue;
                     }
+                    // Disable Newton's third law if we are acting on a copy of our own cell
+                    if(neighborIsCopyOfThis) {
+                        twoParticleForce->setNewtonsThirdLawEnabled(false);
+                    } else {
+                        twoParticleForce->setNewtonsThirdLawEnabled(true);
+                    }
+                    twoParticleForce->calculateAndApplyForce(atom1, atom2, neighborOffset);
                 }
             }
         }
