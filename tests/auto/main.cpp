@@ -10,6 +10,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <locale>
+#include <vector>
+#include <string>
 
 #ifdef MD_USE_MPI
 #include <boost/mpi.hpp>
@@ -34,11 +36,33 @@ int main(int argc, char* argv[])
 #endif
     feenableexcept(FE_INVALID | FE_OVERFLOW);
 
+#ifdef DEVELOPMENT_TESTS
     int result = 0;
     UnitTest::TestReporterStdout reporter;
     UnitTest::TestRunner runner(reporter);
     result = runner.RunTestsIf(UnitTest::Test::GetTestList(), "FannForceSystem", UnitTest::True(), 0);
     return result;
+#else
+    std::vector<std::string> tests;
+    tests.push_back("FannForceSystem");
+//    tests.push_back("ForceCell");
+//    tests.push_back("Forces");
+//    tests.push_back("System");
+//    tests.push_back("Generator");
+//    tests.push_back("ThreeParticleForceSystem");
+//    tests.push_back("TwoParticleForceCount");
+    int result = 0;
+    for(const std::string& testName : tests) {
+        std::cout << "Running " << testName << std::endl;
+        UnitTest::TestReporterStdout reporter;
+        UnitTest::TestRunner runner(reporter);
+        result += runner.RunTestsIf(UnitTest::Test::GetTestList(), testName.c_str(), UnitTest::True(), 0);
+    }
+    if(result != 0) {
+        std::cerr << "FAILURE: Some tests failed! See above log for details..." << std::endl;
+    }
+    return result;
+#endif
 
 //    return UnitTest::RunAllTests();
 }

@@ -69,7 +69,7 @@ SUITE(ThreeParticleForceSystem) {
         system.setSaveEnabled(true);
         Generator generator;
         TwoParticleTestForce testForce2;
-        testForce2.setCutoffRadius(1.0);
+        testForce2.setCutoffRadius(1000.0); // Let all atoms interact with each other
         ThreeParticleTestForce testForce3;
         vector<AtomType> particleTypes;
         AtomType dummyType(0);
@@ -91,10 +91,7 @@ SUITE(ThreeParticleForceSystem) {
         system.setSaveEveryNSteps(10);
         system.setOutputEnabled(false);
         system.setNSimulationSteps(1);
-        system.setupCells();
-
-        // Let all atoms interact with each other
-        testForce2.setCutoffRadius(1000.0);
+        system.setupCells(1.0);
 
         system.simulate();
 
@@ -112,7 +109,7 @@ SUITE(ThreeParticleForceSystem) {
         MoleculeSystem system;
         Generator generator;
         TwoParticleTestForce testForce2;
-        testForce2.setCutoffRadius(1.01);
+        testForce2.setCutoffRadius(1.1);
         ThreeParticleTestForce testForce3;
 
         vector<AtomType> particleTypes;
@@ -149,8 +146,7 @@ SUITE(ThreeParticleForceSystem) {
         system.setSaveEveryNSteps(1);
         system.setOutputEnabled(false);
         system.setNSimulationSteps(2);
-        system.setupCells();
-        testForce2.setCutoffRadius(1.1);
+        system.setupCells(1.01);
         system.simulate();
 
         CHECK_EQUAL(27, system.nAtomsTotal());
@@ -180,7 +176,8 @@ SUITE(ThreeParticleForceSystem) {
         MoleculeSystem system;
         Generator generator;
         TwoParticleTestForce testForce2;
-        testForce2.setCutoffRadius(2.0);
+        testForce2.setCutoffRadius(1.0);
+
         ThreeParticleTestForce testForce3;
 
         vector<AtomType> particleTypes;
@@ -217,8 +214,7 @@ SUITE(ThreeParticleForceSystem) {
         system.setSaveEveryNSteps(1);
         system.setOutputEnabled(false);
         system.setNSimulationSteps(2);
-        system.setupCells();
-        testForce2.setCutoffRadius(1.0);
+        system.setupCells(2.0);
         system.simulate();
 
         CHECK_EQUAL(1000, system.nAtomsTotal());
