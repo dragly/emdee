@@ -59,6 +59,7 @@ void FannThreeParticleForce::loadNetwork(const std::string& fileName,
     boundsFile >> energyMax;
 
     cout << "3P R12 bounds: " << l12Min << "," << l12Max << endl;
+    cout << "3P R13 bounds: " << l13Min << "," << l13Max << endl;
     cout << "3P Energy bounds: " << energyMin << "," << energyMax << endl;
 }
 
@@ -131,9 +132,8 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         return;
     }
 
-    double power = 6.0;
     double softenFactor = 1.0;
-    double limiter = 2.0;
+    double limiter = 0.5;
     if(l12 > l12Max - limiter) {
         softenFactor *= (1 - 1 / limiter * (l12 - (l12Max - limiter)));
     }
