@@ -37,16 +37,16 @@ SUITE(FannForceSystem) {
         vector<Atom *> atoms;
 
         bool friction = false;
-        bool startVelocities = true;
+        bool startVelocities = false;
         bool thermo = false;
-        bool periodic = false;
+        bool periodic = true;
 
         double sideLength = 6.0;
         if(!periodic) {
             sideLength = 40;
         }
 
-        int type = 2;
+        int type = 0;
         if(type == 0)  {
             int nx = 2;
             int ny = 2;
@@ -101,7 +101,7 @@ SUITE(FannForceSystem) {
             }
         } else if(type == 2)  {
             Atom *hydrogenAtom1 = new Atom(hydrogenType);
-            double distance = 0.55;
+            double distance = 1.4;
             hydrogenAtom1->setPosition(Vector3(1.0, -0.5 * distance, 1.0));
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
@@ -136,7 +136,7 @@ SUITE(FannForceSystem) {
 
         if(startVelocities) {
             Generator gen;
-            gen.boltzmannDistributeVelocities(0.0, atoms);
+            gen.boltzmannDistributeVelocities(0.003, atoms);
         }
 
         MoleculeSystem system;
@@ -184,7 +184,7 @@ SUITE(FannForceSystem) {
         system.setFileManager(&fileManager);
 
         system.setSaveEnabled(true);
-        system.setSaveEveryNSteps(100);
+        system.setSaveEveryNSteps(10);
         system.setOutputEnabled(true);
 
         system.setupCells(sideLength);
