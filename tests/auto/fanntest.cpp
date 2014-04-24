@@ -37,9 +37,9 @@ SUITE(FannForceSystem) {
         vector<Atom *> atoms;
 
         bool friction = false;
-        bool startVelocities = false;
+        bool startVelocities = true;
         bool thermo = false;
-        bool periodic = true;
+        bool periodic = false;
 
         double sideLength = 6.0;
         if(!periodic) {
@@ -49,8 +49,8 @@ SUITE(FannForceSystem) {
         int type = 0;
         if(type == 0)  {
             int nx = 2;
-            int ny = 1;
-            int nz = 1;
+            int ny = 2;
+            int nz = 2;
             double spacingx = sideLength / nx;
             double spacingy = sideLength / ny;
             double spacingz = sideLength / nz;
@@ -136,7 +136,7 @@ SUITE(FannForceSystem) {
 
         if(startVelocities) {
             Generator gen;
-            gen.boltzmannDistributeVelocities(0.003, atoms);
+            gen.boltzmannDistributeVelocities(0.00003, atoms);
         }
 
         MoleculeSystem system;
@@ -164,7 +164,7 @@ SUITE(FannForceSystem) {
         testForce3.loadNetwork("/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/three/fann_network.net",
                                "/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/three/bounds.fann");
 
-//        system.setThreeParticleForce(&testForce3);
+        system.setThreeParticleForce(&testForce3);
 
         VelocityVerletIntegrator integrator(&system);
         integrator.setTimeStep(0.01);
