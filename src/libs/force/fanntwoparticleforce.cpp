@@ -13,7 +13,7 @@ FannTwoParticleForce::FannTwoParticleForce() :
 }
 
 void FannTwoParticleForce::addNetwork(const AtomType& atomType1, const AtomType& atomType2,
-                                       const std::string &fileName, const std::string &boundsFilename)
+                                      const std::string &fileName, const std::string &boundsFilename)
 {
     FannTwoParticleNetwork network;
     network.ann = fann_create_from_file(fileName.c_str());
@@ -34,8 +34,39 @@ void FannTwoParticleForce::addNetwork(const AtomType& atomType1, const AtomType&
     boundsFile >> network.energyMin;
     boundsFile >> network.energyMax;
 
+    network.tailCorrectionMin = network.r12Max - tailCorrectionTreshold;
+    network.tailCorrectionMax = network.r12Max*2;
+
+    network.headCorrectionMax = network.r12Min;
+
     cout << "R12 bounds: " << network.r12Min << "," << network.r12Max << endl;
     cout << "Energy bounds: " << network.energyMin << "," << network.energyMax << endl;
+
+    // Find energy at edges
+    double input[1];
+    double *output;
+
+    // headCorrectionMax
+    input[0] = network.rescaleDistance(network.headCorrectionMax);
+    output = fann_run(network.ann, input);
+    network.headCorrectionMaxEnergy = network.rescaleEnergy(output[0]);
+    FannDerivative::backpropagateDerivative(network.ann, 0);
+    network.headCorrectionMaxForce = -1.0 * network.rescaleEnergyDerivative(network.ann->train_errors[0]);
+
+    // tailCorrectionMin
+    input[0] = network.rescaleDistance(network.tailCorrectionMin);
+    output = fann_run(network.ann, input);
+    network.tailCorrectionMinEnergy = network.rescaleEnergy(output[0]);
+    FannDerivative::backpropagateDerivative(network.ann, 0);
+    network.tailCorrectionMinForce = -1.0 * network.rescaleEnergyDerivative(network.ann->train_errors[0]);
+
+//    double F0 = network.tailCorrectionMinForce;
+//    double x0 = network.tailCorrectionMin;
+//    double x1 = network.tailCorrectionMax;
+//    double deltaU1 = -F0*(x1-x0) + F0 / (x1-x0) * (0.5 * x1*x1 - x0*x1 + 0.5 * x0*x0);
+//    double U1 = network.tailCorrectionMinEnergy + deltaU1;
+    network.energyOffset = network.tailCorrectionEnergy(network.tailCorrectionMax);
+
     m_networks.push_back(network);
 }
 
@@ -69,69 +100,42 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
     Vector3 r12 = atom2->position() + atom2Offset - atom1->position();
 
     // Scaling from ångstrøm to atomic units
-    double siToAU = 1.8897;
+    double siToAU = 1.0;
     r12 = siToAU * r12;
 
     double l12Squared = dot(r12, r12);
 
     double l12 = sqrt(l12Squared);
 
-    double h = 1e-8;
-
-
-    double oldl12 = l12;
-    bool softForce = false;
-    if(l12 > network->r12Max - 1.0) {
-        l12 = network->r12Max - 1.0;
-        softForce = true;
+    if(l12 > network->tailCorrectionMax) {
+        return;
     }
 
-    bool hardForce = false;
-    if(l12 < network->r12Min) {
-        l12 = network->r12Min;
-        hardForce = true;
-    }
-
-    fann_type input[1];
-    fann_type *output;
+    double l12Input = l12;
+    double dEdr12 = 0.0;
 
     double potentialEnergy = 0;
-    double energyMinus = 0;
+    if(l12 > network->tailCorrectionMin) {
+        dEdr12 = network->tailCorrectionForce(l12);
+        potentialEnergy = network->tailCorrectionEnergy(l12);
+    } else if(l12 < network->headCorrectionMax) {
+        dEdr12 = network->headCorrectionForce(l12);
+        potentialEnergy = network->headCorrectionEnergy(l12);
+    } else {
+        fann_type input[1];
+        fann_type *output;
 
-    input[0] = network->rescaleDistance(l12 + h);
-    output = fann_run(network->ann, input);
-    potentialEnergy = network->rescaleEnergy(output[0]);
-    FannDerivative::backpropagateDerivative(network->ann, 0);
-    double derivative = network->rescaleEnergyDerivative(network->ann->train_errors[0]);
-
-//    input[0] = network->rescaleDistance(l12 - h);
-//    output = fann_run(network->ann, input);
-//    energyMinus = network->rescaleEnergy(output[0]);
-
-    double dEdr12 = -1.0*(derivative);
-
-    if(hardForce) {
-        double diff = oldl12;
-        double diff2 = diff*diff;
-        double diff4 = diff2*diff2;
-        double normal2 = network->r12Min*network->r12Min;
-        double normal4 = normal2*normal2;
-        dEdr12 += (1 / diff4 - 1 / normal4);
+        input[0] = network->rescaleDistance(l12Input);
+        output = fann_run(network->ann, input);
+        potentialEnergy = network->rescaleEnergy(output[0]);
+        FannDerivative::backpropagateDerivative(network->ann, 0);
+        double derivative = network->rescaleEnergyDerivative(network->ann->train_errors[0]);
+        dEdr12 = -1.0*(derivative);
     }
 
-    if(softForce) {
-        double power = 5.0;
-        dEdr12 *= 1.0 / pow(oldl12 - l12 + 1, power + 1);
-//        dEdr12 *= 0.0;
-    }
+    potentialEnergy -= network->energyOffset;
 
-    double dEdr12Normalized = dEdr12 / oldl12;
-
-//    cout << oldl12 << " -> " << dEdr12Normalized << endl;
-
-//    if(softForce) {
-//        dEdr12 *= exp(-(l12 - network->r12Max));
-//    }
+    double dEdr12Normalized = dEdr12 / l12;
 
     atom1->addForce(0, -r12.x() * dEdr12Normalized);
     atom1->addForce(1, -r12.y() * dEdr12Normalized);
@@ -141,9 +145,9 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
         atom2->addForce(0, r12.x() * dEdr12Normalized);
         atom2->addForce(1, r12.y() * dEdr12Normalized);
         atom2->addForce(2, r12.z() * dEdr12Normalized);
-        atom2->addPotential(0.5 * (potentialEnergy + energyMinus) / 2.0);
+        atom2->addPotential(potentialEnergy / 2.0);
     }
-    atom1->addPotential(0.5 * (potentialEnergy + energyMinus) / 2.0);
+    atom1->addPotential(potentialEnergy / 2.0);
 }
 
 void FannTwoParticleForce::warnAboutMissingNetwork()
@@ -152,4 +156,67 @@ void FannTwoParticleForce::warnAboutMissingNetwork()
         LOG(ERROR) << "FANN network not loaded. Cannot apply force." << endl;
         m_hasWarnedAboutMissingNetwork = true;
     }
+}
+
+
+double FannTwoParticleNetwork::rescaleDistance(double r12) const
+{
+    return (r12 - r12Min) / (r12Max - r12Min) * 0.8 + 0.1;
+}
+
+double FannTwoParticleNetwork::rescaleEnergy(double energy) const
+{
+    return ((energy - 0.1) / 0.8) * (energyMax - energyMin) + energyMin;
+}
+
+double FannTwoParticleNetwork::rescaleEnergyDerivative(double value) const
+{
+    return (energyMax - energyMin) / (r12Max - r12Min) * value;
+}
+
+double FannTwoParticleNetwork::tailCorrectionEnergy(double l12) const
+{
+    double F0 = tailCorrectionMinForce;
+    double x0 = tailCorrectionMin;
+    double x1 = tailCorrectionMax;
+    double x = l12;
+    double deltaU = -F0*(x-x0) + F0 / (x1-x0) * (0.5 * x*x - x0*x + 0.5 * x0*x0);
+    return tailCorrectionMinEnergy + deltaU;
+}
+
+double FannTwoParticleNetwork::tailCorrectionForce(double l12) const
+{
+    double F0 = tailCorrectionMinForce;
+    double x0 = tailCorrectionMin;
+    double x1 = tailCorrectionMax;
+    double x = l12;
+    return F0 - F0 * (x - x0) / (x1 - x0);
+}
+
+double FannTwoParticleNetwork::headCorrectionForce(double l12) const
+{
+    double F0 = headCorrectionMaxForce;
+    double x0 = headCorrectionMax;
+    double x = l12;
+    double x2 = x*x;
+    double x4 = x2*x2;
+    double x0_2 = x0*x0;
+    double x0_4 = x0_2*x0_2;
+    return F0 + (1 / x4 - 1 / x0_4);
+}
+
+double FannTwoParticleNetwork::headCorrectionEnergy(double l12) const
+{
+    double F0 = headCorrectionMaxForce;
+    double x0 = headCorrectionMax;
+    double x = l12;
+    double x2 = x*x;
+    double x3 = x2*x;
+    double x4 = x2*x2;
+    double x0_2 = x0*x0;
+    double x0_3 = x0*x0_2;
+    double x0_4 = x0_2*x0_2;
+    return F0 + (1 / x4 - 1 / x0_4);
+    double deltaU = -F0*(x - x0) + 1 / (3*x3) + x / (x0_4) - 1 / (3*x0_3) - 1 / x0_3;
+    return headCorrectionMaxEnergy + deltaU;
 }

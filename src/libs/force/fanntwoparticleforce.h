@@ -14,25 +14,29 @@ public:
     fann* ann;
     double r12Min;
     double r12Max;
+    double tailCorrectionMin;
+    double tailCorrectionMax;
+    double headCorrectionMax;
     double energyMin;
     double energyMax;
     AtomType atomType1;
     AtomType atomType2;
+    double headCorrectionMaxForce;
+    double tailCorrectionMinForce;
+    double headCorrectionMaxEnergy;
+    double tailCorrectionMinEnergy;
+    double energyOffset;
 
-    double rescaleDistance(double r12) const
-    {
-        return (r12 - r12Min) / (r12Max - r12Min) * 0.8 + 0.1;
-    }
+    double rescaleDistance(double r12) const;
 
-    double rescaleEnergy(double energy) const
-    {
-        return ((energy - 0.1) / 0.8) * (energyMax - energyMin) + energyMin;
-    }
+    double rescaleEnergy(double energy) const;
 
-    double rescaleEnergyDerivative(double value) const
-    {
-        return (energyMax - energyMin) / (r12Max - r12Min) * value;
-    }
+    double rescaleEnergyDerivative(double value) const;
+
+    double tailCorrectionEnergy(double l12) const;
+    double tailCorrectionForce(double l12) const;
+    double headCorrectionEnergy(double l12) const;
+    double headCorrectionForce(double l12) const;
 };
 
 class FannTwoParticleForce : public TwoParticleForce
@@ -52,6 +56,9 @@ private:
     fann_type m_fanntmp;
     bool m_hasWarnedAboutMissingNetwork;
     vector<FannTwoParticleNetwork> m_networks;
+
+    double inherentEnergy = -0.5;
+    double tailCorrectionTreshold = 0.5;
 };
 
 #endif // FANNTWOPARTICLEFORCE_H
