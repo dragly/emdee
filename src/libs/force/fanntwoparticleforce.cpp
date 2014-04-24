@@ -44,7 +44,9 @@ void FannTwoParticleForce::addNetwork(const AtomType& atomType1, const AtomType&
     cout << "Energy bounds: " << network.energyMin << "," << network.energyMax << endl;
 
     // Find energy at edges
-    double input[1];
+    fann_type input[2];
+    input[0] = 0.0;
+    input[1] = 0.0;
     double *output;
 
     // headCorrectionMax
@@ -122,7 +124,9 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
         dEdr12 = network->headCorrectionForce(l12);
         potentialEnergy = network->headCorrectionEnergy(l12);
     } else {
-        fann_type input[1];
+        fann_type input[2];
+        input[0] = 0.0;
+        input[1] = 0.0;
         fann_type *output;
 
         input[0] = network->rescaleDistance(l12);

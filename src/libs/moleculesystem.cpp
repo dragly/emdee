@@ -189,7 +189,9 @@ void MoleculeSystem::updateStatistics()
     }
 #ifdef USE_MPI
 //    LOG(INFO) << world.rank() << " has " << m_nAtomsTotal;
-    mpi::all_reduce(world, m_nAtomsTotal, m_nAtomsTotal, std::plus<int>());
+    int nAtomsTotalTmp = 0;
+    mpi::all_reduce(world, m_nAtomsTotal, nAtomsTotalTmp, std::plus<int>());
+    m_nAtomsTotal = nAtomsTotalTmp;
 #endif
 
     // Calculate total drift
@@ -219,8 +221,12 @@ void MoleculeSystem::updateStatistics()
     }
 
 #ifdef USE_MPI
-    mpi::all_reduce(world, m_kineticEnergyTotal, m_kineticEnergyTotal, std::plus<double>());
-    mpi::all_reduce(world, m_potentialEnergyTotal, m_potentialEnergyTotal, std::plus<double>());
+    double kineticEnergyTotalTmp = 0.0;
+    double potentialEnergyTotalTmp = 0.0;
+    mpi::all_reduce(world, m_kineticEnergyTotal, kineticEnergyTotalTmp, std::plus<double>());
+    mpi::all_reduce(world, m_potentialEnergyTotal, potentialEnergyTotalTmp, std::plus<double>());
+    m_kineticEnergyTotal = kineticEnergyTotalTmp;
+    m_potentialEnergyTotal = potentialEnergyTotalTmp;
 #endif
     if(m_nAtomsTotal > 0) {
         m_temperature = m_kineticEnergyTotal / (3./2. * m_nAtomsTotal);
@@ -244,8 +250,12 @@ void MoleculeSystem::updateStatistics()
     }
 
 #ifdef USE_MPI
-    mpi::all_reduce(world, m_averageSquareDisplacement, m_averageSquareDisplacement, std::plus<double>());
-    mpi::all_reduce(world, m_averageDisplacement, m_averageDisplacement, std::plus<double>());
+    double averageSquareDisplacementTmp = 0.0;
+    double averageDisplacementTmp = 0.0;
+    mpi::all_reduce(world, m_averageSquareDisplacement, averageSquareDisplacementTmp, std::plus<double>());
+    mpi::all_reduce(world, m_averageDisplacement, averageDisplacementTmp, std::plus<double>());
+    m_averageSquareDisplacement = averageSquareDisplacementTmp;
+    m_averageDisplacement = averageDisplacementTmp;
 #endif
     // Calculate pressure
     rowvec sideLengths = m_boundaries.row(1) - m_boundaries.row(0);
@@ -259,7 +269,9 @@ void MoleculeSystem::updateStatistics()
         }
     }
 #ifdef USE_MPI
-    mpi::all_reduce(world, m_pressure, m_pressure, std::plus<double>());
+    double pressureTmp = 0.0;
+    mpi::all_reduce(world, m_pressure, pressureTmp, std::plus<double>());
+    m_pressure = pressureTmp;
 #endif
     m_pressure += density * m_temperature;
     //    cout << "Pressure " << m_pressure << endl;

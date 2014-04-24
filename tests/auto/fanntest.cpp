@@ -211,7 +211,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(30000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(1);
+            system.setNSimulationSteps(4000);
             system.simulate();
         }
 
