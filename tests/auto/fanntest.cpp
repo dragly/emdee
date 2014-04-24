@@ -139,9 +139,9 @@ SUITE(FannForceSystem) {
         fileManager.setUnitLength(1.0e-10);
         system.setFileManager(&fileManager);
 
-        system.setSaveEnabled(true);
+        system.setSaveEnabled(false);
         system.setSaveEveryNSteps(10);
-        system.setOutputEnabled(true);
+        system.setOutputEnabled(false);
 
         system.setupCells(sideLength);
 
