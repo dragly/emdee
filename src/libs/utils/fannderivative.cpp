@@ -71,11 +71,8 @@ void FannDerivative::backpropagateDerivative(struct fann *ann, uint outputIndex)
             return;
         }
     }
-    else
-    {
-        /* clear the error variabels */
-        memset(ann->train_errors, 0, (ann->total_neurons) * sizeof(fann_type));
-    }
+    /* clear the error variabels */
+    memset(ann->train_errors, 0, (ann->total_neurons) * sizeof(fann_type));
     fann_type *error_begin = ann->train_errors;
 
     /* Set the error variable of the output neuron */

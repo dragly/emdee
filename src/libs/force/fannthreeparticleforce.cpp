@@ -5,6 +5,7 @@
 #include <iomanip>
 
 #include <utils/logging.h>
+#include <utils/fannderivative.h>
 
 double l12Min = 1.0;
 double l12Max = 5.0;
@@ -21,6 +22,11 @@ double rescale(double value, double valueMin, double valueMax) {
 
 double rescaleEnergy(double value, double valueMin, double valueMax) {
     return ((value - 0.1) / 0.8) * (valueMax - valueMin) + valueMin;
+}
+
+double rescaleEnergyDerivative(double derivative, double valueMin, double valueMax, double energyMin, double energyMax)
+{
+    return (energyMax - energyMin) / (valueMax - valueMin) * derivative;
 }
 
 FannThreeParticleForce::FannThreeParticleForce() :
@@ -86,6 +92,8 @@ fann_type* FannThreeParticleForce::testForce(fann_type* input) {
 
 void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3, const Vector3 &atom2Offset, const Vector3 &atom3Offset)
 {
+
+    bool symmetric = false;
     if(!m_ann) {
         warnAboutMissingNetwork();
         return;
@@ -103,7 +111,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     Vector3 r13 = atom3->position() + atom3Offset - atom1->position();
 
     // Scaling from ångstrøm to atomic units
-    double siToAU = 1.8897;
+    double siToAU = 1.0;
 
     r12 = r12 * siToAU;
     r13 = r13 * siToAU;
@@ -140,7 +148,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
 //    softenFactor = 0.3;
 //     TODO: Consider if this is necessary with 1/3 force for three-particle potentials with equal particles
-//    softenFactor = 1.0 / 3.0; // Because we have equal particles
+    softenFactor = 1.0 / 3.0; // Because we have equal particles
 
     double limiter = 0.3;
     if(l12 > l12Max - limiter) {
@@ -168,73 +176,103 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
                 );
 
     fann_type input[3];
-    fann_type *output;
+//    fann_type *output;
 
-    double energyPlus = 0;
-    double energyMinus = 0;
+//    double energyPlus = 0;
+//    double energyMinus = 0;
 
-    double h = 1e-8;
+//    double h = 1e-8;
 
-    input[0] = rescale(l12, l12Min, l12Max);
-    input[1] = rescale(l13, l13Min, l13Max);
-    input[2] = rescale(angle, angleMin, angleMax);
 
-    input[0] = rescale(l12 + h, l12Min, l12Max);
-    output = fann_run(m_ann, input);
-    //    output = testForce(input);
-    energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
-    input[0] = rescale(l12 - h, l12Min, l12Max);
-    output = fann_run(m_ann, input);
-    //    output = testForce(input);
-    energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
-    double dEdr12 = (energyPlus - energyMinus) / (2 * h);
-
-    bool symmetric = true;
-
-    double dEdr13 = 0;
+    double l12Input = l12;
+    double l13Input = l13;
+    uint l12Index = 0;
+    uint l13Index = 1;
     if(symmetric) {
-        input[0] = rescale(l13, l13Min, l13Max);
-        input[1] = rescale(l12, l12Min, l12Max);
-        input[2] = rescale(angle, angleMin, angleMax);
-
-        input[0] = rescale(l13 + h, l13Min, l13Max);
-        output = fann_run(m_ann, input);
-        //    output = testForce(input);
-        energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
-        input[0] = rescale(l13 - h, l13Min, l13Max);
-        output = fann_run(m_ann, input);
-        //    output = testForce(input);
-        energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
-        dEdr13 = (energyPlus - energyMinus) / (2 * h);
-    } else {
-        input[0] = rescale(l12, l12Min, l12Max);
-        input[1] = rescale(l13, l13Min, l13Max);
-        input[2] = rescale(angle, angleMin, angleMax);
-
-        input[1] = rescale(l13 + h, l13Min, l13Max);
-        output = fann_run(m_ann, input);
-        //    output = testForce(input);
-        energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
-        input[1] = rescale(l13 - h, l13Min, l13Max);
-        output = fann_run(m_ann, input);
-        //    output = testForce(input);
-        energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
-        dEdr13 = (energyPlus - energyMinus) / (2 * h);
+        if(l12Input < l13Input) {
+            double tmp = l12Input;
+            l12Input = l13Input;
+            l13Input = tmp;
+            l12Index = 1;
+            l13Index = 0;
+        }
     }
-
-    input[0] = rescale(l12, l12Min, l12Max);
-    input[1] = rescale(l13, l13Min, l13Max);
+    input[0] = rescale(l12Input, l12Min, l12Max);
+    input[1] = rescale(l13Input, l13Min, l13Max);
     input[2] = rescale(angle, angleMin, angleMax);
+    double potentialEnergy = rescaleEnergy(fann_run(m_ann, input)[0], energyMin, energyMax);
+//    energyPlus = potentialEnergy;
+//    energyMinus = potentialEnergy;
 
-    input[2] = rescale(angle + h, angleMin, angleMax);
-    output = fann_run(m_ann, input);
+
+    uint outputIndex = 0;
+    FannDerivative::backpropagateDerivative(m_ann, outputIndex);
+    double dEdr12 = rescaleEnergyDerivative(m_ann->train_errors[l12Index], l12Min, l12Max, energyMin, energyMax);
+    double dEdr13 = rescaleEnergyDerivative(m_ann->train_errors[l13Index], l13Min, l13Max, energyMin, energyMax);
+    double dEdangle = rescaleEnergyDerivative(m_ann->train_errors[2], angleMin, angleMax, energyMin, energyMax);
+
+//    if(symmetric) {
+//        input[0] = rescale(l13, l13Min, l13Max);
+//        input[1] = rescale(l12, l12Min, l12Max);
+//        input[2] = rescale(angle, angleMin, angleMax);
+//        fann_run(m_ann, input);
+//        FannDerivative::backpropagateDerivative(m_ann, outputIndex);
+//        dEdr13 = rescaleEnergyDerivative(m_ann->train_errors[0], l13Min, l13Max, energyMin, energyMax);
+//    }
+//    input[0] = rescale(l12 + h, l12Min, l12Max);
+//    output = fann_run(m_ann, input);
     //    output = testForce(input);
-    energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
-    input[2] = rescale(angle - h, angleMin, angleMax);
-    output = fann_run(m_ann, input);
+//    energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
+//    input[0] = rescale(l12 - h, l12Min, l12Max);
+//    output = fann_run(m_ann, input);
     //    output = testForce(input);
-    energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
-    double dEdangle = (energyPlus - energyMinus) / (2 * h);
+//    energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
+//    double dEdr12 = (energyPlus - energyMinus) / (2 * h);
+
+//    double dEdr13 = 0;
+//    if(symmetric) {
+//        input[0] = rescale(l13, l13Min, l13Max);
+//        input[1] = rescale(l12, l12Min, l12Max);
+//        input[2] = rescale(angle, angleMin, angleMax);
+
+//        input[0] = rescale(l13 + h, l13Min, l13Max);
+//        output = fann_run(m_ann, input);
+//        //    output = testForce(input);
+//        energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
+//        input[0] = rescale(l13 - h, l13Min, l13Max);
+//        output = fann_run(m_ann, input);
+//        //    output = testForce(input);
+//        energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
+//        dEdr13 = (energyPlus - energyMinus) / (2 * h);
+//    } else {
+//        input[0] = rescale(l12, l12Min, l12Max);
+//        input[1] = rescale(l13, l13Min, l13Max);
+//        input[2] = rescale(angle, angleMin, angleMax);
+
+//        input[1] = rescale(l13 + h, l13Min, l13Max);
+//        output = fann_run(m_ann, input);
+//        //    output = testForce(input);
+//        energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
+//        input[1] = rescale(l13 - h, l13Min, l13Max);
+//        output = fann_run(m_ann, input);
+//        //    output = testForce(input);
+//        energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
+//        dEdr13 = (energyPlus - energyMinus) / (2 * h);
+//    }
+
+//    input[0] = rescale(l12, l12Min, l12Max);
+//    input[1] = rescale(l13, l13Min, l13Max);
+//    input[2] = rescale(angle, angleMin, angleMax);
+
+//    input[2] = rescale(angle + h, angleMin, angleMax);
+//    output = fann_run(m_ann, input);
+//    //    output = testForce(input);
+//    energyPlus = rescaleEnergy(output[0], energyMin, energyMax);
+//    input[2] = rescale(angle - h, angleMin, angleMax);
+//    output = fann_run(m_ann, input);
+//    //    output = testForce(input);
+//    energyMinus = rescaleEnergy(output[0], energyMin, energyMax);
+//    double dEdangle = (energyPlus - energyMinus) / (2 * h);
 
     double dangleda = 0;
     double dr12da = 0;
@@ -288,9 +326,9 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     }
 
 //    double potentialPerAtom = 0.5 * (energyPlus + energyMinus) / 3.0;
-    double potentialPerAtom = 100;
-    atom1->addPotential(potentialPerAtom);
-    atom2->addPotential(potentialPerAtom);
-    atom3->addPotential(potentialPerAtom);
+//    double potentialPerAtom = 100;
+    atom1->addPotential(potentialEnergy);
+    atom2->addPotential(potentialEnergy);
+    atom3->addPotential(potentialEnergy);
 
 }

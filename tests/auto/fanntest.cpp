@@ -39,14 +39,14 @@ SUITE(FannForceSystem) {
         bool friction = false;
         bool startVelocities = true;
         bool thermo = false;
-        bool periodic = true;
+        bool periodic = false;
 
         double sideLength = 6.0;
         if(!periodic) {
-            sideLength = 20;
+            sideLength = 40;
         }
 
-        int type = 0;
+        int type = 2;
         if(type == 0)  {
             int nx = 2;
             int ny = 2;
@@ -54,6 +54,11 @@ SUITE(FannForceSystem) {
             double spacingx = sideLength / nx;
             double spacingy = sideLength / ny;
             double spacingz = sideLength / nz;
+            if(!periodic) {
+                spacingx = sideLength / 5 / nx;
+                spacingy = sideLength / 5 / ny;
+                spacingz = sideLength / 5 / nz;
+            }
 
             int idCounter = 0;
             for(int i = 0; i < nz; i++) {
@@ -67,6 +72,11 @@ SUITE(FannForceSystem) {
                     }
                 }
             }
+            if(!periodic) {
+                for(Atom* atom : atoms) {
+                    atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
+                }
+            }
         } else if(type == 1)  {
             Atom *hydrogenAtom1 = new Atom(hydrogenType);
             hydrogenAtom1->setPosition(Vector3(1.0, 1.0, 1.0));
@@ -77,7 +87,7 @@ SUITE(FannForceSystem) {
             hydrogenAtom2->setID(2);
             atoms.push_back(hydrogenAtom2);
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(4.2, 3.0, 1.1));
+            hydrogenAtom3->setPosition(Vector3(4.2, 3.0, 1.0));
             hydrogenAtom3->setID(3);
             atoms.push_back(hydrogenAtom3);
             Atom *hydrogenAtom4 = new Atom(hydrogenType);
@@ -89,11 +99,44 @@ SUITE(FannForceSystem) {
                     atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
                 }
             }
+        } else if(type == 2)  {
+            Atom *hydrogenAtom1 = new Atom(hydrogenType);
+            double distance = 0.55;
+            hydrogenAtom1->setPosition(Vector3(1.0, -0.5 * distance, 1.0));
+            hydrogenAtom1->setID(1);
+            atoms.push_back(hydrogenAtom1);
+            Atom *hydrogenAtom2 = new Atom(hydrogenType);
+            hydrogenAtom2->setPosition(Vector3(1.0, 0.5 * distance, 1.0));
+            hydrogenAtom2->setID(2);
+            atoms.push_back(hydrogenAtom2);
+            if(!periodic) {
+                for(Atom* atom : atoms) {
+                    atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
+                }
+            }
+        } else if(type == 3)  {
+            Atom *hydrogenAtom1 = new Atom(hydrogenType);
+            hydrogenAtom1->setPosition(Vector3(1.0, 1.0, 1.0));
+            hydrogenAtom1->setID(1);
+            atoms.push_back(hydrogenAtom1);
+            Atom *hydrogenAtom2 = new Atom(hydrogenType);
+            hydrogenAtom2->setPosition(Vector3(1.0, 2.5, 1.0));
+            hydrogenAtom2->setID(2);
+            atoms.push_back(hydrogenAtom2);
+            Atom *hydrogenAtom3 = new Atom(hydrogenType);
+            hydrogenAtom3->setPosition(Vector3(1.7, 1.75, 1.0));
+            hydrogenAtom3->setID(3);
+            atoms.push_back(hydrogenAtom3);
+            if(!periodic) {
+                for(Atom* atom : atoms) {
+                    atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
+                }
+            }
         }
 
         if(startVelocities) {
             Generator gen;
-            gen.boltzmannDistributeVelocities(0.003, atoms);
+            gen.boltzmannDistributeVelocities(0.0, atoms);
         }
 
         MoleculeSystem system;
@@ -121,7 +164,7 @@ SUITE(FannForceSystem) {
         testForce3.loadNetwork("/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/three/fann_network.net",
                                "/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/three/bounds.fann");
 
-        system.setThreeParticleForce(&testForce3);
+//        system.setThreeParticleForce(&testForce3);
 
         VelocityVerletIntegrator integrator(&system);
         integrator.setTimeStep(0.01);
@@ -136,12 +179,13 @@ SUITE(FannForceSystem) {
 
         FileManager fileManager(&system);
         fileManager.setOutFileName("/tmp/fannforce/hydrogen/atoms*.bin");
-        fileManager.setUnitLength(1.0e-10);
+        fileManager.setUnitLength(5.2917721092e-11);
+        fileManager.setUnitMass(9.10938291e-31);
         system.setFileManager(&fileManager);
 
-        system.setSaveEnabled(false);
-        system.setSaveEveryNSteps(10);
-        system.setOutputEnabled(false);
+        system.setSaveEnabled(true);
+        system.setSaveEveryNSteps(100);
+        system.setOutputEnabled(true);
 
         system.setupCells(sideLength);
 
@@ -167,7 +211,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(30000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(10000);
+            system.setNSimulationSteps(4000);
             system.simulate();
         }
 
