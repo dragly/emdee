@@ -49,8 +49,8 @@ SUITE(FannForceSystem) {
         int type = 0;
         if(type == 0)  {
             int nx = 2;
-            int ny = 2;
-            int nz = 2;
+            int ny = 1;
+            int nz = 1;
             double spacingx = sideLength / nx;
             double spacingy = sideLength / ny;
             double spacingz = sideLength / nz;
@@ -211,7 +211,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(30000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(4000);
+            system.setNSimulationSteps(1);
             system.simulate();
         }
 

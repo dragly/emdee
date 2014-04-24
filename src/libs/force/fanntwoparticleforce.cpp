@@ -8,6 +8,7 @@
 #include <utils/fannderivative.h>
 
 FannTwoParticleForce::FannTwoParticleForce() :
+    TwoParticleForce(),
     m_hasWarnedAboutMissingNetwork(false)
 {
 }
@@ -111,7 +112,6 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
         return;
     }
 
-    double l12Input = l12;
     double dEdr12 = 0.0;
 
     double potentialEnergy = 0;
@@ -125,7 +125,7 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
         fann_type input[1];
         fann_type *output;
 
-        input[0] = network->rescaleDistance(l12Input);
+        input[0] = network->rescaleDistance(l12);
         output = fann_run(network->ann, input);
         potentialEnergy = network->rescaleEnergy(output[0]);
         FannDerivative::backpropagateDerivative(network->ann, 0);
