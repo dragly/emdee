@@ -37,7 +37,8 @@ SOURCES += \
     force/threeparticleforce.cpp \
     force/fanntwoparticleforce.cpp \
     force/fannthreeparticleforce.cpp \
-    modifier/friction.cpp
+    modifier/friction.cpp \
+    utils/fannderivative.cpp
 
 HEADERS += \
     moleculesystem.h \
@@ -66,7 +67,8 @@ HEADERS += \
     utils/logging.h \
     utils/glogfallback.h \
     force/fannthreeparticleforce.h \
-    modifier/friction.h
+    modifier/friction.h \
+    utils/fannderivative.h
 
 !nofann {
     HEADERS +=

@@ -5,6 +5,7 @@
 #include "math/vector3.h"
 
 #include <utils/logging.h>
+#include <utils/fannderivative.h>
 
 FannTwoParticleForce::FannTwoParticleForce() :
     m_hasWarnedAboutMissingNetwork(false)
@@ -94,18 +95,20 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
     fann_type input[1];
     fann_type *output;
 
-    double energyPlus = 0;
+    double potentialEnergy = 0;
     double energyMinus = 0;
 
     input[0] = network->rescaleDistance(l12 + h);
     output = fann_run(network->ann, input);
-    energyPlus = network->rescaleEnergy(output[0]);
+    potentialEnergy = network->rescaleEnergy(output[0]);
+    FannDerivative::backpropagateDerivative(network->ann, 0);
+    double derivative = network->rescaleEnergyDerivative(network->ann->train_errors[0]);
 
-    input[0] = network->rescaleDistance(l12 - h);
-    output = fann_run(network->ann, input);
-    energyMinus = network->rescaleEnergy(output[0]);
+//    input[0] = network->rescaleDistance(l12 - h);
+//    output = fann_run(network->ann, input);
+//    energyMinus = network->rescaleEnergy(output[0]);
 
-    double dEdr12 = -1.0*(energyPlus - energyMinus) / (2 * h);
+    double dEdr12 = -1.0*(derivative);
 
     if(hardForce) {
         double diff = oldl12;
@@ -138,9 +141,9 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
         atom2->addForce(0, r12.x() * dEdr12Normalized);
         atom2->addForce(1, r12.y() * dEdr12Normalized);
         atom2->addForce(2, r12.z() * dEdr12Normalized);
-        atom2->addPotential(0.5 * (energyPlus + energyMinus) / 2.0);
+        atom2->addPotential(0.5 * (potentialEnergy + energyMinus) / 2.0);
     }
-    atom1->addPotential(0.5 * (energyPlus + energyMinus) / 2.0);
+    atom1->addPotential(0.5 * (potentialEnergy + energyMinus) / 2.0);
 }
 
 void FannTwoParticleForce::warnAboutMissingNetwork()

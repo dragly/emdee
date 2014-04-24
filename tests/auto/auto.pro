@@ -18,4 +18,5 @@ SOURCES += main.cpp \
     forcecelltest.cpp \
     threeparticleforcesystem.cpp \
     fanntest.cpp \
-    twoparticleforcecount.cpp
+    twoparticleforcecount.cpp \
+    fannderivative.cpp

@@ -30,27 +30,22 @@ int main(int argc, char* argv[])
     mpi::communicator world;
     (void)env;
     (void)world;
-
-#else
-    (void)argc;
 #endif
     feenableexcept(FE_INVALID | FE_OVERFLOW);
 
-#ifdef DEVELOPMENT_TESTS
-    int result = 0;
-    UnitTest::TestReporterStdout reporter;
-    UnitTest::TestRunner runner(reporter);
-    result = runner.RunTestsIf(UnitTest::Test::GetTestList(), "FannForceSystem", UnitTest::True(), 0);
-    return result;
-#else
+
     std::vector<std::string> tests;
-    tests.push_back("FannForceSystem");
-//    tests.push_back("ForceCell");
-//    tests.push_back("Forces");
-//    tests.push_back("System");
-//    tests.push_back("Generator");
-//    tests.push_back("ThreeParticleForceSystem");
-//    tests.push_back("TwoParticleForceCount");
+    if(argc > 1 && !strcmp(argv[1], "dev")) {
+        tests.push_back("FannForceSystem");
+    } else {
+        tests.push_back("FannDerivative");
+        tests.push_back("ForceCell");
+        tests.push_back("Forces");
+        tests.push_back("System");
+        tests.push_back("Generator");
+        tests.push_back("ThreeParticleForceSystem");
+        tests.push_back("TwoParticleForceCount");
+    }
     int result = 0;
     for(const std::string& testName : tests) {
         std::cout << "Running " << testName << std::endl;
@@ -62,8 +57,6 @@ int main(int argc, char* argv[])
         std::cerr << "FAILURE: Some tests failed! See above log for details..." << std::endl;
     }
     return result;
-#endif
-
-//    return UnitTest::RunAllTests();
+    //    return UnitTest::RunAllTests();
 }
 

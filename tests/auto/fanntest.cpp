@@ -133,9 +133,6 @@ SUITE(FannForceSystem) {
         }
 
         Friction frictionModifier(&system);
-        if(friction) {
-            system.addModifier(&frictionModifier);
-        }
 
         FileManager fileManager(&system);
         fileManager.setOutFileName("/tmp/fannforce/hydrogen/atoms*.bin");
@@ -160,19 +157,18 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(80000);
             system.removeModifier(&thermostat);
             system.simulate();
+        } else if(friction) {
+            system.setNSimulationSteps(10000);
+            system.simulate();
+            system.addModifier(&frictionModifier);
+            system.setNSimulationSteps(20000);
+            system.simulate();
+            system.removeModifier(&frictionModifier);
+            system.setNSimulationSteps(30000);
+            system.simulate();
         } else {
-            for(int i = 0; i < 4; i++) {
-                system.setNSimulationSteps(10000);
-                system.simulate();
-                if(friction) {
-                    system.removeModifier(&frictionModifier);
-                }
-                system.setNSimulationSteps(10000);
-                system.simulate();
-                if(friction) {
-                    system.addModifier(&frictionModifier);
-                }
-            }
+            system.setNSimulationSteps(10000);
+            system.simulate();
         }
 
         //        CHECK_EQUAL(3, system.nAtomsTotal());

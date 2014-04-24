@@ -28,6 +28,11 @@ public:
     {
         return ((energy - 0.1) / 0.8) * (energyMax - energyMin) + energyMin;
     }
+
+    double rescaleEnergyDerivative(double value) const
+    {
+        return (energyMax - energyMin) / (r12Max - r12Min) * value;
+    }
 };
 
 class FannTwoParticleForce : public TwoParticleForce

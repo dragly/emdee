@@ -22,7 +22,7 @@ android {
     INCLUDEPATH += $$ROOT_DIR/armadillo
 }
 
-LIBS += -lglog
+LIBS += -lglog -ldoublefann
 
 !noglog {
     DEFINES += MD_USE_GLOG
