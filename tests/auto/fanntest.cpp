@@ -41,16 +41,16 @@ SUITE(FannForceSystem) {
         bool thermo = false;
         bool periodic = false;
 
-        double sideLength = 6.0;
+        double sideLength = 8.0;
         if(!periodic) {
-            sideLength = 40;
+            sideLength = 60;
         }
 
         int type = 0;
         if(type == 0)  {
-            int nx = 2;
-            int ny = 2;
-            int nz = 2;
+            int nx = 3;
+            int ny = 3;
+            int nz = 3;
             double spacingx = sideLength / nx;
             double spacingy = sideLength / ny;
             double spacingz = sideLength / nz;
@@ -120,11 +120,11 @@ SUITE(FannForceSystem) {
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
             Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(1.0, 2.5, 1.0));
+            hydrogenAtom2->setPosition(Vector3(1.0, 3, 1.0));
             hydrogenAtom2->setID(2);
             atoms.push_back(hydrogenAtom2);
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(1.7, 1.75, 1.0));
+            hydrogenAtom3->setPosition(Vector3(2.1, 2, 1.0));
             hydrogenAtom3->setID(3);
             atoms.push_back(hydrogenAtom3);
             if(!periodic) {
@@ -136,7 +136,7 @@ SUITE(FannForceSystem) {
 
         if(startVelocities) {
             Generator gen;
-            gen.boltzmannDistributeVelocities(0.00003, atoms);
+            gen.boltzmannDistributeVelocities(0.0003, atoms);
         }
 
         MoleculeSystem system;
@@ -184,36 +184,36 @@ SUITE(FannForceSystem) {
         system.setFileManager(&fileManager);
 
         system.setSaveEnabled(true);
-        system.setSaveEveryNSteps(10);
+        system.setSaveEveryNSteps(100);
         system.setOutputEnabled(true);
 
         system.setupCells(sideLength);
 
-        if(thermo) {
-            system.setNSimulationSteps(10000);
-            thermostat.setTargetTemperature(0.01);
-            system.simulate();
+//        if(thermo) {
+//            system.setNSimulationSteps(10000);
+//            thermostat.setTargetTemperature(0.01);
+//            system.simulate();
 
-            system.setNSimulationSteps(10000);
-            thermostat.setTargetTemperature(0.005);
-            system.simulate();
+//            system.setNSimulationSteps(10000);
+//            thermostat.setTargetTemperature(0.005);
+//            system.simulate();
 
-            system.setNSimulationSteps(80000);
-            system.removeModifier(&thermostat);
+//            system.setNSimulationSteps(80000);
+//            system.removeModifier(&thermostat);
+//            system.simulate();
+//        } else if(friction) {
+//            system.setNSimulationSteps(10000);
+//            system.simulate();
+//            system.addModifier(&frictionModifier);
+//            system.setNSimulationSteps(20000);
+//            system.simulate();
+//            system.removeModifier(&frictionModifier);
+//            system.setNSimulationSteps(30000);
+//            system.simulate();
+//        } else {
+            system.setNSimulationSteps(100000);
             system.simulate();
-        } else if(friction) {
-            system.setNSimulationSteps(10000);
-            system.simulate();
-            system.addModifier(&frictionModifier);
-            system.setNSimulationSteps(20000);
-            system.simulate();
-            system.removeModifier(&frictionModifier);
-            system.setNSimulationSteps(30000);
-            system.simulate();
-        } else {
-            system.setNSimulationSteps(4000);
-            system.simulate();
-        }
+//        }
 
         //        CHECK_EQUAL(3, system.nAtomsTotal());
 
