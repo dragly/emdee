@@ -121,11 +121,11 @@ SUITE(FannForceSystem) {
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
             Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(3.0, 1.0, 1.0));
+            hydrogenAtom2->setPosition(Vector3(2.0, 1.5, 1.0));
             hydrogenAtom2->setID(2);
             atoms.push_back(hydrogenAtom2);
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(2.0, 2.7320508075688774, 1.0));
+            hydrogenAtom3->setPosition(Vector3(3.0, 1.0, 1.0));
             hydrogenAtom3->setID(3);
             atoms.push_back(hydrogenAtom3);
             if(!periodic) {
@@ -170,7 +170,7 @@ SUITE(FannForceSystem) {
         system.setThreeParticleForce(&testForce3);
 
         VelocityVerletIntegrator integrator(&system);
-        integrator.setTimeStep(0.0001);
+        integrator.setTimeStep(0.01);
         system.setIntegrator(&integrator);
 
         BerendsenThermostat thermostat(&system);

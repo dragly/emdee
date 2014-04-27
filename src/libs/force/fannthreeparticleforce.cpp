@@ -94,7 +94,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3, const Vector3 &atom2Offset, const Vector3 &atom3Offset)
 {
 
-    bool symmetric = false;
+    bool symmetric = true;
     bool damping = true;
     if(!m_ann) {
         warnAboutMissingNetwork();
@@ -131,6 +131,12 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     double l12 = sqrt(l12Squared);
     double l13 = sqrt(l13Squared);
+
+//    if(symmetric && l12 > l13) {
+//        swap(l12, l13);
+//        swap(r12, r13);
+////        swap(atom2, atom3);
+//    }
 
     // TODO: Use cos angle as parameter instead of angle
     //    double angle2 = acos((l12*l12 + l13*l13 - l23*l23) / (2 * l12 * l13));
