@@ -49,9 +49,10 @@ SUITE(FannForceSystem) {
 
         int type = 0;
         if(type == 0)  {
-            int nx = 4;
-            int ny = 4;
-            int nz = 4;
+            int nx = 6;
+            int ny = nx;
+            int nz = nx;
+            sideLength = nx * 5.0;
             double spacingx = sideLength / nx;
             double spacingy = sideLength / ny;
             double spacingz = sideLength / nz;
@@ -213,7 +214,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(20000);
             system.simulate();
             system.removeModifier(&frictionModifier);
-            system.setNSimulationSteps(30000);
+            system.setNSimulationSteps(200000);
             system.simulate();
         } else {
             system.setNSimulationSteps(10000);
