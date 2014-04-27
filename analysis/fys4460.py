@@ -1,5 +1,4 @@
 from pylab import *
-from pylibconfig import Config
 from os.path import expanduser, join, split
 from glob import glob
 import os
@@ -30,6 +29,7 @@ boltzmannConstant = 1.3806503e-23
 def listSaveFileNames(configFilePath):
 #    saveDir, configFileName = split(configFilePath)
 
+    from pylibconfig import Config
     config = Config()
     config.readFile(configFilePath)
     fileNames = config.value("simulation.saveFileName")[0]

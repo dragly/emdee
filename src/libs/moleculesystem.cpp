@@ -385,7 +385,7 @@ void MoleculeSystem::simulate()
         m_integrator->stepForward();
         updateStatistics();
 
-        if(isOutputEnabledForThisStep()) {
+        if(m_processor->rank() == 0 && isOutputEnabledForThisStep()) {
             cout << "Step: " << setw(10) << setfill('0') << m_step
                  << std::scientific << setprecision(16)
                  << " TE: " << m_potentialEnergyTotal + m_kineticEnergyTotal

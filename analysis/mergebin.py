@@ -7,7 +7,6 @@ Created on Mon Mar 11 16:31:33 2013
 from sys import argv
 from fys4460 import loadHeader
 from pylab import dtype, fromfile, concatenate
-from pylibconfig import Config
 from os.path import expanduser, join, split
 from glob import glob
 import subprocess
