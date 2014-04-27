@@ -41,16 +41,16 @@ SUITE(FannForceSystem) {
         bool thermo = false;
         bool periodic = false;
 
-        double sideLength = 8.0;
+        double sideLength = 10.0;
         if(!periodic) {
-            sideLength = 60;
+            sideLength = 40;
         }
 
-        int type = 0;
+        int type = 3;
         if(type == 0)  {
-            int nx = 3;
-            int ny = 3;
-            int nz = 3;
+            int nx = 2;
+            int ny = 2;
+            int nz = 2;
             double spacingx = sideLength / nx;
             double spacingy = sideLength / ny;
             double spacingz = sideLength / nz;
@@ -120,11 +120,11 @@ SUITE(FannForceSystem) {
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
             Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(1.0, 3, 1.0));
+            hydrogenAtom2->setPosition(Vector3(1.0, 5, 1.0));
             hydrogenAtom2->setID(2);
             atoms.push_back(hydrogenAtom2);
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(2.1, 2, 1.0));
+            hydrogenAtom3->setPosition(Vector3(5, 1, 1.0));
             hydrogenAtom3->setID(3);
             atoms.push_back(hydrogenAtom3);
             if(!periodic) {
@@ -211,7 +211,7 @@ SUITE(FannForceSystem) {
 //            system.setNSimulationSteps(30000);
 //            system.simulate();
 //        } else {
-            system.setNSimulationSteps(100000);
+            system.setNSimulationSteps(1);
             system.simulate();
 //        }
 
