@@ -58,7 +58,7 @@ private:
     vector<FannTwoParticleNetwork> m_networks;
 
     double inherentEnergy = -0.5;
-    double tailCorrectionTreshold = 0.5;
+    double tailCorrectionTreshold = 1.5;
 };
 
 #endif // FANNTWOPARTICLEFORCE_H

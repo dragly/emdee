@@ -63,12 +63,17 @@ void FannTwoParticleForce::addNetwork(const AtomType& atomType1, const AtomType&
     FannDerivative::backpropagateDerivative(network.ann, 0);
     network.tailCorrectionMinForce = -1.0 * network.rescaleEnergyDerivative(network.ann->train_errors[0]);
 
+    cout << "Tail correction, min: "
+         << network.tailCorrectionMin
+         << " max: " << network.tailCorrectionMax
+         << " force: " << network.tailCorrectionMinForce << endl;
+
 //    double F0 = network.tailCorrectionMinForce;
 //    double x0 = network.tailCorrectionMin;
 //    double x1 = network.tailCorrectionMax;
 //    double deltaU1 = -F0*(x1-x0) + F0 / (x1-x0) * (0.5 * x1*x1 - x0*x1 + 0.5 * x0*x0);
 //    double U1 = network.tailCorrectionMinEnergy + deltaU1;
-    network.energyOffset = network.tailCorrectionEnergy(network.tailCorrectionMax);
+    network.energyOffset = 0.0;
 
     m_networks.push_back(network);
 }

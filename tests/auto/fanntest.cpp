@@ -36,21 +36,22 @@ SUITE(FannForceSystem) {
 
         vector<Atom *> atoms;
 
-        bool friction = false;
+        bool friction = true;
         bool startVelocities = true;
         bool thermo = false;
-        bool periodic = false;
+        bool periodic = true;
+        double cutoffRadius = 6.0;
+        double sideLength = 20.0;
 
-        double sideLength = 10.0;
         if(!periodic) {
             sideLength = 40;
         }
 
-        int type = 3;
+        int type = 0;
         if(type == 0)  {
-            int nx = 2;
-            int ny = 2;
-            int nz = 2;
+            int nx = 4;
+            int ny = 4;
+            int nz = 4;
             double spacingx = sideLength / nx;
             double spacingy = sideLength / ny;
             double spacingz = sideLength / nz;
@@ -120,11 +121,11 @@ SUITE(FannForceSystem) {
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
             Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(1.0, 5, 1.0));
+            hydrogenAtom2->setPosition(Vector3(1.0, 3, 1.0));
             hydrogenAtom2->setID(2);
             atoms.push_back(hydrogenAtom2);
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(5, 1, 1.0));
+            hydrogenAtom3->setPosition(Vector3(3, 1, 1.0));
             hydrogenAtom3->setID(3);
             atoms.push_back(hydrogenAtom3);
             if(!periodic) {
@@ -136,7 +137,11 @@ SUITE(FannForceSystem) {
 
         if(startVelocities) {
             Generator gen;
-            gen.boltzmannDistributeVelocities(0.0003, atoms);
+            if(friction) {
+                gen.boltzmannDistributeVelocities(0.03, atoms);
+            } else {
+                gen.boltzmannDistributeVelocities(0.0003, atoms);
+            }
         }
 
         MoleculeSystem system;
@@ -147,22 +152,20 @@ SUITE(FannForceSystem) {
 
         FannTwoParticleForce testForce2;
         testForce2.addNetwork(hydrogenType, hydrogenType,
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140419-164116/fann_network.net",
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140419-164116/bounds.fann");
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/fann_network_4.net",
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/bounds.fann");
 
         //        testForce2.addNetwork(hydrogenType, hydrogenType,
         //                              "/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/two/fann_network.net",
         //                              "/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/two/bounds.fann");
 
-        testForce2.setCutoffRadius(sideLength*0.9);
-
-        cout << "Cutoff: " << testForce2.cutoffRadius() << endl;
+        testForce2.setCutoffRadius(cutoffRadius);
 
         system.setTwoParticleForce(&testForce2);
 
         FannThreeParticleForce testForce3;
-        testForce3.loadNetwork("/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/three/fann_network.net",
-                               "/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/three/bounds.fann");
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140427-154638/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-154638/bounds.fann");
 
         system.setThreeParticleForce(&testForce3);
 
@@ -184,36 +187,36 @@ SUITE(FannForceSystem) {
         system.setFileManager(&fileManager);
 
         system.setSaveEnabled(true);
-        system.setSaveEveryNSteps(100);
+        system.setSaveEveryNSteps(10);
         system.setOutputEnabled(true);
 
-        system.setupCells(sideLength);
+        system.setupCells(cutoffRadius);
 
-//        if(thermo) {
-//            system.setNSimulationSteps(10000);
-//            thermostat.setTargetTemperature(0.01);
-//            system.simulate();
-
-//            system.setNSimulationSteps(10000);
-//            thermostat.setTargetTemperature(0.005);
-//            system.simulate();
-
-//            system.setNSimulationSteps(80000);
-//            system.removeModifier(&thermostat);
-//            system.simulate();
-//        } else if(friction) {
-//            system.setNSimulationSteps(10000);
-//            system.simulate();
-//            system.addModifier(&frictionModifier);
-//            system.setNSimulationSteps(20000);
-//            system.simulate();
-//            system.removeModifier(&frictionModifier);
-//            system.setNSimulationSteps(30000);
-//            system.simulate();
-//        } else {
-            system.setNSimulationSteps(1);
+        if(thermo) {
+            system.setNSimulationSteps(10000);
+            thermostat.setTargetTemperature(0.01);
             system.simulate();
-//        }
+
+            system.setNSimulationSteps(10000);
+            thermostat.setTargetTemperature(0.005);
+            system.simulate();
+
+            system.setNSimulationSteps(80000);
+            system.removeModifier(&thermostat);
+            system.simulate();
+        } else if(friction) {
+            system.setNSimulationSteps(10000);
+            system.simulate();
+            system.addModifier(&frictionModifier);
+            system.setNSimulationSteps(20000);
+            system.simulate();
+            system.removeModifier(&frictionModifier);
+            system.setNSimulationSteps(30000);
+            system.simulate();
+        } else {
+            system.setNSimulationSteps(100000);
+            system.simulate();
+        }
 
         //        CHECK_EQUAL(3, system.nAtomsTotal());
 

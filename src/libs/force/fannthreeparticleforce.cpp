@@ -15,7 +15,7 @@ double angleMin = M_PI / 10;
 double angleMax = M_PI;
 double energyMin = 0.0;
 double energyMax = 1.0;
-double energyOffset = 1.47868;
+double energyOffset = 0.0;
 
 double rescale(double value, double valueMin, double valueMax) {
     return (value - valueMin) / (valueMax - valueMin) * 0.8 + 0.1;
@@ -214,7 +214,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double potentialDampingFactor = 1.0;
 
     if(damping) {
-        double limiter = 0.3;
+        double limiter = 0.5;
         double l12DampingMin = l12Max - limiter;
         double l12DampingMax = l12Max;
         if(l12 > l12DampingMin && l12 < l12DampingMax) {
