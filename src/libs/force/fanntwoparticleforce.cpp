@@ -225,7 +225,7 @@ double FannTwoParticleNetwork::headCorrectionEnergy(double l12) const
     double x0_2 = x0*x0;
     double x0_3 = x0*x0_2;
     double x0_4 = x0_2*x0_2;
-    return F0 + (1 / x4 - 1 / x0_4);
+//    return F0 + (1 / x4 - 1 / x0_4);
     double deltaU = -F0*(x - x0) + 1 / (3*x3) + x / (x0_4) - 1 / (3*x0_3) - 1 / x0_3;
     return headCorrectionMaxEnergy + deltaU;
 }
