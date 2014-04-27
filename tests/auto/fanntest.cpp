@@ -36,10 +36,10 @@ SUITE(FannForceSystem) {
 
         vector<Atom *> atoms;
 
-        bool friction = false;
-        bool startVelocities = false;
+        bool friction = true;
+        bool startVelocities = true;
         bool thermo = false;
-        bool periodic = false;
+        bool periodic = true;
         double cutoffRadius = 6.0;
         double sideLength = 20.0;
 
@@ -47,7 +47,7 @@ SUITE(FannForceSystem) {
             sideLength = 40;
         }
 
-        int type = 3;
+        int type = 0;
         if(type == 0)  {
             int nx = 4;
             int ny = 4;
@@ -121,7 +121,7 @@ SUITE(FannForceSystem) {
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
             Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(2.0, 1.5, 1.0));
+            hydrogenAtom2->setPosition(Vector3(2.0, 2.0, 1.0));
             hydrogenAtom2->setID(2);
             atoms.push_back(hydrogenAtom2);
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
@@ -170,7 +170,8 @@ SUITE(FannForceSystem) {
         system.setThreeParticleForce(&testForce3);
 
         VelocityVerletIntegrator integrator(&system);
-        integrator.setTimeStep(0.01);
+        // Minimum for energy conservation: 0.001
+        integrator.setTimeStep(0.001);
         system.setIntegrator(&integrator);
 
         BerendsenThermostat thermostat(&system);
@@ -187,10 +188,11 @@ SUITE(FannForceSystem) {
         system.setFileManager(&fileManager);
 
         system.setSaveEnabled(true);
-        system.setSaveEveryNSteps(10);
+        system.setSaveEveryNSteps(100);
         system.setOutputEnabled(true);
 
         system.setupCells(cutoffRadius);
+
 
         if(thermo) {
             system.setNSimulationSteps(10000);
@@ -214,8 +216,9 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(30000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(1000);
+            system.setNSimulationSteps(10000);
             system.simulate();
+
         }
 
         //        CHECK_EQUAL(3, system.nAtomsTotal());
