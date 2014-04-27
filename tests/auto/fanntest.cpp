@@ -36,10 +36,10 @@ SUITE(FannForceSystem) {
 
         vector<Atom *> atoms;
 
-        bool friction = true;
-        bool startVelocities = true;
+        bool friction = false;
+        bool startVelocities = false;
         bool thermo = false;
-        bool periodic = true;
+        bool periodic = false;
         double cutoffRadius = 6.0;
         double sideLength = 20.0;
 
@@ -47,7 +47,7 @@ SUITE(FannForceSystem) {
             sideLength = 40;
         }
 
-        int type = 0;
+        int type = 3;
         if(type == 0)  {
             int nx = 4;
             int ny = 4;
@@ -121,11 +121,11 @@ SUITE(FannForceSystem) {
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
             Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(1.0, 3, 1.0));
+            hydrogenAtom2->setPosition(Vector3(3.0, 1.0, 1.0));
             hydrogenAtom2->setID(2);
             atoms.push_back(hydrogenAtom2);
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(3, 1, 1.0));
+            hydrogenAtom3->setPosition(Vector3(2.0, 2.7320508075688774, 1.0));
             hydrogenAtom3->setID(3);
             atoms.push_back(hydrogenAtom3);
             if(!periodic) {
@@ -170,7 +170,7 @@ SUITE(FannForceSystem) {
         system.setThreeParticleForce(&testForce3);
 
         VelocityVerletIntegrator integrator(&system);
-        integrator.setTimeStep(0.01);
+        integrator.setTimeStep(0.0001);
         system.setIntegrator(&integrator);
 
         BerendsenThermostat thermostat(&system);
@@ -214,7 +214,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(30000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(100000);
+            system.setNSimulationSteps(1000);
             system.simulate();
         }
 

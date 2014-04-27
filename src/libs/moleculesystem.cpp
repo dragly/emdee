@@ -386,10 +386,12 @@ void MoleculeSystem::simulate()
         updateStatistics();
 
         if(isOutputEnabledForThisStep()) {
-            cout << "Step: " << m_step
+            cout << "Step: " << setw(10) << setfill('0') << m_step
+                 << std::scientific << setprecision(16)
                  << " TE: " << m_potentialEnergyTotal + m_kineticEnergyTotal
                  << " PE: " << m_potentialEnergyTotal
                  << " KE: " << m_kineticEnergyTotal
+                 << " run time: " << setprecision(5) << timer.elapsed()
                  << endl;
         }
 #ifdef USE_MPI
@@ -400,9 +402,6 @@ void MoleculeSystem::simulate()
             if(m_processor->rank() == 0) {
                 m_progressReporter->reportProgress((double)iStep / (double)m_nSimulationSteps);
             }
-        }
-        if(isOutputEnabledForThisStep()) {
-            cout << "Time used so far: " << setprecision(5) << timer.elapsed() << endl;
         }
 #endif
 

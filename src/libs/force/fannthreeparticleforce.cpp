@@ -94,7 +94,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3, const Vector3 &atom2Offset, const Vector3 &atom3Offset)
 {
 
-    bool symmetric = true;
+    bool symmetric = false;
     bool damping = true;
     if(!m_ann) {
         warnAboutMissingNetwork();
@@ -143,13 +143,6 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     if(l12 < l12Min || l12 > l12Max || l13 < l13Min || l13 > l13Max || angle < angleMin || angle > angleMax) {
         return;
     }
-    //    double angleLimiter = 0.1;
-    //    if(angle > angleMax - angleLimiter) {
-    //        softenFactor *= (1 - 1 / angleLimiter * (angle - (angleMax - angleLimiter)));
-    //    }
-    //    if(angle < angleMin + angleLimiter) {
-    //        softenFactor *= 1 / angleLimiter * (angle - angleMin);
-    //    }
 
     double l12Inv = 1 / l12;
     double l13Inv = 1 / l13;
@@ -201,6 +194,16 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         dEdr13 = rescaleEnergyDerivative(m_ann->train_errors[0], l13Min, l13Max, energyMin, energyMax);
     }
 
+//    cout << atom1->id() << " " << atom2->id() << " " << atom3->id() << endl;
+//    cout << setprecision(20);
+//    cout << "angle: " << angle << endl;
+//    cout << "l12: " << l12 << endl;
+//    cout << "l13: " << l13 << endl;
+//    cout << "potentialEnergy: " << potentialEnergy << endl;
+//    cout << "dEdr12: " << dEdr12 << endl;
+//    cout << "dEdr13: " << dEdr13 << endl;
+//    cout << "dEdangle: " << dEdangle << endl;
+
 
 
     //    double softenFactor = 1.0;
@@ -224,7 +227,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             double exponentialFactor = exp((rij-rd)/(rij-rc));
             potentialDampingFactor *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
             potentialDampingFactorDerivativeR12 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
-            //        cout << "Damping l12!" << endl;
+                    cout << "Damping l12!" << endl;
             //        cout << "l12: " << l12 << endl;
             //        cout << "l13: " << l13 << endl;
             //        cout << potentialDampingFactor << endl;
@@ -240,12 +243,13 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             double exponentialFactor = exp((rij-rd)/(rij-rc));
             potentialDampingFactor *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
             potentialDampingFactorDerivativeR13 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
-            //        cout << "Damping l13!" << endl;
+                    cout << "Damping l13!" << endl;
             //        cout << potentialDampingFactor << endl;
             //        cout << potentialDampingFactorDerivativeR13 << endl;
         }
 
-        double angleLimiter = M_PI/6;
+//        double angleLimiter = M_PI/6;
+        double angleLimiter = 0.001;
         if(angleMax < M_PI - 0.01) { // Avoid damping if max angle is pi
             // Upper angle
             double angleUpperDampingMin = angleMax - angleLimiter;
@@ -257,7 +261,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
                 double exponentialFactor = exp((rij-rd)/(rij-rc));
                 potentialDampingFactor *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
                 potentialDampingFactorDerivativeAngle = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
-                //            cout << "Damping angle upper!" << endl;
+                            cout << "Damping angle upper!" << endl;
             }
         }
 
@@ -271,7 +275,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             double exponentialFactor = exp((rij-rd)/(rij-rc));
             potentialDampingFactor *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
             potentialDampingFactorDerivativeAngle = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
-            //        cout << "Damping angle lower!" << endl;
+                    cout << "Damping angle lower!" << endl;
             //        cout << "WOOO: " << angleMin << " " << angle << " factor: " << potentialDampingFactor << endl;
             //        cout << "rij: " << rij << endl;
             //        cout << "rd: " << rd << endl;
