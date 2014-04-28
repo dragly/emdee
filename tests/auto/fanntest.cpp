@@ -47,17 +47,18 @@ SUITE(FannForceSystem) {
             sideLength = 40;
         }
 
-        int type = 3;
+        int type = 0;
         if(type == 0)  {
             periodic = true;
             friction = false;
-            thermo = true;
+            thermo = false;
             startVelocities = true;
 
-            int nx = 2;
+            int nx = 3;
+
             int ny = nx;
             int nz = nx;
-            sideLength = nx * 7.0;
+            sideLength = nx * 10.0;
             double spacingx = sideLength / nx;
             double spacingy = sideLength / ny;
             double spacingz = sideLength / nz;
@@ -149,9 +150,9 @@ SUITE(FannForceSystem) {
         if(startVelocities) {
             Generator gen;
             if(friction) {
-                gen.boltzmannDistributeVelocities(0.003, atoms);
+                gen.boltzmannDistributeVelocities(0.03, atoms);
             } else {
-                gen.boltzmannDistributeVelocities(0.00003, atoms);
+                gen.boltzmannDistributeVelocities(0.003, atoms);
             }
         }
 
@@ -175,6 +176,7 @@ SUITE(FannForceSystem) {
         system.setTwoParticleForce(&testForce2);
 
         FannThreeParticleForce testForce3;
+        testForce3.setCutoffRadius(cutoffRadius / 2.0);
         testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/fann_network_0.net",
                                "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/bounds.fann");
 
@@ -203,7 +205,7 @@ SUITE(FannForceSystem) {
         }
 
         system.setSaveEnabled(true);
-        system.setSaveEveryNSteps(1);
+        system.setSaveEveryNSteps(100);
         system.setOutputEnabled(true);
 
         system.setupCells(cutoffRadius);
@@ -231,7 +233,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(40000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(23);
+            system.setNSimulationSteps(100000);
             system.simulate();
 
         }

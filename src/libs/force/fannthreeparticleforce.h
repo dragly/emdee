@@ -17,8 +17,13 @@ public:
     void calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3);
     void calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3, const Vector3 &atom2Offset, const Vector3 &atom3Offset);
 
+    double cutoffRadius() const;
+    void setCutoffRadius(double cutoffRadius);
+
 private:
     void warnAboutMissingNetwork();
+
+    double m_cutoffRadius;
 
     fann *m_ann;
     fann_type m_fanntmp;
