@@ -227,8 +227,9 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double totalDampingFactor = 1.0;
 
     if(damping) {
-        double limiter = 1.0;
-        double l12DampingMin = l12Max - limiter;
+        double upperLimiter = 1.0;
+        double lowerLimiter = 0.5;
+        double l12DampingMin = l12Max - upperLimiter;
         double l12DampingMax = l12Max;
         if(l12 > l12DampingMin && l12 < l12DampingMax) {
             double rij = l12;
@@ -244,7 +245,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             //        cout << potentialDampingFactorDerivativeR12 << endl;
         }
 
-        double l12LowerDampingMin = l12Min + limiter;
+        double l12LowerDampingMin = l12Min + lowerLimiter;
         double l12LowerDampingMax = l12Min;
         if(l12 < l12LowerDampingMin && l12 > l12LowerDampingMax) {
             double rij = l12;
@@ -260,7 +261,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             //        cout << potentialDampingFactorDerivativeR12 << endl;
         }
 
-        double l13DampingMin = l13Max - limiter;
+        double l13DampingMin = l13Max - upperLimiter;
         double l13DampingMax = l13Max;
         if(l13 > l13DampingMin && l13 < l13DampingMax) {
             double rij = l13;
@@ -274,7 +275,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             //        cout << potentialDampingFactorDerivativeR13 << endl;
         }
 
-        double l13LowerDampingMin = l13Min - limiter;
+        double l13LowerDampingMin = l13Min + lowerLimiter;
         double l13LowerDampingMax = l13Min;
         if(l13 < l13LowerDampingMin && l13 > l13LowerDampingMax) {
             double rij = l13;
