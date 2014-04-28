@@ -47,7 +47,7 @@ SUITE(FannForceSystem) {
             sideLength = 40;
         }
 
-        int type = 0;
+        int type = 3;
         if(type == 0)  {
             periodic = true;
             friction = false;
@@ -127,7 +127,7 @@ SUITE(FannForceSystem) {
             }
         } else if(type == 3)  {
             Atom *hydrogenAtom1 = new Atom(hydrogenType);
-            hydrogenAtom1->setPosition(Vector3(5.5, 0.0, 0.0));
+            hydrogenAtom1->setPosition(Vector3(0.68, 0.0, 0.0));
             hydrogenAtom1->setVelocity(Vector3(1.0, 0.0, 0.0));
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
@@ -203,7 +203,7 @@ SUITE(FannForceSystem) {
         }
 
         system.setSaveEnabled(true);
-        system.setSaveEveryNSteps(100);
+        system.setSaveEveryNSteps(1);
         system.setOutputEnabled(true);
 
         system.setupCells(cutoffRadius);
@@ -231,7 +231,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(40000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(20000);
+            system.setNSimulationSteps(23);
             system.simulate();
 
         }
