@@ -122,12 +122,9 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double l12Squared = dot(r12, r12);
     double l13Squared = dot(r13, r13);
 
-    //    if(l12Squared > l12Max*l12Max) {
-    //        return;
-    //    }
-    //    if(l12Squared > l13Max*l13Max) {
-    //        return;
-    //    }
+    if(l12Squared < l12Min*l12Min || l13Squared < l13Min*l13Min || l12Squared > l12Max*l12Max || l13Squared > l13Max*l13Max) {
+        return;
+    }
 
     double l12 = sqrt(l12Squared);
     double l13 = sqrt(l13Squared);
@@ -146,7 +143,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     }
     double angle = acos(angleParam);
 
-    if(l12 < l12Min || l12 > l12Max || l13 < l13Min || l13 > l13Max || angle < angleMin || angle > angleMax) {
+    if(angle < angleMin || angle > angleMax) {
         return;
     }
 
@@ -163,26 +160,12 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
                 );
 
     fann_type input[3];
-    //    fann_type *output;
-
-    //    double energyPlus = 0;
-    //    double energyMinus = 0;
-
-    //    double h = 1e-8;
-
-
-    //    double l12Input = l12;
-    //    double l13Input = l13;
-    //    uint l12Index = 0;
-    //    uint l13Index = 1;
 
     input[0] = rescale(l12, l12Min, l12Max);
     input[1] = rescale(l13, l13Min, l13Max);
     input[2] = rescale(angle, angleMin, angleMax);
     double potentialEnergy = rescaleEnergy(fann_run(m_ann, input)[0], energyMin, energyMax);
     potentialEnergy -= energyOffset;
-    //    energyPlus = potentialEnergy;
-    //    energyMinus = potentialEnergy;
 
 
     uint outputIndex = 0;
@@ -195,15 +178,6 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         // Special case for symmetric potentials
         dEdr13 = dEdr12;
     }
-//    if(symmetric) {
-//        input[0] = rescale(l13, l13Min, l13Max);
-//        input[1] = rescale(l12, l12Min, l12Max);
-//        input[2] = rescale(angle, angleMin, angleMax);
-//        double potentialEnergy2 = rescaleEnergy(fann_run(m_ann, input)[0], energyMin, energyMax);
-//        //        potentialEnergy = 0.5 * ( potentialEnergy + potentialEnergy2);
-//        FannDerivative::backpropagateDerivative(m_ann, outputIndex);
-//        dEdr13 = rescaleEnergyDerivative(m_ann->train_errors[0], l13Min, l13Max, energyMin, energyMax);
-//    }
 
 //    cout << atom1->id() << " " << atom2->id() << " " << atom3->id() << endl;
 //    cout << setprecision(20);
@@ -214,13 +188,6 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 //    cout << "dEdr12: " << dEdr12 << endl;
 //    cout << "dEdr13: " << dEdr13 << endl;
 //    cout << "dEdangle: " << dEdangle << endl;
-
-
-
-    //    double softenFactor = 1.0;
-    //    //    softenFactor = 0.3;
-    //    //     TODO: Consider if this is necessary with 1/3 force for three-particle potentials with equal particles
-    //    softenFactor = 1.0 / 3.0; // Because we have equal particles
 
     double dampingFactorDerivativeR12 = 0.0;
     double dampingFactorDerivativeR13 = 0.0;
@@ -361,16 +328,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         atom3->addForce(a, forceComp);
     }
 
-    //    double potentialPerAtom = 0.5 * (energyPlus + energyMinus) / 3.0;
-    //    double potentialPerAtom = 100;
-    //    atom1->addPotential(softenFactor*potentialDampingFactor*potentialEnergy);
-    //    atom2->addPotential(softenFactor*potentialDampingFactor*potentialEnergy);
-    //    atom3->addPotential(softenFactor*potentialDampingFactor*potentialEnergy);
     atom1->addPotential(totalDampingFactor*potentialEnergy / 3.0);
     atom2->addPotential(totalDampingFactor*potentialEnergy / 3.0);
     atom3->addPotential(totalDampingFactor*potentialEnergy / 3.0);
-    //    atom1->addPotential(potentialEnergy / 3.0);
-    //    atom2->addPotential(potentialEnergy / 3.0);
-    //    atom3->addPotential(potentialEnergy / 3.0);
-
 }

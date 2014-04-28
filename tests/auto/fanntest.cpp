@@ -165,8 +165,8 @@ SUITE(FannForceSystem) {
         system.setTwoParticleForce(&testForce2);
 
         FannThreeParticleForce testForce3;
-        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140427-154638/fann_network.net",
-                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-154638/bounds.fann");
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-125637/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-125637/bounds.fann");
 
         system.setThreeParticleForce(&testForce3);
 
