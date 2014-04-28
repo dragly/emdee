@@ -1,11 +1,12 @@
 #include "fannthreeparticleforce.h"
 
-#include <doublefann.h>
 #include <atom.h>
-#include <iomanip>
-
+#include <math/vector3.h>
 #include <utils/logging.h>
 #include <utils/fannderivative.h>
+
+#include <doublefann.h>
+#include <iomanip>
 
 double l12Min = 1.0;
 double l12Max = 5.0;
@@ -101,6 +102,13 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         return;
     }
 
+    bool equalParticles = (atom1->type() == atom2->type() && atom1->type() == atom3->type());
+    bool atom1HasLowestID = (atom1->id() < atom2->id() && atom1->id() < atom3->id());
+    if(equalParticles && !atom1HasLowestID) {
+        // Return if the atom types are equal and atom1 doesn't have the lowest ID
+        return;
+    }
+
     //    if(!(atom1->type().number() == 8 && atom2->type().number() == 1 && atom3->type().number() == 1)) {
     //        return;
     //    }
@@ -111,45 +119,66 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     Vector3 r12 = atom2->position() + atom2Offset - atom1->position();
     Vector3 r13 = atom3->position() + atom3Offset - atom1->position();
-
-    // Scaling from ångstrøm to atomic units
-    double siToAU = 1.0;
-
-    r12 = r12 * siToAU;
-    r13 = r13 * siToAU;
-
     double dotr12r13 = dot(r12, r13);
     double l12Squared = dot(r12, r12);
     double l13Squared = dot(r13, r13);
-
     if(l12Squared < l12Min*l12Min || l13Squared < l13Min*l13Min || l12Squared > l12Max*l12Max || l13Squared > l13Max*l13Max) {
         return;
     }
-
     double l12 = sqrt(l12Squared);
     double l13 = sqrt(l13Squared);
-
-    if(symmetric && l12 > l13) {
-        swap(l12, l13);
-        swap(r12, r13);
-        swap(atom2, atom3);
-    }
-
     // TODO: Use cos angle as parameter instead of angle
     //    double angle2 = acos((l12*l12 + l13*l13 - l23*l23) / (2 * l12 * l13));
     double angleParam = dotr12r13 / (l12*l13);
     if(angleParam > 1.0 || angleParam < -1.0) {
-        return; // This should never happen, but means two atom2 and atom3 are on top of each other
+        // This should never happen, but means that atom2 and atom3 are on top of each other
+        return;
     }
     double angle = acos(angleParam);
+    if(angle < M_PI / 3.0) {
+        // If the angle is less than 60 degrees (pi/3), we should swap the atoms so that we get one with
+        // higher angle. This way we don't have to train the neural network for angles below pi/3
+        // Swapping with the closest atom should give the highest angle
+        Vector3 atom1Offset;
+        if(l12 < l13) {
+            swap(atom1, atom2);
+            atom1Offset = atom2Offset;
+            r12 = (atom2->position()) - (atom1->position() + atom1Offset);
+            r13 = (atom3->position() + atom3Offset) - (atom1->position() + atom1Offset);
+        } else {
+            swap(atom1, atom3);
+            atom1Offset = atom3Offset;
+            r12 = (atom2->position() + atom2Offset) - (atom1->position() + atom1Offset);
+            r13 = (atom3->position()) - (atom1->position() + atom1Offset);
+        }
+        dotr12r13 = dot(r12, r13);
+        l12Squared = dot(r12, r12);
+        l13Squared = dot(r13, r13);
+        l12 = sqrt(l12Squared);
+        l13 = sqrt(l13Squared);
+        angleParam = dotr12r13 / (l12*l13);
+        if(angleParam > 1.0 || angleParam < -1.0) {
+            // This should never happen, but means that atom2 and atom3 are on top of each other
+            return;
+        }
+        angle = acos(angleParam);
+    }
 
+    // Make the potential symmetric, because the neural network might not agree that it is
+    if(symmetric && l12 > l13) {
+        swap(r12, r13);
+        swap(l12Squared, l13Squared);
+        swap(l12, l13);
+        swap(atom2, atom3);
+    }
+
+    // This should not happen if the potential is parameterized between pi/3 and pi
     if(angle < angleMin || angle > angleMax) {
         return;
     }
 
     double l12Inv = 1 / l12;
     double l13Inv = 1 / l13;
-
 
     double shield = 1e-12;
     double invSqrtDotOverLenghtSquared = 1. /
@@ -198,13 +227,29 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double totalDampingFactor = 1.0;
 
     if(damping) {
-        double limiter = 0.5;
+        double limiter = 1.0;
         double l12DampingMin = l12Max - limiter;
         double l12DampingMax = l12Max;
         if(l12 > l12DampingMin && l12 < l12DampingMax) {
             double rij = l12;
             double rd = l12DampingMin;
             double rc = l12DampingMax;
+            double exponentialFactor = exp((rij-rd)/(rij-rc));
+            dampingFactorR12 *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
+            dampingFactorDerivativeR12 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
+//                    cout << "Damping l12!" << endl;
+            //        cout << "l12: " << l12 << endl;
+            //        cout << "l13: " << l13 << endl;
+            //        cout << potentialDampingFactor << endl;
+            //        cout << potentialDampingFactorDerivativeR12 << endl;
+        }
+
+        double l12LowerDampingMin = l12Min + limiter;
+        double l12LowerDampingMax = l12Min;
+        if(l12 < l12LowerDampingMin && l12 > l12LowerDampingMax) {
+            double rij = l12;
+            double rd = l12LowerDampingMin;
+            double rc = l12LowerDampingMax;
             double exponentialFactor = exp((rij-rd)/(rij-rc));
             dampingFactorR12 *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
             dampingFactorDerivativeR12 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
@@ -229,8 +274,23 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             //        cout << potentialDampingFactorDerivativeR13 << endl;
         }
 
+        double l13LowerDampingMin = l13Min - limiter;
+        double l13LowerDampingMax = l13Min;
+        if(l13 < l13LowerDampingMin && l13 > l13LowerDampingMax) {
+            double rij = l13;
+            double rd = l13LowerDampingMin;
+            double rc = l13LowerDampingMax;
+            double exponentialFactor = exp((rij-rd)/(rij-rc));
+            dampingFactorR13 *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
+            dampingFactorDerivativeR13 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
+//                    cout << "Damping l13!" << endl;
+            //        cout << potentialDampingFactor << endl;
+            //        cout << potentialDampingFactorDerivativeR13 << endl;
+        }
+
 //        double angleLimiter = M_PI/6;
         double angleLimiter = M_PI/12;
+//        double angleLimiter = 0.1;
         if(angleMax < M_PI - 0.01) { // Avoid damping if max angle is pi
             // Upper angle
             double angleUpperDampingMin = angleMax - angleLimiter;
