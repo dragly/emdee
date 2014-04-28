@@ -106,11 +106,6 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
     }
 
     Vector3 r12 = atom2->position() + atom2Offset - atom1->position();
-
-    // Scaling from ångstrøm to atomic units
-    double siToAU = 1.0;
-    r12 = siToAU * r12;
-
     double l12Squared = dot(r12, r12);
 
     double l12 = sqrt(l12Squared);

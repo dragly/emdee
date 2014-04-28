@@ -40,14 +40,14 @@ SUITE(FannForceSystem) {
         bool startVelocities = false;
         bool thermo = false;
         bool periodic = false;
-        double cutoffRadius = 6.0;
+        double cutoffRadius = 8.0;
         double sideLength = 20.0;
 
         if(!periodic) {
             sideLength = 40;
         }
 
-        int type = 3;
+        int type = 0;
         if(type == 0)  {
             periodic = true;
             friction = true;
@@ -156,15 +156,15 @@ SUITE(FannForceSystem) {
         system.addAtoms(atoms);
 
         FannTwoParticleForce testForce2;
+        testForce2.setCutoffRadius(cutoffRadius);
         testForce2.addNetwork(hydrogenType, hydrogenType,
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/fann_network_4.net",
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/fann_network.net",
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/bounds.fann");
 
         //        testForce2.addNetwork(hydrogenType, hydrogenType,
         //                              "/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/two/fann_network.net",
         //                              "/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/two/bounds.fann");
 
-        testForce2.setCutoffRadius(cutoffRadius);
 
         system.setTwoParticleForce(&testForce2);
 

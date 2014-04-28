@@ -165,7 +165,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     }
 
     // Make the potential symmetric, because the neural network might not agree that it is
-    if(symmetric && l12 > l13) {
+    if(symmetric && l12 < l13) {
         swap(r12, r13);
         swap(l12Squared, l13Squared);
         swap(l12, l13);
@@ -227,8 +227,8 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double totalDampingFactor = 1.0;
 
     if(damping) {
-        double upperLimiter = 1.0;
-        double lowerLimiter = 0.5;
+        double upperLimiter = 0.5;
+        double lowerLimiter = 0.0;
         double l12DampingMin = l12Max - upperLimiter;
         double l12DampingMax = l12Max;
         if(l12 > l12DampingMin && l12 < l12DampingMax) {
