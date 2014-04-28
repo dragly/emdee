@@ -40,7 +40,7 @@ SUITE(FannForceSystem) {
         bool startVelocities = false;
         bool thermo = false;
         bool periodic = false;
-        double cutoffRadius = 6.0;
+        double cutoffRadius = 12.0;
         double sideLength = 20.0;
 
         if(!periodic) {
@@ -51,10 +51,10 @@ SUITE(FannForceSystem) {
         if(type == 0)  {
             periodic = true;
             friction = false;
-            thermo = false;
+            thermo = true;
             startVelocities = true;
 
-            int nx = 3;
+            int nx = 2;
             int ny = nx;
             int nz = nx;
             sideLength = nx * 7.0;
@@ -127,15 +127,16 @@ SUITE(FannForceSystem) {
             }
         } else if(type == 3)  {
             Atom *hydrogenAtom1 = new Atom(hydrogenType);
-            hydrogenAtom1->setPosition(Vector3(0.0,	0.0, 0.0));
+            hydrogenAtom1->setPosition(Vector3(5.5, 0.0, 0.0));
+            hydrogenAtom1->setVelocity(Vector3(1.0, 0.0, 0.0));
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
             Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(3.7368421052631575, 0.0, 0.0));
+            hydrogenAtom2->setPosition(Vector3(0.0, 2.0, 0.0));
             hydrogenAtom2->setID(2);
             atoms.push_back(hydrogenAtom2);
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(0.92191644351551916, 2.500984084765686, 0.0));
+            hydrogenAtom3->setPosition(Vector3(1.4, 2.0, 0.0));
             hydrogenAtom3->setID(3);
             atoms.push_back(hydrogenAtom3);
             if(!periodic) {
@@ -148,7 +149,7 @@ SUITE(FannForceSystem) {
         if(startVelocities) {
             Generator gen;
             if(friction) {
-                gen.boltzmannDistributeVelocities(0.00003, atoms);
+                gen.boltzmannDistributeVelocities(0.003, atoms);
             } else {
                 gen.boltzmannDistributeVelocities(0.00003, atoms);
             }
@@ -230,7 +231,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(40000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(200000);
+            system.setNSimulationSteps(20000);
             system.simulate();
 
         }
