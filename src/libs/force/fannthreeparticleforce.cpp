@@ -227,7 +227,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double totalDampingFactor = 1.0;
 
     if(damping) {
-        double upperLimiter = 1.5;
+        double upperLimiter = 2.5;
         double lowerLimiter = 0.0;
         double l12DampingMin = l12Max - upperLimiter;
         double l12DampingMax = l12Max;

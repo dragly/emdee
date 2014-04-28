@@ -50,14 +50,14 @@ SUITE(FannForceSystem) {
         int type = 0;
         if(type == 0)  {
             periodic = true;
-            friction = true;
-//            thermo = true;
+            friction = false;
+            thermo = false;
             startVelocities = true;
 
-            int nx = 6;
+            int nx = 3;
             int ny = nx;
             int nz = nx;
-            sideLength = nx * 5.0;
+            sideLength = nx * 7.0;
             double spacingx = sideLength / nx;
             double spacingy = sideLength / ny;
             double spacingz = sideLength / nz;
@@ -75,7 +75,11 @@ SUITE(FannForceSystem) {
                         hydrogenAtom1->setPosition(Vector3(0.5 + spacingx*k, 0.5 + spacingy*j, 0.5 + spacingz*i));
                         hydrogenAtom1->setID(1 + idCounter);
                         atoms.push_back(hydrogenAtom1);
-                        idCounter += 1;
+                        Atom *hydrogenAtom2 = new Atom(hydrogenType);
+                        hydrogenAtom2->setPosition(Vector3(2.0 + spacingx*k, 0.5 + spacingy*j, 0.5 + spacingz*i));
+                        hydrogenAtom2->setID(2 + idCounter);
+                        atoms.push_back(hydrogenAtom2);
+                        idCounter += 2;
                     }
                 }
             }
@@ -144,9 +148,9 @@ SUITE(FannForceSystem) {
         if(startVelocities) {
             Generator gen;
             if(friction) {
-                gen.boltzmannDistributeVelocities(0.03, atoms);
+                gen.boltzmannDistributeVelocities(0.00003, atoms);
             } else {
-                gen.boltzmannDistributeVelocities(0.0003, atoms);
+                gen.boltzmannDistributeVelocities(0.00003, atoms);
             }
         }
 
@@ -183,6 +187,7 @@ SUITE(FannForceSystem) {
         BerendsenThermostat thermostat(&system);
         if(thermo) {
             system.addModifier(&thermostat);
+            thermostat.setRelaxationTime(0.001);
         }
 
         Friction frictionModifier(&system);
@@ -205,11 +210,11 @@ SUITE(FannForceSystem) {
 
         if(thermo) {
             system.setNSimulationSteps(40000);
-            thermostat.setTargetTemperature(0.01);
+            thermostat.setTargetTemperature(0.05);
             system.simulate();
 
             system.setNSimulationSteps(20000);
-            thermostat.setTargetTemperature(0.005);
+            thermostat.setTargetTemperature(0.01);
             system.simulate();
 
             system.setNSimulationSteps(40000);
@@ -225,7 +230,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(40000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(100000);
+            system.setNSimulationSteps(200000);
             system.simulate();
 
         }
