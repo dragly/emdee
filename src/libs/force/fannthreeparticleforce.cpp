@@ -227,7 +227,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double totalDampingFactor = 1.0;
 
     if(damping) {
-        double upperLimiter = 0.5;
+        double upperLimiter = 1.5;
         double lowerLimiter = 0.0;
         double l12DampingMin = l12Max - upperLimiter;
         double l12DampingMax = l12Max;
@@ -290,7 +290,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         }
 
 //        double angleLimiter = M_PI/6;
-        double angleLimiter = M_PI/12;
+        double angleLimiter = 0.0;
 //        double angleLimiter = 0.1;
         if(angleMax < M_PI - 0.01) { // Avoid damping if max angle is pi
             // Upper angle
@@ -317,7 +317,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             double exponentialFactor = exp((rij-rd)/(rij-rc));
             dampingFactorAngle *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
             dampingFactorDerivativeAngle = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
-//                    cout << "Damping angle lower!" << endl;
+                    cout << "Damping angle lower!" << endl;
             //        cout << "WOOO: " << angleMin << " " << angle << " factor: " << potentialDampingFactor << endl;
             //        cout << "rij: " << rij << endl;
             //        cout << "rd: " << rd << endl;

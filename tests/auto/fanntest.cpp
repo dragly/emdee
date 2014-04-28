@@ -40,17 +40,18 @@ SUITE(FannForceSystem) {
         bool startVelocities = false;
         bool thermo = false;
         bool periodic = false;
-        double cutoffRadius = 8.0;
+        double cutoffRadius = 6.0;
         double sideLength = 20.0;
 
         if(!periodic) {
             sideLength = 40;
         }
 
-        int type = 0;
+        int type = 3;
         if(type == 0)  {
             periodic = true;
             friction = true;
+//            thermo = true;
             startVelocities = true;
 
             int nx = 6;
@@ -126,11 +127,11 @@ SUITE(FannForceSystem) {
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
             Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(2.7368421052631575, 0.0, 0.0));
+            hydrogenAtom2->setPosition(Vector3(3.7368421052631575, 0.0, 0.0));
             hydrogenAtom2->setID(2);
             atoms.push_back(hydrogenAtom2);
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(0.42191644351551916, 2.500984084765686, 0.0));
+            hydrogenAtom3->setPosition(Vector3(0.92191644351551916, 2.500984084765686, 0.0));
             hydrogenAtom3->setID(3);
             atoms.push_back(hydrogenAtom3);
             if(!periodic) {
@@ -169,8 +170,8 @@ SUITE(FannForceSystem) {
         system.setTwoParticleForce(&testForce2);
 
         FannThreeParticleForce testForce3;
-        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-154906/fann_network.net",
-                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-154906/bounds.fann");
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/fann_network_0.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/bounds.fann");
 
         system.setThreeParticleForce(&testForce3);
 
@@ -203,28 +204,28 @@ SUITE(FannForceSystem) {
 
 
         if(thermo) {
-            system.setNSimulationSteps(10000);
+            system.setNSimulationSteps(40000);
             thermostat.setTargetTemperature(0.01);
             system.simulate();
 
-            system.setNSimulationSteps(10000);
+            system.setNSimulationSteps(20000);
             thermostat.setTargetTemperature(0.005);
             system.simulate();
 
-            system.setNSimulationSteps(80000);
+            system.setNSimulationSteps(40000);
             system.removeModifier(&thermostat);
             system.simulate();
         } else if(friction) {
-            system.setNSimulationSteps(10000);
+            system.setNSimulationSteps(40000);
             system.simulate();
             system.addModifier(&frictionModifier);
             system.setNSimulationSteps(20000);
             system.simulate();
             system.removeModifier(&frictionModifier);
-            system.setNSimulationSteps(200000);
+            system.setNSimulationSteps(40000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(30000);
+            system.setNSimulationSteps(100000);
             system.simulate();
 
         }

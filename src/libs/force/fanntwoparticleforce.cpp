@@ -125,7 +125,6 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
     } else if(l12 < network->headCorrectionMax) {
         dEdr12 = network->headCorrectionForce(l12);
         potentialEnergy = network->headCorrectionEnergy(l12);
-//        cout << "Head!" << endl;
     } else {
         fann_type input[2];
         input[0] = 0.0;
@@ -228,7 +227,7 @@ double FannTwoParticleNetwork::headCorrectionForce(double l12) const
     double x4 = x2*x2;
     double x0_2 = x0*x0;
     double x0_4 = x0_2*x0_2;
-    return F0 + (1 / x4 - 1 / x0_4);
+    return F0 - (1 / x4 - 1 / x0_4);
 }
 
 double FannTwoParticleNetwork::headCorrectionEnergy(double l12) const
@@ -243,6 +242,7 @@ double FannTwoParticleNetwork::headCorrectionEnergy(double l12) const
     double x0_3 = x0*x0_2;
     double x0_4 = x0_2*x0_2;
 //    return F0 + (1 / x4 - 1 / x0_4);
-    double deltaU = -F0*(x - x0) + 1 / (3*x3) + x / (x0_4) - 1 / (3*x0_3) - 1 / x0_3;
+    // Check this for energy conservation
+    double deltaU = -F0*(x - x0) - 1 / (3*x3) + x / (x0_4) - 1 / (3*x0_3) - 1 / x0_3;
     return headCorrectionMaxEnergy + deltaU;
 }
