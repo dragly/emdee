@@ -6,6 +6,10 @@
 #include <force/vashishtathreeparticleforce.h>
 
 SUITE(Forces) {
+    TEST(Dummy) {
+
+    }
+
     TEST(ArgonForceTest) {
         Atom* atom1 = new Atom(AtomType::argon());
         Atom* atom2 = new Atom(AtomType::argon());

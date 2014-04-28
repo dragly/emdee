@@ -36,10 +36,10 @@ SUITE(FannForceSystem) {
 
         vector<Atom *> atoms;
 
-        bool friction = true;
-        bool startVelocities = true;
+        bool friction = false;
+        bool startVelocities = false;
         bool thermo = false;
-        bool periodic = true;
+        bool periodic = false;
         double cutoffRadius = 6.0;
         double sideLength = 20.0;
 
@@ -47,8 +47,12 @@ SUITE(FannForceSystem) {
             sideLength = 40;
         }
 
-        int type = 0;
+        int type = 3;
         if(type == 0)  {
+            periodic = true;
+            friction = true;
+            startVelocities = true;
+
             int nx = 6;
             int ny = nx;
             int nz = nx;
@@ -118,15 +122,15 @@ SUITE(FannForceSystem) {
             }
         } else if(type == 3)  {
             Atom *hydrogenAtom1 = new Atom(hydrogenType);
-            hydrogenAtom1->setPosition(Vector3(1.0, 1.0, 1.0));
+            hydrogenAtom1->setPosition(Vector3(0.0,	0.0, 0.0));
             hydrogenAtom1->setID(1);
             atoms.push_back(hydrogenAtom1);
             Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(2.0, 2.0, 1.0));
+            hydrogenAtom2->setPosition(Vector3(2.7368421052631575, 0.0, 0.0));
             hydrogenAtom2->setID(2);
             atoms.push_back(hydrogenAtom2);
             Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(3.0, 1.0, 1.0));
+            hydrogenAtom3->setPosition(Vector3(0.42191644351551916, 2.500984084765686, 0.0));
             hydrogenAtom3->setID(3);
             atoms.push_back(hydrogenAtom3);
             if(!periodic) {
@@ -165,8 +169,8 @@ SUITE(FannForceSystem) {
         system.setTwoParticleForce(&testForce2);
 
         FannThreeParticleForce testForce3;
-        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-125637/fann_network.net",
-                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-125637/bounds.fann");
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-154906/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-154906/bounds.fann");
 
         system.setThreeParticleForce(&testForce3);
 
@@ -187,6 +191,9 @@ SUITE(FannForceSystem) {
         fileManager.setUnitLength(5.2917721092e-11);
         fileManager.setUnitMass(9.10938291e-31);
         system.setFileManager(&fileManager);
+        if(type == 99) {
+            system.load("/tmp/fannforce/hydrogen/atoms018400.bin");
+        }
 
         system.setSaveEnabled(true);
         system.setSaveEveryNSteps(100);
@@ -217,7 +224,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(200000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(10000);
+            system.setNSimulationSteps(30000);
             system.simulate();
 
         }

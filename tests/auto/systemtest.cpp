@@ -14,6 +14,8 @@
 #include <unittest++/UnitTest++.h>
 
 SUITE(System) {
+    TEST(Dummy) {
+    }
     TEST(CellSetup)
     {
         double potentialConstant = 1.0;
