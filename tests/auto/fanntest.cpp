@@ -47,7 +47,7 @@ SUITE(FannForceSystem) {
             sideLength = 40;
         }
 
-        int type = 3;
+        int type = 0;
         if(type == 0)  {
             periodic = true;
             friction = true;
