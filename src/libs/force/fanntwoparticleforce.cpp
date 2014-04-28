@@ -36,7 +36,7 @@ void FannTwoParticleForce::addNetwork(const AtomType& atomType1, const AtomType&
     boundsFile >> network.energyMax;
 
     network.tailCorrectionMin = network.r12Max - tailCorrectionTreshold;
-    network.tailCorrectionMax = network.r12Max*2;
+    network.tailCorrectionMax = cutoffRadius();
 
     network.headCorrectionMax = network.r12Min;
 
@@ -54,19 +54,19 @@ void FannTwoParticleForce::addNetwork(const AtomType& atomType1, const AtomType&
     output = fann_run(network.ann, input);
     network.headCorrectionMaxEnergy = network.rescaleEnergy(output[0]);
     FannDerivative::backpropagateDerivative(network.ann, 0);
-    network.headCorrectionMaxForce = -1.0 * network.rescaleEnergyDerivative(network.ann->train_errors[0]);
+    network.headCorrectionMaxDerivative = network.rescaleEnergyDerivative(network.ann->train_errors[0]);
 
     // tailCorrectionMin
     input[0] = network.rescaleDistance(network.tailCorrectionMin);
     output = fann_run(network.ann, input);
     network.tailCorrectionMinEnergy = network.rescaleEnergy(output[0]);
     FannDerivative::backpropagateDerivative(network.ann, 0);
-    network.tailCorrectionMinForce = -1.0 * network.rescaleEnergyDerivative(network.ann->train_errors[0]);
+    network.tailCorrectionMinDerivative = network.rescaleEnergyDerivative(network.ann->train_errors[0]);
 
     cout << "Tail correction, min: "
          << network.tailCorrectionMin
          << " max: " << network.tailCorrectionMax
-         << " force: " << network.tailCorrectionMinForce << endl;
+         << " derivative: " << network.tailCorrectionMinDerivative << endl;
 
 //    double F0 = network.tailCorrectionMinForce;
 //    double x0 = network.tailCorrectionMin;
@@ -123,11 +123,14 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
 
     double potentialEnergy = 0;
     if(l12 > network->tailCorrectionMin) {
-        dEdr12 = network->tailCorrectionForce(l12);
+        dEdr12 = network->tailCorrectionDerivative(l12);
         potentialEnergy = network->tailCorrectionEnergy(l12);
+//        cout << potentialEnergy << endl;
+//        cout << "Tail!" << endl;
     } else if(l12 < network->headCorrectionMax) {
         dEdr12 = network->headCorrectionForce(l12);
         potentialEnergy = network->headCorrectionEnergy(l12);
+//        cout << "Head!" << endl;
     } else {
         fann_type input[2];
         input[0] = 0.0;
@@ -138,13 +141,13 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
         output = fann_run(network->ann, input);
         potentialEnergy = network->rescaleEnergy(output[0]);
         FannDerivative::backpropagateDerivative(network->ann, 0);
-        double derivative = network->rescaleEnergyDerivative(network->ann->train_errors[0]);
-        dEdr12 = -1.0*(derivative);
+        dEdr12 = network->rescaleEnergyDerivative(network->ann->train_errors[0]);
     }
+    double force = -1.0*(dEdr12);
 
     potentialEnergy -= network->energyOffset;
 
-    double dEdr12Normalized = dEdr12 / l12;
+    double dEdr12Normalized = force / l12;
 
     atom1->addForce(0, -r12.x() * dEdr12Normalized);
     atom1->addForce(1, -r12.y() * dEdr12Normalized);
@@ -185,26 +188,45 @@ double FannTwoParticleNetwork::rescaleEnergyDerivative(double value) const
 
 double FannTwoParticleNetwork::tailCorrectionEnergy(double l12) const
 {
-    double F0 = tailCorrectionMinForce;
-    double x0 = tailCorrectionMin;
-    double x1 = tailCorrectionMax;
-    double x = l12;
-    double deltaU = -F0*(x-x0) + F0 / (x1-x0) * (0.5 * x*x - x0*x + 0.5 * x0*x0);
-    return tailCorrectionMinEnergy + deltaU;
+//    double F0 = tailCorrectionMinForce;
+//    double x0 = tailCorrectionMin;
+//    double x1 = tailCorrectionMax;
+//    double x = l12;
+////        double deltaU = -F0*(x-x0) + F0 / (x1-x0) * (0.5 * x*x - x0*x + 0.5 * x0*x0);
+//    double deltaU = F0*(x0-x)*(x0 - 2*x1 + x) / (2*(x0-x1));
+//    return tailCorrectionMinEnergy + deltaU;
+    double rij = l12;
+    double rd = tailCorrectionMin;
+    double rc = tailCorrectionMax;
+    double exponentialFactor = exp((rij-rd)/(rij-rc));
+    double dampingFactorR12 = exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
+//    dampingFactorDerivativeR12 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
+    return tailCorrectionMinEnergy * dampingFactorR12;
 }
 
-double FannTwoParticleNetwork::tailCorrectionForce(double l12) const
+double FannTwoParticleNetwork::tailCorrectionDerivative(double l12) const
 {
-    double F0 = tailCorrectionMinForce;
-    double x0 = tailCorrectionMin;
-    double x1 = tailCorrectionMax;
-    double x = l12;
-    return F0 - F0 * (x - x0) / (x1 - x0);
+//    double F0 = tailCorrectionMinForce;
+//    double x0 = tailCorrectionMin;
+//    double x1 = tailCorrectionMax;
+//    double x = l12;
+//    double F = F0 - F0 * (x - x0) / (x1 - x0);
+//    return F;
+    double rij = l12;
+    double rd = tailCorrectionMin;
+    double rc = tailCorrectionMax;
+    double exponentialFactor = exp((rij-rd)/(rij-rc));
+//    double dampingFactorR12 = exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
+    double dampingFactorDerivativeR12 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
+//    cout << dampingFactorR12 << endl;
+    // Because we are going to use a constant energy from here and out, we only get a derivative term from
+    // pulling this energy down to zero
+    return tailCorrectionMinEnergy * dampingFactorDerivativeR12;
 }
 
 double FannTwoParticleNetwork::headCorrectionForce(double l12) const
 {
-    double F0 = headCorrectionMaxForce;
+    double F0 = headCorrectionMaxDerivative;
     double x0 = headCorrectionMax;
     double x = l12;
     double x2 = x*x;
@@ -216,7 +238,7 @@ double FannTwoParticleNetwork::headCorrectionForce(double l12) const
 
 double FannTwoParticleNetwork::headCorrectionEnergy(double l12) const
 {
-    double F0 = headCorrectionMaxForce;
+    double F0 = headCorrectionMaxDerivative;
     double x0 = headCorrectionMax;
     double x = l12;
     double x2 = x*x;

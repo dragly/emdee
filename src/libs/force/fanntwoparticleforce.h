@@ -21,8 +21,8 @@ public:
     double energyMax;
     AtomType atomType1;
     AtomType atomType2;
-    double headCorrectionMaxForce;
-    double tailCorrectionMinForce;
+    double headCorrectionMaxDerivative;
+    double tailCorrectionMinDerivative;
     double headCorrectionMaxEnergy;
     double tailCorrectionMinEnergy;
     double energyOffset;
@@ -34,7 +34,7 @@ public:
     double rescaleEnergyDerivative(double value) const;
 
     double tailCorrectionEnergy(double l12) const;
-    double tailCorrectionForce(double l12) const;
+    double tailCorrectionDerivative(double l12) const;
     double headCorrectionEnergy(double l12) const;
     double headCorrectionForce(double l12) const;
 };
