@@ -7,9 +7,11 @@ CONFIG -= qt
 
 !noapp {
     SUBDIRS += app
+    app.depends = libs
 }
 !nomdgui {
     SUBDIRS += gui
+    gui.depends = libs
 }
 mpi:!nomdgui {
     message(Cannot compile gui with mpi enabled)

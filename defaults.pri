@@ -2,10 +2,6 @@ ROOT_DIR = $$PWD
 SRC_DIR = $$PWD/src
 INCLUDEPATH += $$ROOT_DIR/src/libs
 
-!noccache {
-    QMAKE_CXX = ccache $$QMAKE_CXX
-}
-
 COMMON_CXXFLAGS = -std=c++11
 QMAKE_CXXFLAGS += $$COMMON_CXXFLAGS
 QMAKE_CXXFLAGS_RELEASE += $$COMMON_CXXFLAGS
@@ -32,8 +28,7 @@ mpi {
     DEFINES += MD_USE_MPI
     DEFINES+=USE_MPI
 
-#    QMAKE_CXX = mpicxx
-    QMAKE_CXX = ccache mpicxx
+    QMAKE_CXX = mpicxx
     QMAKE_CXX_RELEASE = $$QMAKE_CXX
     QMAKE_CXX_DEBUG = $$QMAKE_CXX
     QMAKE_LINK = $$QMAKE_CXX
@@ -53,3 +48,7 @@ QMAKE_CXXFLAGS_RELEASE += -g
 dev {
     DEFINES += DEVELOPMENT_TESTS
 }
+
+#!noccache {
+#    QMAKE_CXX = ccache $$QMAKE_CXX
+#}
