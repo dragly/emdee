@@ -391,6 +391,7 @@ void MoleculeSystem::simulate()
                  << " TE: " << m_potentialEnergyTotal + m_kineticEnergyTotal
                  << " PE: " << m_potentialEnergyTotal
                  << " KE: " << m_kineticEnergyTotal
+                 << " T: " << m_temperature
                  << " run time: " << setprecision(5) << timer.elapsed()
                  << endl;
         }

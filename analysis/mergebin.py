@@ -17,7 +17,7 @@ fileNames = argv[1:]
 if len(fileNames) < 2:
     fileNames = glob(expanduser(argv[1]))
 fileNames.sort()
-print fileNames
+
 for fileName in fileNames:
     header = loadHeader(fileName)
     

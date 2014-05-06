@@ -13,7 +13,7 @@ Friction::Friction(MoleculeSystem *moleculeSystem) :
 void Friction::apply() {
     for(MoleculeSystemCell* cell : m_moleculeSystem->localCells()) {
         for(Atom* atom : cell->atoms()) {
-            atom->addForce(-atom->velocity() * 0.5);
+            atom->addForce(-atom->velocity() * 2.0);
         }
     }
 }

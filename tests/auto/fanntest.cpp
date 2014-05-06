@@ -17,6 +17,8 @@
 #include "integrator/velocityverletintegrator.h"
 #include "filemanager.h"
 
+double electronMassPerAtomicMass = 1822.8896;
+
 SUITE(FannForceSystem) {
     TEST(Dummy) {
 
@@ -27,7 +29,7 @@ SUITE(FannForceSystem) {
 
         // Particle types
         AtomType hydrogenType(0);
-        hydrogenType.setMass(1.0);
+        hydrogenType.setMass(1.008*electronMassPerAtomicMass);
         hydrogenType.setNumber(1);
         hydrogenType.setAbbreviation("H");
 
@@ -42,6 +44,7 @@ SUITE(FannForceSystem) {
         bool periodic = false;
         double cutoffRadius = 12.0;
         double sideLength = 20.0;
+        double targetTemperature = 5.0e-5;
 
         if(!periodic) {
             sideLength = 40;
@@ -51,14 +54,21 @@ SUITE(FannForceSystem) {
         if(type == 0)  {
             periodic = true;
             friction = false;
-            thermo = false;
+            thermo = true;
             startVelocities = true;
+            double density = 0.00627;
+            double densityHalf = density / 2.0;
+            targetTemperature = 5.0e-5;
 
-            int nx = 3;
-
+            int nx = 9;
             int ny = nx;
             int nz = nx;
-            sideLength = nx * 10.0;
+
+            double volume = (nx * ny * nz) / densityHalf;
+
+            sideLength =  pow(volume, 1.0/3.0);
+
+            cout << "Side length: " << sideLength << endl;
             double spacingx = sideLength / nx;
             double spacingy = sideLength / ny;
             double spacingz = sideLength / nz;
@@ -150,9 +160,9 @@ SUITE(FannForceSystem) {
         if(startVelocities) {
             Generator gen;
             if(friction) {
-                gen.boltzmannDistributeVelocities(0.03, atoms);
+                gen.boltzmannDistributeVelocities(targetTemperature*10, atoms);
             } else {
-                gen.boltzmannDistributeVelocities(0.003, atoms);
+                gen.boltzmannDistributeVelocities(targetTemperature, atoms);
             }
         }
 
@@ -184,13 +194,12 @@ SUITE(FannForceSystem) {
 
         VelocityVerletIntegrator integrator(&system);
         // Minimum for energy conservation: 0.001
-        integrator.setTimeStep(0.001);
+        integrator.setTimeStep(1.0);
         system.setIntegrator(&integrator);
 
         BerendsenThermostat thermostat(&system);
         if(thermo) {
-            system.addModifier(&thermostat);
-            thermostat.setRelaxationTime(0.001);
+            thermostat.setRelaxationTime(100.0);
         }
 
         Friction frictionModifier(&system);
@@ -212,16 +221,21 @@ SUITE(FannForceSystem) {
 
 
         if(thermo) {
-            system.setNSimulationSteps(40000);
-            thermostat.setTargetTemperature(0.05);
+            system.addModifier(&thermostat);
+            thermostat.setTargetTemperature(30*targetTemperature);
+            system.setNSimulationSteps(10000);
             system.simulate();
 
-            system.setNSimulationSteps(20000);
-            thermostat.setTargetTemperature(0.01);
-            system.simulate();
-
-            system.setNSimulationSteps(40000);
             system.removeModifier(&thermostat);
+            system.setNSimulationSteps(10000);
+            system.simulate();
+
+            system.addModifier(&thermostat);
+            thermostat.setTargetTemperature(targetTemperature);
+            system.setNSimulationSteps(40000);
+            system.simulate();
+
+            system.setNSimulationSteps(40000);
             system.simulate();
         } else if(friction) {
             system.setNSimulationSteps(40000);
@@ -249,12 +263,12 @@ SUITE(FannForceSystem) {
 
     //        // Particle types
     //        AtomType hydrogenType(0);
-    //        hydrogenType.setMass(1.0);
+    //        hydrogenType.setMass(1.0*1837.0);
     //        hydrogenType.setNumber(1);
     //        hydrogenType.setAbbreviation("H");
 
     //        AtomType oxygenType(1);
-    //        oxygenType.setMass(15.9994);
+    //        oxygenType.setMass(15.9994*1837.0);
     //        oxygenType.setNumber(8);
     //        oxygenType.setAbbreviation("O");
 
