@@ -7,6 +7,9 @@
 #include <utils/logging.h>
 #include <utils/fannderivative.h>
 
+double inherentEnergy = -0.5;
+double tailCorrectionTreshold = 2.0;
+
 FannTwoParticleForce::FannTwoParticleForce() :
     TwoParticleForce(),
     m_hasWarnedAboutMissingNetwork(false)
@@ -119,8 +122,8 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
     double potentialEnergy = 0;
     bool tailCorrectionUsed = false;
     if(l12 > network->tailCorrectionMin) {
-        dEdr12 = network->tailCorrectionDerivative(l12);
-        potentialEnergy = network->tailCorrectionEnergy(l12);
+        dEdr12 = network->tailCorrectionMinEnergy * network->tailCorrectionDerivative(l12) + network->tailCorrectionMinDerivative * network->tailCorrectionEnergy(l12);
+        potentialEnergy = network->tailCorrectionEnergy(l12) * network->tailCorrectionMinEnergy;
         tailCorrectionUsed = true;
 //        cout << potentialEnergy << endl;
 //        cout << "Tail!" << endl;
@@ -184,40 +187,50 @@ double FannTwoParticleNetwork::rescaleEnergyDerivative(double value) const
 
 double FannTwoParticleNetwork::tailCorrectionEnergy(double l12) const
 {
-//    double F0 = tailCorrectionMinForce;
-//    double x0 = tailCorrectionMin;
-//    double x1 = tailCorrectionMax;
-//    double x = l12;
-////        double deltaU = -F0*(x-x0) + F0 / (x1-x0) * (0.5 * x*x - x0*x + 0.5 * x0*x0);
-//    double deltaU = F0*(x0-x)*(x0 - 2*x1 + x) / (2*(x0-x1));
-//    return tailCorrectionMinEnergy + deltaU;
+    // OLD
+//    double rij = l12;
+//    double rd = tailCorrectionMin;
+//    double rc = tailCorrectionMax;
+//    double exponentialFactor = exp((rij-rd)/(rij-rc));
+//    double dampingFactorR12 = exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
+//    return dampingFactorR12;
+    // END OLD
+
+    // NEW
     double rij = l12;
     double rd = tailCorrectionMin;
-    double rc = tailCorrectionMax;
-    double exponentialFactor = exp((rij-rd)/(rij-rc));
-    double dampingFactorR12 = exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
-//    dampingFactorDerivativeR12 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
-    return tailCorrectionMinEnergy * dampingFactorR12;
+//    double b = 1.0 / (1.0 / (rd*rd*rd*rd*rd*rd));
+    double powFactor = (rij - rd + 1.0);
+    double powFactor2 = powFactor*powFactor;
+    double powFactor6 = powFactor2*powFactor2*powFactor2;
+    double dampingFactorR12 = 1.0 / powFactor6;
+    return dampingFactorR12;
+//    return b * dampingFactorR12;
+    // END NEW
 }
 
 double FannTwoParticleNetwork::tailCorrectionDerivative(double l12) const
 {
-//    double F0 = tailCorrectionMinForce;
-//    double x0 = tailCorrectionMin;
-//    double x1 = tailCorrectionMax;
-//    double x = l12;
-//    double F = F0 - F0 * (x - x0) / (x1 - x0);
-//    return F;
+    // OLD
+//    double rij = l12;
+//    double rd = tailCorrectionMin;
+//    double rc = tailCorrectionMax;
+//    double exponentialFactor = exp((rij-rd)/(rij-rc));
+//    double dampingFactorDerivativeR12 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
+//    return dampingFactorDerivativeR12;
+    // END OLD
+
+    // NEW
+//    double rd = tailCorrectionMin;
     double rij = l12;
-    double rd = tailCorrectionMin;
-    double rc = tailCorrectionMax;
-    double exponentialFactor = exp((rij-rd)/(rij-rc));
-//    double dampingFactorR12 = exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
-    double dampingFactorDerivativeR12 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
-//    cout << dampingFactorR12 << endl;
-    // Because we are going to use a constant energy from here and out, we only get a derivative term from
-    // pulling this energy down to zero
-    return tailCorrectionMinEnergy * dampingFactorDerivativeR12;
+//    double b = 1.0 / (1.0 / (rd*rd*rd*rd*rd*rd));
+    double powFactor = rij;
+    double powFactor2 = powFactor*powFactor;
+    double powFactor6 = powFactor2*powFactor2*powFactor2;
+    double dampingFactorDerivativeR12 = -6.0 / (powFactor6 * powFactor);
+    return dampingFactorDerivativeR12;
+//    return b * dampingFactorDerivativeR12;
+    // END NEW
 }
 
 double FannTwoParticleNetwork::headCorrectionForce(double l12) const
