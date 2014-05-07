@@ -42,7 +42,7 @@ SUITE(FannForceSystem) {
         bool startVelocities = false;
         bool thermo = false;
         bool periodic = false;
-        double cutoffRadius = 20.0;
+        double cutoffRadius = 10.0;
         double sideLength = 20.0;
         double targetTemperature = 10.0e-5;
 
@@ -56,17 +56,22 @@ SUITE(FannForceSystem) {
             friction = false;
             thermo = true;
             startVelocities = true;
-            //            double density = 0.00627;
-            double density = 0.00169;
-            double densityHalf = density / 2.0;
-//            targetTemperature = 5.0e-5;
-            targetTemperature = 0.000494;
+            double numberDensity = 0.00627; // 70.82 kg / m^3
+//            double density = 0.00169;
+//            double numberDensity = 7.95918040174197e-06; // 0.08988 kg / m3
+            double numberDensityHalf = numberDensity / 2.0;
+//            targetTemperature = 3.16681542254e-05; // 10 K (solid)
+//            targetTemperature = 4.43354159156e-05; // 14 K (phase change)
+//            targetTemperature = 5.0e-5; // 17 K (liquid)
+//            targetTemperature = 0.000158340771127; // 50 K (liquid)
+            targetTemperature = 0.000475022313381; // 150 K (liquid)
+//            targetTemperature = 0.000494;
 
-            int nx = 6;
+            int nx = 4;
             int ny = nx;
             int nz = nx;
 
-            double volume = (nx * ny * nz) / densityHalf;
+            double volume = (nx * ny * nz) / numberDensityHalf;
 
             sideLength =  pow(volume, 1.0/3.0);
 
@@ -184,9 +189,15 @@ SUITE(FannForceSystem) {
 
         FannTwoParticleForce testForce2;
         testForce2.setCutoffRadius(cutoffRadius);
+//        testForce2.addNetwork(hydrogenType, hydrogenType,
+//                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/fann_network.net",
+//                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/bounds.fann");
         testForce2.addNetwork(hydrogenType, hydrogenType,
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/fann_network.net",
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/bounds.fann");
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
+        testForce2.addNetwork(hydrogenType, hydrogenType,
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/fann_network.net",
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/bounds.fann");
 
         //        testForce2.addNetwork(hydrogenType, hydrogenType,
         //                              "/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/two/fann_network.net",
@@ -209,19 +220,16 @@ SUITE(FannForceSystem) {
 
         BerendsenThermostat thermostat(&system);
         if(thermo) {
-            thermostat.setRelaxationTime(10000.0);
+            thermostat.setRelaxationTime(1000.0);
         }
 
         Friction frictionModifier(&system);
 
         FileManager fileManager(&system);
-        fileManager.setOutFileName("/tmp/fannforce/hydrogen/atoms*.bin");
+        fileManager.setOutFileName("/tmp/fannforce/hydrogen4/atoms*.bin");
         fileManager.setUnitLength(5.2917721092e-11);
         fileManager.setUnitMass(9.10938291e-31);
         system.setFileManager(&fileManager);
-        if(type == 99) {
-            system.load("/tmp/fannforce/hydrogen/atoms018400.bin");
-        }
 
         system.setSaveEnabled(true);
         system.setSaveEveryNSteps(100);
@@ -232,7 +240,7 @@ SUITE(FannForceSystem) {
 
         if(thermo) {
             system.addModifier(&thermostat);
-            thermostat.setTargetTemperature(30*targetTemperature);
+            thermostat.setTargetTemperature(15*targetTemperature);
             system.setNSimulationSteps(10000);
             system.simulate();
 

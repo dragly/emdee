@@ -1,15 +1,21 @@
-include(../../molecular-dynamics.pri)
+include(../../defaults.pri)
 
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-INCLUDEPATH = $$ROOT_DIR
+#INCLUDEPATH = $$ROOT_DIR
 
-SOURCES += $$system(find $$SRC_DIR -name \'*.cpp\')
-SOURCES = $$replace(SOURCES, $$SRC_DIR/main.cpp, )
+#SOURCES += $$system(find $$SRC_DIR -name \'*.cpp\')
+#SOURCES = $$replace(SOURCES, $$SRC_DIR/main.cpp, )
 
 SOURCES += main.cpp
+
+mpi {
+    LIBS += -L../../src/libs -lemdeempi
+} else {
+    LIBS += -L../../src/libs -lemdee
+}
 
 DEFINES += ARMA_NO_DEBUG

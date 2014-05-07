@@ -33,8 +33,8 @@ public:
 
     double rescaleEnergyDerivative(double value) const;
 
-    double tailCorrectionEnergy(double l12) const;
-    double tailCorrectionDerivative(double l12) const;
+    double tailCorrectionDampingFactor(double l12) const;
+    double tailCorrectionDampingFactorDerivative(double l12) const;
     double headCorrectionEnergy(double l12) const;
     double headCorrectionForce(double l12) const;
 };

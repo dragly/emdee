@@ -43,14 +43,20 @@ SUITE(Development2) {
         hydrogenAtom2->setPosition(Vector3(0.0, 2.0, 0.0));
         hydrogenAtom2->setID(2);
 
-        double cutoffRadius = 20.0;
+        double cutoffRadius = 10.0;
 
         FannTwoParticleForce testForce2;
         testForce2.setNewtonsThirdLawEnabled(true);
         testForce2.setCutoffRadius(cutoffRadius);
+//        testForce2.addNetwork(hydrogenType, hydrogenType,
+//                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/fann_network.net",
+//                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/bounds.fann");
         testForce2.addNetwork(hydrogenType, hydrogenType,
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/fann_network.net",
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/bounds.fann");
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
+        testForce2.addNetwork(hydrogenType, hydrogenType,
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/fann_network.net",
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/bounds.fann");
 
         ofstream outFile("/tmp/forcedata.out");
 

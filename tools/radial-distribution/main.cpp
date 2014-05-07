@@ -1,19 +1,26 @@
-#include <iostream>
-
-using namespace std;
-
-#include <src/moleculesystem.h>
-#include <src/atom.h>>
-#include <src/math/vector3.h>
+#include "moleculesystem.h"
+#include "atom.h"
+#include "math/vector3.h"
 #include <fstream>
 #include <armadillo>
 #include <iomanip>
+#include <iostream>
+#ifdef MD_USE_MPI
+#include <boost/mpi.hpp>
+namespace mpi = boost::mpi;
+#endif
 
 using namespace arma;
 using namespace std;
 
 int main(int argc, char* argv[])
 {
+#ifdef MD_USE_MPI
+    mpi::environment env(argc, argv);
+    mpi::communicator world;
+    (void)env;
+    (void)world;
+#endif
     if(argc < 5) {
         cout << "EROR! Too few arguments..." << endl;
         cout << "Usage: radial-distribution inputfile outputfile atom1number atom2number" << endl;
