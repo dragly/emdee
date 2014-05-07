@@ -9,11 +9,11 @@ CONFIG -= qt
     SUBDIRS += app
     app.depends = libs
 }
-!nomdgui {
+!nogui {
     SUBDIRS += gui
     gui.depends = libs
 }
-mpi:!nomdgui {
+mpi:!nogui {
     message(Cannot compile gui with mpi enabled)
     SUBDIRS -= gui
 }

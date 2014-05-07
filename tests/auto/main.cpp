@@ -37,6 +37,8 @@ int main(int argc, char* argv[])
     std::vector<std::string> tests;
     if(argc > 1 && !strcmp(argv[1], "dev")) {
         tests.push_back("FannForceSystem");
+    } else if(argc > 1 && !strcmp(argv[1], "dev2")) {
+        tests.push_back("Development2");
     } else {
         tests.push_back("FannDerivative");
         tests.push_back("ForceCell");

@@ -42,9 +42,9 @@ SUITE(FannForceSystem) {
         bool startVelocities = false;
         bool thermo = false;
         bool periodic = false;
-        double cutoffRadius = 12.0;
+        double cutoffRadius = 20.0;
         double sideLength = 20.0;
-        double targetTemperature = 5.0e-5;
+        double targetTemperature = 10.0e-5;
 
         if(!periodic) {
             sideLength = 40;
@@ -56,11 +56,13 @@ SUITE(FannForceSystem) {
             friction = false;
             thermo = true;
             startVelocities = true;
-            double density = 0.00627;
+            //            double density = 0.00627;
+            double density = 0.00169;
             double densityHalf = density / 2.0;
-            targetTemperature = 5.0e-5;
+//            targetTemperature = 5.0e-5;
+            targetTemperature = 0.000494;
 
-            int nx = 9;
+            int nx = 6;
             int ny = nx;
             int nz = nx;
 
@@ -94,6 +96,14 @@ SUITE(FannForceSystem) {
                     }
                 }
             }
+            cout << "Number of atoms: " << atoms.size() << endl;
+            cout << "Volume: " << sideLength*sideLength*sideLength << endl;
+            double totalMass = 0.0;
+            for(Atom* atom : atoms) {
+                totalMass += atom->mass();
+            }
+            cout << "Total mass: " << totalMass << endl;
+            cout << "Density: " << totalMass / (sideLength*sideLength*sideLength) << endl;
             if(!periodic) {
                 for(Atom* atom : atoms) {
                     atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
@@ -199,7 +209,7 @@ SUITE(FannForceSystem) {
 
         BerendsenThermostat thermostat(&system);
         if(thermo) {
-            thermostat.setRelaxationTime(100.0);
+            thermostat.setRelaxationTime(10000.0);
         }
 
         Friction frictionModifier(&system);
@@ -235,7 +245,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(40000);
             system.simulate();
 
-            system.setNSimulationSteps(40000);
+            system.setNSimulationSteps(100000);
             system.simulate();
         } else if(friction) {
             system.setNSimulationSteps(40000);
