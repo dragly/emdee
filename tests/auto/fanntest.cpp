@@ -42,7 +42,8 @@ SUITE(FannForceSystem) {
         bool startVelocities = false;
         bool thermo = false;
         bool periodic = false;
-        double cutoffRadius = 10.0;
+        double cellCutoff = 12.0;
+        double cutoffRadius = 12.0;
         double sideLength = 20.0;
         double targetTemperature = 10.0e-5;
 
@@ -56,18 +57,20 @@ SUITE(FannForceSystem) {
             friction = false;
             thermo = true;
             startVelocities = true;
-            double numberDensity = 0.00627; // 70.82 kg / m^3
-//            double density = 0.00169;
+//            double numberDensity = 0.00627; // 70.82 kg / m^3
+            double numberDensity = 0.00169; // rho* = 0.0011
+//            double numberDensity = 0.00175;
 //            double numberDensity = 7.95918040174197e-06; // 0.08988 kg / m3
             double numberDensityHalf = numberDensity / 2.0;
 //            targetTemperature = 3.16681542254e-05; // 10 K (solid)
 //            targetTemperature = 4.43354159156e-05; // 14 K (phase change)
 //            targetTemperature = 5.0e-5; // 17 K (liquid)
-            targetTemperature = 0.000158340771127; // 50 K (liquid)
+//            targetTemperature = 0.000158340771127; // 50 K (liquid)
 //            targetTemperature = 0.000475022313381; // 150 K (liquid)
+            targetTemperature = 0.000475022313381 * 100; // 15000 K (dense liquid?)
 //            targetTemperature = 0.000494;
 
-            int nx = 4;
+            int nx = 9;
             int ny = nx;
             int nz = nx;
 
@@ -207,7 +210,7 @@ SUITE(FannForceSystem) {
         system.setTwoParticleForce(&testForce2);
 
         FannThreeParticleForce testForce3;
-        testForce3.setCutoffRadius(cutoffRadius / 2.0);
+        testForce3.setCutoffRadius(fmin(cellCutoff / 2.0, cutoffRadius));
         testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/fann_network_0.net",
                                "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/bounds.fann");
 
@@ -226,7 +229,7 @@ SUITE(FannForceSystem) {
         Friction frictionModifier(&system);
 
         FileManager fileManager(&system);
-        fileManager.setOutFileName("/tmp/fannforce/hydrogen4/atoms*.bin");
+        fileManager.setOutFileName("/tmp/fannforce/hydrogen-hightemp/atoms*.bin");
         fileManager.setUnitLength(5.2917721092e-11);
         fileManager.setUnitMass(9.10938291e-31);
         system.setFileManager(&fileManager);
@@ -235,7 +238,9 @@ SUITE(FannForceSystem) {
         system.setSaveEveryNSteps(100);
         system.setOutputEnabled(true);
 
-        system.setupCells(cutoffRadius);
+        system.setupCells(cellCutoff);
+
+        cout << "Cells: " << system.nCells() << endl;
 
 
         if(thermo) {
