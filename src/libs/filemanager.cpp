@@ -51,8 +51,8 @@ typedef struct s1_t {
 FileManager::FileManager(MoleculeSystem* system) :
     m_outFileName("/tmp/data*.bin"),
     m_moleculeSystem(system),
-    m_unitLength(1e-10),
-    m_unitTime(1e-15),
+    m_unitLength(1),
+    m_unitTime(1),
     m_unitEnergy(1),
     m_unitMass(1),
     m_unitTemperature(1)
@@ -179,7 +179,7 @@ bool FileManager::loadBinary(string fileName) {
         LOG(INFO) << systemBoundaries[3] << " "  << systemBoundaries[4] << " "  << systemBoundaries[5] << " ";
 
         // Append step by one
-        m_moleculeSystem->setStep(step + 1);
+        m_moleculeSystem->setStep(step);
         m_moleculeSystem->integrator()->setTimeStep(timeStep);
         m_moleculeSystem->setTime(time);
         m_moleculeSystem->setBoundaries(systemBoundaries[0], systemBoundaries[3], systemBoundaries[1], systemBoundaries[4], systemBoundaries[2], systemBoundaries[5]);
@@ -466,6 +466,8 @@ bool FileManager::save(int step) {
         return saveXyz(step);
     } else if(m_outFileName.find(".bin") != string::npos) {
         return saveBinary(step);
+    } else {
+        cerr << "Unknown file extension. Cannot save state." << endl;
     }
     return false;
 }

@@ -140,6 +140,7 @@ public:
 //    void addThreeParticleForce(ThreeParticleForce *force);
 //    const vector<ThreeParticleForce*>& threeParticleForces() const;
     bool isOutputEnabledForThisStep() const;
+    void save();
     void save(string fileName);
     void setCreateSymlink(bool enabled);
     const vector<MoleculeSystemCell *> &localCells() const;

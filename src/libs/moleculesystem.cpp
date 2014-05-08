@@ -379,6 +379,7 @@ void MoleculeSystem::simulate()
         cout << "Starting simulation " << endl;
     }
     for(iStep = iStep; iStep < m_nSimulationSteps; iStep++) {
+        m_step++;
         m_isFinalTimeStep = (iStep == (m_nSimulationSteps - 1));
 
         applyModifiers();
@@ -408,7 +409,6 @@ void MoleculeSystem::simulate()
 
         // Finalize step
         m_time += m_integrator->timeStep();
-        m_step++;
     }
 #ifdef USE_MPI
     if(m_isCreateSymlinkEnabled) {
@@ -673,6 +673,13 @@ void MoleculeSystem::setSaveEnabled(bool enabled)
 bool MoleculeSystem::isOutputEnabledForThisStep() const
 {
     return (m_isOutputEnabled && ((m_step % m_saveEveryNSteps) == 0 || m_isFinalTimeStep));
+}
+
+void MoleculeSystem::save()
+{
+#ifdef USE_MPI
+    m_fileManager->save(m_step);
+#endif
 }
 
 void MoleculeSystem::save(string fileName)
