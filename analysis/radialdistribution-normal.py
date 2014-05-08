@@ -26,13 +26,13 @@ fileNames = glob(fileNames)
 
 fileNames.sort()
 
-binary = "/home/svenni/Dropbox/projects/programming/emdee/build-emdee-stan-Desktop_Qt_5_2_1_GCC_64bit-Release/tools/radial-distribution/radial-distribution"
-lib_path = "/home/svenni/Dropbox/projects/programming/emdee/build-emdee-stan-Desktop_Qt_5_2_1_GCC_64bit-Release/src/libs"
+binary = "/home/svenni/Dropbox/projects/programming/emdee/build-emdee-hyperon-Desktop_Qt_5_2_1_GCC_64bit-Release/tools/radial-distribution/radial-distribution"
+lib_path = "/home/svenni/Dropbox/projects/programming/emdee/build-emdee-hyperon-Desktop_Qt_5_2_1_GCC_64bit-Release/src/libs"
 env = dict(os.environ)
 env['LD_LIBRARY_PATH'] = lib_path
 
 for combination in combinations:
-    distBins = [0,1000]
+    distBins = [0,500]
     totalBins = zeros(distBins[1])
     iFiles = 0
     temperature = 0
@@ -41,7 +41,9 @@ for combination in combinations:
         header, lammps, atoms = loadAtoms(fileName)
         temperature += header["temperature"]
         outFileName = fileName + ".out"
-        process = subprocess.call([binary, fileName, outFileName] + combination, env=env)
+        arguments = [binary, fileName, outFileName] + combination + [str(distBins[1])]
+        print arguments
+        process = subprocess.call(arguments, env=env)
         outFile = open(outFileName, "rb")
         nBins = fromfile(outFile, dtype='int32', count=1)
         binEdges = fromfile(outFile, dtype=float, count=nBins + 1) 
@@ -50,11 +52,21 @@ for combination in combinations:
 #        distances = fromfile(outFileName)
         os.remove(outFileName)
         
+        binEdges *= 1e10
+        sideLengths = 1e10*(header["upperBounds"] - header["lowerBounds"])[0]
+        atoms_count = len(atoms)
+        pair_count = atoms_count * (atoms_count-1) / 2.0
+        system_number_density = pair_count / prod(sideLengths)
+        
         #figure("histFigure")
         #distBins = hist(distances, bins=distBins[1])
         V = 4./3. * pi * binEdges**3
         Vdiff = V[1:] - V[:-1]
-        newBins = binContents / (Vdiff * sum(binContents))
+
+        slice_number_densities = binContents / Vdiff
+        newBins = slice_number_densities / system_number_density
+        
+        #newBins = binContents / Vdiff
         totalBins = totalBins + newBins
             
         iFiles += 1
@@ -68,10 +80,15 @@ for combination in combinations:
 #        legend()
     figure()
     title("-".join(combination))
+    
+    # Change of units
+    binEdges /= 0.458
+    
     plot(binEdges[:-1], totalBins, label=temperatureLabel)
     xlabel(u"r")
     ylabel("g(r)")
-    #xlim(0,12)
+    xlim(0, sideLengths[0])
+    ylim(0,5.0)
     legend()
     numberDensity = len(atoms) / prod(header["upperBounds"] - header["lowerBounds"])
     totalMass = sum(atoms["type"] == 8)*2.65676264126474e-26  + sum(atoms["type"] == 14) * 4.66370658657455e-26

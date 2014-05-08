@@ -8,17 +8,20 @@ Created on Fri Feb  8 17:02:54 2013
 from pylab import *
 import time
 from sys import argv
-from fys4460 import dataType, headerType
+from fys4460 import dataType, headerType, loadAtoms, loadHeader
+from glob import glob
 fileNames = argv[1:]
+if len(fileNames) == 1:
+    fileNames = glob(fileNames[0])
+    
 for fileName in fileNames:
     print "Converting " + fileName
     if not fileName[-4:] == ".bin":
         print "Filename should end with .bin"
         exit()
     t1 = time.time()
-    f1 = open(fileName, "rb")
-    header = fromfile(f1, dtype=headerType, count=1)
-    atoms = fromfile(f1, dtype=dataType)
+    
+    header, lammpsHeader, atoms = loadAtoms(fileName)
     
     f = open(fileName.replace(".bin", ".xyz"), "w")
     f.write(str(len(atoms)) + "\n")

@@ -51,6 +51,6 @@ dev {
     DEFINES += DEVELOPMENT_TESTS
 }
 
-#!noccache {
-#    QMAKE_CXX = ccache $$QMAKE_CXX
-#}
+!noccache {
+    QMAKE_CXX = ccache $$QMAKE_CXX
+}
