@@ -138,7 +138,7 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
         potentialEnergy = network->tailCorrectionDampingFactor(l12) * potentialEnergy;
         tailCorrectionUsed = true;
 //        cout << potentialEnergy << endl;
-//        cout << "Tail!" << endl;
+//        cout << "Tail!" << endl;q
     } else if(l12 < network->headCorrectionMax) {
         dEdr12 = network->headCorrectionForce(l12);
         potentialEnergy = network->headCorrectionEnergy(l12);

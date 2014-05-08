@@ -73,6 +73,9 @@ void FannThreeParticleForce::loadNetwork(const std::string& fileName,
     boundsFile >> l13Max;
     boundsFile >> angleMin;
     boundsFile >> angleMax;
+    if(fabs(angleMax - M_PI) < 1e-3) {
+        angleMax = M_PI;
+    }
     boundsFile >> energyMin;
     boundsFile >> energyMax;
 
@@ -239,7 +242,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double totalDampingFactor = 1.0;
 
     if(damping) {
-        double upperLimiter = 0.75;
+        double upperLimiter = 1.5;
         double l12DampingMin = l12MaxOrCutoff - upperLimiter;
         double l12DampingMax = l12MaxOrCutoff;
         if(l12 > l12DampingMin && l12 < l12DampingMax) {
