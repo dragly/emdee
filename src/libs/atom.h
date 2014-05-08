@@ -69,6 +69,8 @@ public:
     const std::vector<std::pair<Atom *, Vector3> > &neighborAtoms();
     void clearNeighborAtoms();
     void addNeighborAtom(Atom *neighborAtom, const Vector3 &offsetVector);
+
+    void setAtomType(const AtomType& atomType);
 protected:
     Vector3 m_position;
     Vector3 m_force;

@@ -31,6 +31,12 @@ void Atom::addNeighborAtom(Atom* neighborAtom, const Vector3 &offsetVector) {
     m_neighborAtoms.push_back(std::pair<Atom*, Vector3>(neighborAtom, offsetVector));
 }
 
+void Atom::setAtomType(const AtomType &atomType)
+{
+    m_atomType = atomType;
+    m_atomTypeIndex = atomType.index();
+}
+
 //void Atom::
 
 //void Atom::
