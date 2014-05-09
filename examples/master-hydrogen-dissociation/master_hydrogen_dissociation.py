@@ -29,7 +29,7 @@ current_path = os.path.dirname(os.path.realpath(__file__))
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
     
-config_file = args.config_file
+config_file = os.path.abspath(args.config_file)
 
 build_path = os.path.abspath(os.path.join(current_path, "..", "..", "..", "build-hydrogen-dissociation"))
 project_path = os.path.abspath(os.path.join(current_path, "..", ".."))

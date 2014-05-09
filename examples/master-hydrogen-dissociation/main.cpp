@@ -75,22 +75,15 @@ int main(int argc, char* argv[])
     double initialTemperatureBoiling = 15600 / au_T;
     double initialTemperatureLiquid = 300 / au_T;
 
-    int particleCount = 0;
+    int atomCountIn = 0;
+    rootNode["atom_count"] >> atomCountIn;
 
-    for(YAML::Iterator it=rootNode.begin();it!=rootNode.end();++it) {
-        string rootKey;
-        it.first() >> rootKey;
-        if(rootKey == "particle_count") {
-            it.second() >> particleCount;
-        }
-    }
-
-    double volume = particleCount / numberDensity;
+    double volume = atomCountIn / numberDensity;
     double sideLengthX = pow(4*volume, 1./3.);
     double sideLengthY = sideLengthX / 2.0;
     double sideLengthZ = sideLengthX / 2.0;
 
-    int nX = round(pow(4*particleCount / 2.0, 1./3.));
+    int nX = round(pow(4*atomCountIn / 2.0, 1./3.));
     int nY = round(nX / 2.0);
     int nZ = round(nX / 2.0);
 
@@ -107,7 +100,7 @@ int main(int argc, char* argv[])
     for(int i = 0; i < nZ; i++) {
         for (int j = 0; j < nY; j++) {
             for (int k = 0; k < nX; ++k) {
-                if(idCounter >= particleCount) {
+                if(idCounter >= atomCountIn) {
                     continue;
                 }
                 Atom *hydrogenAtom1 = new Atom(hydrogenType);
