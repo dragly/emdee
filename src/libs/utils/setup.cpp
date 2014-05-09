@@ -1,8 +1,9 @@
 #include "setup.h"
 #include "utils/logging.h"
 
-Setup::Setup(int argc, char* argv[]) :
-    #ifdef MD_USE_MPI
+Setup::Setup(int argc, char* argv[])
+#ifdef MD_USE_MPI
+    :
     m_env(argc, argv)
   #endif
 {
