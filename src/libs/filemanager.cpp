@@ -302,7 +302,7 @@ string FileManager::processorName() {
 
 string FileManager::headerFileNameFromStep(int step) {
     stringstream outStepName;
-    outStepName << setw(6) << setfill('0') << step;
+    outStepName << setw(10) << setfill('0') << step;
     string headerFileName = m_outFileName;
     unsigned found = m_outFileName.find_last_of("/\\");
     string outPath = m_outFileName.substr(0,found);
