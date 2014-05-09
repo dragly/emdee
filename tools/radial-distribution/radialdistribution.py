@@ -19,13 +19,14 @@ import os
 import subprocess
 
 parser = ArgumentParser()
-parser.add_argument("--lammps_files", required=True)
+parser.add_argument("--lammps_files", nargs="+", required=True)
 parser.add_argument("--id", default="tmp")
 args = parser.parse_args()
 
 combination = ["1","1"]
 fileNames = args.lammps_files
-fileNames = glob(fileNames)
+if len(fileNames) == 1:
+    fileNames = glob(fileNames)
 
 fileNames.sort()
 
