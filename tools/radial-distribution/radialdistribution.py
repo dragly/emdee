@@ -94,9 +94,11 @@ temperature /= iFiles
 temperatureLabel = "%.0f K" % temperature
 totalBins /= iFiles
 
+binEdges /= 0.52917721092
+
 figure()
 plot(binEdges[:-1], totalBins)
-xlabel(r"$r\ [\mathrm{\AA}]$")
+xlabel(r"$r\ [a_0]$")
 ylabel(r"$g(r)$")
 max_bin_size = float(args.max)
 if max_bin_size > min(sideLengths) / 2.0:
