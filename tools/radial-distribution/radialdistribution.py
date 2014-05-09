@@ -5,12 +5,10 @@ Created on Tue Feb 26 08:54:28 2013
 @author: svenni
 """
 
+import sys
 sys.path.append("../../analysis")
 from pylab import *
-from sys import argv
 from glob import glob
-import sys
-from time import time
 from fys4460 import loadAtoms, boltzmannConstant
 from os.path import expanduser, join, split, isdir, islink, exists
 from os import readlink
@@ -121,5 +119,6 @@ if args.id != "tmp":
     savefig(join(output_dir, "radial-distribution.pdf"))
     savefig(join(output_dir, "radial-distribution.png"))
     savetxt(join(output_dir, "radial-distribution.dat"), array([binEdges[:-1], totalBins]).transpose())
+    print "Data saved to", output_dir
 else:
     show()
