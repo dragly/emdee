@@ -82,13 +82,11 @@ def loadAtoms(fileName):
     lammpsFile.close()
     
     nProcessors = header['nProcessors'][0]
-    print "Has", nProcessors, "processor(s)"
     
     if nProcessors > 1:
         for i in range(1, nProcessors):
             subFileName = fileName + (".%04d" % i)
             subLammpsFileName = subFileName.replace(".bin", ".lmp")
-            print "Loading " + split(subFileName)[1]
             lammpsFile2 = open(subLammpsFileName, "rb")
             atoms2 = fromfile(lammpsFile2, dtype=dataType)
             lammpsFile2.close()

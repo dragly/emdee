@@ -10,7 +10,7 @@ sys.path.append("../../analysis")
 from pylab import *
 from glob import glob
 from fys4460 import loadAtoms, boltzmannConstant
-from os.path import expanduser, join, split, isdir, islink, exists
+from os.path import expanduser, join, split, isdir, islink, exists, abspath, dirname
 from os import readlink
 import shutil
 from argparse import ArgumentParser
@@ -30,9 +30,9 @@ if len(fileNames) == 1:
 
 fileNames.sort()
 
-current_path = os.path.dirname(os.path.realpath(__file__))
-build_path = os.path.abspath(os.path.join(current_path, "..", "..", "..", "build-radial-distribution"))
-project_path = os.path.abspath(os.path.join(current_path, "..", ".."))
+current_path = dirname(os.path.realpath(__file__))
+build_path = abspath(os.path.join(current_path, "..", "..", "..", "build-radial-distribution"))
+project_path = abspath(os.path.join(current_path, "..", ".."))
 
 print "Building in:\n", build_path
 
