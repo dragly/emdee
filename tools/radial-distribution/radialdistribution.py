@@ -20,13 +20,15 @@ import subprocess
 
 parser = ArgumentParser()
 parser.add_argument("--lammps_files", nargs="+", required=True)
+parser.add_argument("-n", "--bins", default=200)
+parser.add_argument("-m", "--max", default=inf)
 parser.add_argument("--id", default="tmp")
 args = parser.parse_args()
 
 combination = ["1","1"]
 fileNames = args.lammps_files
 if len(fileNames) == 1:
-    fileNames = glob(fileNames)
+    fileNames = glob(fileNames[0])
 
 fileNames.sort()
 
@@ -51,7 +53,7 @@ env = dict(os.environ)
 env['LD_LIBRARY_PATH'] = lib_path
 binary = os.path.join(staterunner_path, "radial-distribution")
 
-distBins = [0,500]
+distBins = [0,args.bins]
 totalBins = zeros(distBins[1])
 iFiles = 0
 temperature = 0
@@ -91,25 +93,20 @@ for fileName in fileNames:
 temperature /= iFiles
 temperatureLabel = "%.0f K" % temperature
 totalBins /= iFiles
-#        latestFigure = figure("latestFigure")
-#        plot(binEdges[:-1] * 1e10, newBins, label=temperatureLabel)
-#        xlabel(u"r [Å]")
-#        ylabel("g(r)")
-#        legend()
+
 figure()
-title("-".join(combination))
+plot(binEdges[:-1], totalBins)
+xlabel(r"$r\ [\mathrm{\AA}]$")
+ylabel(r"$g(r)$")
+max_bin_size = float(args.max)
+if max_bin_size > min(sideLengths) / 2.0:
+    max_bin_size = min(sideLengths) / 2.0
+else:
+    ax = gca()
+    ax.set_xticks(range(0,int(max_bin_size+1),1))
 
-# Change of units
-#    binEdges /= 0.458
-
-plot(binEdges[:-1], totalBins, label=temperatureLabel)
-xlabel(u"r")
-ylabel("g(r)")
-xlim(0, min(sideLengths) / 2.0)
+xlim(0,max_bin_size)
 ylim(0,5.0)
-legend()
-numberDensity = len(atoms) / prod(header["upperBounds"] - header["lowerBounds"])
-grid()
 
 if args.id != "tmp":
     from sumatra.projects import load_project
