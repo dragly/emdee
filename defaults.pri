@@ -2,8 +2,6 @@ ROOT_DIR = $$PWD
 SRC_DIR = $$PWD/src
 INCLUDEPATH += $$ROOT_DIR/src/libs
 
-message($$INCLUDEPATH)
-
 COMMON_CXXFLAGS = -std=c++11
 QMAKE_CXXFLAGS += $$COMMON_CXXFLAGS
 QMAKE_CXXFLAGS_RELEASE += $$COMMON_CXXFLAGS
@@ -21,6 +19,7 @@ android {
 }
 
 LIBS += -lglog -ldoublefann
+LIBS += -larmadillo -llapack -lblas
 
 !noglog {
     DEFINES += MD_USE_GLOG
@@ -45,11 +44,6 @@ mpi {
 
 QMAKE_CXXFLAGS += -g
 QMAKE_CXXFLAGS_RELEASE += -g
-# -ftree-parallelize-loops=4 -ftree-loop-optimize -floop-parallelize-all
-
-dev {
-    DEFINES += DEVELOPMENT_TESTS
-}
 
 !noccache {
     QMAKE_CXX = ccache $$QMAKE_CXX

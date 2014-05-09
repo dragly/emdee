@@ -4,12 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 include(../../defaults.pri)
-
-mpi {
-    LIBS += -L../../src/libs -lemdeempi
-} else {
-    LIBS += -L../../src/libs -lemdee
-}
+include(../../defaults-nonsrc.pri)
 
 SOURCES += main.cpp
 

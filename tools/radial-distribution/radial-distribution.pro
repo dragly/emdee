@@ -1,4 +1,5 @@
 include(../../defaults.pri)
+include(../../defaults-nonsrc.pri)
 
 TEMPLATE = app
 CONFIG += console
@@ -11,11 +12,5 @@ CONFIG -= qt
 #SOURCES = $$replace(SOURCES, $$SRC_DIR/main.cpp, )
 
 SOURCES += main.cpp
-
-mpi {
-    LIBS += -L../../src/libs -lemdeempi
-} else {
-    LIBS += -L../../src/libs -lemdee
-}
 
 DEFINES += ARMA_NO_DEBUG

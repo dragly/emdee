@@ -1,11 +1,16 @@
 TEMPLATE=subdirs
-SUBDIRS+=src \
-    tools
+SUBDIRS+=src
 CONFIG+=ordered
 
-tools.depends = src
-
+!notools {
+    SUBDIRS += tools
+    tools.depends = src
+}
 !notests {
     SUBDIRS += tests
     tests.depends = src
+}
+!noexamples {
+    SUBDIRS += examples
+    examples.depends = src
 }

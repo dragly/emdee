@@ -4,8 +4,9 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 include(../../defaults.pri)
+include(../../defaults-nonsrc.pri)
 
-LIBS += -larmadillo -llapack -lblas -lconfig++
+LIBS += -lconfig++
 
 SOURCES += \
     main.cpp \
@@ -13,12 +14,6 @@ SOURCES += \
 
 HEADERS += \
     configurationparser.h
-
-mpi {
-    LIBS += -L../libs -lemdeempi
-} else {
-    LIBS += -L../libs -lemdee
-}
 
 OTHER_FILES += testconfig.cfg
 
