@@ -95,6 +95,7 @@ temperatureLabel = "%.0f K" % temperature
 totalBins /= iFiles
 
 binEdges /= 0.52917721092
+sideLengths /= 0.52917721092
 
 figure()
 plot(binEdges[:-1], totalBins)
