@@ -40,7 +40,6 @@ int main(int argc, char* argv[])
     int nBins = atoi(argv[5]);
 
     rowvec sideLengths = system.boundaries().row(1) - system.boundaries().row(0);
-    cout << "sideLengths: " << sideLengths;
     Vector3 distance;
     int nPairs = int(system.atoms().size() * (system.atoms().size() - 1) / 2.0);
     vec distances = zeros(nPairs);
@@ -64,14 +63,16 @@ int main(int argc, char* argv[])
         }
     }
 //    distances *= 10e-10; // Analysis program expects Angstrom
-    vec binEdges = linspace(0, sideLengths.max()*1.0001, nBins + 1);
+    vec binEdges = linspace(0, sideLengths.min() / 2.0, nBins + 1);
     double binSize = binEdges(1) - binEdges(0);
     vec binContent = zeros(nBins);
     for(uint i = 0; i < distances.n_rows; i++) {
         double distance = distances(i);
         if(distance > 0) {
             int bin = distance / binSize;
-            binContent(bin) += 1;
+            if(bin < binContent.n_rows) {
+                binContent(bin) += 1;
+            }
         }
     }
     ofstream distancesFile;
