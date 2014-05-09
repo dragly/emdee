@@ -27,6 +27,7 @@ public:
     void setB(double b);
     void setIdCounter(int idCounter);
     int idCounter();
+    void removeLinearMomentum(const vector<Atom *> &atoms);
 protected:
     double m_unitLength;
 

@@ -79,7 +79,6 @@ vector<Atom*> Generator::generateFcc(double sideLength, int nCells, AtomType ato
  *
  */
 void Generator::boltzmannDistributeVelocities(double temperature, const vector<Atom*>& atoms) {
-    double averageVelocity = 0;
     Vector3 totalVelocity = Vector3::createZeros();
     for(Atom* atom : atoms) {
         rowvec randVec = randn<rowvec>(m_nDimensions);
@@ -91,18 +90,23 @@ void Generator::boltzmannDistributeVelocities(double temperature, const vector<A
         totalVelocity += velocity;
         atom->setVelocity(velocity);
     }
-//    cout << totalVelocity << endl;
     // Remove total linear momentum
+    removeLinearMomentum(atoms);
+}
+
+void Generator::removeLinearMomentum(const vector<Atom*>& atoms) {
+    Vector3 totalVelocity = Vector3::createZeros();
+    for(Atom* atom : atoms) {
+        totalVelocity += atom->velocity();
+    }
     Vector3 velocityToRemove = totalVelocity / atoms.size();
-    averageVelocity = 0;
+    double averageVelocity = 0;
     for(Atom* atom : atoms) {
         Vector3 newVelocity = atom->velocity() - velocityToRemove;
         atom->setVelocity(newVelocity);
         averageVelocity += dot(newVelocity, newVelocity) / atoms.size();
         totalVelocity += newVelocity;
     }
-//    cout << "Boltzmann distributed velocities for " << atoms.size() << " atoms!" << endl;
-//    cout << "Average velocity is " << averageVelocity << " for the temperature " << temperature << endl;
 }
 
 void Generator::uniformDistributeVelocities(double maxVelocity, vector<Atom*> atoms) {
