@@ -39,6 +39,8 @@ int main(int argc, char* argv[])
         tests.push_back("FannForceSystem");
     } else if(argc > 1 && !strcmp(argv[1], "dev2")) {
         tests.push_back("Development2");
+    } else if(argc > 1 && !strcmp(argv[1], "benchmark")) {
+        tests.push_back("Benchmark");
     } else {
         tests.push_back("FannDerivative");
         tests.push_back("ForceCell");

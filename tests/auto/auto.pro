@@ -16,4 +16,5 @@ SOURCES += main.cpp \
     fanntest.cpp \
     twoparticleforcecount.cpp \
     fannderivative.cpp \
-    development2.cpp
+    development2.cpp \
+    benchmarks.cpp

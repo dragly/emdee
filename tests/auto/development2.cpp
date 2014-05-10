@@ -16,6 +16,7 @@
 #include "force/threeparticleforce.h"
 #include "integrator/velocityverletintegrator.h"
 #include "filemanager.h"
+#include <boost/mpi.hpp>
 
 SUITE(Development2) {
     TEST(Dummy) {
