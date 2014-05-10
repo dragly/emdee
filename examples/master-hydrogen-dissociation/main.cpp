@@ -62,11 +62,19 @@ int main(int argc, char* argv[])
     double cellCutoff = 12.0;
     double cutoffRadius = 12.0;
     double targetTemperature = 0.0;
+    double density = 0.0;
     rootNode["temperature"] >> targetTemperature;
     targetTemperature /= au_T;
-    double density = 0.0;
     rootNode["density"] >> density;
     density /= au_rho;
+
+    try {
+        // Read optional params or catch exception
+        rootNode["cell_cutoff"] >> cellCutoff;
+        rootNode["cutoff_radius"] >> cutoffRadius;
+    } catch(YAML::ParserException& ) {
+    }
+
     double numberDensity = density / (mp/me);
     cout << "Temperature: " << targetTemperature << endl;
     cout << "Density: " << density << endl;
