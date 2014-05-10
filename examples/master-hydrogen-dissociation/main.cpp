@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
         // Read optional params or catch exception
         rootNode["cell_cutoff"] >> cellCutoff;
         rootNode["cutoff_radius"] >> cutoffRadius;
-    } catch(YAML::TypedKeyNotFound& ) {
+    } catch(YAML::TypedKeyNotFound<std::string>& ) {
     }
 
     double numberDensity = density / (mp/me);
