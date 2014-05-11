@@ -62,19 +62,19 @@ SUITE(Benchmark) {
                                "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/bounds.fann");
 
         boost::mpi::timer timer;
-        timer.restart();
-        for(int i = 0; i < 10000000; i++) {
-            testForce2.calculateAndApplyForce(hydrogenAtom1, hydrogenAtom2);
-        }
-        cout << hydrogenAtom1->force() << " " << hydrogenAtom2->force() << endl;
-        cout << "Time neural network 2-body: " << timer.elapsed() << endl;
+//        timer.restart();
+//        for(int i = 0; i < 10000000; i++) {
+//            testForce2.calculateAndApplyForce(hydrogenAtom1, hydrogenAtom2);
+//        }
+//        cout << hydrogenAtom1->force() << " " << hydrogenAtom2->force() << endl;
+//        cout << "Time neural network 2-body: " << timer.elapsed() << endl;
 
-        timer.restart();
-        for(int i = 0; i < 10000000; i++) {
-            testForce3.calculateAndApplyForce(hydrogenAtom1, hydrogenAtom2, hydrogenAtom3);
-        }
-        cout << hydrogenAtom1->force() << " " << hydrogenAtom2->force() << endl;
-        cout << "Time neural network 3-body: " << timer.elapsed() << endl;
+//        timer.restart();
+//        for(int i = 0; i < 10000000; i++) {
+//            testForce3.calculateAndApplyForce(hydrogenAtom1, hydrogenAtom2, hydrogenAtom3);
+//        }
+//        cout << hydrogenAtom1->force() << " " << hydrogenAtom2->force() << endl;
+//        cout << "Time neural network 3-body: " << timer.elapsed() << endl;
 
         KohenThreeParticleForce kohenForce3;
 
@@ -88,7 +88,7 @@ SUITE(Benchmark) {
 
 
         timer.restart();
-        for(int i = 0; i < 10000000; i++) {
+        for(int i = 0; i < 100000000; i++) {
             kohenForce3.calculateAndApplyForce(hydrogenAtom1, hydrogenAtom2, hydrogenAtom3);
         }
         cout << hydrogenAtom1->force() << " " << hydrogenAtom2->force() << endl;
