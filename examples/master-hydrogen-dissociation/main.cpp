@@ -69,10 +69,16 @@ int main(int argc, char* argv[])
     density /= au_rho;
     double timeStep = 10.0;
 
+    // Read optional params or catch exception
     try {
-        // Read optional params or catch exception
         rootNode["cell_cutoff"] >> cellCutoff;
+    } catch(YAML::TypedKeyNotFound<std::string>& ) {
+    }
+    try {
         rootNode["cutoff_radius"] >> cutoffRadius;
+    } catch(YAML::TypedKeyNotFound<std::string>& ) {
+    }
+    try {
         rootNode["time_step"] >> timeStep;
     } catch(YAML::TypedKeyNotFound<std::string>& ) {
     }
