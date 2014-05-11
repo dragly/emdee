@@ -97,6 +97,8 @@ totalBins /= iFiles
 binEdges /= 0.52917721092
 sideLengths /= 0.52917721092
 
+print "Mean temperature: ", temperatureLabel
+
 figure()
 plot(binEdges[:-1], totalBins)
 xlabel(r"$r\ [a_0]$")

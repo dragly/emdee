@@ -67,18 +67,22 @@ int main(int argc, char* argv[])
     targetTemperature /= au_T;
     rootNode["density"] >> density;
     density /= au_rho;
+    double timeStep = 10.0;
 
     try {
         // Read optional params or catch exception
         rootNode["cell_cutoff"] >> cellCutoff;
         rootNode["cutoff_radius"] >> cutoffRadius;
+        rootNode["time_step"] >> timeStep;
     } catch(YAML::TypedKeyNotFound<std::string>& ) {
     }
 
     double numberDensity = density / (mp/me);
     cout << "Temperature: " << targetTemperature << endl;
     cout << "Density: " << density << endl;
-    cout << "Number density: " << numberDensity << endl;
+    cout << "cellCutoff: " << cellCutoff << endl;
+    cout << "cutoffRadius: " << cutoffRadius << endl;
+    cout << "timeStep: " << timeStep << endl;
 
     double initialTemperatureBoiling = 15600 / au_T;
     double initialTemperatureLiquid = 300 / au_T;
@@ -161,8 +165,7 @@ int main(int argc, char* argv[])
     system.setThreeParticleForce(&testForce3);
 
     VelocityVerletIntegrator integrator(&system);
-    double targetTimeStep = 10.0;
-    integrator.setTimeStep(targetTimeStep);
+    integrator.setTimeStep(timeStep);
     system.setIntegrator(&integrator);
 
     BerendsenThermostat thermostat(&system);
@@ -189,25 +192,27 @@ int main(int argc, char* argv[])
     // Equilibrate initial
     system.addModifier(&thermostat);
     thermostat.setTargetTemperature(1e-3);
-    thermostat.setRelaxationTime(targetTimeStep * 10);
+    thermostat.setRelaxationTime(timeStep * 10);
     system.setNSimulationSteps(timeStepsInRun / 50);
     system.simulate();
 
     // Cooking
-    integrator.setTimeStep(targetTimeStep*0.1);
+    integrator.setTimeStep(timeStep*0.1);
     thermostat.setTargetTemperature(initialTemperatureBoiling);
-    thermostat.setRelaxationTime(targetTimeStep * 10.0);
+    thermostat.setRelaxationTime(timeStep * 10.0);
     system.setNSimulationSteps(timeStepsInRun / 50);
     system.simulate();
     gen.removeLinearMomentum(system.atoms());
-    integrator.setTimeStep(targetTimeStep);
+    integrator.setTimeStep(timeStep);
 
-    // Liquidizing
-    thermostat.setTargetTemperature(initialTemperatureLiquid);
-    thermostat.setRelaxationTime(timeStepsInRun / 20);
-    system.setNSimulationSteps(timeStepsInRun / 10);
-    system.simulate();
-    gen.removeLinearMomentum(system.atoms());
+    if(initialTemperatureLiquid > targetTemperature) {
+        // Liquidizing
+        thermostat.setTargetTemperature(initialTemperatureLiquid);
+        thermostat.setRelaxationTime(timeStepsInRun / 20);
+        system.setNSimulationSteps(timeStepsInRun / 10);
+        system.simulate();
+        gen.removeLinearMomentum(system.atoms());
+    }
 
     // Equilibration
     system.removeModifier(&thermostat);
