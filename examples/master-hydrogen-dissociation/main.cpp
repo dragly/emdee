@@ -62,6 +62,7 @@ int main(int argc, char* argv[])
     double cellCutoff = 24.0;
     double cutoffRadius = 12.0;
     double targetTemperature = 0.0;
+    int timeStepsInRun = 1000000;
     double density = 0.0;
     rootNode["temperature"] >> targetTemperature;
     targetTemperature /= au_T;
@@ -75,11 +76,15 @@ int main(int argc, char* argv[])
     } catch(YAML::TypedKeyNotFound<std::string>& ) {
     }
     try {
+        rootNode["timestep_count"] >> timeStepsInRun;
+    } catch(YAML::TypedKeyNotFound<std::string>& ) {
+    }
+    try {
         rootNode["cutoff_radius"] >> cutoffRadius;
     } catch(YAML::TypedKeyNotFound<std::string>& ) {
     }
     try {
-        rootNode["time_step"] >> timeStep;
+        rootNode["timestep"] >> timeStep;
     } catch(YAML::TypedKeyNotFound<std::string>& ) {
     }
 
@@ -194,8 +199,6 @@ int main(int argc, char* argv[])
     system.save();
 
     cout << "Cells: " << system.nCells() << endl;
-
-    int timeStepsInRun = 1000000;
 
     system.setSaveEveryNSteps(10000);
     // Equilibrate initial
