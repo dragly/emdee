@@ -53,11 +53,11 @@ SUITE(Development2) {
 //                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/fann_network.net",
 //                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/bounds.fann");
         testForce2.addNetwork(hydrogenType, hydrogenType,
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
-        testForce2.addNetwork(hydrogenType, hydrogenType,
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/fann_network.net",
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/bounds.fann");
+        testForce2.addNetwork(hydrogenType, hydrogenType,
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
 
         ofstream outFile("/tmp/forcedata.out");
 
@@ -87,7 +87,7 @@ SUITE(Development2) {
         particleTypes.push_back(hydrogenType);
 
         Atom *hydrogenAtom1 = new Atom(hydrogenType);
-        hydrogenAtom1->setPosition(Vector3(1.4, 2.5, 0.0));
+        hydrogenAtom1->setPosition(Vector3(0.0, 0.0, 0.0));
         hydrogenAtom1->setID(1);
         Atom *hydrogenAtom2 = new Atom(hydrogenType);
         hydrogenAtom2->setPosition(Vector3(1.4, 0.0, 0.0));
@@ -105,19 +105,20 @@ SUITE(Development2) {
 //                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/fann_network.net",
 //                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/bounds.fann");
         testForce2.addNetwork(hydrogenType, hydrogenType,
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
-        testForce2.addNetwork(hydrogenType, hydrogenType,
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/fann_network.net",
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/bounds.fann");
+        testForce2.addNetwork(hydrogenType, hydrogenType,
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
 
         FannThreeParticleForce testForce3;
         testForce3.setNewtonsThirdLawEnabled(true);
         testForce3.setCutoffRadius(cutoffRadius);
-        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/fann_network_0.net",
-                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/bounds.fann");
-        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/fann_network_0.net",
-                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/bounds.fann", 5.0);
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/bounds.fann",
+                               5.0);
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/bounds.fann");
 
         ofstream outFile("/tmp/forcedata3.out");
 
