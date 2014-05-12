@@ -90,10 +90,10 @@ SUITE(Development2) {
         hydrogenAtom1->setPosition(Vector3(0.0, 0.0, 0.0));
         hydrogenAtom1->setID(1);
         Atom *hydrogenAtom2 = new Atom(hydrogenType);
-        hydrogenAtom2->setPosition(Vector3(1.4, 0.0, 0.0));
+        hydrogenAtom2->setPosition(Vector3(0.0, 1.4, 0.0));
         hydrogenAtom2->setID(2);
         Atom *hydrogenAtom3 = new Atom(hydrogenType);
-        hydrogenAtom3->setPosition(Vector3(2.0, 0.0, 0.0));
+        hydrogenAtom3->setPosition(Vector3(1.0, 0.0, 0.0));
         hydrogenAtom3->setID(3);
 
         double cutoffRadius = 10.0;
