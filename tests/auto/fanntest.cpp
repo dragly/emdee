@@ -42,7 +42,7 @@ SUITE(FannForceSystem) {
         bool startVelocities = false;
         bool thermo = false;
         bool periodic = false;
-        double cellCutoff = 24.0;
+        double cellCutoff = 16.0;
         double cutoffRadius = 12.0;
         double sideLength = 20.0;
         double targetTemperature = 10.0e-5;
