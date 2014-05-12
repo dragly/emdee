@@ -157,17 +157,20 @@ int main(int argc, char* argv[])
     FannTwoParticleForce testForce2;
     testForce2.setCutoffRadius(cutoffRadius);
     testForce2.addNetwork(hydrogenType, hydrogenType,
-                          "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
-                          "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
-    testForce2.addNetwork(hydrogenType, hydrogenType,
                           "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/fann_network.net",
                           "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/bounds.fann");
+    testForce2.addNetwork(hydrogenType, hydrogenType,
+                          "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
+                          "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
     system.setTwoParticleForce(&testForce2);
 
     FannThreeParticleForce testForce3;
     testForce3.setCutoffRadius(fmin(cellCutoff / 2.0, cutoffRadius));
-    testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/fann_network_0.net",
-                           "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/bounds.fann");
+    testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/fann_network_2.net",
+                           "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/bounds.fann",
+                           5.0);
+    testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/fann_network.net",
+                           "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/bounds.fann");
     system.setThreeParticleForce(&testForce3);
 
     VelocityVerletIntegrator integrator(&system);

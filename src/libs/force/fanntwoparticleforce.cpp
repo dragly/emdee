@@ -109,6 +109,7 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
         if((atom1->type() == networkA.atomType1 && atom2->type() == networkA.atomType2)
                 || (atom2->type() == networkA.atomType1 && atom1->type() == networkA.atomType2)) {
             network = &networkA;
+            break;
         }
     }
     if(!network) {

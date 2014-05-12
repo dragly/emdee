@@ -61,11 +61,11 @@ SUITE(FannForceSystem) {
         //            double numberDensity = 7.95918040174197e-06; // 0.08988 kg / m3
         double numberDensityHalf = numberDensity / 2.0;
         //            targetTemperature = 3.16681542254e-05; // 10 K (solid)
-//        targetTemperature = 4.43354159156e-05; // 14 K (phase change)
+        //        targetTemperature = 4.43354159156e-05; // 14 K (phase change)
         //            targetTemperature = 5.0e-5; // 17 K (liquid)
         //            targetTemperature = 0.000158340771127; // 50 K (liquid)
         targetTemperature = 0.000475022313381; // 150 K (liquid)
-//        targetTemperature = 0.000475022313381 * 100; // 15000 K (dense liquid?)
+        //        targetTemperature = 0.000475022313381 * 100; // 15000 K (dense liquid?)
         //            targetTemperature = 0.000494;
 
         int nx = 4;
@@ -115,11 +115,11 @@ SUITE(FannForceSystem) {
         FannTwoParticleForce testForce2;
         testForce2.setCutoffRadius(cutoffRadius);
         testForce2.addNetwork(hydrogenType, hydrogenType,
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
-        testForce2.addNetwork(hydrogenType, hydrogenType,
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/fann_network.net",
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/bounds.fann");
+        testForce2.addNetwork(hydrogenType, hydrogenType,
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
         system.setTwoParticleForce(&testForce2);
 
         //        testForce2.addNetwork(hydrogenType, hydrogenType,
@@ -131,6 +131,9 @@ SUITE(FannForceSystem) {
 
         FannThreeParticleForce testForce3;
         testForce3.setCutoffRadius(fmin(cellCutoff / 2.0, cutoffRadius));
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/fann_network_2.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/bounds.fann",
+                               5.0);
         testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/fann_network.net",
                                "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/bounds.fann");
 

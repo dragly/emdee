@@ -8,20 +8,17 @@
 #include <doublefann.h>
 #include <iomanip>
 
-//double l12Min = 1.0;
-//double l12Max = 5.0;
-//double l13Min = 1.0;
-//double l13Max = 5.0;
-//double energyMin = 0.0;
-//double energyMax = 1.0;
-//double energyOffset = 0.0;
-
 double FannThreeParticleNetwork::rescaleDistance12(double r12) const {
         return (r12 - r12Min) / (r12Max - r12Min) * 0.8 + 0.1;
 }
 
 double FannThreeParticleNetwork::rescaleDistance13(double r13) const {
     return (r13 - r13Min) / (r13Max - r13Min) * 0.8 + 0.1;
+}
+
+double FannThreeParticleNetwork::rescaleAngle(double angle) const
+{
+    return (angle - angleMin) / (angleMax - angleMin) * 0.8 + 0.1;
 }
 
 double FannThreeParticleNetwork::rescaleEnergy(double energy) const
@@ -218,6 +215,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             continue;
         }
         network = &networkA;
+        break;
 //        if((atom1->type() == networkA.atomType1 && atom2->type() == networkA.atomType2)
 //                || (atom2->type() == networkA.atomType1 && atom1->type() == networkA.atomType2)) {
 //            network = &networkA;
@@ -227,17 +225,8 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         return;
     }
 
-    double l12Min = network->r12Min;
-    double l12Max = network->r12Max;
-
-    double l13Min = network->r13Min;
-    double l13Max = network->r13Max;
-
-    double angleMin = network->angleMin;
-    double angleMax = network->angleMax;
-
-    double energyMin = network->energyMin;
-    double energyMax = network->energyMax;
+    double l12MaxOrCutoff = min(network->r12Max, cutoffRadius());
+    double l13MaxOrCutoff = min(network->r13Max, cutoffRadius());
 
     double l12Inv = 1 / l12;
     double l13Inv = 1 / l13;
@@ -252,18 +241,18 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     fann_type input[3];
 
-    input[0] = rescale(l12, l12Min, l12Max);
-    input[1] = rescale(l13, l13Min, l13Max);
-    input[2] = rescale(angle, angleMin, angleMax);
-    double potentialEnergy = rescaleEnergy(fann_run(m_ann, input)[0], energyMin, energyMax);
-    potentialEnergy -= energyOffset;
+    input[0] = network->rescaleDistance12(l12);
+    input[1] = network->rescaleDistance13(l13);
+    input[2] = network->rescaleAngle(angle);
+    double potentialEnergy = network->rescaleEnergy(fann_run(network->ann, input)[0]);
+    potentialEnergy -= network->energyOffset;
 
 
     uint outputIndex = 0;
-    FannDerivative::backpropagateDerivative(m_ann, outputIndex);
-    double dEdr12 = rescaleEnergyDerivative(m_ann->train_errors[0], l12Min, l12Max, energyMin, energyMax);
-    double dEdr13 = rescaleEnergyDerivative(m_ann->train_errors[1], l13Min, l13Max, energyMin, energyMax);
-    double dEdangle = rescaleEnergyDerivative(m_ann->train_errors[2], angleMin, angleMax, energyMin, energyMax);
+    FannDerivative::backpropagateDerivative(network->ann, outputIndex);
+    double dEdr12 = network->rescaleEnergyDerivativeR12(network->ann->train_errors[0]);
+    double dEdr13 = network->rescaleEnergyDerivativeR13(network->ann->train_errors[1]);
+    double dEdangle = network->rescaleEnergyDerivativeAngle(network->ann->train_errors[2]);
 
     if(symmetric && fabs(l12 - l13) < 1e-10) {
         // Special case for symmetric potentials

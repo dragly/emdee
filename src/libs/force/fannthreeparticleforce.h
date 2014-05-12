@@ -2,6 +2,7 @@
 #define FANNFORCE_H
 
 #include <force/threeparticleforce.h>
+#include <atom.h>
 struct fann;
 typedef double fann_type;
 
@@ -28,6 +29,7 @@ public:
 
     double rescaleDistance12(double r12) const;
     double rescaleDistance13(double r12) const;
+    double rescaleAngle(double angle) const;
     double rescaleEnergy(double energy) const;
 //    double rescaleEnergyDerivative(double value) const;
 //    double tailCorrectionDampingFactor(double l12) const;
