@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
 
     YAML::Node rootNode;
     parser.GetNextDocument(rootNode);
-    double cellCutoff = 12.0;
+    double cellCutoff = 24.0;
     double cutoffRadius = 12.0;
     double targetTemperature = 0.0;
     double density = 0.0;
