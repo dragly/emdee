@@ -116,6 +116,8 @@ SUITE(Development2) {
         testForce3.setCutoffRadius(cutoffRadius);
         testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/fann_network_0.net",
                                "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/bounds.fann");
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/fann_network_0.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/bounds.fann", 5.0);
 
         ofstream outFile("/tmp/forcedata3.out");
 

@@ -42,7 +42,7 @@ SUITE(FannForceSystem) {
         bool startVelocities = false;
         bool thermo = false;
         bool periodic = false;
-        double cellCutoff = 12.0;
+        double cellCutoff = 16.0;
         double cutoffRadius = 12.0;
         double sideLength = 20.0;
         double targetTemperature = 10.0e-5;
@@ -51,138 +51,60 @@ SUITE(FannForceSystem) {
             sideLength = 40;
         }
 
-        int type = 0;
-        if(type == 0)  {
-            periodic = true;
-            friction = false;
-            thermo = true;
-            startVelocities = true;
-//            double numberDensity = 0.00627; // 70.82 kg / m^3
-            double numberDensity = 0.00169; // rho* = 0.0011
-//            double numberDensity = 0.00175;
-//            double numberDensity = 7.95918040174197e-06; // 0.08988 kg / m3
-            double numberDensityHalf = numberDensity / 2.0;
-//            targetTemperature = 3.16681542254e-05; // 10 K (solid)
-//            targetTemperature = 4.43354159156e-05; // 14 K (phase change)
-//            targetTemperature = 5.0e-5; // 17 K (liquid)
-//            targetTemperature = 0.000158340771127; // 50 K (liquid)
-//            targetTemperature = 0.000475022313381; // 150 K (liquid)
-            targetTemperature = 0.000475022313381 * 100; // 15000 K (dense liquid?)
-//            targetTemperature = 0.000494;
+        periodic = true;
+        friction = false;
+        thermo = true;
+        startVelocities = true;
+        //            double numberDensity = 0.00627; // 70.82 kg / m^3
+        double numberDensity = 0.00169; // rho* = 0.0011
+        //            double numberDensity = 0.00175;
+        //            double numberDensity = 7.95918040174197e-06; // 0.08988 kg / m3
+        double numberDensityHalf = numberDensity / 2.0;
+        //            targetTemperature = 3.16681542254e-05; // 10 K (solid)
+//        targetTemperature = 4.43354159156e-05; // 14 K (phase change)
+        //            targetTemperature = 5.0e-5; // 17 K (liquid)
+        //            targetTemperature = 0.000158340771127; // 50 K (liquid)
+        targetTemperature = 0.000475022313381; // 150 K (liquid)
+//        targetTemperature = 0.000475022313381 * 100; // 15000 K (dense liquid?)
+        //            targetTemperature = 0.000494;
 
-            int nx = 9;
-            int ny = nx;
-            int nz = nx;
+        int nx = 4;
+        int ny = nx;
+        int nz = nx;
 
-            double volume = (nx * ny * nz) / numberDensityHalf;
+        double volume = (nx * ny * nz) / numberDensityHalf;
 
-            sideLength =  pow(volume, 1.0/3.0);
+        sideLength =  pow(volume, 1.0/3.0);
 
-            cout << "Side length: " << sideLength << endl;
-            double spacingx = sideLength / nx;
-            double spacingy = sideLength / ny;
-            double spacingz = sideLength / nz;
-            if(!periodic) {
-                spacingx = sideLength / 5 / nx;
-                spacingy = sideLength / 5 / ny;
-                spacingz = sideLength / 5 / nz;
-            }
+        cout << "Side length: " << sideLength << endl;
+        double spacingx = sideLength / nx;
+        double spacingy = sideLength / ny;
+        double spacingz = sideLength / nz;
+        if(!periodic) {
+            spacingx = sideLength / 5 / nx;
+            spacingy = sideLength / 5 / ny;
+            spacingz = sideLength / 5 / nz;
+        }
 
-            int idCounter = 0;
-            for(int i = 0; i < nz; i++) {
-                for (int j = 0; j < ny; j++) {
-                    for (int k = 0; k < nx; ++k) {
-                        Atom *hydrogenAtom1 = new Atom(hydrogenType);
-                        hydrogenAtom1->setPosition(Vector3(0.5 + spacingx*k, 0.5 + spacingy*j, 0.5 + spacingz*i));
-                        hydrogenAtom1->setID(1 + idCounter);
-                        atoms.push_back(hydrogenAtom1);
-                        Atom *hydrogenAtom2 = new Atom(hydrogenType);
-                        hydrogenAtom2->setPosition(Vector3(2.0 + spacingx*k, 0.5 + spacingy*j, 0.5 + spacingz*i));
-                        hydrogenAtom2->setID(2 + idCounter);
-                        atoms.push_back(hydrogenAtom2);
-                        idCounter += 2;
-                    }
-                }
-            }
-            cout << "Number of atoms: " << atoms.size() << endl;
-            cout << "Volume: " << sideLength*sideLength*sideLength << endl;
-            double totalMass = 0.0;
-            for(Atom* atom : atoms) {
-                totalMass += atom->mass();
-            }
-            cout << "Total mass: " << totalMass << endl;
-            cout << "Density: " << totalMass / (sideLength*sideLength*sideLength) << endl;
-            if(!periodic) {
-                for(Atom* atom : atoms) {
-                    atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
-                }
-            }
-        } else if(type == 1)  {
-            Atom *hydrogenAtom1 = new Atom(hydrogenType);
-            hydrogenAtom1->setPosition(Vector3(1.0, 1.0, 1.0));
-            hydrogenAtom1->setID(1);
-            atoms.push_back(hydrogenAtom1);
-            Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(1.0, 1.72, 1.0));
-            hydrogenAtom2->setID(2);
-            atoms.push_back(hydrogenAtom2);
-            Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(4.2, 3.0, 1.0));
-            hydrogenAtom3->setID(3);
-            atoms.push_back(hydrogenAtom3);
-            Atom *hydrogenAtom4 = new Atom(hydrogenType);
-            hydrogenAtom4->setPosition(Vector3(4.4, 3.72, 1.0));
-            hydrogenAtom4->setID(4);
-            atoms.push_back(hydrogenAtom4);
-            if(!periodic) {
-                for(Atom* atom : atoms) {
-                    atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
-                }
-            }
-        } else if(type == 2)  {
-            Atom *hydrogenAtom1 = new Atom(hydrogenType);
-            double distance = 1.4;
-            hydrogenAtom1->setPosition(Vector3(1.0, -0.5 * distance, 1.0));
-            hydrogenAtom1->setID(1);
-            atoms.push_back(hydrogenAtom1);
-            Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(1.0, 0.5 * distance, 1.0));
-            hydrogenAtom2->setID(2);
-            atoms.push_back(hydrogenAtom2);
-            if(!periodic) {
-                for(Atom* atom : atoms) {
-                    atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
-                }
-            }
-        } else if(type == 3)  {
-            Atom *hydrogenAtom1 = new Atom(hydrogenType);
-            hydrogenAtom1->setPosition(Vector3(0.68, 0.0, 0.0));
-            hydrogenAtom1->setVelocity(Vector3(1.0, 0.0, 0.0));
-            hydrogenAtom1->setID(1);
-            atoms.push_back(hydrogenAtom1);
-            Atom *hydrogenAtom2 = new Atom(hydrogenType);
-            hydrogenAtom2->setPosition(Vector3(0.0, 2.0, 0.0));
-            hydrogenAtom2->setID(2);
-            atoms.push_back(hydrogenAtom2);
-            Atom *hydrogenAtom3 = new Atom(hydrogenType);
-            hydrogenAtom3->setPosition(Vector3(1.4, 2.0, 0.0));
-            hydrogenAtom3->setID(3);
-            atoms.push_back(hydrogenAtom3);
-            if(!periodic) {
-                for(Atom* atom : atoms) {
-                    atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
+        int idCounter = 0;
+        for(int i = 0; i < nz; i++) {
+            for (int j = 0; j < ny; j++) {
+                for (int k = 0; k < nx; ++k) {
+                    Atom *hydrogenAtom1 = new Atom(hydrogenType);
+                    hydrogenAtom1->setPosition(Vector3(0.5 + spacingx*k, 0.5 + spacingy*j, 0.5 + spacingz*i));
+                    hydrogenAtom1->setID(1 + idCounter);
+                    atoms.push_back(hydrogenAtom1);
+                    Atom *hydrogenAtom2 = new Atom(hydrogenType);
+                    hydrogenAtom2->setPosition(Vector3(0.5 + spacingx*k + 1.4, 0.5 + spacingy*j, 0.5 + spacingz*i));
+                    hydrogenAtom2->setID(2 + idCounter);
+                    atoms.push_back(hydrogenAtom2);
+                    idCounter += 2;
                 }
             }
         }
 
-        if(startVelocities) {
-            Generator gen;
-            if(friction) {
-                gen.boltzmannDistributeVelocities(targetTemperature*10, atoms);
-            } else {
-                gen.boltzmannDistributeVelocities(targetTemperature, atoms);
-            }
-        }
+        Generator gen;
+        gen.boltzmannDistributeVelocities(1e-9, atoms);
 
         MoleculeSystem system;
         system.setPeriodicity(periodic, periodic, periodic);
@@ -192,15 +114,13 @@ SUITE(FannForceSystem) {
 
         FannTwoParticleForce testForce2;
         testForce2.setCutoffRadius(cutoffRadius);
-//        testForce2.addNetwork(hydrogenType, hydrogenType,
-//                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/fann_network.net",
-//                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/bounds.fann");
         testForce2.addNetwork(hydrogenType, hydrogenType,
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
         testForce2.addNetwork(hydrogenType, hydrogenType,
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/fann_network.net",
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/bounds.fann");
+        system.setTwoParticleForce(&testForce2);
 
         //        testForce2.addNetwork(hydrogenType, hydrogenType,
         //                              "/home/svenni/Dropbox/projects/programming/fann-md/fann-md/tools/train/tmp/two/fann_network.net",
@@ -211,14 +131,14 @@ SUITE(FannForceSystem) {
 
         FannThreeParticleForce testForce3;
         testForce3.setCutoffRadius(fmin(cellCutoff / 2.0, cutoffRadius));
-        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/fann_network_0.net",
-                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/bounds.fann");
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/bounds.fann");
 
         system.setThreeParticleForce(&testForce3);
 
         VelocityVerletIntegrator integrator(&system);
         // Minimum for energy conservation: 0.001
-        integrator.setTimeStep(1.0);
+        integrator.setTimeStep(10.0);
         system.setIntegrator(&integrator);
 
         BerendsenThermostat thermostat(&system);
@@ -229,7 +149,7 @@ SUITE(FannForceSystem) {
         Friction frictionModifier(&system);
 
         FileManager fileManager(&system);
-        fileManager.setOutFileName("/tmp/fannforce/hydrogen-hightemp/atoms*.bin");
+        fileManager.setOutFileName("/tmp/fannforce/hydrogen-newpotentials/atoms*.bin");
         fileManager.setUnitLength(5.2917721092e-11);
         fileManager.setUnitMass(9.10938291e-31);
         system.setFileManager(&fileManager);
@@ -270,7 +190,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(40000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(10000000);
+            system.setNSimulationSteps(100000);
             system.simulate();
 
         }

@@ -8,27 +8,40 @@
 #include <doublefann.h>
 #include <iomanip>
 
-double l12Min = 1.0;
-double l12Max = 5.0;
-double l13Min = 1.0;
-double l13Max = 5.0;
-double angleMin = M_PI / 10;
-double angleMax = M_PI;
-double energyMin = 0.0;
-double energyMax = 1.0;
-double energyOffset = 0.0;
+//double l12Min = 1.0;
+//double l12Max = 5.0;
+//double l13Min = 1.0;
+//double l13Max = 5.0;
+//double energyMin = 0.0;
+//double energyMax = 1.0;
+//double energyOffset = 0.0;
 
-double rescale(double value, double valueMin, double valueMax) {
-    return (value - valueMin) / (valueMax - valueMin) * 0.8 + 0.1;
+double FannThreeParticleNetwork::rescaleDistance12(double r12) const {
+        return (r12 - r12Min) / (r12Max - r12Min) * 0.8 + 0.1;
 }
 
-double rescaleEnergy(double value, double valueMin, double valueMax) {
-    return ((value - 0.1) / 0.8) * (valueMax - valueMin) + valueMin;
+double FannThreeParticleNetwork::rescaleDistance13(double r13) const {
+    return (r13 - r13Min) / (r13Max - r13Min) * 0.8 + 0.1;
 }
 
-double rescaleEnergyDerivative(double derivative, double valueMin, double valueMax, double energyMin, double energyMax)
+double FannThreeParticleNetwork::rescaleEnergy(double energy) const
 {
-    return (energyMax - energyMin) / (valueMax - valueMin) * derivative;
+    return ((energy - 0.1) / 0.8) * (energyMax - energyMin) + energyMin;
+}
+
+double FannThreeParticleNetwork::rescaleEnergyDerivativeR12(double value) const
+{
+    return (energyMax - energyMin) / (r12Max - r12Min) * value;
+}
+
+double FannThreeParticleNetwork::rescaleEnergyDerivativeR13(double value) const
+{
+    return (energyMax - energyMin) / (r13Max - r13Min) * value;
+}
+
+double FannThreeParticleNetwork::rescaleEnergyDerivativeAngle(double value) const
+{
+    return (energyMax - energyMin) / (angleMax - angleMin) * value;
 }
 
 FannThreeParticleForce::FannThreeParticleForce() :
@@ -56,9 +69,12 @@ void FannThreeParticleForce::setCutoffRadius(double cutoffRadius)
 
 
 void FannThreeParticleForce::loadNetwork(const std::string& fileName,
-                                         const std::string& boundsFilename)
+                                         const std::string& boundsFilename,
+                                         double minDistance)
 {
-    m_ann = fann_create_from_file(fileName.c_str());
+    FannThreeParticleNetwork network;
+    network.minDistance = minDistance;
+    network.ann = fann_create_from_file(fileName.c_str());
 
     // Read bounds
     ifstream boundsFile(boundsFilename);
@@ -67,21 +83,23 @@ void FannThreeParticleForce::loadNetwork(const std::string& fileName,
     int nOutputs;
     boundsFile >> nOutputs;
 
-    boundsFile >> l12Min;
-    boundsFile >> l12Max;
-    boundsFile >> l13Min;
-    boundsFile >> l13Max;
-    boundsFile >> angleMin;
-    boundsFile >> angleMax;
-    if(fabs(angleMax - M_PI) < 1e-3) {
-        angleMax = M_PI;
+    boundsFile >> network.r12Min;
+    boundsFile >> network.r12Max;
+    boundsFile >> network.r13Min;
+    boundsFile >> network.r13Max;
+    boundsFile >> network.angleMin;
+    boundsFile >> network.angleMax;
+    if(fabs(network.angleMax - M_PI) < 1e-3) {
+        network.angleMax = M_PI;
     }
-    boundsFile >> energyMin;
-    boundsFile >> energyMax;
+    boundsFile >> network.energyMin;
+    boundsFile >> network.energyMax;
 
-    cout << "3P R12 bounds: " << l12Min << "," << l12Max << endl;
-    cout << "3P R13 bounds: " << l13Min << "," << l13Max << endl;
-    cout << "3P Energy bounds: " << energyMin << "," << energyMax << endl;
+    cout << "3P R12 bounds: " << network.r12Min << "," << network.r12Max << endl;
+    cout << "3P R13 bounds: " << network.r13Min << "," << network.r13Max << endl;
+    cout << "3P Energy bounds: " << network.energyMin << "," << network.energyMax << endl;
+
+    m_networks.push_back(network);
 }
 
 void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3)
@@ -109,10 +127,6 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 {
     bool symmetric = true;
     bool damping = true;
-    if(!m_ann) {
-        warnAboutMissingNetwork();
-        return;
-    }
 
     bool equalParticles = (atom1->type() == atom2->type() && atom1->type() == atom3->type());
     bool atom1HasLowestID = (atom1->id() < atom2->id() && atom1->id() < atom3->id());
@@ -137,6 +151,12 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double l13Squared = dot(r13, r13);
     double l12 = sqrt(l12Squared);
     double l13 = sqrt(l13Squared);
+
+    double cutoffSquared = cutoffRadius() * cutoffRadius();
+    if(l12Squared > cutoffSquared || l13Squared > cutoffSquared) {
+        return;
+    }
+
     // TODO: Use cos angle as parameter instead of angle
     //    double angle2 = acos((l12*l12 + l13*l13 - l23*l23) / (2 * l12 * l13));
     double angleParam = dotr12r13 / (l12*l13);
@@ -181,15 +201,43 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         swap(l12, l13);
         swap(atom2, atom3);
     }
-    double l12MaxOrCutoff = min(l12Max, m_cutoffRadius);
-    double l13MaxOrCutoff = min(l13Max, m_cutoffRadius);
-    if(l12Squared < l12Min*l12Min || l13Squared < l13Min*l13Min || l12Squared > l12MaxOrCutoff*l12MaxOrCutoff || l13Squared > l13MaxOrCutoff*l13MaxOrCutoff) {
+
+    const FannThreeParticleNetwork* network = 0;
+    for(const FannThreeParticleNetwork& networkA : m_networks) {
+        if(l12 <= networkA.r12Min || l12 >= networkA.r12Max) {
+            continue;
+        }
+        if(l13 <= networkA.r13Min || l13 >= networkA.r13Max) {
+            continue;
+        }
+        if(l12 < networkA.minDistance && l13 < networkA.minDistance) {
+            continue;
+        }
+        // This should not happen if the potential is parameterized between pi/3 and pi
+        if(angle < networkA.angleMin || angle > networkA.angleMax) {
+            continue;
+        }
+        network = &networkA;
+//        if((atom1->type() == networkA.atomType1 && atom2->type() == networkA.atomType2)
+//                || (atom2->type() == networkA.atomType1 && atom1->type() == networkA.atomType2)) {
+//            network = &networkA;
+//        }
+    }
+    if(!network) {
         return;
     }
-    // This should not happen if the potential is parameterized between pi/3 and pi
-    if(angle < angleMin || angle > angleMax) {
-        return;
-    }
+
+    double l12Min = network->r12Min;
+    double l12Max = network->r12Max;
+
+    double l13Min = network->r13Min;
+    double l13Max = network->r13Max;
+
+    double angleMin = network->angleMin;
+    double angleMax = network->angleMax;
+
+    double energyMin = network->energyMin;
+    double energyMax = network->energyMax;
 
     double l12Inv = 1 / l12;
     double l13Inv = 1 / l13;

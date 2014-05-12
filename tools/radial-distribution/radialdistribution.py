@@ -97,7 +97,7 @@ totalBins /= iFiles
 binEdges /= 0.52917721092
 sideLengths /= 0.52917721092
 
-print "Mean temperature: ", temperatureLabel
+print "Mean temperature: ", temperature
 
 figure()
 plot(binEdges[:-1], totalBins)
