@@ -278,6 +278,7 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double dampingFactorAngle = 1.0;
     double totalDampingFactor = 1.0;
 
+    double beta = 5.0;
     if(damping) {
         double upperLimiter = 1.5;
         double l12DampingMin = l12MaxOrCutoff - upperLimiter;
@@ -286,9 +287,9 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             double rij = l12;
             double rd = l12DampingMin;
             double rc = l12DampingMax;
-            double exponentialFactor = exp((rij-rd)/(rij-rc));
+            double exponentialFactor = exp(beta * (rij-rd)/(rij-rc));
             dampingFactorR12 *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
-            dampingFactorDerivativeR12 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
+            dampingFactorDerivativeR12 = beta * exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
 //                    cout << "Damping l12!" << endl;
             //        cout << "l12: " << l12 << endl;
             //        cout << "l13: " << l13 << endl;
@@ -302,9 +303,9 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             double rij = l13;
             double rd = l13DampingMin;
             double rc = l13DampingMax;
-            double exponentialFactor = exp((rij-rd)/(rij-rc));
+            double exponentialFactor = exp(beta * (rij-rd)/(rij-rc));
             dampingFactorR13 *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
-            dampingFactorDerivativeR13 = exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
+            dampingFactorDerivativeR13 = beta * exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
 //                    cout << "Damping l13!" << endl;
             //        cout << potentialDampingFactor << endl;
             //        cout << potentialDampingFactorDerivativeR13 << endl;
