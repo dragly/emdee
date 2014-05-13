@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
     }
 
     // Equilibration
-    cout << "Equilibration thermalization" << endl;
+    cout << "Equilibrating liquidization" << endl;
     system.removeModifier(&thermostat);
     system.setNSimulationSteps(timeStepsInRun / 10);
     system.simulate();
@@ -251,11 +251,13 @@ int main(int argc, char* argv[])
     gen.removeLinearMomentum(system.atoms());
 
     // Final run
+    cout << "Final run" << endl;
     system.setSaveEveryNSteps(1000);
     system.setNSimulationSteps(timeStepsInRun);
     system.simulate();
 
     // Final dynamics
+    cout << "Final dynamics" << endl;
     system.setSaveEveryNSteps(1);
     system.setNSimulationSteps(timeStepsInRun / 1000);
     system.simulate();
