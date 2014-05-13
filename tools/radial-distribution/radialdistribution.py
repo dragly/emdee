@@ -57,10 +57,12 @@ distBins = [0,args.bins]
 totalBins = zeros(distBins[1])
 iFiles = 0
 temperature = 0
+pressure = 0
 
 for fileName in fileNames:
     header, lammps, atoms = loadAtoms(fileName)
     temperature += header["temperature"]
+    pressure += header["pressure"]
     outFileName = fileName + ".out"
     arguments = [binary, fileName, outFileName] + combination + [str(distBins[1])]
     process = subprocess.call(arguments, env=env)
@@ -91,13 +93,16 @@ for fileName in fileNames:
         
     iFiles += 1
 temperature /= iFiles
-temperatureLabel = "%.0f K" % temperature
+pressure /= iFiles
 totalBins /= iFiles
 
 binEdges /= 0.52917721092
 sideLengths /= 0.52917721092
 
+print "----"
 print "Mean temperature: ", temperature
+print "Mean pressure: ", pressure
+print "----"
 
 figure()
 plot(binEdges[:-1], totalBins)
