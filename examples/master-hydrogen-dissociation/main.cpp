@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
     cout << "Boiling to " << initialTemperatureBoiling << endl;
     integrator.setTimeStep(timeStep*0.1);
     thermostat.setTargetTemperature(initialTemperatureBoiling);
-    thermostat.setRelaxationTime(timeStep * 10.0);
+    thermostat.setRelaxationTime(timeStepsInRun * timeStep / 100);
     system.setNSimulationSteps(timeStepsInRun / 50);
     system.simulate();
     gen.removeLinearMomentum(system.atoms());
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
         // Liquidizing
         cout << "Liquidizing to " << initialTemperatureLiquid << endl;
         thermostat.setTargetTemperature(initialTemperatureLiquid);
-        thermostat.setRelaxationTime(timeStepsInRun / 50);
+        thermostat.setRelaxationTime(timeStepsInRun*timeStep / 500);
         system.setNSimulationSteps(timeStepsInRun / 10);
         system.simulate();
         gen.removeLinearMomentum(system.atoms());
@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
     cout << "Final thermalization to " << targetTemperature << endl;
     system.addModifier(&thermostat);
     thermostat.setTargetTemperature(targetTemperature);
-    thermostat.setRelaxationTime(timeStepsInRun / 50);
+    thermostat.setRelaxationTime(timeStepsInRun*timeStep / 500);
     system.setNSimulationSteps(timeStepsInRun / 10);
     system.simulate();
     gen.removeLinearMomentum(system.atoms());
