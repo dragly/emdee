@@ -61,6 +61,7 @@ int main(int argc, char* argv[])
     parser.GetNextDocument(rootNode);
     double cellCutoff = 16.0;
     double cutoffRadius = 12.0;
+    double threeBodyCutoffRadius = 8.0;
     double targetTemperature = 0.0;
     int timeStepsInRun = 1000000;
     double density = 0.0;
@@ -81,6 +82,10 @@ int main(int argc, char* argv[])
     }
     try {
         rootNode["cutoff_radius"] >> cutoffRadius;
+    } catch(YAML::TypedKeyNotFound<std::string>& ) {
+    }
+    try {
+        rootNode["three_body_cutoff_radius"] >> threeBodyCutoffRadius;
     } catch(YAML::TypedKeyNotFound<std::string>& ) {
     }
     try {
@@ -170,7 +175,7 @@ int main(int argc, char* argv[])
     system.setTwoParticleForce(&testForce2);
 
     FannThreeParticleForce testForce3;
-    testForce3.setCutoffRadius(fmin(cellCutoff / 2.0, cutoffRadius));
+    testForce3.setCutoffRadius(fmin(cellCutoff / 2.0, threeBodyCutoffRadius));
     testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/fann_network.net",
                            "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/bounds.fann",
                            5.0);
