@@ -208,6 +208,7 @@ int main(int argc, char* argv[])
 
     system.setSaveEveryNSteps(10000);
     // Equilibrate initial
+    cout << "Initial equilibration" << endl;
     system.addModifier(&thermostat);
     thermostat.setTargetTemperature(1e-3);
     thermostat.setRelaxationTime(timeStep * 10);
@@ -215,6 +216,7 @@ int main(int argc, char* argv[])
     system.simulate();
 
     // Cooking
+    cout << "Boiling to " << initialTemperatureBoiling << endl;
     integrator.setTimeStep(timeStep*0.1);
     thermostat.setTargetTemperature(initialTemperatureBoiling);
     thermostat.setRelaxationTime(timeStep * 10.0);
@@ -225,22 +227,25 @@ int main(int argc, char* argv[])
 
     if(initialTemperatureLiquid > targetTemperature) {
         // Liquidizing
+        cout << "Liquidizing to " << initialTemperatureLiquid << endl;
         thermostat.setTargetTemperature(initialTemperatureLiquid);
-        thermostat.setRelaxationTime(timeStepsInRun / 20);
+        thermostat.setRelaxationTime(timeStepsInRun / 50);
         system.setNSimulationSteps(timeStepsInRun / 10);
         system.simulate();
         gen.removeLinearMomentum(system.atoms());
     }
 
     // Equilibration
+    cout << "Equilibration thermalization" << endl;
     system.removeModifier(&thermostat);
     system.setNSimulationSteps(timeStepsInRun / 10);
     system.simulate();
 
     // Final thermalization
+    cout << "Final thermalization to " << targetTemperature << endl;
     system.addModifier(&thermostat);
     thermostat.setTargetTemperature(targetTemperature);
-    thermostat.setRelaxationTime(timeStepsInRun / 20);
+    thermostat.setRelaxationTime(timeStepsInRun / 50);
     system.setNSimulationSteps(timeStepsInRun / 10);
     system.simulate();
     gen.removeLinearMomentum(system.atoms());
