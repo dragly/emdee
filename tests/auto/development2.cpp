@@ -118,7 +118,7 @@ SUITE(Development2) {
         testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/fann_network.net",
                                "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/bounds.fann",
                                5.0);
-        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/fann_network.net",
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/fann_network_1.net",
                                "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/bounds.fann");
 
         ofstream outFile("/tmp/forcedata3.out");

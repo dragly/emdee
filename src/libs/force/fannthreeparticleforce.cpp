@@ -149,18 +149,9 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double l12 = sqrt(l12Squared);
     double l13 = sqrt(l13Squared);
 
-    double cutoffSquared = cutoffRadius() * cutoffRadius();
-    if(l12Squared > cutoffSquared || l13Squared > cutoffSquared) {
-        return;
-    }
-
     // TODO: Use cos angle as parameter instead of angle
     //    double angle2 = acos((l12*l12 + l13*l13 - l23*l23) / (2 * l12 * l13));
     double angleParam = dotr12r13 / (l12*l13);
-    if(angleParam > 1.0 || angleParam < -1.0) {
-        // This should never happen, but means that atom2 and atom3 are on top of each other
-        return;
-    }
     double angle = acos(angleParam);
     if(angle < M_PI / 3.0) {
         // If the angle is less than 60 degrees (pi/3), we should swap the atoms so that we get one with
@@ -189,6 +180,16 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
             return;
         }
         angle = acos(angleParam);
+    }
+
+    double cutoffSquared = cutoffRadius() * cutoffRadius();
+    if(l12Squared > cutoffSquared || l13Squared > cutoffSquared) {
+        return;
+    }
+
+    if(angleParam > 1.0 || angleParam < -1.0) {
+        // This should never happen, but means that atom2 and atom3 are on top of each other
+        return;
     }
 
     // Make the potential symmetric, because the neural network might not agree that it is
@@ -278,9 +279,9 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
     double dampingFactorAngle = 1.0;
     double totalDampingFactor = 1.0;
 
-    double beta = 5.0;
+    double beta = 1.0;
     if(damping) {
-        double upperLimiter = 1.0;
+        double upperLimiter = 1.5;
         upperLimiter = min(min(l12MaxOrCutoff - network->r12Min, l12MaxOrCutoff - network->minDistance), upperLimiter);
         double l12DampingMin = l12MaxOrCutoff - upperLimiter;
         double l12DampingMax = l12MaxOrCutoff;
