@@ -40,13 +40,19 @@ void FannTwoParticleForce::addNetwork(const AtomType& atomType1, const AtomType&
     boundsFile >> network.energyMin;
     boundsFile >> network.energyMax;
 
+    cout << "Cutoff radius: " << cutoffRadius() << endl;
+    cout << "R12 bounds: " << network.r12Min << "," << network.r12Max << endl;
+
     network.tailCorrectionMin = network.r12Max - tailCorrectionTreshold;
     network.tailCorrectionMax = network.r12Max + tailCorrectionTresholdUpwards;
 
-    network.headCorrectionMax = network.r12Min;
+    network.tailCorrectionMin = min(network.tailCorrectionMin, cutoffRadius() - tailCorrectionTreshold);
+    network.tailCorrectionMax = min(network.tailCorrectionMax, cutoffRadius() + tailCorrectionTresholdUpwards);
 
-    cout << "R12 bounds: " << network.r12Min << "," << network.r12Max << endl;
+    network.headCorrectionMax = network.r12Min;
     cout << "Energy bounds: " << network.energyMin << "," << network.energyMax << endl;
+
+
 
     // Find energy at edges
     fann_type input[2];
@@ -98,6 +104,9 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
 
     Vector3 r12 = atom2->position() + atom2Offset - atom1->position();
     double l12Squared = dot(r12, r12);
+    if(l12Squared > cutoffRadius()*cutoffRadius()) {
+        return;
+    }
 
     double l12 = sqrt(l12Squared);
 
