@@ -280,13 +280,14 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     double beta = 5.0;
     if(damping) {
-        double upperLimiter = 1.5;
+        double upperLimiter = 1.0;
+        upperLimiter = min(min(l12MaxOrCutoff - network->r12Min, l12MaxOrCutoff - network->minDistance), upperLimiter);
         double l12DampingMin = l12MaxOrCutoff - upperLimiter;
         double l12DampingMax = l12MaxOrCutoff;
-        if(l12 > l12DampingMin && l12 < l12DampingMax) {
+        if(l12 > l12DampingMin && l12 < l12DampingMax + shield) {
             double rij = l12;
             double rd = l12DampingMin;
-            double rc = l12DampingMax;
+            double rc = l12DampingMax + 2*shield;
             double exponentialFactor = exp(beta * (rij-rd)/(rij-rc));
             dampingFactorR12 *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
             dampingFactorDerivativeR12 = beta * exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
@@ -299,10 +300,10 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
         double l13DampingMin = l13MaxOrCutoff - upperLimiter;
         double l13DampingMax = l13MaxOrCutoff;
-        if(l13 > l13DampingMin && l13 < l13DampingMax) {
+        if(l13 > l13DampingMin && l13 < l13DampingMax + shield) {
             double rij = l13;
             double rd = l13DampingMin;
-            double rc = l13DampingMax;
+            double rc = l13DampingMax + 2*shield;
             double exponentialFactor = exp(beta * (rij-rd)/(rij-rc));
             dampingFactorR13 *= exponentialFactor * ( (rij-rd)/(rc-rd) + 1 );
             dampingFactorDerivativeR13 = beta * exponentialFactor * ( ( (rij-rd)*(rij + 2*rd - 3*rc) ) / ( (rc - rd)*(rc - rij)*(rc - rij) ) );
