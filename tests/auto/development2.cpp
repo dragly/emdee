@@ -90,7 +90,7 @@ SUITE(Development2) {
         hydrogenAtom1->setPosition(Vector3(0.0, 0.0, 0.0));
         hydrogenAtom1->setID(1);
         Atom *hydrogenAtom2 = new Atom(hydrogenType);
-        hydrogenAtom2->setPosition(Vector3(0.0, 1.4, 0.0));
+        hydrogenAtom2->setPosition(Vector3(1.4, 1.4, 0.0));
         hydrogenAtom2->setID(2);
         Atom *hydrogenAtom3 = new Atom(hydrogenType);
         hydrogenAtom3->setPosition(Vector3(1.0, 0.0, 0.0));
@@ -122,12 +122,12 @@ SUITE(Development2) {
 
         ofstream outFile("/tmp/forcedata3.out");
 
-        rowvec xValues = linspace(0.5, 20, 1000);
+        rowvec xValues = linspace(2.0, 20, 1000);
         for(double x : xValues) {
             hydrogenAtom1->clearForcePotentialPressure();
             hydrogenAtom2->clearForcePotentialPressure();
             hydrogenAtom3->clearForcePotentialPressure();
-            hydrogenAtom3->setPosition(Vector3(1.4 + x, 0, 0));
+            hydrogenAtom3->setPosition(Vector3(x, 0, 0));
             testForce3.calculateAndApplyForce(hydrogenAtom1, hydrogenAtom2, hydrogenAtom3);
             testForce3.calculateAndApplyForce(hydrogenAtom2, hydrogenAtom1, hydrogenAtom3);
             testForce3.calculateAndApplyForce(hydrogenAtom3, hydrogenAtom1, hydrogenAtom2);

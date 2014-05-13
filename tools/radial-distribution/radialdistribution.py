@@ -59,6 +59,9 @@ iFiles = 0
 temperature = 0
 pressure = 0
 
+if len(fileNames) < 1:
+    raise Exception("Found no files matching input")
+
 for fileName in fileNames:
     header, lammps, atoms = loadAtoms(fileName)
     temperature += header["temperature"]
