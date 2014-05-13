@@ -98,6 +98,7 @@ int main(int argc, char* argv[])
     cout << "Density: " << density << endl;
     cout << "cellCutoff: " << cellCutoff << endl;
     cout << "cutoffRadius: " << cutoffRadius << endl;
+    cout << "threeBodyCutoffRadius: " << threeBodyCutoffRadius << endl;
     cout << "timeStep: " << timeStep << endl;
 
     double initialTemperatureBoiling = 15600 / au_T;
