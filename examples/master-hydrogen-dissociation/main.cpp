@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
 
     cout << "Cells: " << system.nCells() << endl;
 
-    system.setSaveEveryNSteps(1000);
+    system.setSaveEveryNSteps(10000);
     // Equilibrate initial
     cout << "Initial equilibration" << endl;
     system.addModifier(&thermostat);
@@ -253,7 +253,7 @@ int main(int argc, char* argv[])
     // Final run
     cout << "Final run" << endl;
     system.removeModifier(&thermostat);
-    system.setSaveEveryNSteps(10000);
+    system.setSaveEveryNSteps(1000);
     system.setNSimulationSteps(timeStepsInRun);
     system.simulate();
 
