@@ -253,7 +253,7 @@ int main(int argc, char* argv[])
     // Final run
     cout << "Final run" << endl;
     system.removeModifier(&thermostat);
-    system.setSaveEveryNSteps(1000);
+    system.setSaveEveryNSteps(10000);
     system.setNSimulationSteps(timeStepsInRun);
     system.simulate();
 

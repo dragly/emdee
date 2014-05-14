@@ -51,7 +51,7 @@ SUITE(FannForceSystem) {
             sideLength = 40;
         }
 
-        periodic = true;
+        periodic = false;
         friction = false;
         thermo = true;
         startVelocities = true;
@@ -69,7 +69,7 @@ SUITE(FannForceSystem) {
 //        targetTemperature = 0.0475022313381; // 15000 K (dense liquid?)
         //            targetTemperature = 0.000494;
 
-        int nx = 4;
+        int nx = 2;
         int ny = nx;
         int nz = nx;
 
@@ -100,9 +100,13 @@ SUITE(FannForceSystem) {
                     hydrogenAtom2->setID(2 + idCounter);
                     atoms.push_back(hydrogenAtom2);
                     idCounter += 2;
+                    cout << hydrogenAtom1->position() << endl;
                 }
             }
         }
+//        for(Atom* atom : atoms) {
+//            atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
+//        }
 
         Generator gen;
         gen.boltzmannDistributeVelocities(1e-9, atoms);
@@ -151,7 +155,7 @@ SUITE(FannForceSystem) {
         Friction frictionModifier(&system);
 
         FileManager fileManager(&system);
-        fileManager.setOutFileName("/tmp/fannforce/hydrogen-newpotentials/atoms*.bin");
+        fileManager.setOutFileName("/tmp/fannforce/hydrogen-small/atoms*.bin");
         fileManager.setUnitLength(5.2917721092e-11);
         fileManager.setUnitMass(9.10938291e-31);
         system.setFileManager(&fileManager);
