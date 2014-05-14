@@ -258,10 +258,10 @@ int main(int argc, char* argv[])
     system.simulate();
 
     // Final dynamics
-    cout << "Final dynamics" << endl;
-    system.setSaveEveryNSteps(1);
-    system.setNSimulationSteps(timeStepsInRun / 1000);
-    system.simulate();
+//    cout << "Final dynamics" << endl;
+//    system.setSaveEveryNSteps(1);
+//    system.setNSimulationSteps(timeStepsInRun / 1000);
+//    system.simulate();
 
     //        CHECK_EQUAL(3, system.nAtomsTotal());
 
