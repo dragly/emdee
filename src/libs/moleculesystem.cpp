@@ -388,7 +388,7 @@ void MoleculeSystem::simulate()
 
         if(m_processor->rank() == 0 && isOutputEnabledForThisStep()) {
             cout << "Step: " << setw(10) << setfill('0') << m_step
-                 << std::scientific << setprecision(16)
+                 << std::scientific << setprecision(8)
                  << " TE: " << m_potentialEnergyTotal + m_kineticEnergyTotal
                  << " PE: " << m_potentialEnergyTotal
                  << " KE: " << m_kineticEnergyTotal
