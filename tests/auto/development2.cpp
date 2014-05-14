@@ -97,20 +97,7 @@ SUITE(Development2) {
         hydrogenAtom3->setID(3);
 
         double cutoffRadius2 = 12.0;
-        double cutoffRadius3 = 6.0;
-
-        FannTwoParticleForce testForce2;
-        testForce2.setNewtonsThirdLawEnabled(true);
-        testForce2.setCutoffRadius(cutoffRadius2);
-//        testForce2.addNetwork(hydrogenType, hydrogenType,
-//                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/fann_network.net",
-//                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140427-141531/bounds.fann");
-        testForce2.addNetwork(hydrogenType, hydrogenType,
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/fann_network.net",
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/bounds.fann");
-        testForce2.addNetwork(hydrogenType, hydrogenType,
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
+        double cutoffRadius3 = 8.0;
 
         FannThreeParticleForce testForce3;
         testForce3.setNewtonsThirdLawEnabled(true);
@@ -118,7 +105,7 @@ SUITE(Development2) {
         testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/fann_network.net",
                                "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/bounds.fann",
                                5.0);
-        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/fann_network_1.net",
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/fann_network.net",
                                "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/bounds.fann");
 
         ofstream outFile("/tmp/forcedata3.out");
