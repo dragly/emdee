@@ -44,7 +44,7 @@ SUITE(Development2) {
         hydrogenAtom2->setPosition(Vector3(0.0, 2.0, 0.0));
         hydrogenAtom2->setID(2);
 
-        double cutoffRadius = 5.19;
+        double cutoffRadius = 12.0;
 
         FannTwoParticleForce testForce2;
         testForce2.setNewtonsThirdLawEnabled(true);

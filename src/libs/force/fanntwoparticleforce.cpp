@@ -8,9 +8,9 @@
 #include <utils/fannderivative.h>
 
 double inherentEnergy = -0.5;
-double tailCorrectionTreshold = 0.0;
+double tailCorrectionTreshold = 3.0;
 double tailCorrectionTresholdUpwards = 0.0;
-double beta = 10.0;
+double beta = 3.0;
 
 FannTwoParticleForce::FannTwoParticleForce() :
     TwoParticleForce(),
