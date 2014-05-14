@@ -143,32 +143,50 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
 
     Vector3 r12 = atom2->position() + atom2Offset - atom1->position();
     Vector3 r13 = atom3->position() + atom3Offset - atom1->position();
-    double dotr12r13 = dot(r12, r13);
+    Vector3 r23 = atom3->position() + atom3Offset - (atom2->position() + atom2Offset);
+
     double l12Squared = dot(r12, r12);
     double l13Squared = dot(r13, r13);
+    double l23Squared = dot(r23, r23);
     double l12 = sqrt(l12Squared);
     double l13 = sqrt(l13Squared);
+    double l23 = sqrt(l23Squared);
+    double dotr12r13 = dot(r12, r13);
+    double dotr21r23 = dot(-r12, r23);
+    double dotr31r32 = dot(-r13, -r23);
+    double angleParam1 = dotr12r13 / (l12*l13);
+    double angleParam2 = dotr21r23 / (l12*l23);
+    double angleParam3 = dotr31r32 / (l13*l23);
+    double angle1 = acos(angleParam1);
+    double angle2 = acos(angleParam2);
+    double angle3 = acos(angleParam3);
 
-    // TODO: Use cos angle as parameter instead of angle
-    //    double angle2 = acos((l12*l12 + l13*l13 - l23*l23) / (2 * l12 * l13));
-    double angleParam = dotr12r13 / (l12*l13);
-    double angle = acos(angleParam);
-    if(angle < M_PI / 3.0) {
-        // If the angle is less than 60 degrees (pi/3), we should swap the atoms so that we get one with
-        // higher angle. This way we don't have to train the neural network for angles below pi/3
-        // Swapping with the closest atom should give the highest angle
+    double angle = angle1;
+    double angleParam = angleParam1;
+
+    if(angle2 > angle1 && angle2 > angle3) {
         Vector3 atom1Offset;
-        if(l12 < l13) {
-            swap(atom1, atom2);
-            atom1Offset = atom2Offset;
-            r12 = (atom2->position()) - (atom1->position() + atom1Offset);
-            r13 = (atom3->position() + atom3Offset) - (atom1->position() + atom1Offset);
-        } else {
-            swap(atom1, atom3);
-            atom1Offset = atom3Offset;
-            r12 = (atom2->position() + atom2Offset) - (atom1->position() + atom1Offset);
-            r13 = (atom3->position()) - (atom1->position() + atom1Offset);
+        swap(atom1, atom2);
+        atom1Offset = atom2Offset;
+        r12 = (atom2->position()) - (atom1->position() + atom1Offset);
+        r13 = (atom3->position() + atom3Offset) - (atom1->position() + atom1Offset);
+        dotr12r13 = dot(r12, r13);
+        l12Squared = dot(r12, r12);
+        l13Squared = dot(r13, r13);
+        l12 = sqrt(l12Squared);
+        l13 = sqrt(l13Squared);
+        angleParam = dotr12r13 / (l12*l13);
+        if(angleParam > 1.0 || angleParam < -1.0) {
+            // This should never happen, but means that atom2 and atom3 are on top of each other
+            return;
         }
+        angle = acos(angleParam);
+    } else if(angle3 > angle1 && angle3 > angle2) {
+        Vector3 atom1Offset;
+        swap(atom1, atom3);
+        atom1Offset = atom3Offset;
+        r12 = (atom2->position() + atom2Offset) - (atom1->position() + atom1Offset);
+        r13 = (atom3->position()) - (atom1->position() + atom1Offset);
         dotr12r13 = dot(r12, r13);
         l12Squared = dot(r12, r12);
         l13Squared = dot(r13, r13);
@@ -181,6 +199,35 @@ void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, At
         }
         angle = acos(angleParam);
     }
+
+//    if(angle < M_PI / 3.0) {
+//        // If the angle is less than 60 degrees (pi/3), we should swap the atoms so that we get one with
+//        // higher angle. This way we don't have to train the neural network for angles below pi/3
+//        // Swapping with the closest atom should give the highest angle
+//        Vector3 atom1Offset;
+//        if(l12 < l13) {
+//            swap(atom1, atom2);
+//            atom1Offset = atom2Offset;
+//            r12 = (atom2->position()) - (atom1->position() + atom1Offset);
+//            r13 = (atom3->position() + atom3Offset) - (atom1->position() + atom1Offset);
+//        } else {
+//            swap(atom1, atom3);
+//            atom1Offset = atom3Offset;
+//            r12 = (atom2->position() + atom2Offset) - (atom1->position() + atom1Offset);
+//            r13 = (atom3->position()) - (atom1->position() + atom1Offset);
+//        }
+//        dotr12r13 = dot(r12, r13);
+//        l12Squared = dot(r12, r12);
+//        l13Squared = dot(r13, r13);
+//        l12 = sqrt(l12Squared);
+//        l13 = sqrt(l13Squared);
+//        angleParam = dotr12r13 / (l12*l13);
+//        if(angleParam > 1.0 || angleParam < -1.0) {
+//            // This should never happen, but means that atom2 and atom3 are on top of each other
+//            return;
+//        }
+//        angle = acos(angleParam);
+//    }
 
     double cutoffSquared = cutoffRadius() * cutoffRadius();
     if(l12Squared > cutoffSquared || l13Squared > cutoffSquared) {

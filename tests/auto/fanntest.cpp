@@ -40,12 +40,12 @@ SUITE(FannForceSystem) {
 
         bool friction = false;
         bool startVelocities = false;
-        bool thermo = false;
+        bool thermo = true;
         bool periodic = false;
-        double cellCutoff = 16.0;
+        double cellCutoff = 100.0;
         double cutoffRadius = 12.0;
         double sideLength = 20.0;
-        double targetTemperature = 10.0e-5;
+        double targetTemperature = 1e-6;
 
         if(!periodic) {
             sideLength = 40;
@@ -62,7 +62,7 @@ SUITE(FannForceSystem) {
         double numberDensityHalf = numberDensity / 2.0;
         //            targetTemperature = 5e-06; // (solid)
         //            targetTemperature = 3.16681542254e-05; // 10 K (solid)
-        targetTemperature = 4.43354159156e-05; // 14 K (phase change)
+//        targetTemperature = 4.43354159156e-05; // 14 K (phase change)
         //            targetTemperature = 5.0e-5; // 17 K (liquid)
         //            targetTemperature = 0.000158340771127; // 50 K (liquid)
 //        targetTemperature = 0.000475022313381; // 150 K (liquid)
@@ -73,18 +73,18 @@ SUITE(FannForceSystem) {
         int ny = nx;
         int nz = nx;
 
-        double volume = (nx * ny * nz) / numberDensityHalf;
+        double volume = 10000;
 
-        sideLength =  pow(volume, 1.0/3.0);
+        sideLength = 100;
 
         cout << "Side length: " << sideLength << endl;
         double spacingx = sideLength / nx;
         double spacingy = sideLength / ny;
         double spacingz = sideLength / nz;
         if(!periodic) {
-            spacingx = sideLength / 5 / nx;
-            spacingy = sideLength / 5 / ny;
-            spacingz = sideLength / 5 / nz;
+            spacingx = 10;
+            spacingy = 10;
+            spacingz = 10;
         }
 
         int idCounter = 0;
@@ -104,12 +104,12 @@ SUITE(FannForceSystem) {
                 }
             }
         }
-//        for(Atom* atom : atoms) {
-//            atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
-//        }
+        for(Atom* atom : atoms) {
+            atom->setPosition(atom->position() + Vector3(sideLength / 2, sideLength / 2, sideLength / 2));
+        }
 
         Generator gen;
-        gen.boltzmannDistributeVelocities(1e-9, atoms);
+        gen.boltzmannDistributeVelocities(1e-6, atoms);
 
         MoleculeSystem system;
         system.setPeriodicity(periodic, periodic, periodic);
@@ -146,11 +146,9 @@ SUITE(FannForceSystem) {
 
         VelocityVerletIntegrator integrator(&system);
         // Minimum for energy conservation: 0.001
-        integrator.setTimeStep(10.0);
+        double factor = 1;
+        integrator.setTimeStep(factor*1.0);
         system.setIntegrator(&integrator);
-
-        BerendsenThermostat thermostat(&system);
-        thermostat.setRelaxationTime(5000.0);
 
         Friction frictionModifier(&system);
 
@@ -161,7 +159,7 @@ SUITE(FannForceSystem) {
         system.setFileManager(&fileManager);
 
         system.setSaveEnabled(true);
-        system.setSaveEveryNSteps(100);
+        system.setSaveEveryNSteps(1000 / factor);
         system.setOutputEnabled(true);
 
         system.setupCells(cellCutoff);
@@ -170,21 +168,19 @@ SUITE(FannForceSystem) {
 
 
         if(thermo) {
+            system.setNSimulationSteps(100000 / factor);
+            system.simulate();
+//            AndersenThermostat thermostat(&system);
+//            thermostat.setCollisionTime(10000);
+            BerendsenThermostat thermostat(&system);
+            thermostat.setRelaxationTime(100 * factor);
             system.addModifier(&thermostat);
-            thermostat.setTargetTemperature(15*targetTemperature);
-            system.setNSimulationSteps(10000);
+            thermostat.setTargetTemperature(targetTemperature);
+            system.setNSimulationSteps(100000 / factor);
             system.simulate();
 
             system.removeModifier(&thermostat);
-            system.setNSimulationSteps(10000);
-            system.simulate();
-
-            system.addModifier(&thermostat);
-            thermostat.setTargetTemperature(targetTemperature);
-            system.setNSimulationSteps(40000);
-            system.simulate();
-
-            system.setNSimulationSteps(100000);
+            system.setNSimulationSteps(1000000 / factor);
             system.simulate();
         } else if(friction) {
             system.setNSimulationSteps(40000);
@@ -196,7 +192,7 @@ SUITE(FannForceSystem) {
             system.setNSimulationSteps(40000);
             system.simulate();
         } else {
-            system.setNSimulationSteps(100000);
+            system.setNSimulationSteps(10000);
             system.simulate();
 
         }
