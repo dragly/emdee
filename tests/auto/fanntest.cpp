@@ -45,13 +45,13 @@ SUITE(FannForceSystem) {
         double cellCutoff = 100.0;
         double cutoffRadius = 12.0;
         double sideLength = 20.0;
-        double targetTemperature = 1e-6;
+        double targetTemperature = 4e-5;
 
         if(!periodic) {
             sideLength = 40;
         }
 
-        periodic = false;
+        periodic = true;
         friction = false;
         thermo = true;
         startVelocities = true;
@@ -69,13 +69,11 @@ SUITE(FannForceSystem) {
 //        targetTemperature = 0.0475022313381; // 15000 K (dense liquid?)
         //            targetTemperature = 0.000494;
 
-        int nx = 2;
+        int nx = 3;
         int ny = nx;
         int nz = nx;
 
         double volume = 10000;
-
-        sideLength = 100;
 
         cout << "Side length: " << sideLength << endl;
         double spacingx = sideLength / nx;
