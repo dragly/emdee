@@ -58,6 +58,7 @@ totalBins = zeros(distBins[1])
 iFiles = 0
 temperature = 0
 pressure = 0
+total_count_bins = zeros(distBins[1])
 
 if len(fileNames) < 1:
     raise Exception("Found no files matching input")
@@ -88,6 +89,7 @@ for fileName in fileNames:
     V = 4./3. * pi * binEdges**3
     Vdiff = V[1:] - V[:-1]
 
+    total_count_bins += binContents
     slice_number_densities = binContents / Vdiff
     newBins = slice_number_densities / system_number_density
     
@@ -95,16 +97,24 @@ for fileName in fileNames:
     totalBins = totalBins + newBins
         
     iFiles += 1
+    
 temperature /= iFiles
 pressure /= iFiles
 totalBins /= iFiles
+total_count_bins /= iFiles
 
 binEdges /= 0.52917721092
 sideLengths /= 0.52917721092
 
+dissociation_limit = 1.832 # Angstrom
+
+pairs_below_dissociation_limit = sum(total_count_bins[(where(binEdges < dissociation_limit))])
+
 print "----"
 print "Mean temperature: ", temperature
 print "Mean pressure: ", pressure
+print "Pairs below dissociation limit: ", pairs_below_dissociation_limit
+print "Atoms above dissociation limit: ", atoms_count - 2*pairs_below_dissociation_limit
 print "----"
 
 figure()
