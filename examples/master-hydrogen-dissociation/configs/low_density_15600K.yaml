@@ -1,4 +1,4 @@
 atom_count: 1000    #
 density:        19.121  # kg / m3
 temperature:    15600.0    # K
-time_step: 1.0
+timestep: 1.0
