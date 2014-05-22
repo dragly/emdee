@@ -49,32 +49,34 @@ SUITE(Benchmark) {
         testForce2.setNewtonsThirdLawEnabled(true);
         testForce2.setCutoffRadius(cutoffRadius);
         testForce2.addNetwork(hydrogenType, hydrogenType,
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
-                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
-        testForce2.addNetwork(hydrogenType, hydrogenType,
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/fann_network.net",
                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-204601/bounds.fann");
+        testForce2.addNetwork(hydrogenType, hydrogenType,
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/fann_network.net",
+                              "/home/svenni/Dropbox/studies/master/results/fann_train/20140507-200839/bounds.fann");
 
         FannThreeParticleForce testForce3;
         testForce3.setNewtonsThirdLawEnabled(true);
         testForce3.setCutoffRadius(cutoffRadius);
-        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/fann_network_0.net",
-                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140428-194643/bounds.fann");
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-200948/bounds.fann",
+                               5.0);
+        testForce3.loadNetwork("/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/fann_network.net",
+                               "/home/svenni/Dropbox/studies/master/results/fann_train/20140512-182447/bounds.fann");
 
+        int nCalculations = 20000000;
         boost::mpi::timer timer;
-//        timer.restart();
-//        for(int i = 0; i < 10000000; i++) {
-//            testForce2.calculateAndApplyForce(hydrogenAtom1, hydrogenAtom2);
-//        }
-//        cout << hydrogenAtom1->force() << " " << hydrogenAtom2->force() << endl;
-//        cout << "Time neural network 2-body: " << timer.elapsed() << endl;
+        timer.restart();
+        for(int i = 0; i < nCalculations; i++) {
+            testForce2.calculateAndApplyForce(hydrogenAtom1, hydrogenAtom2);
+        }
+        cout << "Time neural network 2-body: " << timer.elapsed() << endl;
 
-//        timer.restart();
-//        for(int i = 0; i < 10000000; i++) {
-//            testForce3.calculateAndApplyForce(hydrogenAtom1, hydrogenAtom2, hydrogenAtom3);
-//        }
-//        cout << hydrogenAtom1->force() << " " << hydrogenAtom2->force() << endl;
-//        cout << "Time neural network 3-body: " << timer.elapsed() << endl;
+        timer.restart();
+        for(int i = 0; i < nCalculations; i++) {
+            testForce3.calculateAndApplyForce(hydrogenAtom1, hydrogenAtom2, hydrogenAtom3);
+        }
+        cout << "Time neural network 3-body: " << timer.elapsed() << endl;
 
         KohenThreeParticleForce kohenForce3;
 
@@ -88,10 +90,9 @@ SUITE(Benchmark) {
 
 
         timer.restart();
-        for(int i = 0; i < 100000000; i++) {
+        for(int i = 0; i < nCalculations; i++) {
             kohenForce3.calculateAndApplyForce(hydrogenAtom1, hydrogenAtom2, hydrogenAtom3);
         }
-        cout << hydrogenAtom1->force() << " " << hydrogenAtom2->force() << endl;
         cout << "Time Kohen 3-body: " << timer.elapsed() << endl;
     }
 }
