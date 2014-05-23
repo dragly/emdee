@@ -18,17 +18,18 @@ void BerendsenThermostat::apply()
     double dt = m_moleculeSystem->integrator()->timeStep();
     double tau = m_relaxationTime;
     double currentTemperature = m_moleculeSystem->temperature();
-    double argument = 1 + dt / tau * (m_targetTemperature / currentTemperature - 1);
+    double gamma = dt / tau;
+    double argument = 1 + gamma * (m_targetTemperature / currentTemperature - 1);
     if(argument < 0) {
         return;
     }
-    double gamma = sqrt(argument);
+    double beta = sqrt(argument);
     for(MoleculeSystemCell* cell : m_moleculeSystem->localCells()) {
         for(Atom* atom : cell->atoms()) {
             if(atom->isPositionFixed()) {
                 continue;
             }
-            atom->setVelocity(gamma * atom->velocity());
+            atom->setVelocity(beta * atom->velocity());
         }
     }
 }

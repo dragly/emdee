@@ -16,6 +16,7 @@ public:
 private:
     Vector3 rij;
     Vector3 rik;
+    double force(double Bijk, double drij, double dfdrij, double drik, double dfdrik, double p, double f, double dtheta, double dpdtheta);
 };
 
 #endif // KOHENTHREEPARTICLEFORCE_H

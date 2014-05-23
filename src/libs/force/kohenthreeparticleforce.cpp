@@ -19,10 +19,12 @@ void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, A
     double rcSquared = rc*rc;
     double shield = 1e-12; // just to avoid nan from 0 / 0 in dtheta and acos
     double mu = 0.132587;
-    double nu = 0.2997;
+    double nu = -0.2997;
+    double lambda = 0.6422395192972986; // 2.80e-21 kJ
+    double gamma = 2.8345891868475928; // 1.5 Å
 
-    rij = atom2->position() - atom1->position();
-    rik = atom3->position() - atom1->position();
+    rij = atom2->position() + atom2Offset - atom1->position();
+    rik = atom3->position() + atom2Offset - atom1->position();
 
     double lij2 = dot(rij, rij);
     double lik2 = dot(rik, rik);
@@ -32,12 +34,22 @@ void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, A
     double dotrijrik = dot(rij,rik);
     double lij = sqrt(lij2);
     double lik = sqrt(lik2);
+    double lijMinusrc = lij - rc;
+    double likMinusrc = lik - rc;
 
-    double lambda = 0.6422395192972986; // 2.80e-21 kJ
-    double gamma = 2.8345891868475928; // 1.5 Å
+    double gammaOverLijMinusrc = gamma / lijMinusrc;
+    double gammaOverLikMinusrc = gamma / likMinusrc;
+    double expTerm = exp(gammaOverLijMinusrc + gammaOverLikMinusrc);
+
     double cosTheta = dotrijrik / (lij * lik + shield);
+//    double theta = acos(cosTheta);
+    double sinTheta = sqrt(1 - cosTheta*cosTheta);
     double a = 1 + mu * cosTheta + nu * cosTheta * cosTheta;
-    double potential = lambda * a * exp(gamma / (lij - rc) + gamma / (lik - rc));
+
+    double potential = lambda * a * expTerm;
+    double dPotentialdrij = -gamma*potential/(lijMinusrc*lijMinusrc);
+    double dPotentialdrik = -gamma*potential/(likMinusrc*likMinusrc);
+    double dPotentialdtheta = lambda * expTerm * (-mu * sinTheta - 2*nu*sinTheta * cosTheta);
     atom1->addPotential(potential / 3.0);
     atom2->addPotential(potential / 3.0);
     atom3->addPotential(potential / 3.0);
@@ -65,7 +77,7 @@ void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, A
                     ) * invSqrtDotOverLenghtSquared;
         drij = -rij[a] * invLij;
         drik = -rik[a] * invLik;
-        double forceComp = dtheta * drij * drik * potential; // TODO This is just a dummy for benchmarking!
+        double forceComp = drij * dPotentialdrij + drik * dPotentialdrik + dtheta * dPotentialdtheta;
         if(!m_isNewtonsThirdLawEnabled) {
             forceComp *= 0.5; // We count twice if Newton's third is not enabled
         }
@@ -81,7 +93,7 @@ void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, A
                     + ((rik[a]) * (invLij * invLik))
                     ) * invSqrtDotOverLenghtSquared;
         drij = rij[a] * invLij;
-        double forceComp = dtheta * drij * drik * potential; // TODO This is just a dummy for benchmarking!
+        double forceComp = drij * dPotentialdrij + drik * dPotentialdrik + dtheta * dPotentialdtheta;
         if(!m_isNewtonsThirdLawEnabled) {
             forceComp *= 0.5; // We count twice if Newton's third is not enabled
         }
@@ -98,10 +110,15 @@ void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, A
                     + ((rij[a]) * (invLij * invLik))
                     ) * invSqrtDotOverLenghtSquared;
         drik = rik[a] * invLik;
-        double forceComp = dtheta * drij * drik * potential; // TODO This is just a dummy for benchmarking!
+        double forceComp = drij * dPotentialdrij + drik * dPotentialdrik + dtheta * dPotentialdtheta;
         if(!m_isNewtonsThirdLawEnabled) {
             forceComp *= 0.5; // We count twice if Newton's third is not enabled
         }
         atom3->addForce(a,forceComp);
     }
 }
+
+//double KohenThreeParticleForce::force(double Bijk, double drij, double dfdrij, double drik, double dfdrik, double p, double f, double dtheta, double dpdtheta)
+//{
+//    return -Bijk * ((drij * dfdrij + drik * dfdrik) * p + f * (dtheta * dpdtheta));
+//}

@@ -16,5 +16,6 @@ OTHER_FILES += \
     configs/high_density_15600K.yaml \
     configs/high_density_156K.yaml \
     configs/high_density_14K.yaml \
-    configs/low_density_15600K.yaml
+    configs/low_density_15600K.yaml \
+    configs/low_density_small_system_15600K.yaml
 

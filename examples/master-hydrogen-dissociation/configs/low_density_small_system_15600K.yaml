@@ -1,0 +1,4 @@
+atom_count: 8    #
+density:        19.121  # kg / m3
+temperature:    15600.0    # K
+timestep: 1.0
