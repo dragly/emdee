@@ -119,17 +119,24 @@ print "----"
 
 figure()
 plot(binEdges[:-1], totalBins)
-xlabel(r"$r\ [a_0]$")
+xlabel(r"$r$")
 ylabel(r"$g(r)$")
 max_bin_size = float(args.max)
 if max_bin_size > min(sideLengths) / 2.0:
     max_bin_size = min(sideLengths) / 2.0
 else:
     ax = gca()
-    ax.set_xticks(range(0,int(max_bin_size+1),1))
-
+    ax.set_xticks(range(0,int(max_bin_size+1),2))
+    
 xlim(0,max_bin_size)
 ylim(0,5.0)
+
+ax = gca()
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.get_xaxis().tick_bottom()
+ax.get_yaxis().tick_left()
+
 
 if args.id != "tmp":
     from sumatra.projects import load_project

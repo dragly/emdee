@@ -17,7 +17,8 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 #ifdef MD_USE_GLOG
-    FLAGS_log_dir = "/dev/null";
+//    FLAGS_log_dir = "/dev/null";
+    FLAGS_minloglevel = 100;
     google::InitGoogleLogging(argv[0]);
 #endif
 #ifdef MD_USE_MPI
