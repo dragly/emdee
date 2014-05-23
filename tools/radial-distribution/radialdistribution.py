@@ -124,11 +124,12 @@ ylabel(r"$g(r)$")
 max_bin_size = float(args.max)
 if max_bin_size > min(sideLengths) / 2.0:
     max_bin_size = min(sideLengths) / 2.0
-else:
-    ax = gca()
-    ax.set_xticks(range(0,int(max_bin_size+1),2))
+
+tick_range = arange(0,int(max_bin_size+1),2)
+ax = gca()
+ax.set_xticks(tick_range)
     
-xlim(0,max_bin_size)
+xlim(0,tick_range.max())
 ylim(0,5.0)
 
 ax = gca()
