@@ -56,7 +56,7 @@ Rectangle {
             sortPoints: MolecularDynamics.BackToFront
             effect: Effect {
                 blending: true
-                texture: "particle.png"
+                texture: "sphere3-purple.png"
             }
             targetTemperature: tools.thermostat.targetTemperature
             useThermostat: tools.thermostat.thermostatEnabled
