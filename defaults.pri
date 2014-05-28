@@ -27,7 +27,7 @@ LIBS += -larmadillo -llapack -lblas
 
 mpi {
     DEFINES += MD_USE_MPI
-    DEFINES+=USE_MPI
+    DEFINES += USE_MPI
 
     QMAKE_CXX = mpicxx
     QMAKE_CXX_RELEASE = $$QMAKE_CXX

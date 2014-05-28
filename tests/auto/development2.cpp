@@ -15,8 +15,9 @@
 #include "utils/logging.h"
 #include "force/threeparticleforce.h"
 #include "integrator/velocityverletintegrator.h"
+#ifdef MD_USE_MPI
 #include "filemanager.h"
-#include <boost/mpi.hpp>
+#endif
 
 SUITE(Development2) {
     TEST(Dummy) {

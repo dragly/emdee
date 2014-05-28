@@ -82,10 +82,14 @@ HEADERS += \
 
 mpi {
     SOURCES += \
-        processor.cpp \
+        processor_mpi.cpp \
         filemanager.cpp
-
     HEADERS +=\
         processor.h \
         filemanager.h
+} else {
+    SOURCES += \
+        processor_nompi.cpp
+    HEADERS +=\
+        processor.h
 }

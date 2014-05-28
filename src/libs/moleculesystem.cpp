@@ -12,8 +12,8 @@
 
 #ifdef USE_MPI
 #include <filemanager.h>
-#include <processor.h>
 #endif
+#include <processor.h>
 #include <progressreporter.h>
 #include <force/threeparticleforce.h>
 
@@ -38,9 +38,7 @@ MoleculeSystem::MoleculeSystem() :
     m_step(0),
     m_time(0),
     m_skipInitialize(false),
-    #ifdef USE_MPI
     m_processor(new Processor(this)),
-    #endif
     m_isCalculatePressureEnabled(true),
     m_isCalculatePotentialEnabled(true),
     m_saveEveryNSteps(1),
@@ -393,7 +391,9 @@ void MoleculeSystem::simulate()
                  << " PE: " << m_potentialEnergyTotal
                  << " KE: " << m_kineticEnergyTotal
                  << " T: " << m_temperature
+        #ifdef MD_USE_MPI
                  << " run time: " << setprecision(5) << timer.elapsed()
+        #endif
                  << endl;
         }
 #ifdef USE_MPI

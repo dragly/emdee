@@ -48,11 +48,12 @@ MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
     integrator->setTimeStep(0.01);
     m_moleculeSystem->setIntegrator(integrator);
     m_moleculeSystem->setTwoParticleForce(force);
+    m_moleculeSystem->setPeriodicity(true, true, true);
     // system.setPotentialConstant(potentialConstant);
     mat lastBoundaries = generator.lastBoundaries();
-    lastBoundaries(1,0) += 5;
-    lastBoundaries(1,1) += 5;
-    lastBoundaries(1,2) += 5;
+    lastBoundaries(1,0) += 2;
+    lastBoundaries(1,1) += 2;
+    lastBoundaries(1,2) += 2;
     m_moleculeSystem->setBoundaries(lastBoundaries);
     m_moleculeSystem->addAtoms(atoms);
     m_moleculeSystem->setupCells();

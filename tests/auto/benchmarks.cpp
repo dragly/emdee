@@ -17,8 +17,8 @@
 #include "force/threeparticleforce.h"
 #include "integrator/velocityverletintegrator.h"
 #include "filemanager.h"
-#include <boost/mpi.hpp>
 
+#ifdef MD_USE_MPI
 SUITE(Benchmark) {
     TEST(Dummy) {
 
@@ -96,3 +96,5 @@ SUITE(Benchmark) {
         cout << "Time Kohen 3-body: " << timer.elapsed() << endl;
     }
 }
+
+#endif

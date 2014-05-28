@@ -321,7 +321,7 @@ string FileManager::lammpsFileNameFromStep(int step) {
 }
 
 int FileManager::collectNAtoms() {
-#ifdef USE_MPI
+#ifdef MD_USE_MPI
     mpi::communicator world;
     if(m_moleculeSystem->processor()->rank() == 0) {
         int nAtomsSum = m_moleculeSystem->processor()->nAtoms();

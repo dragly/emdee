@@ -12,6 +12,7 @@
 #include <locale>
 #include <vector>
 #include <string>
+#include <iostream>
 
 #ifdef MD_USE_MPI
 #include <boost/mpi.hpp>

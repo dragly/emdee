@@ -200,9 +200,9 @@ protected:
 
     double m_kineticEnergyTotal;
     double m_potentialEnergyTotal;
+    Processor* m_processor;
 #ifdef USE_MPI
     FileManager *m_fileManager;
-    Processor* m_processor;
     mpi::communicator world;
 #endif
     bool m_isCalculatePressureEnabled;
