@@ -253,9 +253,13 @@ void ConfigurationParser::runConfiguration(string configurationFileName) {
             double energyConstantLJ = 0;
             forces[i].lookupValue("energyConstant", energyConstantLJ);
             energyConstantLJ /= unitEnergy;
+            double cutoffRadius = 0;
+            forces[i].lookupValue("cutoffRadius", cutoffRadius);
+            cutoffRadius /= unitLength;
             LennardJonesForce* force = new LennardJonesForce();
             force->setPotentialConstant(potentialConstantLJ);
             force->setEnergyConstant(energyConstantLJ);
+            force->setCutoffRadius(cutoffRadius);
             m_moleculeSystem->setTwoParticleForce(force);
         }
     }
