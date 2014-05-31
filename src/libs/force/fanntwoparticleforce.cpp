@@ -91,7 +91,7 @@ void FannTwoParticleForce::addNetwork(const AtomType& atomType1, const AtomType&
 
 void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2)
 {
-    calculateAndApplyForce(atom1, atom2, m_zeroVector);
+    TwoParticleForce::calculateAndApplyForce(atom1, atom2);
 }
 
 bool printed = false;
@@ -172,7 +172,7 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
     atom1->addForce(1, -r12.y() * dEdr12Normalized);
     atom1->addForce(2, -r12.z() * dEdr12Normalized);
 
-    if(m_isNewtonsThirdLawEnabled) {
+    if(isNewtonsThirdLawEnabled()) {
         atom2->addForce(0, r12.x() * dEdr12Normalized);
         atom2->addForce(1, r12.y() * dEdr12Normalized);
         atom2->addForce(2, r12.z() * dEdr12Normalized);

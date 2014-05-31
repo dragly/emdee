@@ -20,7 +20,7 @@ SUITE(TwoParticleForceCount) {
     public:
         virtual void calculateAndApplyForce(Atom *atom1, Atom *atom2)
         {
-            calculateAndApplyForce(atom1, atom2, m_zeroVector);
+            TwoParticleForce::calculateAndApplyForce(atom1, atom2);
         }
         virtual void calculateAndApplyForce(Atom *atom1, Atom *atom2, const Vector3 &atom2Offset)
         {

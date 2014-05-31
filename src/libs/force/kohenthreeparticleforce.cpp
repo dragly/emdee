@@ -10,7 +10,7 @@ KohenThreeParticleForce::KohenThreeParticleForce()
 
 void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3)
 {
-    calculateAndApplyForce(atom1, atom2, atom3, m_zeroVector, m_zeroVector);
+    calculateAndApplyForce(atom1, atom2, atom3, Vector3::zeroVector(), Vector3::zeroVector());
 }
 
 void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3, const Vector3 &atom2Offset, const Vector3 &atom3Offset)
@@ -79,7 +79,7 @@ void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, A
         drij = -rij[a] * invLij;
         drik = -rik[a] * invLik;
         double forceComp = drij * dPotentialdrij + drik * dPotentialdrik + dtheta * dPotentialdtheta;
-        if(!m_isNewtonsThirdLawEnabled) {
+        if(!isNewtonsThirdLawEnabled()) {
             forceComp *= 0.5; // We count twice if Newton's third is not enabled
         }
         atom1->addForce(a, forceComp);
@@ -95,7 +95,7 @@ void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, A
                     ) * invSqrtDotOverLenghtSquared;
         drij = rij[a] * invLij;
         double forceComp = drij * dPotentialdrij + drik * dPotentialdrik + dtheta * dPotentialdtheta;
-        if(!m_isNewtonsThirdLawEnabled) {
+        if(!isNewtonsThirdLawEnabled()) {
             forceComp *= 0.5; // We count twice if Newton's third is not enabled
         }
         atom2->addForce(a, forceComp);
@@ -112,7 +112,7 @@ void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, A
                     ) * invSqrtDotOverLenghtSquared;
         drik = rik[a] * invLik;
         double forceComp = drij * dPotentialdrij + drik * dPotentialdrik + dtheta * dPotentialdtheta;
-        if(!m_isNewtonsThirdLawEnabled) {
+        if(!isNewtonsThirdLawEnabled()) {
             forceComp *= 0.5; // We count twice if Newton's third is not enabled
         }
         atom3->addForce(a,forceComp);

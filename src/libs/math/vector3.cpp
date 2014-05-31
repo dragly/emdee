@@ -4,6 +4,8 @@
 
 #include "vector3.h"
 
+Vector3 Vector3::m_zeroVectorPointer = Vector3(0,0,0);
+
 std::ostream& operator<< (std::ostream &out, const Vector3 &vector)
 {
     out << vector.mem_local[0] << ", " << vector.mem_local[1] << ", " << vector.mem_local[2];

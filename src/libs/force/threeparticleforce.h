@@ -29,11 +29,13 @@ public:
     bool isCalculatePressureEnabled();
     void setCalculatePotentialEnabled(bool enable);
     bool isCalculatePotentialEnabled();
-protected:
+    double cutoffRadius() const;
+    void setCutoffRadius(double cutoffRadius);
+private:
     bool m_isCalculatePotentialEnabled;
     bool m_isCalculatePressureEnabled;
     bool m_isNewtonsThirdLawEnabled;
-    Vector3 m_zeroVector;
+    double m_cutoffRadius;
 };
 
 inline void ThreeParticleForce::setNewtonsThirdLawEnabled(bool enable) {

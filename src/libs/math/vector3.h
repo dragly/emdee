@@ -55,11 +55,13 @@ public:
     // Statics
     static Vector3 ones();
     static Vector3 createZeros();
+    static const Vector3 zeroVector();
 
     static double dot(const Vector3 &vector1, const Vector3 &vector2);
     static double distanceSquared(const Vector3 &vector1, const Vector3 &vector2);
     static double distance(const Vector3 &vector1, const Vector3 &vector2);
 private:
+    static Vector3 m_zeroVectorPointer;
 #ifdef USE_MPI
     friend class boost::serialization::access;
     template<class Archive>
@@ -180,6 +182,11 @@ inline Vector3& Vector3::operator/= (double value)
     this->mem_local[1] /= value;
     this->mem_local[2] /= value;
     return *this;
+}
+
+inline const Vector3 Vector3::zeroVector()
+{
+    return Vector3(0,0,0);
 }
 
 inline Vector3 operator*(const Vector3 &vector1, double value)

@@ -90,7 +90,13 @@ const irowvec &MoleculeSystemCell::indices() const
 void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
 {
     TwoParticleForce* twoParticleForce = m_moleculeSystem->twoParticleForce();
-    bool needsNeighborLists = (m_moleculeSystem->threeParticleForce() != NULL);
+    bool needsNeighborLists = false;
+    double threeParticleForceCutoffRadius = 0.0;
+    double threeParticleForceCutoffRadiusSquared = 0.0;
+    if(m_moleculeSystem->threeParticleForce()) {
+        threeParticleForceCutoffRadius = m_moleculeSystem->threeParticleForce()->cutoffRadius();
+        threeParticleForceCutoffRadiusSquared = threeParticleForceCutoffRadius * threeParticleForceCutoffRadius;
+    }
     // Single particle forces
     for(SingleParticleForce* singleParticleForce : m_moleculeSystem->singleParticleForces()) {
         for(Atom* atom : m_atoms) {
@@ -139,16 +145,18 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
                     if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
                         continue;
                     }
-                    // Skip if outside cutoff radius
                     double distanceSquared = Vector3::distanceSquared(atom1->position(), atom2->position() + neighborOffset);
-                    if(distanceSquared > cutoffRadiusSquared) {
-                        continue;
-                    }
-                    if(needsNeighborLists) {
+                    // Add atom2 to atom1's neighbor list, and vice versa (only if neighbor
+                    // cell isn't a copy of this)
+                    if(needsNeighborLists && distanceSquared < threeParticleForceCutoffRadiusSquared) {
                         atom1->addNeighborAtom(atom2, &neighborOffset);
                         if(!neighborIsCopyOfThis) {
                             atom2->addNeighborAtom(atom1, &negativeNeighborOffset);
                         }
+                    }
+                    // Skip if outside cutoff radius
+                    if(distanceSquared > cutoffRadiusSquared) {
+                        continue;
                     }
 
                     // No reason to calculate forces between atoms on two ghost cells.

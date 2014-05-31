@@ -54,15 +54,6 @@ void FannThreeParticleForce::warnAboutMissingNetwork()
         m_hasWarnedAboutMissingNetwork = true;
     }
 }
-double FannThreeParticleForce::cutoffRadius() const
-{
-    return m_cutoffRadius;
-}
-
-void FannThreeParticleForce::setCutoffRadius(double cutoffRadius)
-{
-    m_cutoffRadius = cutoffRadius;
-}
 
 
 void FannThreeParticleForce::loadNetwork(const std::string& fileName,
@@ -101,7 +92,7 @@ void FannThreeParticleForce::loadNetwork(const std::string& fileName,
 
 void FannThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3)
 {
-    calculateAndApplyForce(atom1, atom2, atom3, m_zeroVector, m_zeroVector);
+    calculateAndApplyForce(atom1, atom2, atom3, Vector3::zeroVector(), Vector3::zeroVector());
 }
 
 //fann_type* FannThreeParticleForce::testForce(fann_type* input) {

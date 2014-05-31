@@ -45,7 +45,7 @@ public:
     }
 
     void setLocal(bool localCell);
-    bool local() const;
+    bool isLocal() const;
 protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;

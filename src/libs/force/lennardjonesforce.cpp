@@ -13,7 +13,7 @@ LennardJonesForce::LennardJonesForce() :
 
 
 void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2) {
-    return calculateAndApplyForce(atom1, atom2, zeroVector);
+    TwoParticleForce::calculateAndApplyForce(atom1, atom2);
 }
 
 void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const Vector3& atom2Offset)
@@ -52,7 +52,7 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const V
     //    atom1->m_force += tmpForce * factor;
 
     // Acting directly on elements
-    if(m_isNewtonsThirdLawEnabled) {
+    if(isNewtonsThirdLawEnabled()) {
         atom2->addForce(0, x * factor);
         atom2->addForce(1, y * factor);
         atom2->addForce(2, z * factor);
@@ -61,19 +61,19 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const V
     atom1->addForce(1, -y * factor);
     atom1->addForce(2, -z * factor);
 
-    if(m_isCalculatePotentialEnabled) {
+    if(isCalculatePotentialEnabled()) {
         // Potential
         double tmpPotential = eps4 * (sigmaOverR12 - sigmaOverR6);
-        if(m_isNewtonsThirdLawEnabled) {
+        if(isNewtonsThirdLawEnabled()) {
             atom2->addPotential(0.5 * tmpPotential);
         }
         atom1->addPotential(0.5 * tmpPotential);
     }
 
-    if(m_isCalculatePressureEnabled) {
+    if(isCalculatePressureEnabled()) {
         // Pressure
         double pressure = factor * rSquared; // dot product
-        if(m_isNewtonsThirdLawEnabled) {
+        if(isNewtonsThirdLawEnabled()) {
             atom2->addLocalPressure(0.5 * pressure);
         }
         atom1->addLocalPressure(0.5 * pressure);

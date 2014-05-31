@@ -36,7 +36,7 @@ int VashishtaTwoParticleForce::comboHash(int v[2]) {
 
 void VashishtaTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2)
 {
-    calculateAndApplyForce(atom1, atom2, m_zeroVector);
+    TwoParticleForce::calculateAndApplyForce(atom1, atom2);
 }
 
 
@@ -88,12 +88,12 @@ void VashishtaTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2,
 
     double potential = potentialH + potentialCoulomb + potentialExp;
 
-    if(m_isNewtonsThirdLawEnabled) {
+    if(isNewtonsThirdLawEnabled()) {
         atom2->addForce(force);
     }
     atom1->addForce(-force);
 
-    if(m_isNewtonsThirdLawEnabled) {
+    if(isNewtonsThirdLawEnabled()) {
         atom2->addPotential(0.5 * potential);
     }
     atom1->addPotential(0.5 * potential);

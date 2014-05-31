@@ -34,11 +34,10 @@ public:
     double cutoffRadius() const;
     void setCutoffRadius(double cutoffRadius);
 
-protected:
+private:
     bool m_isNewtonsThirdLawEnabled;
     bool m_isCalculatePressureEnabled;
     bool m_isCalculatePotentialEnabled;
-    Vector3 m_zeroVector;
     double m_cutoffRadius;
 };
 

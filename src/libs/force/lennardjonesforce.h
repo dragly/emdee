@@ -8,8 +8,8 @@ class LennardJonesForce : public TwoParticleForce
 public:
     LennardJonesForce();
 
-    void calculateAndApplyForce(Atom *atom1, Atom *atom2);
-    void calculateAndApplyForce(Atom* atom1, Atom* atom2, const Vector3 &atom2Offset);
+    virtual void calculateAndApplyForce(Atom *atom1, Atom *atom2);
+    virtual void calculateAndApplyForce(Atom* atom1, Atom* atom2, const Vector3 &atom2Offset);
 
     void setPotentialConstant(double potentialConstant);
     void setEnergyConstant(double energyConstant);
