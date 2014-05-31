@@ -90,6 +90,7 @@ const irowvec &MoleculeSystemCell::indices() const
 void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
 {
     TwoParticleForce* twoParticleForce = m_moleculeSystem->twoParticleForce();
+    bool needsNeighborLists = (m_moleculeSystem->threeParticleForce() != NULL);
     // Single particle forces
     for(SingleParticleForce* singleParticleForce : m_moleculeSystem->singleParticleForces()) {
         for(Atom* atom : m_atoms) {
@@ -124,25 +125,30 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
             const vector<Atom*>& neighborCellAtoms = neighborCell->atoms();
             for(Atom* atom1 : m_atoms) {
                 for(Atom* atom2 : neighborCellAtoms) {
-
-                    // Newton's third law implmented so that each atom is responsible for
+                    // Newton's third law is implemented on the next line.
+                    // It works so that each atom is responsible for
                     // calculating and applying forces to all atoms with a higher atom ID
                     // This is an alternative to only caring about neighbor cells in a
-                    // certain direction. Note above exception when neighbor is the same as this,
+                    // certain direction.
+                    // Note the above exception when the neighbor is the same as this,
                     // but still a neighbor.
                     if(atom1->id() >= atom2->id() && !neighborIsCopyOfThis) {
                         continue;
                     }
+                    // Skip if position of either is fixed
                     if(atom1->isPositionFixed() && atom2->isPositionFixed()) {
                         continue;
                     }
+                    // Skip if outside cutoff radius
                     double distanceSquared = Vector3::distanceSquared(atom1->position(), atom2->position() + neighborOffset);
                     if(distanceSquared > cutoffRadiusSquared) {
                         continue;
                     }
-                    atom1->addNeighborAtom(atom2, &neighborOffset);
-                    if(!neighborIsCopyOfThis) {
-                        atom2->addNeighborAtom(atom1, &negativeNeighborOffset);
+                    if(needsNeighborLists) {
+                        atom1->addNeighborAtom(atom2, &neighborOffset);
+                        if(!neighborIsCopyOfThis) {
+                            atom2->addNeighborAtom(atom1, &negativeNeighborOffset);
+                        }
                     }
 
                     // No reason to calculate forces between atoms on two ghost cells.
