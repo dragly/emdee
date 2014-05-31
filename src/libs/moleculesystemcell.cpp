@@ -44,6 +44,7 @@ void MoleculeSystemCell::addNeighbor(MoleculeSystemCell *cell, const Vector3 &of
 {
     m_neighborCells.push_back(cell);
     m_neighborOffsets.push_back(offset);
+    m_negativeNeighborOffsets.push_back(-offset);
     m_neighborDirections.push_back(direction);
 }
 
@@ -100,7 +101,8 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
     if(twoParticleForce) {
         double cutoffRadiusSquared = twoParticleForce->cutoffRadius()*twoParticleForce->cutoffRadius();
         twoParticleForce->setNewtonsThirdLawEnabled(true);
-        for(uint iNeighbor = 0; iNeighbor < m_neighborCells.size(); iNeighbor++) {
+        uint neighborCellCount = m_neighborCells.size();
+        for(uint iNeighbor = 0; iNeighbor < neighborCellCount; iNeighbor++) {
             MoleculeSystemCell* neighborCell = m_neighborCells[iNeighbor];
             // No reason to calculate forces between atoms on two ghost cells.
             // This will also skip internal calculations on ghost cells.
@@ -109,18 +111,19 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
             if(!m_moleculeSystem->threeParticleForce() && !m_isLocalCell && !neighborCell->local()) {
                 continue;
             }
-            const Vector3& neighborOffset = m_neighborOffsets[iNeighbor];
-            Vector3 neighborOffsetNegative = -m_neighborOffsets[iNeighbor];
+            Vector3 &neighborOffset = (m_neighborOffsets[iNeighbor]);
+            double neighborOffsetSquared = Vector3::dot(neighborOffset, neighborOffset);
+            Vector3 &negativeNeighborOffset = (m_negativeNeighborOffsets[iNeighbor]);
+
+            // Exception to ID check below is when the neighbor cell is a copy of this,
+            // but still a neighbor. This results in a situations where
+            // the atoms will have the same IDs, even though we want to
+            // calculate their forces
+            bool neighborIsCopyOfThis = (this == neighborCell && neighborOffsetSquared > 1e-12);
+
             const vector<Atom*>& neighborCellAtoms = neighborCell->atoms();
             for(Atom* atom1 : m_atoms) {
                 for(Atom* atom2 : neighborCellAtoms) {
-                    // Exception to ID check below is when the neighbor cell is a copy of this,
-                    // but still a neighbor. This results in a situations where
-                    // the atoms will have the same IDs, even though we want to
-                    // calculate their forces
-                    bool neighborIsCopyOfThis = (this == neighborCell && (neighborOffset.x() != 0.0
-                                                                          || neighborOffset.y() != 0.0
-                                                                          || neighborOffset.z() != 0.0));
 
                     // Newton's third law implmented so that each atom is responsible for
                     // calculating and applying forces to all atoms with a higher atom ID
@@ -137,9 +140,9 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
                     if(distanceSquared > cutoffRadiusSquared) {
                         continue;
                     }
-                    atom1->addNeighborAtom(atom2, neighborOffset);
+                    atom1->addNeighborAtom(atom2, &neighborOffset);
                     if(!neighborIsCopyOfThis) {
-                        atom2->addNeighborAtom(atom1, neighborOffsetNegative);
+                        atom2->addNeighborAtom(atom1, &negativeNeighborOffset);
                     }
 
                     // No reason to calculate forces between atoms on two ghost cells.

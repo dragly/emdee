@@ -50,6 +50,7 @@ protected:
     mat geometry;
     vector<MoleculeSystemCell*> m_neighborCells;
     vector<Vector3> m_neighborOffsets;
+    vector<Vector3> m_negativeNeighborOffsets;
     vector<irowvec> m_neighborDirections;
 
     int m_nDimensions;
