@@ -31,7 +31,7 @@ MoleculeSystem::MoleculeSystem() :
     m_isSaveEnabled(false),
     m_isOutputEnabled(true),
     m_areCellsSetUp(false),
-    m_temperature(1.0),
+    m_temperature(0.0),
     m_averageDisplacement(0.0),
     m_averageSquareDisplacement(0.0),
     m_pressure(0.0),
