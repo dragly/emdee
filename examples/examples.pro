@@ -1,4 +1,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    master-hydrogen-dissociation
+    master-hydrogen-dissociation \
+    argon-crystallization

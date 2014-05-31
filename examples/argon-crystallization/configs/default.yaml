@@ -1,0 +1,3 @@
+boiling_temperature:    360.0    # K
+temperature:    20.0    # K
+timestep: 89.71 # hbar / Eh
