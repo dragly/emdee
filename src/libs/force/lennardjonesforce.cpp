@@ -72,7 +72,7 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const V
 
     if(isCalculatePressureEnabled()) {
         // Pressure
-        double pressure = factor * rSquared; // dot product
+        double pressure = -factor * rSquared; // dot product
         if(isNewtonsThirdLawEnabled()) {
             atom2->addLocalPressure(0.5 * pressure);
         }
