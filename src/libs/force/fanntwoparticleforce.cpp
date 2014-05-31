@@ -128,7 +128,6 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
     double dEdr12 = 0.0;
 
     double potentialEnergy = 0;
-    bool tailCorrectionUsed = false;
     if(l12 > network->tailCorrectionMin) {
         // TODO: Remove duplicate code
         fann_type input[2];
@@ -146,7 +145,6 @@ void FannTwoParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, cons
         dEdr12 = potentialEnergy * network->tailCorrectionDampingFactorDerivative(l12) + dEdr12 * network->tailCorrectionDampingFactor(l12);
 //        potentialEnergy = network->tailCorrectionDampingFactor(l12) * network->tailCorrectionMinEnergy;
         potentialEnergy = network->tailCorrectionDampingFactor(l12) * potentialEnergy;
-        tailCorrectionUsed = true;
 //        cout << potentialEnergy << endl;
 //        cout << "Tail!" << endl;q
     } else if(l12 < network->headCorrectionMax) {
@@ -270,7 +268,6 @@ double FannTwoParticleNetwork::headCorrectionEnergy(double l12) const
     double x = l12;
     double x2 = x*x;
     double x3 = x2*x;
-    double x4 = x2*x2;
     double x0_2 = x0*x0;
     double x0_3 = x0*x0_2;
     double x0_4 = x0_2*x0_2;

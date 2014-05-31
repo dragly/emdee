@@ -15,6 +15,7 @@ void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, A
 
 void KohenThreeParticleForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, Atom *atom3, const Vector3 &atom2Offset, const Vector3 &atom3Offset)
 {
+    (void)atom3Offset;
     double rc = 5.291233148782173; // 2.8 Å
     double rcSquared = rc*rc;
     double shield = 1e-12; // just to avoid nan from 0 / 0 in dtheta and acos
