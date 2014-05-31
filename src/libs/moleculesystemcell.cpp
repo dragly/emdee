@@ -109,7 +109,7 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
             // This will also skip internal calculations on ghost cells.
             // This skip may only be performed if there are no need for
             // listing neighbors, as it is when three-particle forces are in use
-            if(!m_moleculeSystem->threeParticleForce() && !m_isLocalCell && !neighborCell->local()) {
+            if(!needsNeighborLists && !m_isLocalCell && !neighborCell->isLocal()) {
                 continue;
             }
             Vector3 &neighborOffset = (m_neighborOffsets[iNeighbor]);
@@ -154,7 +154,7 @@ void MoleculeSystemCell::updateTwoParticleForceAndNeighborAtoms()
                     // No reason to calculate forces between atoms on two ghost cells.
                     // This will also skip internal calculations on ghost cells.
                     // We had to add neighbors above, however
-                    if(!m_isLocalCell && !neighborCell->local()) {
+                    if(!m_isLocalCell && !neighborCell->isLocal()) {
                         continue;
                     }
                     // Disable Newton's third law if we are acting on a copy of our own cell
@@ -221,7 +221,7 @@ void MoleculeSystemCell::setLocal(bool localCell)
     m_isLocalCell = localCell;
 }
 
-bool MoleculeSystemCell::local() const
+bool MoleculeSystemCell::isLocal() const
 {
     return m_isLocalCell;
 }
