@@ -307,9 +307,13 @@ string FileManager::headerFileNameFromStep(int step) {
     unsigned found = m_outFileName.find_last_of("/\\");
     string outPath = m_outFileName.substr(0,found);
     boost::filesystem::create_directories(outPath);
+
     size_t starPos = m_outFileName.find("*");
+    if(starPos != string::npos) {
+        headerFileName.replace(starPos, 1, outStepName.str());
+    }
+
     headerFileName.append(processorName());
-    headerFileName.replace(starPos, 1, outStepName.str());
     return headerFileName;
 }
 
