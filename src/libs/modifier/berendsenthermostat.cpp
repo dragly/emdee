@@ -34,10 +34,24 @@ void BerendsenThermostat::apply()
     }
 }
 
-void BerendsenThermostat::setTargetTemperature(double targetTemperature) {
-    m_targetTemperature = targetTemperature;
+double BerendsenThermostat::targetTemperature() const
+{
+    return m_targetTemperature;
 }
 
-void BerendsenThermostat::setRelaxationTime(double relaxationTime) {
+void BerendsenThermostat::setTargetTemperature(double targetTemperature)
+{
+    m_targetTemperature = targetTemperature;
+}
+double BerendsenThermostat::relaxationTime() const
+{
+    return m_relaxationTime;
+}
+
+void BerendsenThermostat::setRelaxationTime(double relaxationTime)
+{
     m_relaxationTime = relaxationTime;
 }
+
+
+

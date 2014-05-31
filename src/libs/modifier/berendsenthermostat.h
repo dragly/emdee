@@ -10,8 +10,12 @@ public:
 
     void apply();
 
+    double targetTemperature() const;
     void setTargetTemperature(double targetTemperature);
+
+    double relaxationTime() const;
     void setRelaxationTime(double relaxationTime);
+
 protected:
     double m_targetTemperature;
     double m_relaxationTime;
