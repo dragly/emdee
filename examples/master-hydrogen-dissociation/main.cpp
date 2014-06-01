@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
     FileManager fileManager(&system);
     fileManager.setOutFileName(argv[2]);
     fileManager.setUnitLength(a0);
-    fileManager.setUnitMass(mp);
+    fileManager.setUnitMass(me);
     fileManager.setUnitTemperature(au_T);
     fileManager.setUnitTime(au_t);
     system.setFileManager(&fileManager);

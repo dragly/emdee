@@ -76,7 +76,7 @@ for percentage in array([0.9]):
     potentialEnergiesCutoff = potentialEnergies[-cutoff:]
     cTemperaturesCutoff = cTemperatures[-cutoff:]
     pressuresCutoff = pressures[-cutoff:]
-    nMovingAverage = 1
+    nMovingAverage = 100
     
     
     electronVolt = 1 #1.6e-19 # J
@@ -95,7 +95,7 @@ for percentage in array([0.9]):
     unitTemperature = 119.74
     #temperatures = kineticEnergies / (3. / 2. * len(atoms) * boltzmannConstant)
     #plot(times, temperatures, label="Temperature")
-    plot(picoTimes, cTemperaturesCutoff, label="Temperature")
+    plot(picoTimes[nMovingAverage-1:], movavg(cTemperaturesCutoff, nMovingAverage), label="Temperature")
 #        plot(picoTimes[nMovingAverage - 1:], movavg(cTemperaturesCutoff, nMovingAverage), label="Moving average")
     xlabel("t [ps]")
     ylabel(r"temperature [K]")
@@ -105,7 +105,7 @@ for percentage in array([0.9]):
     
     # Pressure plot
     figure()
-    plot(picoTimes, pressuresCutoff, label="Pressure")
+    plot(picoTimes[nMovingAverage-1:], movavg(pressuresCutoff, nMovingAverage), label="Pressure")
     xlabel("t [ps]")
     ylabel(r"pressure [Pa]")
     legend()
@@ -114,7 +114,7 @@ for percentage in array([0.9]):
     
     # Pressure temperature plot
     figure()
-    scatter(cTemperaturesCutoff, pressuresCutoff, label="Pressure vs temperature")
+    scatter(movavg(cTemperaturesCutoff, nMovingAverage), movavg(pressuresCutoff, nMovingAverage), label="Pressure vs temperature")
     xlabel(r"temperature [K]")
     ylabel(r"pressure [Pa]")
     legend()
