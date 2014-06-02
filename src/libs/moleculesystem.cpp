@@ -391,6 +391,7 @@ void MoleculeSystem::simulate()
                  << " PE: " << m_potentialEnergyTotal
                  << " KE: " << m_kineticEnergyTotal
                  << " T: " << m_temperature
+                 << " P: " << m_pressure
         #ifdef MD_USE_MPI
                  << " run time: " << setprecision(5) << timer.elapsed()
         #endif
