@@ -40,9 +40,9 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const V
     double r = sqrt(rSquared) + m_shift;
     rSquared = r*r;
     sigmaSquaredOverRSquared = sigmaSquared/rSquared;
-    double sigmaOverR6 = sigmaSquaredOverRSquared * sigmaSquaredOverRSquared * sigmaSquaredOverRSquared;
-    double sigmaOverR12 = sigmaOverR6 * sigmaOverR6;
-    double factor = ((eps24) / (rSquared)) * (2 * sigmaOverR12 - sigmaOverR6);
+    double sigma6OverR6 = sigmaSquaredOverRSquared * sigmaSquaredOverRSquared * sigmaSquaredOverRSquared;
+    double sigma12OverR12 = sigma6OverR6 * sigma6OverR6;
+    double factor = ((eps24) / (rSquared)) * (2 * sigma12OverR12 - sigma6OverR6);
 
     // The following is the same as
     //    atom2->m_force -= tmpForce * factor;
@@ -63,7 +63,7 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const V
 
     if(isCalculatePotentialEnabled()) {
         // Potential
-        double tmpPotential = eps4 * (sigmaOverR12 - sigmaOverR6);
+        double tmpPotential = eps4 * (sigma12OverR12 - sigma6OverR6);
         if(isNewtonsThirdLawEnabled()) {
             atom2->addPotential(0.5 * tmpPotential);
         }
@@ -71,12 +71,13 @@ void LennardJonesForce::calculateAndApplyForce(Atom *atom1, Atom *atom2, const V
     }
 
     if(isCalculatePressureEnabled()) {
-        // Pressure
-        double pressure = -factor * rSquared; // dot product
+        // Virial pressure on particle 1 from 2
+        double pressure = factor * rSquared; // Fij * rij
+        // For better visualization, half the pressure is added to atom1 and atom2
+        atom1->addLocalPressure(0.5 * pressure);
         if(isNewtonsThirdLawEnabled()) {
             atom2->addLocalPressure(0.5 * pressure);
         }
-        atom1->addLocalPressure(0.5 * pressure);
     }
 }
 
