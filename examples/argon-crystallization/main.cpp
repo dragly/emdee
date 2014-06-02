@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
     LennardJonesForce lennardJonesForce;
     lennardJonesForce.setCalculatePotentialEnabled(true);
     lennardJonesForce.setCalculatePressureEnabled(true);
-    lennardJonesForce.setCutoffRadius(2.3*sigma);
+    lennardJonesForce.setCutoffRadius(cutoffRadius);
     lennardJonesForce.setPotentialConstant(sigma);
     lennardJonesForce.setEnergyConstant(epsilon);
     system.setTwoParticleForce(&lennardJonesForce);
