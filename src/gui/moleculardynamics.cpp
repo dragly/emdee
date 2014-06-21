@@ -120,14 +120,16 @@ void MolecularDynamics::drawItem(QGLPainter *painter)
         }
     }
 
+    double scale = 1.4;
+
     QVector3D a;
     QVector3D b;
     QVector3D c;
     QVector3D d;
-    QVector3D aOffset =  - right * 0.5 - up * 0.5;
-    QVector3D bOffset =  right * 0.5 - up * 0.5;
-    QVector3D cOffset =  right * 0.5 + up * 0.5;
-    QVector3D dOffset =  - right * 0.5 + up * 0.5;
+    QVector3D aOffset =  - right * scale - up * scale;
+    QVector3D bOffset =  right * scale - up * scale;
+    QVector3D cOffset =  right * scale + up * scale;
+    QVector3D dOffset =  - right * scale + up * scale;
     QVector2D ta(0,0);
     QVector2D tb(0,1);
     QVector2D tc(1,1);
