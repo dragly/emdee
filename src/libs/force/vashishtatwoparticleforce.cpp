@@ -2,6 +2,12 @@
 
 #include <atom.h>
 
+/*!
+ * \class VashishtaTwoParticleForce
+ * \brief The VashishtaTwoParticleForce class defines the interaction between
+ * two particles in the Vashishta-Kalia-Rino-Ebbsjø potential.
+ */
+
 VashishtaTwoParticleForce::VashishtaTwoParticleForce() :
     TwoParticleForce(),
     nParticleTypes(2),

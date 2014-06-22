@@ -1,6 +1,12 @@
 #include "range.h"
 
 /*!
+ * \class Range
+ * \brief The Range class defines a simple mathematical range used by the
+ * Processor class.
+ */
+
+/*!
   * Dummy range object with no data.
   */
 Range::Range() :

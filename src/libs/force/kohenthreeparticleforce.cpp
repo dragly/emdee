@@ -4,6 +4,12 @@
 
 #include <cmath>
 
+/*!
+ * \class KohenThreeParticleForce
+ * \brief The KohenThreeParticleForce class calculates the force and potential
+ * based on the Kohen-Tully-Stillinger potential.
+ */
+
 KohenThreeParticleForce::KohenThreeParticleForce()
 {
 }

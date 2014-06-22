@@ -8,6 +8,13 @@
 #include <doublefann.h>
 #include <iomanip>
 
+/*!
+ * \class FannThreeParticleForce
+ * \brief The FannThreeParticleForce class loads a pre-trained FANN network and uses this
+ * to calculate three-particle forces between a given set of atoms.
+ */
+
+
 double FannThreeParticleNetwork::rescaleDistance12(double r12) const {
         return (r12 - r12Min) / (r12Max - r12Min) * 0.8 + 0.1;
 }

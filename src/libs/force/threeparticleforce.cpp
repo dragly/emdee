@@ -1,5 +1,11 @@
 #include "threeparticleforce.h"
 
+/*!
+ * \class ThreeParticleForce
+ * \brief The ThreeParticleForce class is the base class for three-particle
+ * forces and potentials.
+ */
+
 ThreeParticleForce::ThreeParticleForce() :
     m_isCalculatePotentialEnabled(false),
     m_isCalculatePressureEnabled(false),

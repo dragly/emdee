@@ -2,6 +2,12 @@
 
 #include <iostream>
 
+/*!
+ * \class AtomType
+ * \brief The AtomType class defines the name, abbreviation, number, mass
+ * and other properties of an atom type.
+ */
+
 AtomType::AtomType() :
     m_name("A"),
     m_abbreviation("A"),

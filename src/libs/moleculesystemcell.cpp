@@ -6,6 +6,12 @@
 #include <force/threeparticleforce.h>
 #include <force/singleparticleforce.h>
 
+/*!
+ * \class MoleculeSystemCell
+ * \brief The MoleculeSystemCell class defines a region of a MoleculeSystem and holds
+ * information about neighboring MoleculeSystemCell objects.
+ */
+
 MoleculeSystemCell::MoleculeSystemCell(MoleculeSystem *parent) :
     m_nDimensions(3),
     pow3nDimensions(pow(3, m_nDimensions)),

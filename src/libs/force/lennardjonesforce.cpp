@@ -1,6 +1,12 @@
 #include "lennardjonesforce.h"
 #include <atom.h>
 
+/*!
+ * \class LennardJonesForce
+ * \brief The LennardJonesForce class calculates the force and potential
+ * based on the Lennard-Jones potential.
+ */
+
 LennardJonesForce::LennardJonesForce() :
     m_potentialConstant(1),
     m_potentialConstantSquared(1),

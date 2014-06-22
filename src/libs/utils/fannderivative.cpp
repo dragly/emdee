@@ -5,6 +5,13 @@
 
 using namespace std;
 
+/*!
+ * \class FannDerivative
+ * \brief The FannDerivative class is a helper class that is used to calculate the
+ * gradient of the FANN network output with respect to its input.
+ */
+
+
 FannDerivative::FannDerivative()
 {
 }

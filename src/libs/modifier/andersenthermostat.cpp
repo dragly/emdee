@@ -7,6 +7,12 @@
 #include <processor.h>
 #include <moleculesystemcell.h>
 
+/*!
+ * \class AndersenThermostat
+ * \brief The AndersenThermostat class modifies the temperature of the system by
+ * use of a Andersen thermostat.
+ */
+
 AndersenThermostat::AndersenThermostat(MoleculeSystem* moleculeSystem) :
     Modifier(moleculeSystem),
     m_targetTemperature(1.0),

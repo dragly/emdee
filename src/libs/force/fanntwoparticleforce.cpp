@@ -7,6 +7,12 @@
 #include <utils/logging.h>
 #include <utils/fannderivative.h>
 
+/*!
+ * \class FannTwoParticleForce
+ * \brief The FannTwoParticleForce class loads a pre-trained FANN network and uses this
+ * to calculate two-particle forces between a given set of atoms.
+ */
+
 double inherentEnergy = -0.5;
 double tailCorrectionTreshold = 3.0;
 double tailCorrectionTresholdUpwards = 0.0;

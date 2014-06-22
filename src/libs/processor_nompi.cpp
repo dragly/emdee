@@ -12,6 +12,13 @@
 
 using namespace std;
 
+/*!
+ * \class Processor
+ * \brief The Processor class holds information about the current processor and
+ * neighboring processors. Its implementation depends on whether the program is
+ * compiled with MPI or not.
+ */
+
 Processor::Processor(MoleculeSystem *moleculeSystem) :
     m_moleculeSystem(moleculeSystem),
     m_nProcessors(0),

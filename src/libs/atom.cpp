@@ -5,6 +5,14 @@
 
 //void Atom::
 
+
+
+/*!
+ * \class Atom
+ * \brief The Atom class defines the type, position and other properties of
+ * an atom.
+ */
+
 void Atom::clone(const Atom &other)
 {
     this->m_id = other.m_id;

@@ -6,6 +6,12 @@
 #include <processor.h>
 #include <moleculesystemcell.h>
 
+/*!
+ * \class BerendsenThermostat
+ * \brief The BerendsenThermostat class modifies the temperature of the system by
+ * use of a Berendsen thermostat.
+ */
+
 BerendsenThermostat::BerendsenThermostat(MoleculeSystem* moleculeSystem) :
     Modifier(moleculeSystem),
     m_targetTemperature(1.0),

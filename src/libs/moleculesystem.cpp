@@ -25,6 +25,13 @@
 
 using namespace std;
 
+/*!
+ * \class MoleculeSystem
+ * \brief The MoleculeSystem class is the core of the molecular dynamics simulation.
+ * It provides functions to add and remove atoms, start simulations, and sampling of
+ * statistical properties.
+ */
+
 MoleculeSystem::MoleculeSystem() :
     m_nDimensions(3),
     pow3nDimensions(pow(3, m_nDimensions)),

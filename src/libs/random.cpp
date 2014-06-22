@@ -1,11 +1,18 @@
 #include "random.h"
 
+/*!
+ * \class Random
+ * \brief The Random class provides standard functions for generation of random
+ * numbers.
+ */
+
 Random::Random() :
     m_idum(-1),
     idum(&m_idum)
 {
 }
-/*
+
+/*!
 ** The function
 **         ran2()
 ** is a long periode (> 2 x 10^18) random number generator of

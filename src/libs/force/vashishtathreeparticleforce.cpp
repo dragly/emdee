@@ -8,6 +8,12 @@
 using namespace arma;
 using namespace std;
 
+/*!
+ * \class VashishtaThreeParticleForce
+ * \brief The VashishtaThreeParticleForce class defines the interaction between
+ * three particles in the Vashishta-Kalia-Rino-Ebbsjø potential.
+ */
+
 VashishtaThreeParticleForce::VashishtaThreeParticleForce() :
     nParticleTypes(2)
 {

@@ -1,5 +1,11 @@
 #include "twoparticleforce.h"
 
+/*!
+ * \class TwoParticleForce
+ * \brief The TwoParticleForce class is the base class for two-particle
+ * forces and potentials.
+ */
+
 TwoParticleForce::TwoParticleForce() :
     m_isNewtonsThirdLawEnabled(false),
     m_isCalculatePressureEnabled(true),

@@ -4,6 +4,12 @@
 #include <moleculesystemcell.h>
 #include <processor.h>
 
+/*!
+ * \class VelocityVerletIntegrator
+ * \brief The VelocityVerletIntegrator class integrates the position and velocity
+ * of all particles based on the velocity-Verlet scheme.
+ */
+
 VelocityVerletIntegrator::VelocityVerletIntegrator(MoleculeSystem *moleculeSystem) :
     Integrator(moleculeSystem)
 {

@@ -17,11 +17,6 @@
 using namespace std;
 
 class TwoParticleForce;
-
-/*!
- * \brief The Molecule class contains a list of atoms which are positioned
- * relatively to the molecule's position.
- */
 class Atom
 {
     friend class TwoParticleForce;

@@ -4,6 +4,11 @@
 
 #include "vector3.h"
 
+/*!
+ * \class Vector3
+ * \brief The Vector3 class is a simple and performance-centric 3D vector class.
+ */
+
 Vector3 Vector3::m_zeroVectorPointer = Vector3(0,0,0);
 
 std::ostream& operator<< (std::ostream &out, const Vector3 &vector)

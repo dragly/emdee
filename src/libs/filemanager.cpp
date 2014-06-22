@@ -34,6 +34,12 @@ using namespace std;
 using namespace arma;
 //using namespace H5;
 
+/*!
+ * \class FileManager
+ * \brief The FileManager class provides functionality to save
+ * the current state of a MoleculeSystem with proper unit conversions.
+ */
+
 typedef struct s1_t {
     char atomType[3];
     double positionX;

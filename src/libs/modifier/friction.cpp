@@ -5,6 +5,11 @@
 #include "math/vector3.h"
 #include "atom.h"
 
+/*!
+ * \class Friction
+ * \brief The Friction class applies a friction force to all particles of the system.
+ */
+
 Friction::Friction(MoleculeSystem *moleculeSystem) :
     Modifier(moleculeSystem)
 {

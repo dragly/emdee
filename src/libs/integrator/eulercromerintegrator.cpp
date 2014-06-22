@@ -4,6 +4,11 @@
 #include <processor.h>
 #include <moleculesystemcell.h>
 
+/*!
+ * \class EulerCromerIntegrator
+ * \brief The EulerCromerIntegrator class integrates the position and velocity
+ * of all particles based on the Euler-Cromer scheme.
+ */
 
 EulerCromerIntegrator::EulerCromerIntegrator(MoleculeSystem *moleculeSystem) :
     Integrator(moleculeSystem)

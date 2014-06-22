@@ -2,9 +2,11 @@
 
 #include <atom.h>
 #include "math/vector3.h"
+
 /*!
- * \brief Generator::Generator has multiple functions to generate different setups of atoms.
- * Something is longer than shorter is simple. This is bla bla bla boom.
+ * \class Generator
+ * \brief The Generator class provides functions to generate crystal structures,
+ * initial velocities, etc. for a MoleculeSystem.
  */
 
 Generator::Generator() :
