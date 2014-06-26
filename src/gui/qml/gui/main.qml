@@ -23,7 +23,7 @@ Rectangle {
         id: viewportRoot
         blending: true
         anchors.fill: parent
-        navigation: false
+        navigation: true
 
         light: Light {
             ambientColor: Qt.rgba(1,1,1,1)
@@ -37,14 +37,7 @@ Rectangle {
             center: Qt.vector3d(0,0,0)
             nearPlane: 0.1
             farPlane: 5000
-            fieldOfView: 90
-            onFieldOfViewChanged: {
-                if(fieldOfView > 160) {
-                    fieldOfView = 160
-                } else if(fieldOfView < 20) {
-                    fieldOfView = 20
-                }
-            }
+            fieldOfView: 60
 //            eyeSeparation: 0.1
         }
 
@@ -85,6 +78,14 @@ Rectangle {
                 moleculeSystem.stepForward()
             }
         }
+        MouseArea {
+            anchors.fill: parent
+            onPressed: {
+                myCamera.center = Qt.vector3d(0,0,0)
+                mouse.accepted = false
+            }
+        }
+
 //        MouseArea {
 //            propagateComposedEvents: false
 //            anchors.fill: parent
