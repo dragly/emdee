@@ -72,7 +72,9 @@ HEADERS += \
     modifier/friction.h \
     utils/fannderivative.h \
     utils/setup.h \
-    force/kohenthreeparticleforce.h
+    force/kohenthreeparticleforce.h \
+    processor_mpi.h \
+    processor_nompi.h
 
 !nofann {
     HEADERS +=
