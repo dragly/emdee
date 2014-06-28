@@ -35,7 +35,7 @@ MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
     // generator.setUnitLength(unitLength);
     LennardJonesForce *force = new LennardJonesForce();
     force->setPotentialConstant(potentialConstant);
-    vector<Atom*> atoms = generator.generateFcc(bUnit, 5, AtomType::argon());
+    vector<Atom*> atoms = generator.generateFcc(bUnit, 8, AtomType::argon());
     generator.boltzmannDistributeVelocities(3, atoms);
 
 //    for(Atom* atom : atoms) {
@@ -56,7 +56,7 @@ MolecularDynamics::MolecularDynamics(QQuickItem *parent) :
     lastBoundaries(1,2) += 2;
     m_moleculeSystem->setBoundaries(lastBoundaries);
     m_moleculeSystem->addAtoms(atoms);
-    m_moleculeSystem->setupCells();
+    m_moleculeSystem->setupCells(4.0);
 }
 
 void MolecularDynamics::drawItem(QGLPainter *painter)

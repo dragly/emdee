@@ -40,16 +40,16 @@ Rectangle {
         color: "white"
     }
 
-    Text {
-        anchors {
-            right: parent.right
-        }
-        width: parent.width / 2
-        height: parent.height
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+//    Text {
+//        anchors {
+//            right: parent.right
+//        }
+//        width: parent.width / 2
+//        height: parent.height
+//        horizontalAlignment: Text.AlignHCenter
+//        verticalAlignment: Text.AlignVCenter
 
-        text: (pressureToPascal(pressure)/1000000 * 3.3).toFixed(1) + " kPa"
-        color: "white"
-    }
+//        text: (pressureToPascal(pressure)/1000000 * 3.3).toFixed(1) + " kPa"
+//        color: "white"
+//    }
 }

@@ -27,13 +27,15 @@ Rectangle {
 
         light: Light {
             ambientColor: Qt.rgba(1,1,1,1)
-            position: myCamera.eye
-            quadraticAttenuation: 0.000005
+            position: Qt.vector3d(myCamera.eye.x + 0.3 * (myCamera.center.x - myCamera.eye.x),
+                                  myCamera.eye.y + 0.3 * (myCamera.center.y - myCamera.eye.y),
+                                  myCamera.eye.z + 0.3 * (myCamera.center.z - myCamera.eye.z))
+            quadraticAttenuation: 0.005
         }
 
         camera: Camera {
             id: myCamera
-            eye: Qt.vector3d(10,0,0)
+            eye: Qt.vector3d(23,0,0)
             center: Qt.vector3d(0,0,0)
             nearPlane: 0.1
             farPlane: 5000
@@ -43,9 +45,9 @@ Rectangle {
 
         MolecularDynamics {
             id: moleculeSystem
-            x: 2
-            y: 2
-            z: 2
+            x: -2
+            y: -2
+            z: -2
             sortPoints: MolecularDynamics.BackToFront
             effect: Effect {
                 blending: true
