@@ -9,10 +9,10 @@ CONFIG -= qt
     SUBDIRS += app
     app.depends = libs
 }
-!nogui {
-    SUBDIRS += gui
-    gui.depends = libs
-}
+#!nogui {
+#    SUBDIRS += gui
+#    gui.depends = libs
+#}
 mpi:!nogui {
     message(Cannot compile gui with mpi enabled)
     SUBDIRS -= gui

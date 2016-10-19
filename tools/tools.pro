@@ -1,4 +1,7 @@
 TEMPLATE = subdirs
 
-SUBDIRS += radial-distribution \
-    master-small-hydrogen
+SUBDIRS += radial-distribution
+
+mpi {
+    SUBDIRS += master-small-hydrogen
+}

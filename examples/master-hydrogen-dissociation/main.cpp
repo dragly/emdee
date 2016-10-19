@@ -20,6 +20,12 @@
 
 using namespace std;
 
+template<typename T>
+T operator>>(YAML::Node node, T &other) {
+    other = node.as<T>();
+    return other;
+}
+
 int main(int argc, char* argv[])
 {    
     Setup setup(argc, argv);
@@ -28,13 +34,6 @@ int main(int argc, char* argv[])
         cerr << "Usage: master-hydrogen-dissociation <config.yaml> <outfolder>" << endl;
         return 1;
     }
-
-    ifstream fin(argv[1]);
-    if(fin.fail()) {
-        cerr << "Could not open the configuration file " << argv[1] << endl;
-        return 1;
-    }
-    YAML::Parser parser(fin);
 
     double electronMassPerAtomicMass = 1822.8896;
     LOG(INFO) << "Example master hydrogen dissociation started";
@@ -57,8 +56,7 @@ int main(int argc, char* argv[])
     double au_T = 3.1577464e5; // K
     double au_t = 2.418884326505e-17; // s
 
-    YAML::Node rootNode;
-    parser.GetNextDocument(rootNode);
+    YAML::Node rootNode = YAML::LoadFile(argv[1]);
     double cellCutoff = 16.0;
     double cutoffRadius = 12.0;
     double threeBodyCutoffRadius = 8.0;
