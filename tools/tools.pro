@@ -2,6 +2,6 @@ TEMPLATE = subdirs
 
 SUBDIRS += radial-distribution
 
-mpi {
+#mpi {
     SUBDIRS += master-small-hydrogen
-}
+#}

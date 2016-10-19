@@ -5,13 +5,13 @@ CONFIG -= qt
 
 include(../../defaults.pri)
 
-mpi {
+#mpi {
     TARGET = emdeempi
-} else:android {
-    TARGET = emdeeandroid
-} else {
-    TARGET = emdee
-}
+#} else:android {
+#    TARGET = emdeeandroid
+#} else {
+#    TARGET = emdee
+#}
 
 SOURCES += \
     moleculesystem.cpp \
@@ -82,16 +82,16 @@ HEADERS += \
     LIBS += -ldoublefann
 }
 
-mpi {
+#mpi {
     SOURCES += \
         processor_mpi.cpp \
         filemanager.cpp
     HEADERS +=\
         processor.h \
         filemanager.h
-} else {
-    SOURCES += \
-        processor_nompi.cpp
-    HEADERS +=\
-        processor.h
-}
+#} else {
+#    SOURCES += \
+#        processor_nompi.cpp
+#    HEADERS +=\
+#        processor.h
+#}

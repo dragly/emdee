@@ -25,7 +25,7 @@ LIBS += -larmadillo -llapack -lblas
     DEFINES += MD_USE_GLOG
 }
 
-mpi {
+#mpi {
     DEFINES += MD_USE_MPI
     DEFINES += USE_MPI
 
@@ -40,7 +40,7 @@ mpi {
     QMAKE_CXXFLAGS_RELEASE += $$system(mpicxx --showme:compile) -DMPICH_IGNORE_CXX_SEEK
 
     LIBS += -lboost_system -lboost_filesystem -lboost_mpi -lboost_serialization
-}
+#}
 
 QMAKE_CXXFLAGS += -g
 QMAKE_CXXFLAGS_RELEASE += -g
